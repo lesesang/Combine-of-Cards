@@ -102,7 +102,17 @@ function runSummonEffects(r,who,id,body={}){const u=r.units[id],p=r.players[who]
  case 'COC-10-003':{if(p.hp>500){const loss=p.hp-500;p.hp=500;r.players[1-who].hp-=loss;setOutcome(r)}break}
  case 'COC-10-004':r.players[1-who].noAttackUntil=(r.players[1-who].turnsTaken||0)+1;break;
  case 'COC-12-010':{const all=r.players.flatMap(pp=>[...pp.field,pp.integration].filter(Boolean));for(const mid of all){if(mid===id)continue;if(zoneOwner(r,mid))move(r,mid,'deck',r.units[mid].owner)}break}
- case 'COC-14-005':summonToken(r,who,'스톰 토큰',0,50);break;
+ case 'COC-14-004':{
+  if(body.costUnitIds.length===1)summonToken(r,who,'스톰 토큰',0,50);
+  else{const mid=body.target?.id,z=mid&&zoneOwner(r,mid);if(!z||z.zone!=='field')fail(409,'필드에서 공격력 감소 대상을 선택해 주세요.');const u2=r.units[mid],before=u2.atk;u2.atk=Math.floor(Math.max(0,u2.atk)/2);if(before>0&&u2.atk===0)H.destroy(r,mid)}
+  break;
+ }
+ case 'COC-14-005':{
+  if(!p.deck.length)fail(409,'무작위로 버릴 덱 카드가 없습니다.');
+  const discarded=p.deck[crypto.randomInt(p.deck.length)];move(r,discarded,'grave',who);
+  log(r,'mill',`${p.label}: 스톰 팬니르 소환 비용으로 덱의 무작위 카드 1장을 묘지로 보냈습니다.`);
+  summonToken(r,who,'스톰 토큰',0,50);break;
+ }
  case 'COC-19-006':{const snapshots=r.players.flatMap((pp,controller)=>pp.field.filter(Boolean).map(mid=>({mid,controller})));for(const {mid} of snapshots)H.destroy(r,mid);for(const {mid,controller} of snapshots){if(r.units[mid]&&zoneOwner(r,mid)?.zone==='grave'&&r.players[controller].field.includes(null)){move(r,mid,'field',controller);r.units[mid].cannotAttackUntil=r.turnNumber;}}break}
  case 'COC-27-003':{let n=0;for(let k=0;k<2;k++){if(!p.deck.length)break;const mid=p.deck.shift();const mc=cards.get(r.units[mid].cardId);p.grave.push(mid);n++;if(k===0&&mc.type!=='몬스터')break}u.atk+=50*n;u.hp=(u.hp??0)+50*n;log(r,'mill',`${p.label}: 분쇄차 티라노 소재 ${n}장 묘지 이동`);break}
  case 'COC-27-004':for(const pp of r.players)for(const mid of [...pp.field].filter(Boolean))H.destroy(r,mid);break;
