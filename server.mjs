@@ -152,10 +152,12 @@ function isSimpleSummonCard(c){return c.type==='몬스터'&&(!c.conditions.lengt
 function performExtraSummon(r,who,body){
  const p=r.players[who],extraUnitId=requireStr(body.extraUnitId,100);
  const recipe=validateExtraSummon({room:r,who,extraUnitId,materials:body.materials,spellUnitId:body.spellUnitId,cards});
+ if(recipe.spellUnitId&&(p.spellForbiddenUntil||0)>=p.turnsTaken)fail(409,'주문 사용 금지 상태에서는 퓨전 주문을 발동할 수 없습니다.');
  // Validating all preconditions before spending materials or spells.
  if(recipe.spellUnitId)move(r,recipe.spellUnitId,'grave',who);
  for(const id of recipe.materials){if(recipe.method==='wakeup')H.destroy(r,id);else move(r,id,'grave',r.units[id].owner)}
  move(r,extraUnitId,'field',who);
+ if(['COC-12-014','COC-26-012','COC-27-013'].includes(r.units[extraUnitId].cardId))r.units[extraUnitId].cannotAttack=true;
  if(recipe.method==='wakeup'){r.effects??=[];r.effects.push({type:'returnWakeup',spellId:recipe.spellUnitId,player:who,turn:r.turnNumber})}
  const c=cards.get(r.units[extraUnitId].cardId);
  log(r,'fusion',`${p.label}: ${c.name} 소환 (소재 ${recipe.materials.length}장, ${recipe.method})`);
@@ -175,6 +177,7 @@ function runManual(r,m){const x=m.payload;const p=r.players;switch(m.kind){
  case 'draw':{if(![0,1].includes(x.player)||!Number.isInteger(x.count)||x.count<1||x.count>5)fail(400,'드로우 수 오류');for(let k=0;k<x.count&&r.status==='active';k++)draw(r,x.player);break}
  case 'extra':{
   if(x.player!==m.by)fail(403,'소환자는 발동자와 일치해야 합니다.');
+  if(r.turn!==m.by||r.phase!=='MAIN')fail(409,'엑스트라 소환의 수동 승인도 자신의 메인 페이즈에만 가능합니다.');
   const id=r.players[x.player].extra.find(unit=>r.units[unit].cardId===x.cardId);
   if(!id)fail(409,'해당 엑스트라 카드를 찾을 수 없습니다.');
   performExtraSummon(r,x.player,{extraUnitId:id,materials:x.materials,spellUnitId:x.spellUnitId,target:x.target});
