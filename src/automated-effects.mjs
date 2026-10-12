@@ -8,10 +8,11 @@ const getTarget=(ctx,kind='enemy')=>{
  if(target?.type==='unit'&&typeof target.id==='string'){
   const z=H.zone(r,target.id);
   if(z&&['field','integration'].includes(z.zone)&&(kind==='any'||z.player===(kind==='own'?who:1-who)))return {id:target.id,player:z.player};
+  H.fail(409,'선택할 수 없는 카드입니다.');
  }
- if(target?.type==='player'&&Number.isInteger(target.player)&&(kind==='any'||target.player===(kind==='own'?who:1-who)))return {player:target.player};
+ if(target?.type==='player'){if(![0,1].includes(target.player)||!(kind==='any'||target.player===(kind==='own'?who:1-who)))H.fail(409,'선택할 수 없는 플레이어입니다.');return {player:target.player};}
  const enemy=1-who,p=r.players[kind==='own'?who:enemy];
- if(kind==='any'&&target?.type==='player')return {player:target.player};
+ 
  const candidate=p.field.find(Boolean);
  return candidate?{id:candidate,player:kind==='own'?who:enemy}:{player:kind==='own'?who:enemy};
 };
@@ -28,12 +29,12 @@ register('COC-03-007',ctx=>{const n=ctx.r.players[1-ctx.who].grave.length;hit(ct
 register('COC-03-008',ctx=>{const n=ctx.r.players[ctx.who].grave.length;heal(ctx,own(ctx),Array.from({length:n},()=>ctx.H.roll(100)).reduce((a,b)=>a+b,0));});
 register('COC-05-002',ctx=>{charge(ctx,100);if(!ctx.r.players[ctx.who].field.includes(null))ctx.H.fail(409,'몬스터 슬롯이 없습니다.');return {retain:'field',monsterized:true,hp:1,atk:0}});
 register('COC-06-003',ctx=>{const n=Math.max(0,ctx.r.players[ctx.who].roundElementUses||0)+( ['금속','원소'].includes(ctx.c.attribute)?1:0);for(let i=0;i<n;i++){const choices=[...ctx.r.players.flatMap((p,j)=>[{player:j},...p.field.filter(Boolean).map(id=>({player:j,id}))])];hit(ctx,choices[ctx.H.randomInt(choices.length)],50)}});
-register('COC-06-004',ctx=>{const targets=ctx.r.players.flatMap((p,i)=>p.field.filter(Boolean).map(id=>({id,player:i})));if(!targets.length)ctx.H.fail(409,'필드에 몬스터가 없습니다.');if((ctx.r.players[ctx.who].roundElementUses||0)>=3){for(const t of targets.slice(0,2))ctx.H.destroy(ctx.r,t.id)}else{const t=getTarget(ctx,'any');if(!t.id)ctx.H.fail(409,'몬스터 대상이 필요합니다.');hit(ctx,t,100)}});
-register('COC-06-007',ctx=>{if((ctx.r.players[ctx.who].roundPlays||0)<5)ctx.H.fail(409,'이번 턴 카드 사용이 5회 이상이어야 합니다.');hit(ctx,enemy(ctx),300)});
+register('COC-06-004',ctx=>{const targets=ctx.r.players.flatMap((p,i)=>p.field.filter(Boolean).map(id=>({id,player:i})));if(!targets.length)ctx.H.fail(409,'필드에 몬스터가 없습니다.');if((ctx.r.players[ctx.who].roundElementUses||0)+1>=3){const selected=ctx.body.targets;if(!Array.isArray(selected)||selected.length!==2||new Set(selected).size!==2)ctx.H.fail(409,'파괴할 몬스터 두 장을 각각 선택해야 합니다.');for(const id of selected){if(!targets.some(t=>t.id===id))ctx.H.fail(409,'선택한 몬스터가 필드에 없습니다.')}for(const id of selected)ctx.H.destroy(ctx.r,id)}else{const t=getTarget(ctx,'any');if(!t.id)ctx.H.fail(409,'몬스터 대상이 필요합니다.');hit(ctx,t,100)}});
+register('COC-06-007',ctx=>{if((ctx.r.players[ctx.who].roundPlays||0)+1<5)ctx.H.fail(409,'이번 턴 카드 사용이 5회 이상이어야 합니다.');hit(ctx,enemy(ctx),300)});
 register('COC-07-003',ctx=>{ctx.H.draw(ctx.r,1-ctx.who);ctx.H.mill(ctx.r,1-ctx.who,3)});
 register('COC-07-010',ctx=>{ctx.H.draw(ctx.r,1-ctx.who);ctx.H.mill(ctx.r,1-ctx.who,ctx.r.players[1-ctx.who].lastRoundPlays||0)});
 register('COC-08-005',ctx=>{const target=enemy(ctx);ctx.r.effects??=[];ctx.r.effects.push({type:'dot',target,damage:50,origin:ctx.who});});
-register('COC-08-006',ctx=>{if(ctx.r.players[ctx.who].field.filter(id=>id&&ctx.H.attribute(ctx.r,id)==='요괴').length<2)ctx.H.fail(409,'요괴 2장이 필요합니다.');const t=enemy(ctx);if(!t.id)ctx.H.fail(409,'파괴할 몬스터가 없습니다.');ctx.H.destroy(ctx.r,t.id)});
+register('COC-08-006',ctx=>{if(ctx.r.players[ctx.who].field.filter(id=>id&&ctx.H.attribute(ctx.r,id)==='요괴').length!==2)ctx.H.fail(409,'요괴 2장이 필요합니다.');const t=enemy(ctx);if(!t.id)ctx.H.fail(409,'파괴할 몬스터가 없습니다.');ctx.H.destroy(ctx.r,t.id)});
 register('COC-08-007',ctx=>{const n=ctx.r.players[ctx.who].field.filter(id=>id&&ctx.H.attribute(ctx.r,id)==='요괴').length;heal(ctx,{player:ctx.who},n*100)});
 register('COC-10-009',ctx=>{ctx.r.effects??=[];ctx.r.effects.push({type:'firstDestroyHeal',player:ctx.who,turn:ctx.r.turnNumber});});
 register('COC-13-007',ctx=>{const p=ctx.r.players[1-ctx.who],n=Math.floor(p.hp/10);p.hp-=n;ctx.r.players[ctx.who].hp+=n;ctx.H.outcome(ctx.r)});
@@ -43,7 +44,7 @@ register('COC-14-006',ctx=>{if(!ctx.r.players[1-ctx.who].field.some(id=>id&&ctx.
 register('COC-17-003',ctx=>{const p=ctx.r.players[ctx.who];p.hp+=150;for(const id of p.field.filter(Boolean))heal(ctx,{id},150)});
 register('COC-17-005',ctx=>{if(!ctx.r.players[ctx.who].integration)ctx.H.fail(409,'일체화가 필요합니다.');hit(ctx,enemy(ctx),ctx.H.roll(400))});
 register('COC-17-006',ctx=>{if(!ctx.r.players[ctx.who].integration)ctx.H.fail(409,'일체화가 필요합니다.');const n=ctx.H.roll(200);hit(ctx,{player:1-ctx.who},n);for(const id of [...ctx.r.players[1-ctx.who].field].filter(Boolean))hit(ctx,{id},n)});
-register('COC-20-005',ctx=>{const n=ctx.H.roll(200);hit(ctx,{player:ctx.who},n);hit(ctx,{player:1-ctx.who},n)});
+register('COC-20-005',ctx=>{const n=ctx.H.roll(200);ctx.r.players[0].hp-=n;ctx.r.players[1].hp-=n;ctx.H.outcome(ctx.r)});
 register('COC-21-005',ctx=>{const t=own(ctx);if(!t.id)ctx.H.fail(409,'자신의 몬스터를 선택하세요.');const hp=ctx.r.units[t.id].hp||0;ctx.H.destroy(ctx.r,t.id);ctx.r.players[ctx.who].hp+=hp});
 register('COC-27-006',ctx=>{hit(ctx,enemy(ctx),100)});
 register('COC-30-001',ctx=>{for(const id of [...ctx.r.players[1-ctx.who].field].filter(Boolean))if(ctx.r.units[id].atk<=100)ctx.H.destroy(ctx.r,id)});
