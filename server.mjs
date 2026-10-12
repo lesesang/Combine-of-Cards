@@ -350,7 +350,7 @@ function runAI(r){if(r.mode!=='ai'||r.status!=='active')return;
     apply(r,1,'phase',{});continue;
    }
    if(r.phase==='ATTACK'){
-    const units=r.players[1].noAttackUntil>=r.players[1].turnsTaken?[]:[...r.players[1].field,r.players[1].integration].filter(id=>id&&r.units[id].atk>0&&!r.units[id].cannotAttack&&!r.units[id].frozen&&r.units[id].cannotAttackUntil!==r.turnNumber&&attackAvailable(r.units[id],r.turnNumber)&&!(r.units[id].cardId==='COC-01-006'&&p.integration)&&!(r.units[id].cardId==='COC-05-003'&&!p.field.some(mid=>mid&&unitName(r,mid).includes('카툰 랜드'))));
+    const units=r.players[1].noAttackUntil>=r.players[1].turnsTaken?[]:[...r.players[1].field,r.players[1].integration].filter(id=>id&&r.units[id].atk>0&&!r.units[id].cannotAttack&&!r.units[id].frozen&&r.units[id].cannotAttackUntil!==r.turnNumber&&attackAvailable(r.units[id],r.turnNumber)&&!(r.units[id].cardId==='COC-01-006'&&r.players[1].integration)&&!(r.units[id].cardId==='COC-05-003'&&!r.players[1].field.some(mid=>mid&&unitName(r,mid).includes('카툰 랜드'))));
     if(units.length){const attackerId=r.aiDifficulty==='easy'?units[crypto.randomInt(units.length)]:units.sort((a,b)=>r.units[b].atk-r.units[a].atk)[0];apply(r,1,'attack',{attackerId,target:chooseAITarget(r,attackerId)});continue}
     apply(r,1,'phase',{});continue;
    }
