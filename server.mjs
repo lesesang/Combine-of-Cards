@@ -152,7 +152,7 @@ function isSimpleSummonCard(c){return c.type==='몬스터'&&(!c.conditions.lengt
 function performExtraSummon(r,who,body){
  const p=r.players[who],extraUnitId=requireStr(body.extraUnitId,100);
  const recipe=validateExtraSummon({room:r,who,extraUnitId,materials:body.materials,spellUnitId:body.spellUnitId,cards});
- if(recipe.spellUnitId&&(p.spellForbiddenUntil||0)>=p.turnsTaken)fail(409,'주문 사용 금지 상태에서는 퓨전 주문을 발동할 수 없습니다.');
+ if(recipe.spellUnitId&&p.spellForbiddenUntil>0&&p.spellForbiddenUntil>=p.turnsTaken)fail(409,'주문 사용 금지 상태에서는 퓨전 주문을 발동할 수 없습니다.');
  // Validating all preconditions before spending materials or spells.
  if(recipe.spellUnitId)move(r,recipe.spellUnitId,'grave',who);
  for(const id of recipe.materials){if(recipe.method==='wakeup')H.destroy(r,id);else move(r,id,'grave',r.units[id].owner)}
