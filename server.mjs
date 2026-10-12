@@ -236,6 +236,37 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
  }
  if(changed){r.version++;r.updatedAt=Date.now();save();}return publicState(r,who)
 }
+function chooseAIExtra(r){
+ const who=1,p=r.players[who];
+ for(const extraUnitId of p.extra){
+  const recipe=EXTRA_RECIPES[r.units[extraUnitId]?.cardId];
+  if(!recipe)continue;
+  const pool=(recipe.method==='wakeup'||recipe.method==='infinity'?p.field:[...p.field,...p.hand]).filter(Boolean);
+  const size=recipe.parts.length;
+  if(size>pool.length)continue;
+  const spells=recipe.method==='hero'||recipe.method==='infinity'?[null]:p.hand.filter(id=>cards.get(r.units[id]?.cardId)?.type==='주문');
+  if(!spells.length)continue;
+  let visited=0,choice=null;
+  function visit(i,picked){
+   if(choice||visited>200)return;
+   if(picked.length===size){
+    visited++;
+    for(const spellUnitId of spells){
+     try{validateExtraSummon({room:r,who,extraUnitId,materials:picked,spellUnitId,cards});
+      const cardId=r.units[extraUnitId].cardId;
+      const target=cardId==='COC-12-012'?r.players[0].field.filter(Boolean).find(id=>(Number(cards.get(r.units[id].cardId)?.atk)||0)<(Number(cards.get(cardId)?.atk)||0)):null;
+      choice={extraUnitId,materials:[...picked],spellUnitId,target:target?{type:'unit',id:target}:undefined};return;
+     }catch(e){if(e.status!==409)throw e}
+    }
+    return;
+   }
+   for(let k=i;k<pool.length;k++)visit(k+1,[...picked,pool[k]]);
+  }
+  visit(0,[]);
+  if(choice)return choice;
+ }
+ return null;
+}
 // Server-only AI: never receives or exposes an opponent's hand to the browser.
 function chooseAIMove(r){const who=1,p=r.players[who],level=r.aiDifficulty||'medium';
  const candidate=p.hand.filter(id=>{if(p.aiRejected?.includes(id))return false;const c=cards.get(r.units[id].cardId);if(c.type==='주문')return hasAutoSpell(c.id);if(c.type==='일체화')return !p.integration&&!c.conditions.length;if(c.type==='몬스터')return p.field.includes(null)&&isSimpleSummonCard(c);return false});
@@ -260,6 +291,7 @@ function runAI(r){if(r.mode!=='ai'||r.status!=='active')return;
   try{
    if(r.phase==='DRAW'){apply(r,1,'draw',{});continue}
    if(r.phase==='MAIN'){
+    const extra=chooseAIExtra(r);if(extra){apply(r,1,'extraSummon',extra);continue}
     const id=chooseAIMove(r);
     if(id){const c=cards.get(r.units[id].cardId),t=['COC-03-008','COC-17-003','COC-30-007','COC-32-006'].includes(c.id)?{type:'player',player:1}:chooseAITarget(r,id);if(['COC-08-001','COC-08-008','COC-31-002'].includes(c.id)&&r.players[0].field.some(Boolean)){t.type='unit';t.id=r.players[0].field.find(Boolean);delete t.player;}const before=structuredClone(r);try{apply(r,1,'play',{unitId:id,target:t,targets:c.id==='COC-06-004'?[...r.players[0].field,...r.players[1].field].filter(Boolean).slice(0,2):undefined})}catch(e){for(const key of Object.keys(r))delete r[key];Object.assign(r,before);r.players[1].aiRejected??=[];r.players[1].aiRejected.push(id);if(r.players[1].aiRejected.length>20)r.players[1].aiRejected.shift();log(r,'ai',`AI가 사용 불가능한 ${c.name} 카드를 건너뛰었습니다.`)}continue}
     apply(r,1,'phase',{});continue;
@@ -301,4 +333,4 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
 }
 
 // Purely programmatic internal test seam. No HTTP route exposes these internals.
-export const gameTestInternals={cards,catalog,createPlayer,instantiate,move,draw,runSummonEffects,runIntegrationOnEnter,processStartOfTurn,processEndOfTurn,attackAvailable,damageUnit,H,performExtraSummon};
+export const gameTestInternals={cards,catalog,createPlayer,instantiate,move,draw,runSummonEffects,runIntegrationOnEnter,processStartOfTurn,processEndOfTurn,attackAvailable,damageUnit,H,performExtraSummon,chooseAIExtra};
