@@ -14,7 +14,7 @@ function make(a,b){
 }
 test('envy validates a 250-stat sacrifice then destroys selected enemy',()=>{
  const {r,position}=make('21','03');const spell=position(0,'COC-21-004','hand');
- const ally=I.instantiate(r,'COC-21-009',0);I.move(r,ally,'field',0); // Created-card pool, not a main-deck card.r.units[ally].hp=210;
+ const ally=I.instantiate(r,'COC-21-009',0);I.move(r,ally,'field',0); /* Created-card instance: not in main deck. */ r.units[ally].hp=210;
  const enemy=position(1,'COC-03-002','field');
  I.apply(r,0,'play',{unitId:spell,costUnitIds:[ally],target:{type:'unit',id:enemy}});
  assert.ok(r.players[0].grave.includes(spell),'spent spell');
@@ -34,7 +34,7 @@ test('Storm Knight exiles two chosen allies, halves an enemy attack, and stays f
 });
 test('an invalid sacrifice cannot consume the source spell or target',()=>{
  const {r,position}=make('21','03');const spell=position(0,'COC-21-004','hand');
- const ally=I.instantiate(r,'COC-21-009',0);I.move(r,ally,'field',0); // Created-card pool, not a main-deck card.const enemy=position(1,'COC-03-002','field');
+ const ally=I.instantiate(r,'COC-21-009',0);I.move(r,ally,'field',0); /* Created-card instance: not in main deck. */ const enemy=position(1,'COC-03-002','field');
  assert.throws(()=>I.apply(r,0,'play',{unitId:spell,costUnitIds:[ally],target:{type:'unit',id:enemy}}),/250/);
  assert.ok(r.players[0].hand.includes(spell));
  assert.ok(r.players[0].field.includes(ally));
