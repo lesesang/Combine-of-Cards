@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0d121c" />
+  <meta name="description" content="컴바인 오브 카드즈 — 24개 오리지널 덱과 함께하는 커뮤니티 TCG 대전 사이트" />
+  <title>Combine of Cards · 컴바인 오브 카드즈</title>
+  <link rel="stylesheet" href="/style.css" />
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <a href="#home" class="brand" data-nav="home"><span class="brand-mark">C<span>✦</span>C</span><span class="brand-name">COMBINE<br><em>OF CARDS</em></span></a>
+    <div class="side-label">COLLECTION</div>
+    <nav class="navigation" aria-label="주 메뉴">
+      <button data-view="home" class="nav-item active"><span class="nav-icon">⌂</span> 홈</button>
+      <button data-view="decks" class="nav-item"><span class="nav-icon">▦</span> 덱 라이브러리 <small>24</small></button>
+      <button data-view="cards" class="nav-item"><span class="nav-icon">♧</span> 카드 도감</button>
+      <button data-view="rules" class="nav-item"><span class="nav-icon">☷</span> 게임 룰북</button>
+      <div class="nav-separator"></div>
+      <button data-view="battle" class="nav-item"><span class="nav-icon">⚔</span> 온라인 대전</button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="mini-emblem">✧</div>
+      <strong>당신의 카드, 당신의 전장.</strong>
+      <p>동호회 자작 TCG를 웹에서 즐겨보세요.</p>
+      <span class="version">RULESET v1.3 · BETA</span>
+    </div>
+  </aside>
+  <div class="app-body">
+    <header class="topbar">
+      <button id="menuToggle" class="icon-button mobile-menu" aria-label="메뉴 열기">☰</button>
+      <span class="breadcrumbs">COMBINE OF CARDS <span>/</span> <b id="currentPage">홈</b></span>
+      <div class="topbar-right"><span class="online-dot"></span> 커뮤니티 TCG <span class="top-badge">v1.3 BETA</span></div>
+    </header>
+    <main id="content" tabindex="-1"><div class="loading"><span class="spinner"></span> 카드 데이터를 불러오는 중...</div></main>
+    <footer>COMBINE OF CARDS <span>·</span> COMMUNITY-MADE TRADING CARD GAME <span>·</span> v1.3 BETA</footer>
+  </div>
+</div>
+<div id="modalRoot" class="modal-root" aria-live="polite"></div>
+<div id="toastRoot" class="toast-root" aria-live="polite"></div>
+</body>
+</html>

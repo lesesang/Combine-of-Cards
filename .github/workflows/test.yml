@@ -1,0 +1,23 @@
+name: Node tests
+on:
+  push:
+    branches: [main, feat/playable-tcg-site]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: ''
+      - name: Validate card data
+        run: npm run check:data
+      - name: Integration tests
+        run: npm test
+      - name: AI 24-deck smoke matrix
+        run: npm run test:matrix
