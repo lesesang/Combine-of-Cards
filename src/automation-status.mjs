@@ -1,5 +1,6 @@
 // Card automation coverage is deliberately conservative: partial is never complete.
 import {hasAutoSpell} from './automated-effects.mjs';
+import {SUPPORTED_EXTRA_IDS} from './extra-summons.mjs';
 
 export const summonAutomations = new Set([
  'COC-05-010','COC-07-002','COC-08-001','COC-08-008','COC-10-003',
@@ -19,7 +20,7 @@ export const integrationAutomations = new Set([
 ]);
 export function automationStatus(card){
  if(card.type==='주문'&&hasAutoSpell(card.id))return 'partial';
- if(summonAutomations.has(card.id)||passiveAutomations.has(card.id)||integrationAutomations.has(card.id))return 'partial';
+ if(summonAutomations.has(card.id)||passiveAutomations.has(card.id)||integrationAutomations.has(card.id)||SUPPORTED_EXTRA_IDS.includes(card.id))return 'partial';
  if(!card.effects?.length&&!card.conditions?.length)return 'basic';
  return 'manual';
 }
