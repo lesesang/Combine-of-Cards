@@ -90,6 +90,29 @@ register('COC-14-001',c=>{
  if(!Array.isArray(ids)||ids.length!==2||new Set(ids).size!==2||!ids.every(id=>c.ownField.includes(id)))deny('자신 필드의 몬스터 2장을 파괴 비용으로 지정해야 합니다.');
  return {costs:ids.map(id=>({unitId:id,to:'destroy'}))};
 });
+register('COC-14-004',c=>{
+ const ids=c.body.costUnitIds;
+ if(!Array.isArray(ids)||ids.length<1||ids.length>2||new Set(ids).size!==ids.length||!ids.every(id=>c.ownField.includes(id)))deny('자신을 제외한 아군 몬스터 1~2장을 제외 비용으로 선택해야 합니다.');
+ if(ids.length===2){
+  const target=c.body.target?.id;
+  if(!target||ids.includes(target)||![...c.ownField,...c.enemyField].includes(target))deny('공격력을 절반으로 낮출 유효한 필드 몬스터를 선택해야 합니다.');
+ }
+ return {costs:ids.map(id=>({unitId:id,to:'banished'}))};
+});
+register('COC-14-005',c=>require_(c.player.deck.length>0,'무작위로 버릴 덱 카드가 1장 이상 필요합니다.'));
+register('COC-17-008',c=>{
+ const ids=c.body.costUnitIds;
+ if(!Array.isArray(ids)||ids.length!==1||!c.ownField.includes(ids[0])||!c.named(ids[0]).includes('미라 병사'))deny('자신 필드의 미라 병사 1장을 릴리스해야 합니다.');
+ return {costs:[{unitId:ids[0],to:'grave'}]};
+});
+register('COC-21-004',c=>{
+ const ids=c.body.costUnitIds;
+ if(!Array.isArray(ids)||ids.length!==1||!c.ownField.includes(ids[0]))deny('제물로 바칠 아군 몬스터를 지정해야 합니다.');
+ const unit=c.room.units[ids[0]];
+ if(!Number.isFinite(unit.atk)||!Number.isFinite(unit.hp)||unit.atk+unit.hp<250)deny('제물 몬스터의 현재 공격력과 체력 합계가 250 이상이어야 합니다.');
+ if(!c.enemyField.includes(c.body.target?.id))deny('파괴할 상대 필드 몬스터를 선택해야 합니다.');
+ return {costs:[{unitId:ids[0],to:'grave'}]};
+});
 register('COC-27-004',c=>({costs:c.player.hand.filter(id=>id!==c.unitId).map(id=>({unitId:id,to:'grave'}))}));
 register('COC-08-008',c=>({costs:c.player.hand.filter(id=>id!==c.unitId).map(id=>({unitId:id,to:'grave'}))}));
 
@@ -105,7 +128,7 @@ export function commitActivationCosts(room,plan,{move,destroy}){
   const unit=room.units[cost.unitId];
   if(!unit)deny('소재나 비용으로 지정한 카드가 존재하지 않습니다.');
   if(cost.to==='destroy')destroy(room,cost.unitId);
-  else move(room,cost.unitId,'grave',unit.owner);
+  else move(room,cost.unitId,cost.to==='banished'?'banished':'grave',unit.owner);
  }
 }
 export const PRECHECKED_ACTIVATION_IDS=Object.freeze([...SPEC.keys()].sort());
