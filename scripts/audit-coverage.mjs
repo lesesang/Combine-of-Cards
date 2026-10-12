@@ -1,10 +1,13 @@
 import fs from 'node:fs';
+import zlib from 'node:zlib';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {automationStatus} from '../src/automation-status.mjs';
 import {spellHandlerIds} from '../src/automated-effects.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const catalog=JSON.parse(fs.readFileSync(path.join(root,'public/data/catalog.json'),'utf8'));
+const readable=path.join(root,'public/data/catalog.json');
+const compressed=path.join(root,'public/data/catalog.json.gz.b64');
+const catalog=JSON.parse(fs.existsSync(readable)?fs.readFileSync(readable,'utf8'):zlib.gunzipSync(Buffer.from(fs.readFileSync(compressed,'utf8').trim(),'base64')).toString('utf8'));
 const byDeck=new Map(catalog.decks.map(d=>[d.id,d.name]));
 const entries=catalog.cards.map(c=>({id:c.id,deck:byDeck.get(c.deckId),name:c.name,type:c.type,zone:c.zone,status:automationStatus(c),conditions:c.conditions,effects:c.effects}));
 const tally=entries.reduce((a,c)=>(a[c.status]=(a[c.status]||0)+1,a),{});
