@@ -19,3 +19,5 @@ jobs:
         run: npm run check:data
       - name: Integration tests
         run: npm test
+      - name: AI 24-deck smoke matrix
+        run: npm run test:matrix
