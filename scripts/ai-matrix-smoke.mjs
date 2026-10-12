@@ -6,8 +6,8 @@ process.env.DATA_DIR=temporary;
 process.env.NODE_ENV='test';
 const {createApp}=await import('../server.mjs');
 const app=createApp();
-const catalog=JSON.parse(fs.readFileSync(new URL('../public/data/catalog.json',import.meta.url),'utf8'));
 const url=await new Promise(ok=>app.listen(0,'127.0.0.1',()=>ok('http://127.0.0.1:'+app.address().port)));
+const catalog=await (await fetch(url+'/api/catalog')).json();
 const result={tested:0,failures:[],aiStops:[],totalActions:0};
 async function api(route,{method='GET',token,body}={}){
  const response=await fetch(url+route,{method,headers:{'content-type':'application/json',...(token?{authorization:'Bearer '+token}:{})},body:body?JSON.stringify(body):undefined});
