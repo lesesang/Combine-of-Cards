@@ -1,0 +1,26 @@
+name: Verify TCG beta
+on:
+  push:
+    branches: [main, 'feat/**']
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static syntax checks
+        run: |
+          node --check server.mjs
+          node --check public/app.js
+          node --check src/automated-effects.mjs
+      - run: npm run check:data
+      - run: npm run check:coverage
+      - run: npm test
+      - run: npm run test:matrix

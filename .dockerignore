@@ -1,0 +1,9 @@
+.git
+.data
+.data-test
+node_modules
+*.zip
+*.tgz
+bundle.br.b64
+scripts/patch-*.py
+scripts/expand-automations*.py
