@@ -321,7 +321,7 @@ function chooseAIExtra(r){
 }
 // Server-only AI: never receives or exposes an opponent's hand to the browser.
 function chooseAIMove(r){const who=1,p=r.players[who],level=r.aiDifficulty||'medium';
- const candidate=p.hand.filter(id=>{if(p.aiRejected?.includes(id))return false;const c=cards.get(r.units[id].cardId);if(c.type==='주문')return hasAutoSpell(c.id);if(c.type==='일체화')return !p.integration&&!c.conditions.length;if(c.type==='몬스터')return p.field.includes(null)&&isSimpleSummonCard(c);return false});
+ const candidate=p.hand.filter(id=>{if(p.aiRejected?.includes(id))return false;try{planActivation({room:r,who,unitId:id,cards})}catch(e){if(e.status===409)return false;throw e}const c=cards.get(r.units[id].cardId);if(c.type==='주문')return hasAutoSpell(c.id);if(c.type==='일체화')return !p.integration&&!c.conditions.length;if(c.type==='몬스터')return p.field.includes(null)&&isSimpleSummonCard(c);return false});
  if(!candidate.length)return null;
  const attack=(id)=>Math.max(0,Number(cards.get(r.units[id].cardId).atk)||0);
  const score=id=>{const c=cards.get(r.units[id].cardId);if(c.type==='몬스터')return attack(id)+40+(c.effects.length?25:0);if(c.type==='일체화')return 150+attack(id);if(c.id==='COC-30-007'&&p.hp>850)return -100;if(c.type==='주문')return 85;return 0};
@@ -350,7 +350,7 @@ function runAI(r){if(r.mode!=='ai'||r.status!=='active')return;
     apply(r,1,'phase',{});continue;
    }
    if(r.phase==='ATTACK'){
-    const units=r.players[1].noAttackUntil>=r.players[1].turnsTaken?[]:[...r.players[1].field,r.players[1].integration].filter(id=>id&&r.units[id].atk>0&&!r.units[id].cannotAttack&&!r.units[id].frozen&&r.units[id].cannotAttackUntil!==r.turnNumber&&attackAvailable(r.units[id],r.turnNumber));
+    const units=r.players[1].noAttackUntil>=r.players[1].turnsTaken?[]:[...r.players[1].field,r.players[1].integration].filter(id=>id&&r.units[id].atk>0&&!r.units[id].cannotAttack&&!r.units[id].frozen&&r.units[id].cannotAttackUntil!==r.turnNumber&&attackAvailable(r.units[id],r.turnNumber)&&!(r.units[id].cardId==='COC-01-006'&&p.integration)&&!(r.units[id].cardId==='COC-05-003'&&!p.field.some(mid=>mid&&unitName(r,mid).includes('카툰 랜드'))));
     if(units.length){const attackerId=r.aiDifficulty==='easy'?units[crypto.randomInt(units.length)]:units.sort((a,b)=>r.units[b].atk-r.units[a].atk)[0];apply(r,1,'attack',{attackerId,target:chooseAITarget(r,attackerId)});continue}
     apply(r,1,'phase',{});continue;
    }
