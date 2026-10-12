@@ -7,12 +7,13 @@ import { fileURLToPath } from 'node:url';
 import { castAutomatedSpell, hasAutoSpell, spellHandlerIds } from './src/automated-effects.mjs';
 import {automationStatus} from './src/automation-status.mjs';
 import {validateExtraSummon, EXTRA_RECIPES} from './src/extra-summons.mjs';
+import {applyFieldAbility,FIELD_ABILITY_IDS} from './src/field-abilities.mjs';
 
 const ROOT=path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC=path.join(ROOT,'public');
 const DATA_DIR=process.env.DATA_DIR || path.join(ROOT,'.data');
 const STORAGE=path.join(DATA_DIR,'rooms.json');
-const RULES='1.3-ai-beta.5';
+const RULES='1.3-ai-beta.6';
 const CARD_PATH=path.join(PUBLIC,'data','catalog.json.gz.b64');
 function loadCatalog(){
  if(fs.existsSync(CARD_PATH))return JSON.parse(zlib.gunzipSync(Buffer.from(fs.readFileSync(CARD_PATH,'utf8').trim(),'base64')).toString('utf8'));
@@ -69,7 +70,7 @@ function destroyed(r,id){const z=zoneOwner(r,id),u=r.units[id];if(!z||!u)return;
  for(const eff of [...(r.effects||[])])if(eff.type==='firstDestroyHeal'&&eff.turn===r.turnNumber){r.players[eff.player].hp+=u.hp<=0?Math.max(0,u.preDamageHp||0):before;r.effects.splice(r.effects.indexOf(eff),1)}
 }
 const H={
- zone:zoneOwner,move,draw,fail,roll:die,randomInt:n=>crypto.randomInt(n),hurt,healUnit,outcome:setOutcome,
+ zone:zoneOwner,move,draw,fail,roll:die,randomInt:n=>crypto.randomInt(n),hurt,healUnit,outcome:setOutcome,shuffle,onSummon:runSummonEffects,
  mill:dropFromDeck,summonToken,search:findCardInDeck,destroy:(r,id)=>{const u=r.units[id];if(u&&zoneOwner(r,id)){
  destroyed(r,id);const z=zoneOwner(r,id),canRevive=u.cardId==='COC-10-011'&&!u.revivedOnce&&z.zone==='field';
  const name=cards.get(u.cardId)?.name||u.tokenCard?.name;move(r,id,'grave',u.owner);log(r,'destroy',`${name} 파괴`);
@@ -118,7 +119,7 @@ function runIntegrationOnEnter(r,who,id){const u=r.units[id],p=r.players[who];sw
  case 'COC-30-010':p.hp+=800;break;
  default:break;
  }}
-function processStartOfTurn(r){const who=r.turn,p=r.players[who];p.turnsTaken=(p.turnsTaken||0)+1;p.aiRejected=[];for(const u of Object.values(r.units)){if(u.buffExpiresAt&&u.buffExpiresAt<=p.turnsTaken&&u.owner===who){u.atk=Math.max(0,u.atk-(u.temporaryBuff||0));u.temporaryBuff=0;u.buffExpiresAt=0}}p.lastRoundPlays=p.roundPlays||0;p.roundPlays=0;p.roundElementUses=0;
+function processStartOfTurn(r){const who=r.turn,p=r.players[who];p.turnsTaken=(p.turnsTaken||0)+1;p.aiRejected=[];p.aiRejectedAbilities=[];for(const u of Object.values(r.units)){if(u.buffExpiresAt&&u.buffExpiresAt<=p.turnsTaken&&u.owner===who){u.atk=Math.max(0,u.atk-(u.temporaryBuff||0));u.temporaryBuff=0;u.buffExpiresAt=0}}p.lastRoundPlays=p.roundPlays||0;p.roundPlays=0;p.roundElementUses=0;
  
  // Passive draw-phase triggers happen before the normal draw action.
  const enemyIntegration=r.players[1-who].integration;
@@ -186,7 +187,7 @@ function runManual(r,m){const x=m.payload;const p=r.players;switch(m.kind){
  case 'note':break;
  default:fail(400,'허용되지 않는 수동 판정 유형');
  }}
-function publicState(r,viewer){const mapId=id=>id?{...r.units[id],card:cards.get(r.units[id].cardId)||r.units[id].tokenCard}:null;return {code:r.code,status:r.status,version:r.version,rulesVersion:RULES,mode:r.mode||'pvp',difficulty:r.aiDifficulty||null,aiDeckId:r.mode==='ai'?r.players[1]?.deckId:null,automation:{supportedSpells:spellHandlerIds.length,totalSpells:catalog.cards.filter(c=>c.type==='주문').length},turn:r.turn,phase:r.phase,turnNumber:r.turnNumber,winner:r.winner,pendingAttack:r.pendingAttack?{...r.pendingAttack,attacker:mapId(r.pendingAttack.attackerId),target:r.pendingAttack.target}:null,pendingManual:r.pendingManual?{...r.pendingManual}:null,logs:r.logs.slice(-80),you:viewer,players:r.players.map((p,i)=>({index:i,label:p.label,deckId:p.deckId,deckName:decks.get(p.deckId)?.name,hp:p.hp,reloads:p.reloads,deckCount:p.deck.length,handCount:p.hand.length,grave:p.grave.map(mapId),banishedCount:p.banished.length,extraCount:p.extra.length,field:p.field.map(mapId),integration:mapId(p.integration),hand:i===viewer?p.hand.map(mapId):null,extra:i===viewer?p.extra.map(mapId):null}))}}
+function publicState(r,viewer){const mapId=id=>id?{...r.units[id],card:cards.get(r.units[id].cardId)||r.units[id].tokenCard}:null;return {code:r.code,status:r.status,version:r.version,rulesVersion:RULES,mode:r.mode||'pvp',difficulty:r.aiDifficulty||null,aiDeckId:r.mode==='ai'?r.players[1]?.deckId:null,automation:{supportedSpells:spellHandlerIds.length,totalSpells:catalog.cards.filter(c=>c.type==='주문').length,fieldAbilityIds:FIELD_ABILITY_IDS},turn:r.turn,phase:r.phase,turnNumber:r.turnNumber,winner:r.winner,pendingAttack:r.pendingAttack?{...r.pendingAttack,attacker:mapId(r.pendingAttack.attackerId),target:r.pendingAttack.target}:null,pendingManual:r.pendingManual?{...r.pendingManual}:null,logs:r.logs.slice(-80),you:viewer,players:r.players.map((p,i)=>({index:i,label:p.label,deckId:p.deckId,deckName:decks.get(p.deckId)?.name,hp:p.hp,reloads:p.reloads,deckCount:p.deck.length,handCount:p.hand.length,grave:p.grave.map(mapId),banishedCount:p.banished.length,extraCount:p.extra.length,field:p.field.map(mapId),integration:mapId(p.integration),hand:i===viewer?p.hand.map(mapId):null,extra:i===viewer?p.extra.map(mapId):null}))}}
 function apply(r,who,type,body){const p=r.players[who];let changed=true;
  switch(type){
  case 'start':{if(r.status!=='lobby'||r.players.length!==2||who!==0)fail(409,'방장만 두 사람이 모인 뒤 시작할 수 있습니다.');r.status='active';r.turn=crypto.randomInt(2);r.turnNumber=1;r.phase='DRAW';for(const pp of r.players)shuffle(pp.deck);
@@ -210,6 +211,7 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
  }else fail(409,'이 카드 종류는 직접 사용할 수 없습니다.');
  p.roundPlays=(p.roundPlays||0)+1;if(/원소|금속/.test(c.attribute))p.roundElementUses=(p.roundElementUses||0)+1;if(c.attribute==='자연'&&c.type==='주문')p.naturalStreak=(p.naturalStreak||0)+1;
  log(r,'play',`${p.label}: ${c.name} 사용`);setOutcome(r);break}
+ case 'ability':{requireTurn(r,who);if(r.phase!=='MAIN'||r.pendingAttack||r.pendingManual)fail(409,'지금은 일반 필드 효과를 사용할 수 없습니다.');const result=applyFieldAbility(r,who,body,H);log(r,'effect',`${p.label}: ${cards.get(result.cardId)?.name} 필드 효과 자동 처리`);setOutcome(r);break}
  case 'extraSummon':{
   requireTurn(r,who);
   if(r.phase!=='MAIN'||r.pendingAttack||r.pendingManual)fail(409,'메인 페이즈에서만 특수 소환할 수 있습니다.');
@@ -238,6 +240,44 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
  default:fail(404,'알 수 없는 행동입니다.');
  }
  if(changed){r.version++;r.updatedAt=Date.now();save();}return publicState(r,who)
+}
+function chooseAIFieldAbility(r){
+ const who=1,p=r.players[who],enemy=0;
+ if(r.aiDifficulty==='easy'&&crypto.randomInt(3)===0)return null;
+ for(const sourceUnitId of [...p.field,p.integration].filter(Boolean)){
+  const u=r.units[sourceUnitId],id=u.cardId;
+  if(!FIELD_ABILITY_IDS.includes(id)||p.abilityUsed?.[id]===r.turnNumber||u.abilityGameUsed||p.aiRejectedAbilities?.includes(sourceUnitId))continue;
+  const foes=r.players[enemy].field.filter(Boolean);
+  const allies=p.field.filter(Boolean);
+  const stronger=foes.sort((a,b)=>r.units[b].atk-r.units[a].atk);
+  const body={sourceUnitId};
+  if(['COC-05-004','COC-13-001','COC-13-002','COC-13-005'].includes(id)){
+   if(!stronger.length)continue;
+   body.target={type:'unit',id:stronger[0]};
+  }
+  if(id==='COC-10-005'){
+   if(!stronger.length||!allies.length)continue;
+   body.target={type:'unit',id:stronger[0]};
+   const low=allies.sort((a,b)=>r.units[a].atk-r.units[b].atk)[0];
+   body.costTarget={type:'unit',id:low};
+  }
+  if(id==='COC-08-003'){
+   if(!p.hand.length)continue;
+   body.costCardId=p.hand.sort((a,b)=>(cards.get(r.units[a].cardId)?.atk||0)-(cards.get(r.units[b].cardId)?.atk||0))[0];
+  }
+  if(id==='COC-22-010'){
+   const choice=allies.filter(a=>a!==sourceUnitId&&r.units[a].atk>0).sort((a,b)=>r.units[b].atk-r.units[a].atk)[0];
+   if(!choice)continue;
+   body.target={type:'unit',id:choice};
+  }
+  if(['COC-24-003','COC-26-003'].includes(id)){
+   const choice=allies.filter(a=>Number.isFinite(r.units[a].hp)&&r.units[a].hp>r.units[a].atk).sort((a,b)=>(r.units[b].hp-r.units[b].atk)-(r.units[a].hp-r.units[a].atk))[0];
+   if(!choice)continue;
+   body.target={type:'unit',id:choice};
+  }
+  return body;
+ }
+ return null;
 }
 function chooseAIExtra(r){
  const who=1,p=r.players[who];
@@ -294,6 +334,7 @@ function runAI(r){if(r.mode!=='ai'||r.status!=='active')return;
   try{
    if(r.phase==='DRAW'){apply(r,1,'draw',{});continue}
    if(r.phase==='MAIN'){
+    const ability=chooseAIFieldAbility(r);if(ability){const snapshot=structuredClone(r);try{apply(r,1,'ability',ability)}catch(e){for(const key of Object.keys(r))delete r[key];Object.assign(r,snapshot);r.players[1].aiRejectedAbilities??=[];r.players[1].aiRejectedAbilities.push(ability.sourceUnitId);log(r,'ai',`AI가 실행 불가능한 필드 효과를 건너뛰었습니다: ${e.message}`)}continue}
     const extra=chooseAIExtra(r);if(extra){apply(r,1,'extraSummon',extra);continue}
     const id=chooseAIMove(r);
     if(id){const c=cards.get(r.units[id].cardId),t=['COC-03-008','COC-17-003','COC-30-007','COC-32-006'].includes(c.id)?{type:'player',player:1}:chooseAITarget(r,id);if(['COC-08-001','COC-08-008','COC-31-002'].includes(c.id)&&r.players[0].field.some(Boolean)){t.type='unit';t.id=r.players[0].field.find(Boolean);delete t.player;}const before=structuredClone(r);try{apply(r,1,'play',{unitId:id,target:t,targets:c.id==='COC-06-004'?[...r.players[0].field,...r.players[1].field].filter(Boolean).slice(0,2):undefined})}catch(e){for(const key of Object.keys(r))delete r[key];Object.assign(r,before);r.players[1].aiRejected??=[];r.players[1].aiRejected.push(id);if(r.players[1].aiRejected.length>20)r.players[1].aiRejected.shift();log(r,'ai',`AI가 사용 불가능한 ${c.name} 카드를 건너뛰었습니다.`)}continue}
@@ -336,4 +377,4 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
 }
 
 // Purely programmatic internal test seam. No HTTP route exposes these internals.
-export const gameTestInternals={cards,catalog,createPlayer,instantiate,move,draw,runSummonEffects,runIntegrationOnEnter,processStartOfTurn,processEndOfTurn,attackAvailable,damageUnit,H,performExtraSummon,chooseAIExtra,maxAttacks};
+export const gameTestInternals={cards,catalog,createPlayer,instantiate,move,draw,runSummonEffects,runIntegrationOnEnter,processStartOfTurn,processEndOfTurn,attackAvailable,damageUnit,H,performExtraSummon,chooseAIExtra,chooseAIFieldAbility,maxAttacks,applyFieldAbility};
