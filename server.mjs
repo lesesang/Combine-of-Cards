@@ -6,12 +6,13 @@ import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import { castAutomatedSpell, hasAutoSpell, spellHandlerIds } from './src/automated-effects.mjs';
 import {automationStatus} from './src/automation-status.mjs';
+import {validateExtraSummon, EXTRA_RECIPES} from './src/extra-summons.mjs';
 
 const ROOT=path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC=path.join(ROOT,'public');
 const DATA_DIR=process.env.DATA_DIR || path.join(ROOT,'.data');
 const STORAGE=path.join(DATA_DIR,'rooms.json');
-const RULES='1.3-ai-beta.3';
+const RULES='1.3-ai-beta.4';
 const CARD_PATH=path.join(PUBLIC,'data','catalog.json.gz.b64');
 function loadCatalog(){
  if(fs.existsSync(CARD_PATH))return JSON.parse(zlib.gunzipSync(Buffer.from(fs.readFileSync(CARD_PATH,'utf8').trim(),'base64')).toString('utf8'));
@@ -135,7 +136,12 @@ function processStartOfTurn(r){const who=r.turn,p=r.players[who];p.turnsTaken=(p
  }
  setOutcome(r);
 }
-function processEndOfTurn(r){const p=r.players[r.turn];for(const id of [...p.field].filter(Boolean))if(r.units[id].cardId==='COC-20-001'){hurt(r,id,150)}
+function processEndOfTurn(r){
+ for(const e of [...(r.effects||[])])if(e.type==='returnWakeup'&&e.player===r.turn&&e.turn===r.turnNumber){
+  if(zoneOwner(r,e.spellId)?.zone==='grave'){move(r,e.spellId,'hand',e.player);log(r,'effect','웨이크업 드래곤! 엔드 페이즈 패 복귀')}
+  r.effects.splice(r.effects.indexOf(e),1);
+ }
+ const p=r.players[r.turn];for(const id of [...p.field].filter(Boolean))if(r.units[id].cardId==='COC-20-001'){hurt(r,id,150)}
  setOutcome(r);
 }
 function isAggro(r,id){const c=cards.get(r.units[id]?.cardId);return c?.id==='COC-12-007'||c?.id==='COC-08-002'||c?.id==='COC-09-004'||c?.id==='COC-21-008'}
@@ -143,13 +149,40 @@ function maxAttacks(u){return u.cardId==='COC-09-003'?2:Math.max(1,u.extraAttack
 function attackAvailable(u,turn){return u.attackCountTurn!==turn||(u.attackCount||0)<maxAttacks(u)}
 function validateAggro(r,who,target){const aggro=r.players[1-who].field.filter(id=>id&&isAggro(r,id));if(aggro.length&&(!target||target.type!=='unit'||!aggro.includes(target.id)))fail(409,'공격 대상 강제(어그로): 해당 몬스터 중에서 선택해야 합니다.')}
 function isSimpleSummonCard(c){return c.type==='몬스터'&&(!c.conditions.length||c.conditions.every(s=>/공격|이 몬스터|효과|드로우|시작|턴/.test(s)))}
+function performExtraSummon(r,who,body){
+ const p=r.players[who],extraUnitId=requireStr(body.extraUnitId,100);
+ const recipe=validateExtraSummon({room:r,who,extraUnitId,materials:body.materials,spellUnitId:body.spellUnitId,cards});
+ if(recipe.spellUnitId&&p.spellForbiddenUntil>0&&p.spellForbiddenUntil>=p.turnsTaken)fail(409,'주문 사용 금지 상태에서는 퓨전 주문을 발동할 수 없습니다.');
+ // Validating all preconditions before spending materials or spells.
+ if(recipe.spellUnitId)move(r,recipe.spellUnitId,'grave',who);
+ for(const id of recipe.materials){if(recipe.method==='wakeup')H.destroy(r,id);else move(r,id,'grave',r.units[id].owner)}
+ move(r,extraUnitId,'field',who);
+ if(['COC-12-014','COC-26-012','COC-27-013'].includes(r.units[extraUnitId].cardId))r.units[extraUnitId].cannotAttack=true;
+ if(recipe.method==='wakeup'){r.effects??=[];r.effects.push({type:'returnWakeup',spellId:recipe.spellUnitId,player:who,turn:r.turnNumber})}
+ const c=cards.get(r.units[extraUnitId].cardId);
+ log(r,'fusion',`${p.label}: ${c.name} 소환 (소재 ${recipe.materials.length}장, ${recipe.method})`);
+ if(c.id==='COC-12-012'){
+  const eligible=r.players[1-who].field.filter(Boolean).filter(id=>Math.max(0,Number(cards.get(r.units[id].cardId)?.atk)||0)<r.units[extraUnitId].atk);
+  if(eligible.length){if(!eligible.includes(body.target?.id))fail(409,'파괴할 유효한 상대 몬스터를 지정하세요.');H.destroy(r,body.target.id)}
+ }
+ if(c.id==='COC-22-015')findCardInDeck(r,who,'퓨전업')||findCardInDeck(r,who,'퓨전 업');
+ setOutcome(r);
+ return recipe;
+}
 function runManual(r,m){const x=m.payload;const p=r.players;switch(m.kind){
  case 'hp':{if(![0,1].includes(x.player)||!Number.isInteger(x.delta)||Math.abs(x.delta)>1000)fail(400,'체력 변경 범위 오류');p[x.player].hp+=x.delta;setOutcome(r);break}
  case 'unitHp':{if(!r.units[x.unitId]||!zoneOwner(r,x.unitId)||!['field','integration'].includes(zoneOwner(r,x.unitId).zone)||!Number.isInteger(x.delta)||Math.abs(x.delta)>1000)fail(400,'몬스터 변경 오류');damageUnit(r,x.unitId,x.delta);break}
  case 'unitAtk':{if(!r.units[x.unitId]||!zoneOwner(r,x.unitId)||!['field','integration'].includes(zoneOwner(r,x.unitId).zone)||!Number.isInteger(x.delta)||Math.abs(x.delta)>1000)fail(400,'공격력 변경 오류');r.units[x.unitId].atk=Math.max(0,r.units[x.unitId].atk+x.delta);break}
  case 'move':{const z=zoneOwner(r,x.unitId);if(!z||!['field','integration'].includes(z.zone)||!['grave','hand','deck','banished'].includes(x.to))fail(400,'이동 대상 오류');move(r,x.unitId,x.to,r.units[x.unitId].owner);break}
  case 'draw':{if(![0,1].includes(x.player)||!Number.isInteger(x.count)||x.count<1||x.count>5)fail(400,'드로우 수 오류');for(let k=0;k<x.count&&r.status==='active';k++)draw(r,x.player);break}
- case 'extra':{const ix=x.player;if(![0,1].includes(ix))fail(400,'플레이어 오류');const pp=p[ix];const id=pp.extra.find(u=>r.units[u].cardId===x.cardId);if(!id)fail(400,'엑스트라 덱에 존재하지 않는 카드입니다.');const materials=Array.isArray(x.materials)?x.materials:[];if(new Set(materials).size!==materials.length||materials.length>7)fail(400,'소재 중복 또는 초과');for(const mid of materials){const z=zoneOwner(r,mid);if(!z||z.player!==ix||!['field','hand'].includes(z.zone))fail(400,'사용 불가능한 소재입니다.')}if(pp.field.filter(Boolean).length-materials.filter(mid=>pp.field.includes(mid)).length>=3)fail(409,'소환 공간 부족');for(const mid of materials)move(r,mid,'grave',r.units[mid].owner);move(r,id,'field',ix);break}
+ case 'extra':{
+  if(x.player!==m.by)fail(403,'소환자는 발동자와 일치해야 합니다.');
+  if(r.turn!==m.by||r.phase!=='MAIN')fail(409,'엑스트라 소환의 수동 승인도 자신의 메인 페이즈에만 가능합니다.');
+  const id=r.players[x.player].extra.find(unit=>r.units[unit].cardId===x.cardId);
+  if(!id)fail(409,'해당 엑스트라 카드를 찾을 수 없습니다.');
+  performExtraSummon(r,x.player,{extraUnitId:id,materials:x.materials,spellUnitId:x.spellUnitId,target:x.target});
+  break;
+ }
  case 'note':break;
  default:fail(400,'허용되지 않는 수동 판정 유형');
  }}
@@ -177,7 +210,13 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
  }else fail(409,'이 카드 종류는 직접 사용할 수 없습니다.');
  p.roundPlays=(p.roundPlays||0)+1;if(/원소|금속/.test(c.attribute))p.roundElementUses=(p.roundElementUses||0)+1;if(c.attribute==='자연'&&c.type==='주문')p.naturalStreak=(p.naturalStreak||0)+1;
  log(r,'play',`${p.label}: ${c.name} 사용`);setOutcome(r);break}
- case 'attack':{requireTurn(r,who);if(r.phase!=='ATTACK'||r.pendingAttack||r.pendingManual||((p.noAttackUntil||0)>=p.turnsTaken))fail(409,'현재 공격할 수 없습니다.');const attacker=r.units[requireStr(body.attackerId,100)];const z=attacker&&zoneOwner(r,attacker.id);if(!z||z.player!==who||!['field','integration'].includes(z.zone)||attacker.atk<1||attacker.cannotAttack||attacker.cannotAttackUntil===r.turnNumber||attacker.frozen||!attackAvailable(attacker,r.turnNumber))fail(409,'공격 가능한 카드가 아닙니다.');const target=body.target;if(!target||!['player','unit'].includes(target.type))fail(400,'공격 대상을 지정해 주세요.');if(target.type==='unit'){const zz=zoneOwner(r,target.id);if(!zz||zz.player===who||zz.zone!=='field')fail(409,'공격할 수 없는 대상입니다.');}if(attacker.cardId==='COC-05-001'&&target.type==='player')fail(409,'카툰 데몬즈 드래곤은 플레이어를 직접 공격할 수 없습니다.');validateAggro(r,who,target);r.pendingAttack={attackerId:attacker.id,target:target.type==='player'?{type:'player',player:1-who}:{type:'unit',id:target.id},stage:'response'};log(r,'attack',`${p.label}: ${unitName(r,attacker.id)} 공격 선언`);break}
+ case 'extraSummon':{
+  requireTurn(r,who);
+  if(r.phase!=='MAIN'||r.pendingAttack||r.pendingManual)fail(409,'메인 페이즈에서만 특수 소환할 수 있습니다.');
+  performExtraSummon(r,who,body);
+  break;
+ }
+ case 'attack':{requireTurn(r,who);if(r.phase!=='ATTACK'||r.pendingAttack||r.pendingManual||((p.noAttackUntil||0)>=p.turnsTaken))fail(409,'현재 공격할 수 없습니다.');const attacker=r.units[requireStr(body.attackerId,100)];const z=attacker&&zoneOwner(r,attacker.id);if(!z||z.player!==who||!['field','integration'].includes(z.zone)||attacker.atk<1||attacker.cannotAttack||attacker.cannotAttackUntil===r.turnNumber||attacker.frozen||!attackAvailable(attacker,r.turnNumber))fail(409,'공격 가능한 카드가 아닙니다.');const target=body.target;if(!target||!['player','unit'].includes(target.type))fail(400,'공격 대상을 지정해 주세요.');if(target.type==='player'&&target.player!==undefined&&target.player!==1-who)fail(409,'상대 플레이어만 공격할 수 있습니다.');if(target.type==='unit'){const zz=zoneOwner(r,target.id);if(!zz||zz.player===who||zz.zone!=='field')fail(409,'공격할 수 없는 대상입니다.');}if(attacker.cardId==='COC-05-001'&&target.type==='player')fail(409,'카툰 데몬즈 드래곤은 플레이어를 직접 공격할 수 없습니다.');validateAggro(r,who,target);r.pendingAttack={attackerId:attacker.id,target:target.type==='player'?{type:'player',player:1-who}:{type:'unit',id:target.id},stage:'response'};log(r,'attack',`${p.label}: ${unitName(r,attacker.id)} 공격 선언`);break}
  case 'defend':{if(r.status!=='active'||!r.pendingAttack||who===r.turn||r.pendingManual)fail(409,'대응할 공격이 없습니다.');const a=r.pendingAttack,src=r.units[a.attackerId],sourceZone=zoneOwner(r,a.attackerId);if(!sourceZone||sourceZone.player!==r.turn){r.pendingAttack=null;log(r,'attack','공격자가 사라져 공격이 무효화되었습니다.');break;}const tz=a.target.type==='unit'?zoneOwner(r,a.target.id):null;if(a.target.type==='unit'&&(!tz||tz.player!==who||tz.zone!=='field')){a.stage='retarget';log(r,'attack','상대 대응으로 대상이 사라져 공격자가 재선택합니다.');break;}const targetName=a.target.type==='unit'?unitName(r,a.target.id):'플레이어';const max=Math.min(src.atk,src.diceMax??src.atk);const dice=die(max,src.diceMin??1);src.attackTurn=r.turnNumber;if(src.attackCountTurn!==r.turnNumber){src.attackCount=0;src.attackCountTurn=r.turnNumber}src.attackCount++;let dealt=dice;
  if(a.target.type==='unit'){
   const partner=r.players[r.turn].field.some(mid=>mid&&r.units[mid].cardId==='COC-12-006');
@@ -192,13 +231,44 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
   if(src.cardId==='COC-21-007')r.players[r.turn].hp+=Math.floor(dealt/3);
  }
  log(r,'damage',`1d${src.atk} = ${dice} / ${targetName}에게 ${dealt} 피해`);r.pendingAttack=null;setOutcome(r);break}
- case 'retarget':{requireTurn(r,who);if(r.pendingAttack?.stage!=='retarget'||r.pendingManual)fail(409,'대상 재선택을 할 수 없습니다.');const target=body.target;if(!target||!['player','unit'].includes(target.type))fail(400,'대상 오류');if(target.type==='unit'){const z=zoneOwner(r,target.id);if(!z||z.player===who||z.zone!=='field')fail(409,'재선택 대상 오류')}validateAggro(r,who,target);r.pendingAttack.target=target.type==='player'?{type:'player',player:1-who}:{type:'unit',id:target.id};r.pendingAttack.stage='response';log(r,'attack','공격 대상 재선택');break}
+ case 'retarget':{requireTurn(r,who);if(r.pendingAttack?.stage!=='retarget'||r.pendingManual)fail(409,'대상 재선택을 할 수 없습니다.');const target=body.target;if(!target||!['player','unit'].includes(target.type))fail(400,'대상 오류');if(target.type==='player'&&target.player!==undefined&&target.player!==1-who)fail(409,'상대 플레이어만 재선택할 수 있습니다.');if(target.type==='unit'){const z=zoneOwner(r,target.id);if(!z||z.player===who||z.zone!=='field')fail(409,'재선택 대상 오류')}validateAggro(r,who,target);r.pendingAttack.target=target.type==='player'?{type:'player',player:1-who}:{type:'unit',id:target.id};r.pendingAttack.stage='response';log(r,'attack','공격 대상 재선택');break}
  case 'manual':{if(r.mode==='ai')fail(409,'AI 대전에서는 합의 판정을 사용할 수 없습니다.');if(r.status!=='active'||r.pendingManual)fail(409,'지금은 효과 협의를 요청할 수 없습니다.');if(!['hp','unitHp','unitAtk','move','draw','extra','note'].includes(body.kind))fail(400,'효과 유형 오류');const payload=body.payload;if(!payload||typeof payload!=='object'||Array.isArray(payload))fail(400,'효과 입력 오류');const explanation=requireStr(body.explanation,240);if(explanation.length<3)fail(400,'효과 근거를 구체적으로 적어 주세요.');r.pendingManual={by:who,kind:body.kind,payload,explanation};log(r,'manual',`${p.label}: 수동 판정 제안 — ${explanation}`);break}
  case 'manualDecision':{if(r.mode==='ai')fail(409,'AI 대전에서는 합의 판정을 사용할 수 없습니다.');if(r.status!=='active'||!r.pendingManual||r.pendingManual.by===who)fail(403,'상대의 제안만 승인할 수 있습니다.');const m=r.pendingManual;if(body.approve===true){runManual(r,m);log(r,'manual',`${p.label}: 효과 승인 — ${m.explanation}`)}else{log(r,'manual',`${p.label}: 효과 거절 — ${m.explanation}`)}r.pendingManual=null;break}
  case 'concede':{if(r.status!=='active')fail(409,'진행 중인 대전이 아닙니다.');r.status='finished';r.winner=1-who;r.pendingAttack=null;r.pendingManual=null;log(r,'result',`${p.label} 항복`);break}
  default:fail(404,'알 수 없는 행동입니다.');
  }
  if(changed){r.version++;r.updatedAt=Date.now();save();}return publicState(r,who)
+}
+function chooseAIExtra(r){
+ const who=1,p=r.players[who];
+ for(const extraUnitId of p.extra){
+  const recipe=EXTRA_RECIPES[r.units[extraUnitId]?.cardId];
+  if(!recipe)continue;
+  const pool=(recipe.method==='wakeup'||recipe.method==='infinity'?p.field:[...p.field,...p.hand]).filter(Boolean);
+  const size=recipe.parts.length;
+  if(size>pool.length)continue;
+  const spells=recipe.method==='hero'||recipe.method==='infinity'?[null]:p.hand.filter(id=>cards.get(r.units[id]?.cardId)?.type==='주문');
+  if(!spells.length)continue;
+  let visited=0,choice=null;
+  function visit(i,picked){
+   if(choice||visited>200)return;
+   if(picked.length===size){
+    visited++;
+    for(const spellUnitId of spells){
+     try{validateExtraSummon({room:r,who,extraUnitId,materials:picked,spellUnitId,cards});
+      const cardId=r.units[extraUnitId].cardId;
+      const target=cardId==='COC-12-012'?r.players[0].field.filter(Boolean).find(id=>(Number(cards.get(r.units[id].cardId)?.atk)||0)<(Number(cards.get(cardId)?.atk)||0)):null;
+      choice={extraUnitId,materials:[...picked],spellUnitId,target:target?{type:'unit',id:target}:undefined};return;
+     }catch(e){if(e.status!==409)throw e}
+    }
+    return;
+   }
+   for(let k=i;k<pool.length;k++)visit(k+1,[...picked,pool[k]]);
+  }
+  visit(0,[]);
+  if(choice)return choice;
+ }
+ return null;
 }
 // Server-only AI: never receives or exposes an opponent's hand to the browser.
 function chooseAIMove(r){const who=1,p=r.players[who],level=r.aiDifficulty||'medium';
@@ -224,6 +294,7 @@ function runAI(r){if(r.mode!=='ai'||r.status!=='active')return;
   try{
    if(r.phase==='DRAW'){apply(r,1,'draw',{});continue}
    if(r.phase==='MAIN'){
+    const extra=chooseAIExtra(r);if(extra){apply(r,1,'extraSummon',extra);continue}
     const id=chooseAIMove(r);
     if(id){const c=cards.get(r.units[id].cardId),t=['COC-03-008','COC-17-003','COC-30-007','COC-32-006'].includes(c.id)?{type:'player',player:1}:chooseAITarget(r,id);if(['COC-08-001','COC-08-008','COC-31-002'].includes(c.id)&&r.players[0].field.some(Boolean)){t.type='unit';t.id=r.players[0].field.find(Boolean);delete t.player;}const before=structuredClone(r);try{apply(r,1,'play',{unitId:id,target:t,targets:c.id==='COC-06-004'?[...r.players[0].field,...r.players[1].field].filter(Boolean).slice(0,2):undefined})}catch(e){for(const key of Object.keys(r))delete r[key];Object.assign(r,before);r.players[1].aiRejected??=[];r.players[1].aiRejected.push(id);if(r.players[1].aiRejected.length>20)r.players[1].aiRejected.shift();log(r,'ai',`AI가 사용 불가능한 ${c.name} 카드를 건너뛰었습니다.`)}continue}
     apply(r,1,'phase',{});continue;
@@ -265,4 +336,4 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
 }
 
 // Purely programmatic internal test seam. No HTTP route exposes these internals.
-export const gameTestInternals={cards,catalog,createPlayer,instantiate,move,draw,runSummonEffects,runIntegrationOnEnter,processStartOfTurn,attackAvailable,damageUnit,H};
+export const gameTestInternals={cards,catalog,createPlayer,instantiate,move,draw,runSummonEffects,runIntegrationOnEnter,processStartOfTurn,processEndOfTurn,attackAvailable,damageUnit,H,performExtraSummon,chooseAIExtra};
