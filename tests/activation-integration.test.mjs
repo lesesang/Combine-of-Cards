@@ -37,3 +37,23 @@ test('incorrect elemental wizard rejects LAND spell even if FLAME is present',()
  assert.throws(()=>I.apply(r,0,'play',{unitId:spell}),/랜드/);
 });
 test.after(()=>fs.rmSync(tmp,{recursive:true,force:true}));
+test('Storm Fannir mills one random deck card then creates the storm token',()=>{
+ const {r,position}=room('14','03');const id=position(0,'COC-14-005','hand');const before=r.players[0].deck.length;
+ I.apply(r,0,'play',{unitId:id});
+ assert.equal(r.players[0].deck.length,before-1);
+ assert.equal(r.players[0].grave.length,1);
+ assert.ok(r.players[0].field.some(mid=>mid&&r.units[mid].created&&r.units[mid].tokenCard.name==='스톰 토큰'));
+});
+test('Storm Knight removes one friendly monster, then creates a storm token',()=>{
+ const {r,position}=room('14','03');const id=position(0,'COC-14-004','hand'),material=position(0,'COC-14-005','field');
+ I.apply(r,0,'play',{unitId:id,costUnitIds:[material]});
+ assert.ok(r.players[0].banished.includes(material));
+ assert.ok(r.players[0].field.includes(id));
+ assert.ok(r.players[0].field.some(mid=>mid&&r.units[mid].created));
+});
+test('Mummy general requires and releases a mummy token without consuming other cards',()=>{
+ const {r,position}=room('17','03');const id=position(0,'COC-17-008','hand');
+ const soldier=I.H.summonToken(r,0,'미라 병사',80,100);
+ I.apply(r,0,'play',{unitId:id,costUnitIds:[soldier]});
+ assert.ok(r.players[0].field.includes(id));assert.ok(!r.units[soldier]);
+});

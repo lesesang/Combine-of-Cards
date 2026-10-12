@@ -81,6 +81,12 @@ register('COC-01-008',ctx=>{const id=ctx.r.players[ctx.who].integration;if(!id)c
 // Generic evolution: named created-card search, preserving integration identity by updating cardId.
 const evolves={'COC-03-003':'영매사 스트로베리아','COC-08-010':'오오 츠쿠모가미 백귀야행','COC-20-007':'버닝데몬즈 워리어 드라고닉','COC-23-006':'라이드 위저드 인피니티','COC-24-009':'인빈시블 지니어스','COC-26-009':'인빈시블 지니어스','COC-30-009':'대자연의 여신 유리카'};
 for(const [id,target] of Object.entries(evolves)){aliases[id]=(ctx)=>{const p=ctx.r.players[ctx.who];if(!p.integration)ctx.H.fail(409,'일체화 중이어야 합니다.');const matching=ctx.H.cardNamed(ctx.r,ctx.who,target);if(!matching)ctx.H.fail(409,'진화 대상이 카드 데이터에 없습니다.');ctx.H.evolve(ctx.r,p.integration,matching)};}
+// Curse deck: source monster is sacrificed by the audited activation preflight.
+register('COC-21-004',ctx=>{
+ const id=ctx.body.target?.id,z=id&&ctx.H.zone(ctx.r,id);
+ if(!z||z.player===ctx.who||z.zone!=='field')ctx.H.fail(409,'상대 필드의 파괴 대상 몬스터를 지정해야 합니다.');
+ ctx.H.destroy(ctx.r,id);
+});
 export function hasAutoSpell(cardId){return Object.hasOwn(aliases,cardId)}
 export const spellHandlerIds=Object.keys(aliases);
 export function castAutomatedSpell(r,who,c,body,H){const f=aliases[c.id];if(!f)return {supported:false};const ctx={r,who,c,body,H};const result=f(ctx)||{};return {supported:true,...result}}
