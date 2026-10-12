@@ -15,12 +15,16 @@ export const passiveAutomations = new Set([
  'COC-12-008','COC-10-006','COC-21-007','COC-08-002','COC-09-004',
  'COC-12-007','COC-21-008','COC-21-010'
 ]);
+export const combatAutomations = new Set([
+ 'COC-12-011','COC-12-008','COC-26-011','COC-32-001',
+ 'COC-32-003','COC-32-011','COC-32-013'
+]);
 export const integrationAutomations = new Set([
  'COC-05-009','COC-17-001','COC-19-006','COC-30-010'
 ]);
 export function automationStatus(card){
  if(card.type==='주문'&&hasAutoSpell(card.id))return 'partial';
- if(summonAutomations.has(card.id)||passiveAutomations.has(card.id)||integrationAutomations.has(card.id)||SUPPORTED_EXTRA_IDS.includes(card.id))return 'partial';
+ if(summonAutomations.has(card.id)||passiveAutomations.has(card.id)||integrationAutomations.has(card.id)||combatAutomations.has(card.id)||SUPPORTED_EXTRA_IDS.includes(card.id))return 'partial';
  if(!card.effects?.length&&!card.conditions?.length)return 'basic';
  return 'manual';
 }
