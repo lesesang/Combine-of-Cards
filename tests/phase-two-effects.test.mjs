@@ -8,7 +8,7 @@ process.env.DATA_DIR=tmp;
 const {gameTestInternals:I}=await import('../server.mjs');
 function make(a,b){
  const r={code:'TST456',status:'active',turn:0,turnNumber:1,phase:'MAIN',version:1,players:[],units:{},logs:[],effects:[],pendingAttack:null,pendingManual:null};
- I.createPlayer(r,a,'A','token1');I.createPlayer(r,b,'B','token2');
+ I.createPlayer(r,a,'A','token1');I.createPlayer(r,b,'B','token2');r.players[0].turnsTaken=1;
  const position=(who,id,to)=>{const unit=r.players[who].deck.find(i=>r.units[i].cardId===id);assert.ok(unit,id);I.move(r,unit,to,who);return unit};
  return {r,position};
 }
