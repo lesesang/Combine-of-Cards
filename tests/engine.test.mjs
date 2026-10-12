@@ -21,3 +21,32 @@ const hand=r.json.players[active].hand;const playable=hand.find(u=>['몬스터',
 test('mutual approval required for manual rulings; optimistic concurrency',async()=>{const p=await createPair();let r=await act(p,0,'start');const by=r.json.turn,other=1-by;const prior=r.json.players[other].hp;r=await act(p,by,'manual',{kind:'hp',payload:{player:other,delta:-75},explanation:'확인된 카드 효과 75 피해'});assert.equal(r.status,200);assert.equal(r.json.players[other].hp,prior);assert.ok(r.json.pendingManual);assert.equal((await act(p,by,'manualDecision',{approve:true})).status,403);const conflict=await call(`/api/rooms/${p.code}/actions`,{method:'POST',token:p.tokens[other],body:{type:'manualDecision',expectedVersion:1,approve:true}});assert.equal(conflict.status,409);r=await act(p,other,'manualDecision',{approve:true});assert.equal(r.status,200);assert.equal(r.json.players[other].hp,prior-75);assert.equal(r.json.pendingManual,null);r=await act(p,other,'manual',{kind:'note',payload:{},explanation:'효과 주석 테스트'});assert.equal(r.status,200);r=await act(p,by,'manualDecision',{approve:false});assert.equal(r.json.pendingManual,null);assert.ok(r.json.logs.some(x=>x.text.includes('거절')))});
 test('invalid manual payloads do not leak hidden cards or mutate health',async()=>{const p=await createPair();let r=await act(p,0,'start');const active=r.json.turn,other=1-active;const hp=r.json.players[other].hp;r=await act(p,active,'manual',{kind:'hp',payload:{player:other,delta:-999999},explanation:'악성 수치 입력 확인'});assert.equal(r.status,200);r=await act(p,other,'manualDecision',{approve:true});assert.equal(r.status,400);const s=await call(`/api/rooms/${p.code}`,{token:p.tokens[other]});assert.equal(s.json.players[other].hp,hp);assert.equal(s.json.players[active].hand,null)});
 test('forbidden rooms and persisted state are isolated',async()=>{const p=await createPair();const s=JSON.parse(fs.readFileSync(path.join(temporary,'rooms.json'),'utf8'));assert.ok(s[p.code]);assert.ok(!JSON.stringify(s[p.code].players).includes(p.tokens[0]));assert.equal((await call('/api/rooms/ZZZZZZ',{token:p.tokens[0]})).status,404);const r=await call('/api/rooms',{method:'POST',body:{deckId:'xx',label:'X'}});assert.equal(r.status,400)});
+test('AI: random and selected decks, independent three difficulties, private cards',async()=>{
+ for(const difficulty of ['easy','medium','hard']){
+  const body={deckId:'30',aiDeckId:difficulty==='hard'?'03':'random',difficulty,label:'인간'};
+  const a=await call('/api/ai',{method:'POST',body});
+  assert.equal(a.status,201,JSON.stringify(a.json));
+  const g=a.json.state;
+  assert.equal(g.mode,'ai');assert.equal(g.difficulty,difficulty);assert.equal(g.you,0);
+  assert.ok(g.players[1].deckId);assert.equal(g.players[1].hand,null);assert.equal(g.players[1].extra,null);
+  assert.equal(g.players[1].label.startsWith('AI · '),true);
+  const noKey=await call(`/api/rooms/${a.json.code}`);assert.equal(noKey.status,401);
+  const badJoin=await call(`/api/rooms/${a.json.code}/join`,{method:'POST',body:{deckId:'01',label:'침입'}});assert.equal(badJoin.status,409);
+  const p={code:a.json.code,tokens:[a.json.token,null]};let state=g;
+  for(let i=0;i<30&&state.status==='active';i++){
+   const t=state.turn===0?(state.pendingAttack?.stage==='response'?'defend':state.phase==='DRAW'?'draw':state.phase==='MAIN'?'phase':state.phase==='ATTACK'?'phase':'phase'):'defend';
+   const actType=t==='phase'&&state.phase==='MAIN'?'phase':t;
+   const r=await act(p,0,actType);assert.equal(r.status,200,JSON.stringify(r.json));state=r.json;
+   assert.equal(state.players[1].hand,null);
+  }
+  assert.ok(state.version>g.version);
+ }
+});
+test('AI rejects unimplemented spell instead of silently consuming the card',async()=>{
+ const a=await call('/api/ai',{method:'POST',body:{deckId:'01',aiDeckId:'03',difficulty:'medium'}});assert.equal(a.status,201);
+ const p={code:a.json.code,tokens:[a.json.token,null]};let s=a.json.state;
+ if(s.turn!==0){for(let i=0;i<60&&s.turn!==0&&s.status==='active';i++){const t=s.pendingAttack?'defend':s.phase==='DRAW'?'draw':'phase';const r=await act(p,0,t);assert.equal(r.status,200);s=r.json}}
+ if(s.status==='active'&&s.turn===0&&s.phase==='DRAW')s=(await act(p,0,'draw')).json;
+ const unavailable=s.players[0].hand?.find(u=>u.card.type==='주문'&&!['COC-03-007','COC-03-008','COC-05-002'].includes(u.card.id));
+ if(unavailable){const r=await act(p,0,'play',{unitId:unavailable.id});assert.equal(r.status,409);const again=(await call(`/api/rooms/${p.code}`,{token:p.tokens[0]})).json;assert.ok(again.players[0].hand.some(u=>u.id===unavailable.id))}
+});
