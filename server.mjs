@@ -263,7 +263,7 @@ function chooseAIFieldAbility(r){
   }
   if(id==='COC-08-003'){
    if(!p.hand.length)continue;
-   body.costCardId=p.hand.sort((a,b)=>(cards.get(r.units[a].cardId)?.atk||0)-(cards.get(r.units[b].cardId)?.atk||0))[0];
+   body.costCardId=[...p.hand].sort((a,b)=>(Number(cards.get(r.units[a].cardId)?.atk)||0)-(Number(cards.get(r.units[b].cardId)?.atk)||0))[0];
   }
   if(id==='COC-22-010'){
    const choice=allies.filter(a=>a!==sourceUnitId&&r.units[a].atk>0).sort((a,b)=>r.units[b].atk-r.units[a].atk)[0];
