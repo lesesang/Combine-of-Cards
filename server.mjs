@@ -4,7 +4,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
-import { castAutomatedSpell, hasAutoSpell, spellHandlerIds } from './src/automated-effects.mjs';
+import { castAutomatedSpell, hasAutoSpell, spellHandlerIds, validateLifeEatingSwordTarget } from './src/automated-effects.mjs';
 import {automationStatus} from './src/automation-status.mjs';
 import {planActivation,commitActivationCosts} from './src/activation-rules.mjs';
 import {validateExtraSummon, EXTRA_RECIPES} from './src/extra-summons.mjs';
@@ -32,6 +32,7 @@ const REACTIVE_SPELL_IDS=new Set([
  'COC-19-004', // search one monster from own deck (if present)
  'COC-20-005', // one shared dice roll damages both players
  'COC-30-005', // spell bonus and next-turn draw registration
+ 'COC-21-002', // independent Life-Eating Sword effect granted to selected unit/player
  'COC-30-007', // own recovery
  'COC-07-004', // opponent draw and own fixed-name deck search
  'COC-07-011', // opponent draw/mill; self heal and optional integration buff
@@ -336,7 +337,47 @@ function runIntegrationOnEnter(r,who,id){const u=r.units[id],p=r.players[who];sw
  case 'COC-30-010':p.hp+=800;break;
  default:break;
  }}
-function processStartOfTurn(r){const who=r.turn,p=r.players[who];p.turnsTaken=(p.turnsTaken||0)+1;p.aiRejected=[];p.aiRejectedAbilities=[];for(const u of Object.values(r.units)){if(u.buffExpiresAt&&u.buffExpiresAt<=p.turnsTaken&&u.owner===who){u.atk=Math.max(0,u.atk-(u.temporaryBuff||0));u.temporaryBuff=0;u.buffExpiresAt=0}}p.lastRoundPlays=p.roundPlays||0;p.roundPlays=0;p.roundElementUses=0;p.elementSpellPlaysThisTurn=0;p.spellsThisTurn=0;
+// The spell has gone to grave; this is a serialized, independent effect.
+// The bearer must pay 30 HP on each of their OWN subsequent turns. HP <= 30
+// cannot pay the full cost, so the unit is destroyed or the player loses.
+function processLifeEatingSwordTurn(r,who){
+ for(const effect of [...(r.effects||[])].filter(e=>e.type==='lifeEatingSword')){
+  const target=effect.target;
+  const zone=target?.kind==='unit'?zoneOwner(r,target.id):null;
+  if(target?.kind==='unit'&&(!zone||zone.zone!=='field')){
+   r.effects.splice(r.effects.indexOf(effect),1);continue;
+  }
+  const bearer=target?.kind==='unit'?zone?.player:target?.player;
+  if(bearer!==who||r.turnNumber<=effect.appliedAtTurn)continue;
+  const unit=target.kind==='unit'?r.units[target.id]:null;
+  const hp=unit?unit.hp:r.players[who].hp;
+  if(!Number.isFinite(hp)||hp<=30){
+   r.effects.splice(r.effects.indexOf(effect),1);
+   if(unit){
+    H.destroy(r,target.id,{cause:'lethal'});
+    log(r,'effect','생명을 먹는 마검: 체력 30을 지불할 수 없어 대상 몬스터 파괴');
+   }else{
+    r.players[who].hp=0;
+    log(r,'effect','생명을 먹는 마검: 체력 30을 지불할 수 없어 플레이어 패배');
+   }
+   setOutcome(r);
+  }else if(unit){
+   unit.hp-=30;unit.atk+=100;
+   log(r,'effect','생명을 먹는 마검: 대상 몬스터 체력 30 지불 / 공격력 +100');
+  }else{
+   r.players[who].hp-=30;
+   const p=r.players[who];
+   p.playerAtkBonus=(p.playerAtkBonus||0)+100;
+   if(p.integration){
+    r.units[p.integration].atk+=100;
+    r.units[p.integration].playerAttackBonusApplied=(r.units[p.integration].playerAttackBonusApplied||0)+100;
+   }
+   log(r,'effect','생명을 먹는 마검: 일체화 플레이어 체력 30 지불 / 공격력 +100');
+  }
+  if(r.status==='finished')return;
+ }
+}
+function processStartOfTurn(r){const who=r.turn,p=r.players[who];p.turnsTaken=(p.turnsTaken||0)+1;processLifeEatingSwordTurn(r,who);if(r.status==='finished')return;p.aiRejected=[];p.aiRejectedAbilities=[];for(const u of Object.values(r.units)){if(u.buffExpiresAt&&u.buffExpiresAt<=p.turnsTaken&&u.owner===who){u.atk=Math.max(0,u.atk-(u.temporaryBuff||0));u.temporaryBuff=0;u.buffExpiresAt=0}}p.lastRoundPlays=p.roundPlays||0;p.roundPlays=0;p.roundElementUses=0;p.elementSpellPlaysThisTurn=0;p.spellsThisTurn=0;
  
  // Passive draw-phase triggers happen before the normal draw action.
  const enemyIntegration=r.players[1-who].integration;
@@ -492,6 +533,7 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
  if(c.type==='주문'&&r.mode==='ai'&&!hasAutoSpell(c.id))
   fail(409,'이 주문의 특수 효과는 아직 자동 판정을 지원하지 않습니다. 다른 카드를 사용해 주세요.');
  if(c.type==='일체화'&&p.integration)fail(409,'이미 일체화했습니다.');
+ if(c.id==='COC-21-002')validateLifeEatingSwordTarget(r,body,H,who);
  const activation=planActivation({room:r,who,unitId:id,cards,body});
  if(c.type==='몬스터'&&!p.field.includes(null)&&
     !activation.costs.some(cost=>p.field.includes(cost.unitId)))
@@ -652,7 +694,7 @@ function chooseAISpellCost(r,who,sourceUnitId){
  )[0]||null;
 }
 function chooseAIMove(r){const who=1,p=r.players[who],level=r.aiDifficulty||'medium';
- const candidate=p.hand.filter(id=>{if(p.aiRejected?.includes(id))return false;try{planActivation({room:r,who,unitId:id,cards})}catch(e){if(e.status===409)return false;throw e}const c=cards.get(r.units[id].cardId);if(c.id==='COC-31-009'&&!chooseAISpellCost(r,who,id))return false;if(c.type==='주문')return hasAutoSpell(c.id);if(c.type==='일체화')return !p.integration&&!c.conditions.length;if(c.type==='몬스터')return p.field.includes(null)&&isSimpleSummonCard(c);return false});
+ const candidate=p.hand.filter(id=>{if(p.aiRejected?.includes(id))return false;try{planActivation({room:r,who,unitId:id,cards})}catch(e){if(e.status===409)return false;throw e}const c=cards.get(r.units[id].cardId);if(c.id==='COC-31-009'&&!chooseAISpellCost(r,who,id))return false;if(c.id==='COC-21-002'&&!p.integration&&!p.field.some(mid=>mid&&r.units[mid].hp>30))return false;if(c.type==='주문')return hasAutoSpell(c.id);if(c.type==='일체화')return !p.integration&&!c.conditions.length;if(c.type==='몬스터')return p.field.includes(null)&&isSimpleSummonCard(c);return false});
  if(!candidate.length)return null;
  const attack=(id)=>Math.max(0,Number(cards.get(r.units[id].cardId).atk)||0);
  const score=id=>{const c=cards.get(r.units[id].cardId);if(c.type==='몬스터')return attack(id)+40+(c.effects.length?25:0);if(c.type==='일체화')return 150+attack(id);if(c.id==='COC-30-007'&&p.hp>850)return -100;if(c.type==='주문')return 85;return 0};
@@ -694,6 +736,13 @@ function runAI(r){if(r.mode!=='ai'||r.status!=='active')return;
       const c=cards.get(r.units[id].cardId);
       const t=['COC-03-008','COC-17-003','COC-30-007','COC-32-006'].includes(c.id)?
        {type:'player',player:1}:chooseAITarget(r,id);
+      if(c.id==='COC-21-002'){
+       if(r.players[1].integration){t.type='player';t.player=1;delete t.id;}
+       else{
+        const bearer=r.players[1].field.find(mid=>mid&&r.units[mid].hp>30);
+        if(bearer){t.type='unit';t.id=bearer;delete t.player;}
+       }
+      }
       const enemyUnits=r.players[0].field.filter(Boolean);
       const allUnits=r.players.flatMap(p=>p.field.filter(Boolean));
       if(['COC-08-001','COC-08-008','COC-31-002','COC-05-007'].includes(c.id)&&enemyUnits.length){
@@ -785,4 +834,4 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
 }
 
 // Purely programmatic internal test seam. No HTTP route exposes these internals.
-export const gameTestInternals={cards,catalog,createPlayer,instantiate,move,draw,runSummonEffects,runIntegrationOnEnter,processStartOfTurn,processEndOfTurn,attackAvailable,damageUnit,H,performExtraSummon,finishExtraSummon,queueAutomatedSpell,finishAutomatedSpell,attachOverlayMaterials,attachCard,detachCard,resolveQueuedDestroyHeals,chooseAIExtra,chooseAIFieldAbility,chooseAIGraveAbility,chooseAISpellCost,runAI,maxAttacks,actualAttack,treatedAttackForCondition,applyFieldAbility,apply,publicState};
+export const gameTestInternals={cards,catalog,createPlayer,instantiate,move,draw,runSummonEffects,runIntegrationOnEnter,processStartOfTurn,processEndOfTurn,attackAvailable,damageUnit,H,performExtraSummon,finishExtraSummon,queueAutomatedSpell,finishAutomatedSpell,attachOverlayMaterials,attachCard,detachCard,processLifeEatingSwordTurn,resolveQueuedDestroyHeals,chooseAIExtra,chooseAIFieldAbility,chooseAIGraveAbility,chooseAISpellCost,runAI,maxAttacks,actualAttack,treatedAttackForCondition,applyFieldAbility,apply,publicState};
