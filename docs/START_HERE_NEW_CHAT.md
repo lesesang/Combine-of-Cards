@@ -27,8 +27,8 @@
 7. **docs/ARCHITECTURE_AND_RUNBOOK.md** — 파일 구조, 실행, 빌드, 테스트, 배포·보안 제한.
 8. **docs/SOURCE_DATA_PROVENANCE.md** — 이전 v1.3 정본 파일 이름, 현재 GitHub에 없는 원본과 정본 편입 방법.
 9. **docs/AUTOMATION_COVERAGE.md** — 카드 ID별 '부분 지원 / 미지원' 최신 목록. 이 파일은 코드 기반으로 생성되는 자료일 수 있으므로 갱신 시 주의.
-9. **docs/EFFECT_STACK_AND_PERSISTENCE.md** 및 각 카드별 docs — 구체적인 기술 판정과 이미 작성된 테스트.
-10. **server.mjs**, **src/**, **tests/**, **public/** — 실제 구현 코드가 최종 근거.
+10. **docs/EFFECT_STACK_AND_PERSISTENCE.md** 및 각 카드별 docs — 구체적인 기술 판정과 이미 작성된 테스트.
+11. **server.mjs**, **src/**, **tests/**, **public/** — 실제 구현 코드가 최종 근거.
 
 별도 Word 파일로 만들어진 2026-10-12 **v1.3 통합 룰북·24개 덱 카드집·원본 비교 JSON**은 과거 대화에서 생성되었지만 **현 저장소에는 그 정본 파일 자체가 커밋되어 있지 않다**. 현재 repo에는 압축되어 변환된 플레이용 카드 도감(public/data/catalog.json.gz.b64)이 들어 있다. 원본 v1.3 JSON/DOCX를 정본으로 버전 관리하는 작업은 **최우선 후속 과제**이다. 여기서 공개 플레이 도감 데이터를 원본 전체 명세와 동일하다고 추정하지 말 것.
 
