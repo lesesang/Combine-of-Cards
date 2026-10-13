@@ -136,6 +136,7 @@ test('confirmed sword: AI gives independent spell effect to own legal monster',(
  assert.equal(r.pendingSpell?.who,1,'human opponent must receive a response window');
  assert.ok(!r.effects.some(e=>e.type==='lifeEatingSword'));
  I.apply(r,0,'spellResponse',{choice:'pass'});
+ console.log('SWORD_AI_TRACE',JSON.stringify({pending:r.pendingSpell,effects:r.effects,ally,players:r.players.map(p=>({field:p.field,integration:p.integration,hp:p.hp})),logs:r.logs.slice(-9)}));
  assert.ok(r.effects.some(e=>e.type==='lifeEatingSword'&&e.target?.id===ally));
  assert.ok(!r.units[ally].attachments?.includes(aiSword));
 });
