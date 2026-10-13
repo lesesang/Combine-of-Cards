@@ -100,3 +100,6 @@
 - 현재 룰북/엔진은 전체 카드 자동 판정이 아직 되지 않은 **베타**이며, 이것이 정본 규칙의 변경을 뜻하지 않는다.
 
 **관련 코드·문서:** docs/GANDRAE_RULING.md, docs/CARTOON_CHAIN_RULING.md, docs/SIMULTANEOUS_DESTRUCTION.md, docs/BURNING_NATURE_RULINGS.md, docs/ACTIVATION_VALIDATION.md, docs/EFFECT_STACK_AND_PERSISTENCE.md.
+
+
+- **R15 장착 해제 확정(2026-10-13): 장착 해제는 플레이어의 임의 행동이 아니다.** 카드 원문에 명시된 효과·규칙에 따라 해제되는 경우에만 허용한다. 서버 내부의 `detachCard`는 카드 효과 처리용이며 플레이어에게 자유 해제 버튼이나 `detach` 행동을 제공하지 않는다.
