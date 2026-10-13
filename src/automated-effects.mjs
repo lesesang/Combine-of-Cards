@@ -282,4 +282,19 @@ register('COC-30-011',ctx=>{
 
 export function hasAutoSpell(cardId){return Object.hasOwn(aliases,cardId)}
 export const spellHandlerIds=Object.keys(aliases);
-export function castAutomatedSpell(r,who,c,body,H){const f=aliases[c.id];if(!f)return {supported:false};const ctx={r,who,c,body,H};const result=f(ctx)||{};return {supported:true,...result}}
+export function castAutomatedSpell(r,who,c,body,H){
+ const f=aliases[c.id];if(!f)return {supported:false};
+ // A player applying a spell is its action source. In particular, an
+ // independently enchanted integrated player can earn the next-turn sword
+ // double by destroying an opposing monster with an effect. Do not attribute
+ // a physical unit's kill to unrelated equipped/enhanced monsters.
+ const attributedH={
+  ...H,
+  hurt:(room,id,n,meta={})=>H.hurt(room,id,n,{...meta,sourcePlayer:who}),
+  destroy:(room,id,meta={})=>H.destroy(room,id,{...meta,sourcePlayer:who}),
+  destroyBatch:(room,ids,meta={})=>H.destroyBatch(room,ids,{...meta,sourcePlayer:who})
+ };
+ const ctx={r,who,c,body,H:attributedH};
+ const result=f(ctx)||{};
+ return {supported:true,...result};
+}
