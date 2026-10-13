@@ -50,6 +50,20 @@ test('Storm UI: only current responder sees counters and sends the selected sour
  await t.listeners.click({target:{closest:()=>({id:'spellPass',dataset:{}})}});
  assert.equal(t.requests[1].body.choice,'pass');
 });
+
+test('BLOCK UI: requires a selected other hand card and submits its UID with the version',async()=>{
+ const t=ui();
+ t.run("state.game.players[0].hand.push({id:'block',card:{id:'COC-31-009',name:'BLOCK'}})");
+ t.run('openPlay()');t.node('playPick').value='block';await t.node('playPick').onchange();
+ assert.equal(t.node('playCostWrap').style.display,'');
+ assert.match(t.node('playCostCard').innerHTML,/value="cost"/);
+ assert.doesNotMatch(t.node('playCostCard').innerHTML,/value="block"/);
+ await t.node('playSubmit').onclick();assert.equal(t.requests.length,0);
+ t.node('playCostCard').value='cost';await t.node('playSubmit').onclick();
+ assert.equal(t.requests[0].body.unitId,'block');
+ assert.equal(t.requests[0].body.costCardId,'cost');
+ assert.equal(t.requests[0].body.expectedVersion,7);
+});
 test('Crash Voltage UI labels a discard cost and submits the selected hand card and enemy target',async()=>{
  const t=ui();t.run('openFieldAbility()');
  assert.equal(t.node('abilityCostLabel').textContent,'비용으로 묘지에 버릴 손패 1장');

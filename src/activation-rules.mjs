@@ -80,6 +80,12 @@ register('COC-32-009',c=>require_(c.ownField.some(id=>c.named(id).includes('원�
 register('COC-32-010',c=>require_((c.player.spellsThisTurn||0)>=1,'이번 턴에 주문을 사용한 기록이 있어야 합니다.'));
 
 // Material / discard costs: preflight every zone and selected unit before any mutation.
+register('COC-31-009',c=>{
+ const id=c.body.costCardId;
+ if(typeof id!=='string'||id===c.unitId||!c.player.hand.includes(id))
+  deny('효과 비용으로 버릴 다른 자신의 손패 1장을 선택해야 합니다.');
+ return {costs:[{unitId:id,to:'grave'}]};
+});
 register('COC-12-010',c=>{
  const ids=c.body.costUnitIds;
  if(!Array.isArray(ids)||ids.length!==2||new Set(ids).size!==2||!ids.every(id=>c.ownField.includes(id)))deny('소환하기 전에 자신 필드의 몬스터 2장을 소재로 지정해야 합니다.');

@@ -116,11 +116,8 @@ register('COC-24-008 COC-26-008',ctx=>{const p=ctx.r.players[ctx.who];if(p.field
 register('COC-31-005',ctx=>{ctx.H.draw(ctx.r,ctx.who);if(ctx.H.roll(2)===1){const p=ctx.r.players[1-ctx.who];if(p.hand.length)ctx.H.move(ctx.r,p.hand[ctx.H.randomInt(p.hand.length)],'grave',1-ctx.who)}});
 register('COC-31-007',ctx=>{charge(ctx,100);const t=enemy(ctx);if(!t.id)ctx.H.fail(409,'탈취할 몬스터가 없습니다.');ctx.H.capture(ctx.r,ctx.who,t.id)});
 register('COC-31-009',ctx=>{
- const p=ctx.r.players[ctx.who],selected=ctx.body.costCardId;
- // The spell being activated is not an eligible discard cost, and a choice is mandatory.
- if(typeof selected!=='string'||selected===ctx.body.unitId||!p.hand.includes(selected))
-  ctx.H.fail(409,'효과 비용으로 버릴 다른 자신의 손패 1장을 선택해야 합니다.');
- ctx.H.move(ctx.r,selected,'grave',ctx.r.units[selected].owner);
+ // The chosen discard was validated and paid by activation-rules before
+ // opening the response window. Resolution must never charge it again.
  for(const id of ctx.r.players[1-ctx.who].field.filter(Boolean))
   ctx.r.units[id].effectsNegated=true;
 });
