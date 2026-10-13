@@ -70,6 +70,80 @@ export function declareAutomaticGroup(room, effects, activePlayer, orderedIds = 
   return ordered.map(effect => declareEffect(room, effect));
 }
 
+
+/**
+ * R02: collect one simultaneous trigger event in persistent, JSON-only state.
+ * For equal-priority triggers, each player who controls multiple triggers
+ * chooses that player's declaration order. Active player chooses first.
+ * Higher explicit priorities still override player-selected ordering.
+ */
+export function beginAutomaticTriggerOrder(room, effects, activePlayer) {
+  requireRecord(room, 'room');
+  if (!validOwner(activePlayer)) throw new TypeError('invalid active player');
+  if (!Array.isArray(effects) || effects.length < 1 || effects.length > 256) {
+    throw new TypeError('invalid automatic trigger group');
+  }
+  if (room.pendingTriggerOrder || room.effectStack?.length) {
+    throw new Error('cannot open another trigger order while a stack or choice is pending');
+  }
+  const keys = new Set();
+  for (const effect of effects) {
+    requireRecord(effect, 'effect');
+    if (!validId(effect.key) || keys.has(effect.key) || !validOwner(effect.owner) ||
+        !validId(effect.effectId) || (effect.priority !== undefined &&
+        (!Number.isInteger(effect.priority) || Math.abs(effect.priority) > 1000))) {
+      throw new Error('invalid simultaneous trigger identity');
+    }
+    keys.add(effect.key);
+  }
+  const snapshot = structuredClone(effects);
+  // One trigger per owner per priority requires no user-supplied ordering.
+  const needsChoice = [activePlayer,1-activePlayer].filter(who => {
+    const counts = new Map();
+    for (const e of snapshot) if (e.owner === who) {
+      const priority = e.priority || 0;
+      counts.set(priority,(counts.get(priority)||0)+1);
+    }
+    return [...counts.values()].some(count => count > 1);
+  });
+  if (!needsChoice.length) {
+    declareAutomaticGroup(room,snapshot,activePlayer);
+    return {pending:false,awaiting:null};
+  }
+  room.pendingTriggerOrder = {
+    activePlayer,
+    effects:snapshot,
+    awaiting:needsChoice,
+    selected:{},
+    createdAtTurn:room.turnNumber || 0
+  };
+  return {pending:true,awaiting:needsChoice[0]};
+}
+
+export function chooseAutomaticTriggerOrder(room, owner, keys) {
+  requireRecord(room, 'room');
+  const pending = room.pendingTriggerOrder;
+  if (!pending || !Array.isArray(pending.awaiting) || pending.awaiting[0] !== owner) {
+    throw new Error('not the current trigger-order controller');
+  }
+  const owned = pending.effects.filter(e => e.owner === owner).map(e => e.key);
+  if (!Array.isArray(keys) || keys.length !== owned.length ||
+      new Set(keys).size !== keys.length || keys.some(k => !owned.includes(k))) {
+    throw new Error('ordering must select every owned trigger exactly once');
+  }
+  pending.selected[String(owner)] = [...keys];
+  pending.awaiting.shift();
+  if (pending.awaiting.length) return {pending:true,awaiting:pending.awaiting[0]};
+  const allKeys = [pending.activePlayer,1-pending.activePlayer].flatMap(who =>
+    pending.selected[String(who)] ||
+    pending.effects.filter(e => e.owner === who).map(e => e.key)
+  );
+  // Only clear the pending choice after successfully declaring the stack.
+  declareAutomaticGroup(room,pending.effects,pending.activePlayer,allKeys);
+  room.pendingTriggerOrder = null;
+  return {pending:false,awaiting:null};
+}
+
 export function resolveEffectStack(room, { getZone, execute, onResult } = {}) {
   requireRecord(room, 'room');
   if (typeof getZone !== 'function' || typeof execute !== 'function') {
