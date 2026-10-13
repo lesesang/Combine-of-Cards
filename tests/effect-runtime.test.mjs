@@ -279,3 +279,63 @@ test('R26: sequence overflow rejects without consuming the current maximum',()=>
  assert.throws(()=>declareEffect(r,{owner:0,effectId:'overflow'}),/sequence overflow/);
  assert.deepEqual(r,before);
 });
+
+
+test('R01: failed effect execution restores room and retains the pending effect',()=>{
+ const r=room();
+ r.players=[{hp:1000,grave:[]}];
+ declareEffect(r,{effectId:'cost-and-roll',owner:0,sourceId:'a'});
+ const before=structuredClone(r);
+ assert.throws(()=>resolveEffectStack(r,{
+  getZone:()=>({zone:'field',player:0}),
+  execute:()=>{
+   r.players[0].hp-=30;
+   r.players[0].grave.push('moved-card');
+   declareEffect(r,{effectId:'nested',owner:0});
+   throw new Error('delayed effect failure');
+  }
+ }),/delayed effect failure/);
+ assert.deepEqual(r,before);
+ const output=resolveEffectStack(r,{
+  getZone:()=>({zone:'field',player:0}),
+  execute:()=>{r.players[0].hp-=30;}
+ });
+ assert.deepEqual(output.map(x=>x.status),['resolved']);
+ assert.equal(r.players[0].hp,970);
+ assert.equal(r.effectStack.length,0);
+});
+test('R01: failing source-zone lookup does not consume the effect',()=>{
+ const r=room();
+ declareEffect(r,{effectId:'zone-check',owner:0,sourceId:'a'});
+ const before=structuredClone(r);
+ assert.throws(()=>resolveEffectStack(r,{
+  getZone:()=>{r.someTransientValue=123;throw new Error('location unavailable');},
+  execute:()=>{}
+ }),/location unavailable/);
+ assert.deepEqual(r,before);
+});
+test('R01: failed result callback restores the step and does not report it completed',()=>{
+ const r=room();
+ declareEffect(r,{effectId:'report',owner:0});
+ const before=structuredClone(r);
+ assert.throws(()=>resolveEffectStack(r,{
+  getZone:()=>null,
+  execute:()=>{r.phase='CHANGED';},
+  onResult:()=>{throw new Error('result callback failed');}
+ }),/result callback failed/);
+ assert.deepEqual(r,before);
+});
+test('R01: a later step fails without rolling back an earlier successful step',()=>{
+ const r=room();r.players=[{hp:1000}];
+ declareEffect(r,{effectId:'bad',owner:0});
+ declareEffect(r,{effectId:'good',owner:0});
+ assert.throws(()=>resolveEffectStack(r,{
+  getZone:()=>null,
+  execute:e=>{
+   if(e.effectId==='good')r.players[0].hp+=50;
+   else{r.players[0].hp-=400;throw Error('bad follow-up');}
+  }
+ }),/bad follow-up/);
+ assert.equal(r.players[0].hp,1050,'earlier successful resolution remains committed');
+ assert.deepEqual(r.effectStack.map(e=>e.effectId),['bad']);
+});
