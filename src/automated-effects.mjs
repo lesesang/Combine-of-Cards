@@ -37,7 +37,7 @@ register('COC-03-007',ctx=>{const n=ctx.r.players[1-ctx.who].grave.length;hit(ct
 register('COC-03-008',ctx=>{const n=ctx.r.players[ctx.who].grave.length;heal(ctx,own(ctx),Array.from({length:n},()=>ctx.H.roll(100)).reduce((a,b)=>a+b,0));});
 register('COC-05-002',ctx=>{charge(ctx,100);if(!ctx.r.players[ctx.who].field.includes(null))ctx.H.fail(409,'몬스터 슬롯이 없습니다.');return {retain:'field',monsterized:true,hp:1,atk:0}});
 register('COC-06-003',ctx=>{const n=Math.max(0,ctx.r.players[ctx.who].roundElementUses||0)+( ['금속','원소'].includes(ctx.c.attribute)?1:0);for(let i=0;i<n;i++){const choices=[...ctx.r.players.flatMap((p,j)=>[{player:j},...p.field.filter(Boolean).map(id=>({player:j,id}))])];hit(ctx,choices[ctx.H.randomInt(choices.length)],50)}});
-register('COC-06-004',ctx=>{const targets=ctx.r.players.flatMap((p,i)=>p.field.filter(Boolean).map(id=>({id,player:i})));if(!targets.length)ctx.H.fail(409,'필드에 몬스터가 없습니다.');if((ctx.r.players[ctx.who].roundElementUses||0)+1>=3){const selected=ctx.body.targets;if(!Array.isArray(selected)||selected.length!==2||new Set(selected).size!==2)ctx.H.fail(409,'파괴할 몬스터 두 장을 각각 선택해야 합니다.');for(const id of selected){if(!targets.some(t=>t.id===id))ctx.H.fail(409,'선택한 몬스터가 필드에 없습니다.')}for(const id of selected)ctx.H.destroy(ctx.r,id)}else{const t=getTarget(ctx,'any');if(!t.id)ctx.H.fail(409,'몬스터 대상이 필요합니다.');hit(ctx,t,100)}});
+register('COC-06-004',ctx=>{const targets=ctx.r.players.flatMap((p,i)=>p.field.filter(Boolean).map(id=>({id,player:i})));if(!targets.length)ctx.H.fail(409,'필드에 몬스터가 없습니다.');if((ctx.r.players[ctx.who].roundElementUses||0)+1>=3){const selected=ctx.body.targets;if(!Array.isArray(selected)||selected.length!==2||new Set(selected).size!==2)ctx.H.fail(409,'파괴할 몬스터 두 장을 각각 선택해야 합니다.');for(const id of selected){if(!targets.some(t=>t.id===id))ctx.H.fail(409,'선택한 몬스터가 필드에 없습니다.')}ctx.H.destroyBatch(ctx.r,selected)}else{const t=getTarget(ctx,'any');if(!t.id)ctx.H.fail(409,'몬스터 대상이 필요합니다.');hit(ctx,t,100)}});
 register('COC-06-007',ctx=>{if((ctx.r.players[ctx.who].roundPlays||0)+1<5)ctx.H.fail(409,'이번 턴 카드 사용이 5회 이상이어야 합니다.');hit(ctx,enemy(ctx),300)});
 register('COC-07-003',ctx=>{ctx.H.draw(ctx.r,1-ctx.who);ctx.H.mill(ctx.r,1-ctx.who,3)});
 register('COC-07-010',ctx=>{ctx.H.draw(ctx.r,1-ctx.who);ctx.H.mill(ctx.r,1-ctx.who,ctx.r.players[1-ctx.who].lastRoundPlays||0)});
@@ -60,10 +60,10 @@ register('COC-30-003',ctx=>{for(let i=0;i<3;i++)hit(ctx,enemy(ctx),ctx.H.roll(50
 register('COC-30-006',ctx=>{const t=enemy(ctx);if(!t.id)ctx.H.fail(409,'대상 몬스터가 없습니다.');ctx.r.units[t.id].diceMax=10});
 register('COC-30-007',ctx=>{ctx.r.players[ctx.who].hp+=300});
 // COC-30-011: prior-two-turn natural spell history is not yet implemented; do not misrepresent as automated.
-register('COC-31-008',ctx=>{if(ctx.H.roll(2)===1)for(const p of ctx.r.players)for(const id of [...p.field].filter(Boolean))ctx.H.destroy(ctx.r,id)});
+
 register('COC-32-005',ctx=>{requireField(ctx,'플레임');hit(ctx,{player:1-ctx.who},ctx.H.roll(200))});
 register('COC-32-006',ctx=>{requireField(ctx,'워터');heal(ctx,{player:ctx.who},100)});
-register('COC-32-008',ctx=>{requireField(ctx,'랜드');for(const id of [...ctx.r.players[1-ctx.who].field].filter(Boolean))ctx.H.destroy(ctx.r,id)});
+register('COC-32-008',ctx=>{requireField(ctx,'랜드');ctx.H.destroyBatch(ctx.r,ctx.r.players[1-ctx.who].field.filter(Boolean))});
 // More precisely scoped automatic spells with explicit prerequisites.
 register('COC-06-002',ctx=>{const count=ctx.r.players[ctx.who].roundElementUses||0;const atk=count*50,hp=50+count*50;ctx.H.summonToken(ctx.r,ctx.who,'인조 생물',atk,hp)});
 register('COC-07-004',ctx=>{ctx.H.draw(ctx.r,1-ctx.who);const a=ctx.H.search(ctx.r,ctx.who,'포식자 알리자');if(!a)ctx.H.search(ctx.r,ctx.who,'포식의 맹약')});
@@ -157,7 +157,7 @@ register('COC-31-006',ctx=>{
 register('COC-31-008',ctx=>{
  if(ctx.H.roll(2)!==1)return;
  const targets=ctx.r.players.flatMap(p=>p.field.filter(Boolean));
- for(const id of targets)if(ctx.H.zone(ctx.r,id)?.zone==='field')ctx.H.destroy(ctx.r,id);
+ ctx.H.destroyBatch(ctx.r,targets);
 });
 // Returns to hand only when *this damage* kills the targeted enemy monster.
 register('COC-30-004',ctx=>{
