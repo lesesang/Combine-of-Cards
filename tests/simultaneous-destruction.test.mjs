@@ -109,7 +109,7 @@ test('R01: one on-field destruction heals through the serializable effect stack'
  I.H.destroy(r,victim);
  assert.ok(r.players[1].grave.includes(victim));
  assert.equal(r.players[0].hp,440);
- assert.equal(r.pendingTriggerOrder,null);
+ assert.equal(r.pendingTriggerOrder??null,null);
  assert.equal(r.effectStack.length,0);
  assert.ok(r.logs.some(e=>e.type==='effect'&&e.text.includes('140 HP 회복')));
 });
