@@ -69,7 +69,7 @@ test('R15: detach one of two attachments without moving host or the other card',
  const sword=create(r,'COC-09-005',0,'hand'),shield=create(r,'COC-09-006',0,'hand');
  I.attachCard(r,sword,host);I.attachCard(r,shield,host);
  const serialized=JSON.parse(JSON.stringify(r));
- assert.equal(I.detachCard(serialized,sword,'grave'),sword);
+ assert.equal(I.detachCard(serialized,sword,'grave',{cause:'card-effect'}),sword);
  assert.equal(serialized.players[0].integration,host);
  assert.deepEqual(serialized.units[host].attachments,[shield]);
  assert.equal(serialized.units[shield].attachmentHostId,host);
@@ -86,7 +86,7 @@ test('R15: detach uses equipment original owner even after opponent captures hos
   const r=room(),host=create(r,'COC-09-002',0,'field'),equipment=create(r,'COC-09-005',1,'hand');
   I.attachCard(r,equipment,host);
   I.move(r,host,'field',1);
-  I.detachCard(r,equipment,destination);
+  I.detachCard(r,equipment,destination,{cause:'host-effect'});
   assert.ok(r.players[1][destination].includes(equipment));
   assert.ok(!r.players[0][destination]?.includes(equipment));
   assert.ok(r.players[1].field.includes(host));
@@ -99,12 +99,24 @@ test('R15: invalid detach does not alter saved attachment state',()=>{
  const equipment=create(r,'COC-09-005',0,'hand');
  I.attachCard(r,equipment,host);
  const snapshot=structuredClone(r);
- assert.throws(()=>I.detachCard(r,equipment,'field'),/장착 해제/);
- assert.throws(()=>I.detachCard(r,host,'grave'),/장착 해제/);
- assert.throws(()=>I.detachCard(r,'forged','grave'),/장착 해제/);
+ assert.throws(()=>I.detachCard(r,equipment,'field',{cause:'card-effect'}),/장착 해제/);
+ assert.throws(()=>I.detachCard(r,host,'grave',{cause:'card-effect'}),/장착 해제/);
+ assert.throws(()=>I.detachCard(r,'forged','grave',{cause:'card-effect'}),/장착 해제/);
  assert.deepEqual(r,snapshot);
- I.detachCard(r,equipment,'hand');
+ I.detachCard(r,equipment,'hand',{cause:'card-effect'});
  const after=structuredClone(r);
- assert.throws(()=>I.detachCard(r,equipment,'grave'),/장착 해제/);
+ assert.throws(()=>I.detachCard(r,equipment,'grave',{cause:'card-effect'}),/장착 해제/);
  assert.deepEqual(r,after);
+});
+
+test('R15 confirmed: no voluntary unequip or generic player action',()=>{
+ const r=room(),host=create(r,'COC-09-002',0,'integration'),equipment=create(r,'COC-09-005',0,'hand');
+ I.attachCard(r,equipment,host);
+ const original=structuredClone(r);
+ assert.throws(()=>I.detachCard(r,equipment,'grave'),/임의로 할 수 없습니다/);
+ assert.throws(()=>I.detachCard(r,equipment,'grave',{cause:'voluntary'}),/임의로 할 수 없습니다/);
+ assert.throws(()=>I.apply(r,0,'detach',{unitId:equipment}),/알 수 없는 행동/);
+ assert.deepEqual(r,original,'no voluntary unequip may mutate physical or effect state');
+ I.detachCard(r,equipment,'grave',{cause:'card-effect'});
+ assert.ok(r.players[0].grave.includes(equipment));
 });

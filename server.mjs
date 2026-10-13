@@ -99,7 +99,11 @@ function attachCard(r,cardId,hostId){
  * explicitly validated card effect; this is not a free player action.
  * The attachment returns to its original owner's requested destination.
  */
-function detachCard(r,cardId,to='grave'){
+function detachCard(r,cardId,to='grave',{cause}={}){
+ // R15 confirmed: unequipping is never a voluntary player action.
+ // A card-specific, server-verified effect must explicitly supply its cause.
+ if(cause!=='card-effect'&&cause!=='host-effect')
+  fail(409,'장착 해제는 임의로 할 수 없습니다. 카드 효과로만 처리합니다.');
  const card=r.units[cardId],hostId=card?.attachmentHostId,host=hostId&&r.units[hostId];
  const hostLocation=hostId&&zoneOwner(r,hostId);
  if(!card||!host||!hostLocation||!['field','integration'].includes(hostLocation.zone)||
