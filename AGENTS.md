@@ -18,10 +18,12 @@ This file is for a new coding assistant taking over the repository after the 202
 - Preserve the user's custom TCG v1.3: **24 premade playable decks**, **254 card records**, no card mixing across premade decks.
 - Never restore the deleted decks: 합체 기계, 코미컬, 럭키, 카지노이드, 비트스타즈, 파트너 몬스터즈, 코브라, 아홉꼬리.
 - The goal is **fully automatic server-authoritative card effects**, AI duels (choose opponent deck/random; easy, medium, hard), PvP, rules conflict diagnostics and production-ready deployment.
-- As of beta.10, the code supports **156 partially**, **97 manually/unsupported**, **1 basic**; 70 spell handlers. **Full automation is not achieved.**
+- As of beta.10, the code supports **157 partially**, **96 manually/unsupported**, **1 basic**; 71 spell handlers. **Full automation is not achieved.**
 - Source v1.3 DOCX and comparison JSON were created in a prior conversation but are **not yet committed** to this public repository. See docs/SOURCE_DATA_PROVENANCE.md.
 
 ## Latest implementation update (2026-10-13)
+
+- **Latest COC-21-002 confirmation (PR #58):** Life-Eating Sword is a spell to grave, not equipment. Every granted instance pays 30 HP / gains +100 ATK at bearer\'s own ATTACK phase start; HP <=30 prevents payment, destroying the unit or losing as targeted player. Monster kills by a bearer grant ×2 for its **next own full turn**, copies stack multiplicatively (×4, ×8, ×16). Voluntary unequipping remains prohibited. Track unimplemented causes separately.
 
 - beta.10: 156 partial / 97 manual / 1 basic; 13 field abilities; Black Metal Fusion Up grave recovery and independent effect limits; Crash Voltage discard/destruction and confirmed dice-result piercing (R28).
 - **R05/R06/R07/R08/R09/R10/R11/R12/R13/R21/R22/R23/R24/R25/R28/R29/R30 were user-approved 2026-10-13**: see docs/RULINGS_CONFIRMED_2026-10-13.md. Never describe these 17 as open. Some confirmed behavior (notably R22 response window and all R05 token paths) remains incompletely implemented.
