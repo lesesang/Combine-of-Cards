@@ -22,6 +22,7 @@ test('Nature consecutive-turn requirement rejects a single previous Nature casti
  const {r,place}=setup();
  const first=place(0,'COC-30-005','hand');
  I.apply(r,0,'play',{unitId:first});
+ I.apply(r,1,'spellResponse',{choice:'pass'});
  assert.deepEqual(r.players[0].natureSpellTurns,[1]);
  r.turnNumber=5;
  const bite=place(0,'COC-30-011','hand');
@@ -34,9 +35,11 @@ test('Nature spells cast on the two prior own turns unlock a 200-damage direct a
  const {r,place}=setup();
  const first=place(0,'COC-30-005','hand');
  I.apply(r,0,'play',{unitId:first});
+ I.apply(r,1,'spellResponse',{choice:'pass'});
  r.turnNumber=3;
  const second=place(0,'COC-30-007','hand');
  I.apply(r,0,'play',{unitId:second,target:{type:'player',player:0}});
+ I.apply(r,1,'spellResponse',{choice:'pass'});
  assert.deepEqual(r.players[0].natureSpellTurns,[1,3]);
  r.turnNumber=5;
  const bite=place(0,'COC-30-011','hand');
