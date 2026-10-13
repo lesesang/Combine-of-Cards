@@ -13,13 +13,14 @@ import {onTokenCreation,onTokenActivity,onDragonAttackPhase,onFafnirDestroyed} f
 import {onCartoonLandDestroyed} from './src/cartoon-land.mjs';
 import {applyGraveAbility,legalGraveAbilities,GRAVE_ABILITY_IDS} from './src/grave-abilities.mjs';
 import {FUSION_UP_ID,markEffectUsed} from './src/effect-usage.mjs';
-import {beginAutomaticTriggerOrder,chooseAutomaticTriggerOrder,resolveEffectStack} from './src/effect-runtime.mjs';
+import {declareEffect,beginAutomaticTriggerOrder,chooseAutomaticTriggerOrder,resolveEffectStack} from './src/effect-runtime.mjs';
 
 const ROOT=path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC=path.join(ROOT,'public');
 const DATA_DIR=process.env.DATA_DIR || path.join(ROOT,'.data');
 const STORAGE=path.join(DATA_DIR,'rooms.json');
 const RULES='1.3-ai-beta.10';
+const REACTIVE_SPELL_IDS=new Set(['COC-07-003','COC-13-007','COC-17-003']);
 const CARD_PATH=path.join(PUBLIC,'data','catalog.json.gz.b64');
 function loadCatalog(){
  if(fs.existsSync(CARD_PATH))return JSON.parse(zlib.gunzipSync(Buffer.from(fs.readFileSync(CARD_PATH,'utf8').trim(),'base64')).toString('utf8'));
@@ -48,7 +49,7 @@ function getRoom(code){const r=rooms[requireStr(code,8).toUpperCase()];if(!r)fai
 function indexFor(r,token){if(typeof token!=='string'||!/^[a-f0-9]{64}$/.test(token))fail(401,'플레이어 인증이 필요합니다.');const h=hash(token);const idx=r.players.findIndex(p=>p.authHash&&crypto.timingSafeEqual(Buffer.from(p.authHash,'hex'),Buffer.from(h,'hex')));if(idx<0)fail(403,'이 방에 접근할 권한이 없습니다.');return idx}
 function requireTurn(r,p){if(r.status!=='active')fail(409,'진행 중인 대전이 아닙니다.');if(r.turn!==p)fail(403,'상대방의 턴입니다.');}
 function log(r,type,text){r.logs.push({id:uid(),at:new Date().toISOString(),turn:r.turnNumber,type,text});if(r.logs.length>500)r.logs.shift()}
-function setOutcome(r){if(r.pendingTriggerOrder)return;const lost=r.players.map(p=>p.hp<=0);if(lost[0]||lost[1]){r.status='finished';r.winner=lost[0]&&lost[1]?'draw':lost[0]?1:0;r.pendingAttack=null;r.pendingManual=null;r.pendingExtraSummon=null;log(r,'result',r.winner==='draw'?'두 플레이어가 동시에 패배하여 무승부입니다.':`${r.players[r.winner].label} 승리`);}}
+function setOutcome(r){if(r.pendingTriggerOrder)return;const lost=r.players.map(p=>p.hp<=0);if(lost[0]||lost[1]){r.status='finished';r.winner=lost[0]&&lost[1]?'draw':lost[0]?1:0;r.pendingAttack=null;r.pendingManual=null;r.pendingExtraSummon=null;r.pendingSpell=null;r.effectStack=[];log(r,'result',r.winner==='draw'?'두 플레이어가 동시에 패배하여 무승부입니다.':`${r.players[r.winner].label} 승리`);}}
 function instantiate(r,cardId,owner){const c=cards.get(cardId);if(!c)fail(400,'존재하지 않는 카드입니다.');const id=uid();r.units[id]={id,cardId,owner,atk:Number.isFinite(+c.atk)?Math.max(0,Math.floor(+c.atk)):0,hp:Number.isFinite(+c.hp)?Math.floor(+c.hp):null,attackTurn:-1,created:false,baseAtk:Number.isFinite(+c.atk)?Math.max(0,Math.floor(+c.atk)):0};return id}
 function createPlayer(r,deckId,label,auth){const d=decks.get(deckId);if(!d)fail(400,'유효하지 않은 덱입니다.');const i=r.players.length;const p={label:requireStr(label??'',24)||`플레이어 ${i+1}`,authHash:hash(auth),deckId,hp:1000,reloads:0,deck:[],hand:[],grave:[],banished:[],extra:[],field:[null,null,null],integration:null,turnsTaken:0,roundPlays:0,lastRoundPlays:0,roundElementUses:0,naturalStreak:0,metalElementUsedGame:0,natureSpellsUsedGame:0,elementSpellPlaysThisTurn:0,spellsThisTurn:0};r.players.push(p);for(const id of d.main)p.deck.push(instantiate(r,id,i));for(const id of d.extra)p.extra.push(instantiate(r,id,i));return p}
 function draw(r,who){const p=r.players[who];if(!p.deck.length){const feedback=100+50*p.reloads;p.reloads++;if(p.grave.length){p.deck.push(...p.grave.splice(0));shuffle(p.deck)}p.hp-=feedback;log(r,'reload',`${p.label}: 리로드 피해 ${feedback}, 덱 ${p.deck.length}장`);setOutcome(r);if(r.status==='finished')return;if(!p.deck.length){log(r,'draw',`${p.label}: 드로우 실패 (덱과 묘지에 카드 없음)`);
@@ -307,6 +308,37 @@ function finishExtraSummon(r,pending){
  setOutcome(r);
  return recipe;
 }
+function queueAutomatedSpell(r,who,id,c,body){
+ if(r.effectStack?.length||r.pendingTriggerOrder||r.pendingSpell)fail(409,'다른 효과 체인이 해결되기 전에는 주문을 발동할 수 없습니다.');
+ // The spell card moves to grave as the usage cost, but the declared effect
+ // survives by the already-approved independent/self-cost exception.
+ move(r,id,'grave',who);
+ declareEffect(r,{effectId:'auto-spell-resolution',owner:who,sourceId:id,
+  exception:'self-cost',payload:{cardId:c.id,body:structuredClone(body)}});
+ r.pendingSpell={who,sourceId:id,cardId:c.id,turnNumber:r.turnNumber,stage:'response'};
+ log(r,'spell',`${r.players[who].label}: ${c.name} 주문 선언 및 대응 대기`);
+}
+function finishAutomatedSpell(r){
+ if(!r.pendingSpell)fail(409,'해결할 주문이 없습니다.');
+ const pending=r.pendingSpell;
+ r.pendingSpell=null;
+ const outcomes=resolveEffectStack(r,{
+  getZone:id=>zoneOwner(r,id),
+  execute:effect=>{
+   if(effect.effectId!=='auto-spell-resolution'||effect.owner!==pending.who||
+      effect.sourceId!==pending.sourceId||effect.payload.cardId!==pending.cardId)
+    throw new Error('unexpected spell effect in response stack');
+   const card=cards.get(effect.payload.cardId);
+   if(!card||!REACTIVE_SPELL_IDS.has(card.id))throw new Error('unregistered queued spell effect');
+   const result=castAutomatedSpell(r,effect.owner,card,effect.payload.body,H);
+   if(result?.retain)throw new Error('queued spell unexpectedly changed its retention zone');
+   log(r,'effect',`${r.players[effect.owner].label}: ${card.name} 주문 효과 해결`);
+  }
+ });
+ if(!outcomes.length)throw new Error('queued spell had no stack entry');
+ setOutcome(r);
+ return outcomes;
+}
 function runManual(r,m){const x=m.payload;const p=r.players;switch(m.kind){
  case 'hp':{if(![0,1].includes(x.player)||!Number.isInteger(x.delta)||Math.abs(x.delta)>1000)fail(400,'체력 변경 범위 오류');p[x.player].hp+=x.delta;setOutcome(r);break}
  case 'unitHp':{if(!r.units[x.unitId]||!zoneOwner(r,x.unitId)||!['field','integration'].includes(zoneOwner(r,x.unitId).zone)||!Number.isInteger(x.delta)||Math.abs(x.delta)>1000)fail(400,'몬스터 변경 오류');damageUnit(r,x.unitId,x.delta);break}
@@ -329,9 +361,10 @@ function publicState(r,viewer){const mapId=id=>id?{...r.units[id],card:cards.get
  count:r.pendingTriggerOrder.effects.length,
  options:r.pendingTriggerOrder.effects.filter(e=>e.owner===viewer&&r.pendingTriggerOrder.awaiting[0]===viewer)
   .map(e=>({key:e.key,title:e.title||e.effectId,priority:e.priority||0}))
- }:null,pendingExtraSummon:r.pendingExtraSummon?{who:r.pendingExtraSummon.who,card:{id:r.units[r.pendingExtraSummon.extraUnitId].cardId,name:unitName(r,r.pendingExtraSummon.extraUnitId)},method:r.pendingExtraSummon.recipe.method,materialCount:r.pendingExtraSummon.recipe.materials.length,stage:'response'}:null,pendingManual:r.pendingManual?{...r.pendingManual}:null,persistentEffects:(r.persistentEffects||[]).map(e=>({kind:e.kind,owner:e.owner,counters:e.counters})),logs:r.logs.slice(-80),you:viewer,players:r.players.map((p,i)=>({index:i,label:p.label,deckId:p.deckId,deckName:decks.get(p.deckId)?.name,hp:p.hp,playerAtkBonus:p.playerAtkBonus||0,reloads:p.reloads,deckCount:p.deck.length,handCount:p.hand.length,grave:p.grave.map(mapId),banishedCount:p.banished.length,extraCount:p.extra.length,field:p.field.map(mapId),integration:mapId(p.integration),hand:i===viewer?p.hand.map(mapId):null,extra:i===viewer?p.extra.map(mapId):null}))}}
+ }:null,pendingSpell:r.pendingSpell?{who:r.pendingSpell.who,card:{id:r.pendingSpell.cardId,name:cards.get(r.pendingSpell.cardId)?.name},stage:'response'}:null,pendingExtraSummon:r.pendingExtraSummon?{who:r.pendingExtraSummon.who,card:{id:r.units[r.pendingExtraSummon.extraUnitId].cardId,name:unitName(r,r.pendingExtraSummon.extraUnitId)},method:r.pendingExtraSummon.recipe.method,materialCount:r.pendingExtraSummon.recipe.materials.length,stage:'response'}:null,pendingManual:r.pendingManual?{...r.pendingManual}:null,persistentEffects:(r.persistentEffects||[]).map(e=>({kind:e.kind,owner:e.owner,counters:e.counters})),logs:r.logs.slice(-80),you:viewer,players:r.players.map((p,i)=>({index:i,label:p.label,deckId:p.deckId,deckName:decks.get(p.deckId)?.name,hp:p.hp,playerAtkBonus:p.playerAtkBonus||0,reloads:p.reloads,deckCount:p.deck.length,handCount:p.hand.length,grave:p.grave.map(mapId),banishedCount:p.banished.length,extraCount:p.extra.length,field:p.field.map(mapId),integration:mapId(p.integration),hand:i===viewer?p.hand.map(mapId):null,extra:i===viewer?p.extra.map(mapId):null}))}}
 function apply(r,who,type,body){const p=r.players[who];let changed=true;
  if(r.pendingExtraSummon&&!['extraResponse','concede'].includes(type))fail(409,'특수 소환 대응 중에는 다른 행동을 할 수 없습니다.');
+ if(r.pendingSpell&&!['spellResponse','concede'].includes(type))fail(409,'주문 대응 창이 닫히기 전에는 다른 행동을 할 수 없습니다.');
  if(r.pendingTriggerOrder&&!['triggerOrder','concede'].includes(type))fail(409,'동시 자동 효과 선언 순서를 정하기 전에는 다른 행동을 할 수 없습니다.');
  switch(type){
  case 'start':{if(r.status!=='lobby'||r.players.length!==2||who!==0)fail(409,'방장만 두 사람이 모인 뒤 시작할 수 있습니다.');r.status='active';r.turn=crypto.randomInt(2);r.turnNumber=1;r.phase='DRAW';for(const pp of r.players)shuffle(pp.deck);
@@ -356,7 +389,8 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
  if((p.spellForbiddenUntil||0)>=p.turnsTaken)fail(409,'상대의 주문 사용 금지 효과가 적용 중입니다.');
  const automated=hasAutoSpell(c.id);
  if(!automated&&r.mode==='ai')fail(409,'이 주문의 특수 효과는 아직 자동 판정을 지원하지 않습니다. 다른 카드를 사용해 주세요.');
- if(automated){const result=castAutomatedSpell(r,who,c,body,H);if(result.retain==='field'){move(r,id,'field',who);if(result.monsterized){r.units[id].atk=result.atk;r.units[id].hp=result.hp;r.units[id].cannotAttack=true}}else if(result.retain!=='hand')move(r,id,'grave',who);
+ if(automated&&REACTIVE_SPELL_IDS.has(c.id)){queueAutomatedSpell(r,who,id,c,body)}
+ else if(automated){const result=castAutomatedSpell(r,who,c,body,H);if(result.retain==='field'){move(r,id,'field',who);if(result.monsterized){r.units[id].atk=result.atk;r.units[id].hp=result.hp;r.units[id].cannotAttack=true}}else if(result.retain!=='hand')move(r,id,'grave',who);
   log(r,'effect',`${p.label}: ${c.name} 자동 효과 처리`);
  }else{move(r,id,'grave',who);log(r,'manual',`${p.label}: ${c.name} 주문 사용 — 상대 승인 기반 수동 판정 필요`)}
  }else fail(409,'이 카드 종류는 직접 사용할 수 없습니다.');
@@ -378,6 +412,13 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
   if(r.pendingTriggerOrder.awaiting[0]!==who)fail(403,'현재 선언 순서를 지정할 플레이어가 아닙니다.');
   try{chooseAutomaticTriggerOrder(r,who,body.orderedKeys)}catch(e){fail(409,e.message)}
   if(!r.pendingTriggerOrder)resolveQueuedDestroyHeals(r);
+  break;
+ }
+ case 'spellResponse':{
+  if(r.status!=='active'||!r.pendingSpell||r.pendingSpell.who===who)fail(403,'상대가 선언한 주문에만 대응할 수 있습니다.');
+  if(body.choice!=='pass')fail(409,'자동화되지 않은 주문 무효화 응답은 사용할 수 없습니다. 대응 없음만 지원합니다.');
+  log(r,'response',`${p.label}: 주문 대응 없음`);
+  finishAutomatedSpell(r);
   break;
  }
  case 'extraResponse':{
@@ -409,7 +450,7 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
  case 'retarget':{requireTurn(r,who);if(r.pendingAttack?.stage!=='retarget'||r.pendingManual)fail(409,'대상 재선택을 할 수 없습니다.');const target=body.target;if(target===null){const blocked=(p.noDirectAttackUntil||0)>0&&p.noDirectAttackUntil>=p.turnsTaken;if(!blocked||r.players[1-who].field.some(Boolean))fail(409,'선택 가능한 공격 대상이 남아 있습니다.');r.pendingAttack=null;log(r,'attack','합법적인 재선택 대상이 없어 공격이 종료되었습니다.');break;}if(!target||!['player','unit'].includes(target.type))fail(400,'대상 오류');if(target.type==='player'&&target.player!==undefined&&target.player!==1-who)fail(409,'상대 플레이어만 재선택할 수 있습니다.');if(target.type==='player'&&(p.noDirectAttackUntil||0)>0&&p.noDirectAttackUntil>=p.turnsTaken)fail(409,'보호막 효과로 직접 공격 대상을 선택할 수 없습니다.');if(target.type==='unit'){const z=zoneOwner(r,target.id);if(!z||z.player===who||z.zone!=='field')fail(409,'재선택 대상 오류')}validateAggro(r,who,target);r.pendingAttack.target=target.type==='player'?{type:'player',player:1-who}:{type:'unit',id:target.id};r.pendingAttack.stage='response';log(r,'attack','공격 대상 재선택');break}
  case 'manual':{if(r.mode==='ai')fail(409,'AI 대전에서는 합의 판정을 사용할 수 없습니다.');if(r.status!=='active'||r.pendingManual)fail(409,'지금은 효과 협의를 요청할 수 없습니다.');if(!['hp','unitHp','unitAtk','move','draw','extra','note'].includes(body.kind))fail(400,'효과 유형 오류');const payload=body.payload;if(!payload||typeof payload!=='object'||Array.isArray(payload))fail(400,'효과 입력 오류');const explanation=requireStr(body.explanation,240);if(explanation.length<3)fail(400,'효과 근거를 구체적으로 적어 주세요.');r.pendingManual={by:who,kind:body.kind,payload,explanation};log(r,'manual',`${p.label}: 수동 판정 제안 — ${explanation}`);break}
  case 'manualDecision':{if(r.mode==='ai')fail(409,'AI 대전에서는 합의 판정을 사용할 수 없습니다.');if(r.status!=='active'||!r.pendingManual||r.pendingManual.by===who)fail(403,'상대의 제안만 승인할 수 있습니다.');const m=r.pendingManual;if(body.approve===true){runManual(r,m);log(r,'manual',`${p.label}: 효과 승인 — ${m.explanation}`)}else{log(r,'manual',`${p.label}: 효과 거절 — ${m.explanation}`)}r.pendingManual=null;break}
- case 'concede':{if(r.status!=='active')fail(409,'진행 중인 대전이 아닙니다.');r.status='finished';r.winner=1-who;r.pendingAttack=null;r.pendingManual=null;r.pendingExtraSummon=null;r.pendingTriggerOrder=null;r.effectStack=[];log(r,'result',`${p.label} 항복`);break}
+ case 'concede':{if(r.status!=='active')fail(409,'진행 중인 대전이 아닙니다.');r.status='finished';r.winner=1-who;r.pendingAttack=null;r.pendingManual=null;r.pendingExtraSummon=null;r.pendingTriggerOrder=null;r.pendingSpell=null;r.effectStack=[];log(r,'result',`${p.label} 항복`);break}
  default:fail(404,'알 수 없는 행동입니다.');
  }
  if(changed){r.version++;r.updatedAt=Date.now();save();}return publicState(r,who)
@@ -518,6 +559,10 @@ function chooseAITarget(r,attacker,{forAttack=false}={}){const level=r.aiDifficu
 function runAI(r){if(r.mode!=='ai'||r.status!=='active')return;
  let steps=0;while(r.status==='active'&&steps++<70){
   if(r.pendingManual)break;
+  if(r.pendingSpell){
+   if(r.pendingSpell.who===0){apply(r,1,'spellResponse',{choice:'pass'});continue;}
+   break;
+  }
   if(r.pendingTriggerOrder){
    if(r.pendingTriggerOrder.awaiting[0]===1){
     const orderedKeys=r.pendingTriggerOrder.effects.filter(e=>e.owner===1).map(e=>e.key);
@@ -630,4 +675,4 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
 }
 
 // Purely programmatic internal test seam. No HTTP route exposes these internals.
-export const gameTestInternals={cards,catalog,createPlayer,instantiate,move,draw,runSummonEffects,runIntegrationOnEnter,processStartOfTurn,processEndOfTurn,attackAvailable,damageUnit,H,performExtraSummon,finishExtraSummon,attachOverlayMaterials,resolveQueuedDestroyHeals,chooseAIExtra,chooseAIFieldAbility,chooseAIGraveAbility,chooseAISpellCost,runAI,maxAttacks,applyFieldAbility,apply,publicState};
+export const gameTestInternals={cards,catalog,createPlayer,instantiate,move,draw,runSummonEffects,runIntegrationOnEnter,processStartOfTurn,processEndOfTurn,attackAvailable,damageUnit,H,performExtraSummon,finishExtraSummon,queueAutomatedSpell,finishAutomatedSpell,attachOverlayMaterials,resolveQueuedDestroyHeals,chooseAIExtra,chooseAIFieldAbility,chooseAIGraveAbility,chooseAISpellCost,runAI,maxAttacks,applyFieldAbility,apply,publicState};
