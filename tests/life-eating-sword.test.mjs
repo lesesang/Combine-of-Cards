@@ -41,6 +41,10 @@ test('confirmed sword: spell grants independent effect and never attaches as equ
  const saved=JSON.parse(JSON.stringify(r));
  saved.turn=1;saved.turnNumber=4;
  I.processStartOfTurn(saved);
+ assert.equal(saved.units[unit].hp,100,'DRAW/turn start does not charge the curse');
+ saved.phase='MAIN';
+ I.apply(saved,1,'phase',{});
+ assert.equal(saved.phase,'ATTACK');
  assert.equal(saved.units[unit].hp,70);
  assert.equal(saved.units[unit].atk,r.units[unit].atk+100);
  assert.ok(saved.players[0].grave.includes(source),'the source spell stays in grave');
@@ -51,6 +55,8 @@ test('confirmed sword: HP 31 can pay, HP 30 and below fail at payment',()=>{
   playAndPass(r,source,{type:'unit',id:unit});
   r.turn=1;r.turnNumber=4;
   I.processStartOfTurn(r);
+  assert.equal(r.units[unit].hp,hp,'before attack phase payment');
+  r.phase='MAIN';I.apply(r,1,'phase',{});
   if(hp>30){
    assert.equal(r.units[unit].hp,1);
    assert.ok(r.players[1].field.includes(unit));
@@ -69,6 +75,8 @@ test('confirmed sword: non-payment for an integrated player is a loss, not destr
   playAndPass(r,source,{type:'player',player:1});
   r.turn=1;r.turnNumber=4;
   I.processStartOfTurn(r);
+  assert.equal(r.players[1].hp,hp,'no charge before ATTACK');
+  r.phase='MAIN';I.apply(r,1,'phase',{});
   if(hp===30){
    assert.equal(r.status,'finished');assert.equal(r.winner,0);
    assert.equal(r.players[1].hp,0);
@@ -97,10 +105,14 @@ test('confirmed sword: monster bearer pays only on own turn, not opponent turn',
  I.processStartOfTurn(r);
  assert.equal(r.units[unit].hp,100);
  r.turn=1;r.turnNumber=4;I.processStartOfTurn(r);
+ assert.equal(r.units[unit].hp,100);
+ r.phase='MAIN';I.apply(r,1,'phase',{});
  assert.equal(r.units[unit].hp,70);
- r.turn=0;r.turnNumber=5;I.processStartOfTurn(r);
+ r.turn=0;r.turnNumber=5;r.phase='MAIN';I.processStartOfTurn(r);
  assert.equal(r.units[unit].hp,70);
- r.turn=1;r.turnNumber=6;I.processStartOfTurn(r);
+ r.turn=1;r.turnNumber=6;r.phase='MAIN';I.processStartOfTurn(r);
+ assert.equal(r.units[unit].hp,70);
+ I.apply(r,1,'phase',{});
  assert.equal(r.units[unit].hp,40);
 });
 test('confirmed sword: original spell stays in grave and effect ceases if target leaves field',()=>{
