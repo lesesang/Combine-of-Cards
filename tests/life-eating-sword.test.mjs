@@ -84,7 +84,7 @@ test('confirmed sword: invalid target is rejected before discarding the spell',(
  const {r,source,unit}=setup();
  for(const target of [undefined,{type:'player',player:1},{type:'unit',id:source},{type:'unit',id:'forged'}]){
   const before=structuredClone(r);
-  assert.throws(()=>I.apply(r,0,'play',{unitId:source,target}),/대상|일체화/);
+  assert.throws(()=>I.apply(r,0,'play',{unitId:source,target}),/대상|일체화|지정/);
   assert.deepEqual(r,before);
  }
  const original=structuredClone(r);
