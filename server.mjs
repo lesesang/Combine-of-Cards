@@ -107,7 +107,7 @@ const H={
 function runSummonEffects(r,who,id,body={}){const u=r.units[id],p=r.players[who];switch(u.cardId){
  case 'COC-03-005':{
   // Confirmed base without Beria: 0 ATK / 1 HP. Beria's current ATK
-  // determines both values at summon; later live-link behavior is unresolved (R30).
+  // determines both values at summon; R30 confirms no later live stat link.
   const beriaId=p.integration;
   const beria=beriaId&&r.units[beriaId]?.cardId==='COC-03-001'?r.units[beriaId]:null;
   const currentAtk=beria?Math.max(0,Math.floor(Number(beria.atk)||0)):0;
