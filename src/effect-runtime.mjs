@@ -132,15 +132,21 @@ export function chooseAutomaticTriggerOrder(room, owner, keys) {
       new Set(keys).size !== keys.length || keys.some(k => !owned.includes(k))) {
     throw new Error('ordering must select every owned trigger exactly once');
   }
-  pending.selected[String(owner)] = [...keys];
-  pending.awaiting.shift();
-  if (pending.awaiting.length) return {pending:true,awaiting:pending.awaiting[0]};
-  const allKeys = [pending.activePlayer,1-pending.activePlayer].flatMap(who =>
-    pending.selected[String(who)] ||
-    pending.effects.filter(e => e.owner === who).map(e => e.key)
+  // Do not mutate the live room until declaration succeeds: malformed
+  // restored state or a full stack must not consume either player's choice.
+  const next = structuredClone(pending);
+  next.selected[String(owner)] = [...keys];
+  next.awaiting.shift();
+  if (next.awaiting.length) {
+    room.pendingTriggerOrder = next;
+    return {pending:true,awaiting:next.awaiting[0]};
+  }
+  const allKeys = [next.activePlayer,1-next.activePlayer].flatMap(who =>
+    next.selected[String(who)] ||
+    next.effects.filter(e => e.owner === who).map(e => e.key)
   );
   // Only clear the pending choice after successfully declaring the stack.
-  declareAutomaticGroup(room,pending.effects,pending.activePlayer,allKeys);
+  declareAutomaticGroup(room,next.effects,next.activePlayer,allKeys);
   room.pendingTriggerOrder = null;
   return {pending:false,awaiting:null};
 }
