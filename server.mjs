@@ -20,7 +20,19 @@ const PUBLIC=path.join(ROOT,'public');
 const DATA_DIR=process.env.DATA_DIR || path.join(ROOT,'.data');
 const STORAGE=path.join(DATA_DIR,'rooms.json');
 const RULES='1.3-ai-beta.10';
-const REACTIVE_SPELL_IDS=new Set(['COC-07-003','COC-13-007','COC-17-003']);
+// Only standalone, target-free handlers with no unresolved activation costs.
+// Do not add a spell with a selection, field-retention, or resolution-time
+// precondition without a declaration-time legality audit.
+const REACTIVE_SPELL_IDS=new Set([
+ 'COC-07-003','COC-13-007','COC-17-003', // already audited response spells
+ 'COC-07-010', // opponent draw, then mill based on previous-turn use
+ 'COC-08-007', // own recovery based on current field Yokai
+ 'COC-10-009', // register one-shot independent first-destroy heal
+ 'COC-19-004', // search one monster from own deck (if present)
+ 'COC-20-005', // one shared dice roll damages both players
+ 'COC-30-005', // spell bonus and next-turn draw registration
+ 'COC-30-007'  // own recovery
+]);
 const CARD_PATH=path.join(PUBLIC,'data','catalog.json.gz.b64');
 function loadCatalog(){
  if(fs.existsSync(CARD_PATH))return JSON.parse(zlib.gunzipSync(Buffer.from(fs.readFileSync(CARD_PATH,'utf8').trim(),'base64')).toString('utf8'));
