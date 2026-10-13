@@ -395,12 +395,20 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
  if(c.id==='COC-05-008')fail(409,'카툰 월드 가이드는 카툰 랜드 파괴 시 덱에서 자동 발동합니다.');
  if(c.id==='COC-11-007')fail(409,'파프니르는 토큰 사용·생성 시 자동으로만 소환할 수 있습니다.');
  if(c.id==='COC-11-008'||c.id==='COC-11-009')fail(409,'이 생성 주문은 자동 발동 조건으로만 사용할 수 있습니다.');
+ // R20: use prohibitions and unsupported AI actions are legality checks, not
+ // effects: reject before any paid discard, sacrifice, or token event.
+ if(c.type==='주문'&&(p.spellForbiddenUntil||0)>0&&p.spellForbiddenUntil>=p.turnsTaken)
+  fail(409,'상대의 주문 사용 금지 효과가 적용 중입니다.');
+ if(c.type==='주문'&&r.mode==='ai'&&!hasAutoSpell(c.id))
+  fail(409,'이 주문의 특수 효과는 아직 자동 판정을 지원하지 않습니다. 다른 카드를 사용해 주세요.');
+ if(c.type==='일체화'&&p.integration)fail(409,'이미 일체화했습니다.');
  const activation=planActivation({room:r,who,unitId:id,cards,body});
+ if(c.type==='몬스터'&&!p.field.includes(null)&&
+    !activation.costs.some(cost=>p.field.includes(cost.unitId)))
+  fail(409,'필드 세 칸이 모두 차 있습니다.');
  commitActivationCosts(r,activation,{move:(room,id,to,owner)=>move(room,id,to,owner,{tokenAction:to==='grave'?'릴리스':to==='banished'?'사용':undefined}),destroy:(room,id)=>H.destroy(room,id,{cause:'cost'})});
- if(c.type==='몬스터'){move(r,id,'field',who);runSummonEffects(r,who,id,body)}else if(c.type==='일체화'){if(p.integration)fail(409,'이미 일체화했습니다.');move(r,id,'integration',who);runIntegrationOnEnter(r,who,id)}else if(c.type==='주문'){
- if((p.spellForbiddenUntil||0)>=p.turnsTaken)fail(409,'상대의 주문 사용 금지 효과가 적용 중입니다.');
+ if(c.type==='몬스터'){move(r,id,'field',who);runSummonEffects(r,who,id,body)}else if(c.type==='일체화'){move(r,id,'integration',who);runIntegrationOnEnter(r,who,id)}else if(c.type==='주문'){
  const automated=hasAutoSpell(c.id);
- if(!automated&&r.mode==='ai')fail(409,'이 주문의 특수 효과는 아직 자동 판정을 지원하지 않습니다. 다른 카드를 사용해 주세요.');
  if(automated&&REACTIVE_SPELL_IDS.has(c.id)){queueAutomatedSpell(r,who,id,c,body)}
  else if(automated){const result=castAutomatedSpell(r,who,c,body,H);if(result.retain==='field'){move(r,id,'field',who);if(result.monsterized){r.units[id].atk=result.atk;r.units[id].hp=result.hp;r.units[id].cannotAttack=true}}else if(result.retain!=='hand')move(r,id,'grave',who);
   log(r,'effect',`${p.label}: ${c.name} 자동 효과 처리`);
