@@ -85,6 +85,18 @@ const H={
   u.revivedOnce=true;move(r,id,'field',z.player);log(r,'revive',`${name}: 파괴 후 효과 없이 1회 부활`)
  }
  }} ,
+ destroyBatch:(r,ids)=>{
+  // Snapshot all destruction targets before resolving destruction-triggered effects.
+  const chosen=[...new Set(ids)].filter(id=>r.units[id]&&zoneOwner(r,id)?.zone==='field');
+  if(!chosen.length)return;
+  const firstDestroy=(r.effects||[]).filter(e=>e.type==='firstDestroyHeal'&&e.turn===r.turnNumber);
+  if(firstDestroy.length){
+   const highest=Math.max(...chosen.map(id=>Math.max(0,Number(r.units[id].hp)||0)));
+   for(const e of firstDestroy){r.players[e.player].hp+=highest;r.effects.splice(r.effects.indexOf(e),1);}
+  }
+  for(const id of chosen)if(zoneOwner(r,id)?.zone==='field')H.destroy(r,id);
+  setOutcome(r);
+ },
  name:(r,id)=>cards.get(r.units[id]?.cardId)?.name||'',attribute:(r,id)=>cards.get(r.units[id]?.cardId)?.attribute||'',
  originalOwner:(r,id)=>r.units[id].owner,type:(r,id)=>cards.get(r.units[id].cardId)?.type,capture:(r,who,id)=>move(r,id,'field',who),cardNamed:(r,who,name)=>catalog.cards.find(c=>c.deckId===r.players[who].deckId&&c.name.replace(/\s+/g,'').includes(name.replace(/\s+/g,''))),evolve
 };
@@ -119,9 +131,9 @@ function runSummonEffects(r,who,id,body={}){const u=r.units[id],p=r.players[who]
   log(r,'mill',`${p.label}: 스톰 팬니르 소환 비용으로 덱의 무작위 카드 1장을 묘지로 보냈습니다.`);
   summonToken(r,who,'스톰 토큰',0,50);break;
  }
- case 'COC-19-006':{const snapshots=r.players.flatMap((pp,controller)=>pp.field.filter(Boolean).map(mid=>({mid,controller})));for(const {mid} of snapshots)H.destroy(r,mid);for(const {mid,controller} of snapshots){if(r.units[mid]&&zoneOwner(r,mid)?.zone==='grave'&&r.players[controller].field.includes(null)){move(r,mid,'field',controller);r.units[mid].cannotAttackUntil=r.turnNumber;}}break}
+ case 'COC-19-006':{const snapshots=r.players.flatMap((pp,controller)=>pp.field.filter(Boolean).map(mid=>({mid,controller})));H.destroyBatch(r,snapshots.map(x=>x.mid));for(const {mid,controller} of snapshots){if(r.units[mid]&&zoneOwner(r,mid)?.zone==='grave'&&r.players[controller].field.includes(null)){move(r,mid,'field',controller);r.units[mid].cannotAttackUntil=r.turnNumber;}}break}
  case 'COC-27-003':{let n=0;for(let k=0;k<2;k++){if(!p.deck.length)break;const mid=p.deck.shift();const mc=cards.get(r.units[mid].cardId);p.grave.push(mid);n++;if(k===0&&mc.type!=='몬스터')break}u.atk+=50*n;u.hp=(u.hp??0)+50*n;log(r,'mill',`${p.label}: 분쇄차 티라노 소재 ${n}장 묘지 이동`);break}
- case 'COC-27-004':for(const pp of r.players)for(const mid of [...pp.field].filter(mid=>mid&&mid!==id))H.destroy(r,mid);break;
+ case 'COC-27-004':H.destroyBatch(r,r.players.flatMap(pp=>pp.field.filter(mid=>mid&&mid!==id)));break;
  case 'COC-31-001':draw(r,die(2)===1?who:1-who);break;
  case 'COC-31-002':{const enemyMonsters=r.players[1-who].field.filter(Boolean),mid=body.target?.id,z=mid&&zoneOwner(r,mid);if(enemyMonsters.length&&(!z||z.player!==1-who||z.zone!=='field'))fail(409,'동전 판정 전에 상대 필드 몬스터를 지정해 주세요.');let h=0;for(let k=0;k<3;k++)if(die(2)===1)h++;if(h===2&&enemyMonsters.length){r.units[mid].atk=Math.max(0,r.units[mid].atk-100);if(r.units[mid].atk===0)H.destroy(r,mid)}break}
  case 'COC-31-003':{let h=0;for(let k=0;k<5;k++)if(die(2)===1)h++;r.players[1-who].hp-=h*100;setOutcome(r);break}
