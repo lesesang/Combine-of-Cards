@@ -84,7 +84,15 @@ register('COC-24-006',ctx=>{const id=ctx.r.players[ctx.who].integration;if(!id)c
 register('COC-24-008 COC-26-008',ctx=>{const p=ctx.r.players[ctx.who];if(p.field.filter(id=>id&&ctx.H.name(ctx.r,id).includes('매치')).length>1)ctx.H.fail(409,'필드의 매치는 최대 1장이어야 합니다.');const id=p.deck.find(id=>ctx.H.type(ctx.r,id)==='몬스터');if(id)ctx.H.move(ctx.r,id,'hand',ctx.who)});
 register('COC-31-005',ctx=>{ctx.H.draw(ctx.r,ctx.who);if(ctx.H.roll(2)===1){const p=ctx.r.players[1-ctx.who];if(p.hand.length)ctx.H.move(ctx.r,p.hand[ctx.H.randomInt(p.hand.length)],'grave',1-ctx.who)}});
 register('COC-31-007',ctx=>{charge(ctx,100);const t=enemy(ctx);if(!t.id)ctx.H.fail(409,'탈취할 몬스터가 없습니다.');ctx.H.capture(ctx.r,ctx.who,t.id)});
-register('COC-31-009',ctx=>{const p=ctx.r.players[ctx.who];if(!p.hand.length)ctx.H.fail(409,'버릴 패 한 장이 필요합니다.');const selected=ctx.body.costCardId&&p.hand.includes(ctx.body.costCardId)?ctx.body.costCardId:p.hand[0];ctx.H.move(ctx.r,selected,'grave',ctx.who);for(const id of ctx.r.players[1-ctx.who].field.filter(Boolean))ctx.r.units[id].effectsNegated=true});
+register('COC-31-009',ctx=>{
+ const p=ctx.r.players[ctx.who],selected=ctx.body.costCardId;
+ // The spell being activated is not an eligible discard cost, and a choice is mandatory.
+ if(typeof selected!=='string'||selected===ctx.body.unitId||!p.hand.includes(selected))
+  ctx.H.fail(409,'효과 비용으로 버릴 다른 자신의 손패 1장을 선택해야 합니다.');
+ ctx.H.move(ctx.r,selected,'grave',ctx.r.units[selected].owner);
+ for(const id of ctx.r.players[1-ctx.who].field.filter(Boolean))
+  ctx.r.units[id].effectsNegated=true;
+});
 register('COC-32-007',ctx=>{requireField(ctx,'윈드');ctx.r.players[1-ctx.who].spellForbiddenUntil=(ctx.r.players[1-ctx.who].turnsTaken||0)+1});
 register('COC-30-005',ctx=>{ctx.r.players[ctx.who].spellDiceBonus=(ctx.r.players[ctx.who].spellDiceBonus||0)+50;ctx.r.players[ctx.who].bonusDrawOnTurn=(ctx.r.players[ctx.who].turnsTaken||0)+1});
 // Mixed heads/tails resolve together; each of five coin flips contributes to exactly one count.
