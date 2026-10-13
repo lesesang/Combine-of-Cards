@@ -30,12 +30,14 @@ export function declareEffect(room, effect) {
       (!Number.isInteger(effect.priority) || Math.abs(effect.priority) > 1000)) {
     throw new TypeError('invalid priority');
   }
-  room.effectStack ??= [];
-  if (room.effectStack.length >= 256) throw new Error('effect stack exceeds safe limit');
-  room.effectSequence = (room.effectSequence || 0) + 1;
-  if (!Number.isSafeInteger(room.effectSequence)) throw new Error('effect sequence overflow');
+  const stack = room.effectStack || [];
+  if (stack.length >= 256) throw new Error('effect stack exceeds safe limit');
+  const nextSequence = (room.effectSequence || 0) + 1;
+  if (!Number.isSafeInteger(nextSequence)) throw new Error('effect sequence overflow');
+  // Prepare the entire payload before changing sequence or stack. Invalid
+  // serialized data must not consume an effect declaration.
   const entry = {
-    sequence: room.effectSequence,
+    sequence: nextSequence,
     key: effect.key ?? null,
     effectId: effect.effectId,
     owner: effect.owner,
@@ -46,7 +48,9 @@ export function declareEffect(room, effect) {
     payload: structuredClone(effect.payload ?? {}),
     declaredAtTurn: room.turnNumber || 0
   };
-  room.effectStack.push(entry);
+  room.effectStack = stack;
+  stack.push(entry);
+  room.effectSequence = nextSequence;
   return entry;
 }
 
