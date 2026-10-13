@@ -261,3 +261,21 @@ test('R02: final trigger choice remains pending after partial-capacity failure',
  assert.equal(r.effectStack.length,256);
  assert.deepEqual(r.effectStack.slice(-2).map(e=>e.effectId),['B','A']);
 });
+
+test('R26: failed individual declaration does not consume sequence or create stack',()=>{
+ const r=room();r.effectSequence=17;delete r.effectStack;
+ const before=structuredClone(r);
+ assert.throws(()=>declareEffect(r,{owner:0,effectId:'bad-payload',
+  payload:{notSerializable:()=>1}}));
+ assert.deepEqual(r,before,'structured-clone rejection must not mutate game state');
+ const entry=declareEffect(r,{owner:0,effectId:'after'});
+ assert.equal(entry.sequence,18);
+ assert.equal(r.effectSequence,18);
+ assert.equal(r.effectStack.length,1);
+});
+test('R26: sequence overflow rejects without consuming the current maximum',()=>{
+ const r=room();r.effectSequence=Number.MAX_SAFE_INTEGER;
+ const before=structuredClone(r);
+ assert.throws(()=>declareEffect(r,{owner:0,effectId:'overflow'}),/sequence overflow/);
+ assert.deepEqual(r,before);
+});
