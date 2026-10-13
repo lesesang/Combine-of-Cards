@@ -202,3 +202,16 @@ test('R26: invalid cycle fingerprint is rejected instead of weakening protection
  assert.throws(()=>resolveEffectStack(r,{getZone:()=>null,execute:()=>{},fingerprint:()=>42}),/bounded string/);
  assert.equal(r.effectStack.length,1);
 });
+
+test('R02: a failed final declaration preserves the awaiting choice',()=>{
+ const r=room();
+ const fx=[{key:'a',owner:0,effectId:'A'},{key:'b',owner:0,effectId:'B'}];
+ beginAutomaticTriggerOrder(r,fx,0);
+ const before=structuredClone(r.pendingTriggerOrder);
+ r.effectStack=Array.from({length:256},(_,i)=>({sequence:i+1,effectId:'occupied'}));
+ assert.throws(()=>chooseAutomaticTriggerOrder(r,0,['b','a']),/safe limit/);
+ assert.deepEqual(r.pendingTriggerOrder,before,'the player may retry after stack capacity is available');
+ r.effectStack=[];
+ assert.equal(chooseAutomaticTriggerOrder(r,0,['b','a']).pending,false);
+ assert.deepEqual(r.effectStack.map(e=>e.effectId),['B','A']);
+});
