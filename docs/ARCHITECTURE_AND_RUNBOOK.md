@@ -1,0 +1,117 @@
+# 기술 구조, 개발 실행, 테스트·운영 및 보안 인수인계
+
+**현재:** Node.js 단일 서버 + 브라우저 정적 파일 + 서버 내부 게임 상태. **정식 운영 인프라/DB/공개 URL은 아직 없음.** 이 문서를 읽으면 새 채팅의 개발자가 직접 실행·검증하고 배포 전 조건을 알 수 있어야 한다.
+
+## 1. 개발 환경과 실행
+
+- 저장소: https://github.com/lesesang/Combine-of-Cards
+- 브랜치: **main** (기능별 새 브랜치에서 작업, CI 성공 후 PR 병합).
+- Node.js **20 이상**, GitHub Actions에서는 Node 22. 외부 npm 런타임 패키지 없이 node 표준 라이브러리 기반.
+- 기본 서버 주소: http://localhost:3000, PORT 환경 변수로 변경.
+- 데이터 위치: 기본 **.data/rooms.json**, DATA_DIR 환경 변수로 변경.
+- 룰/엔진 식별 문자열: server.mjs 안의 **1.3-ai-beta.9**. 카드/룰북 정본은 v1.3.
+- 테스트/빌드/운영 명령:
+
+~~~bash
+git clone https://github.com/lesesang/Combine-of-Cards.git
+cd Combine-of-Cards
+npm start
+# 별도 터미널:
+npm test
+npm run check:data
+npm run test:matrix
+npm run check:coverage
+~~~
+
+Windows PowerShell에서도 동일하게 npm 명령 사용. npm run check:coverage 실행 후에는 Git diff를 확인할 것.
+
+## 2. 주요 파일과 역할
+
+| 경로 | 책임 및 주의사항 |
+|---|---|
+| **server.mjs** | HTTP/API, 룸 비밀 토큰·인증, 룸 저장·복원, 턴/페이즈/다이스/드로우/리로드/승패, AI 행동 루프, 카드별 소환·전투 예외, 지속 효과 훅 |
+| **src/activation-rules.mjs** | 카드 발동 전 조건과 비용 검사. 80종 기준이나 전 카드 검증 완료가 아님 |
+| **src/automated-effects.mjs** | 카드 ID 기반 주문 효과 실행 핸들러 70종(효과 전체 완료 아님) |
+| **src/field-abilities.mjs** | 메인 페이즈 일부 카드의 필드 발동 12종·AI 행동 |
+| **src/extra-summons.mjs** | 엑스트라 21개 지정 소재, 소환 수단, 필드 공간 검사 및 AI 소환 선택 |
+| **src/effect-runtime.mjs** | JSON 저장 가능한 LIFO 효과 선언/해결, 소스 이탈 예외, 독립 지속 효과와 종료 트리거의 공통 기반 |
+| **src/dragon-gold.mjs** | 파프니르/라인의 황금/니벨룽겐의 반지 부분 실연동 |
+| **src/cartoon-land.mjs** | 카툰 랜드 파괴 → 데몬즈 드래곤 → 월드 가이드 복구 연쇄 |
+| **src/automation-status.mjs** | 카드 지원 상태 분류(현재 partial/manual/basic, full 인증 없음) |
+| **public/index.html, style.css, app.js** | 한국어 웹 UI, 덱·카드 도감, AI/PvP 방·대전 컨트롤, 지속 효과 카운터 표시 |
+| **public/data/catalog.json.gz.b64** | 배포와 테스트에 포함된 v1.3 도감 JSON을 gzip+base64로 저장 |
+| **scripts/build-data.mjs** | 별도 제공되는 원본 v1.3 카드 JSON으로 도감 생성. **원본 파일은 아직 현 repo에 없음** |
+| **scripts/verify-data.mjs** | 덱 수·카드 수·덱 구성·삭제 덱 검증 |
+| **scripts/audit-coverage.mjs** | 실제 코드 기반 카드 지원 상태 보고서/JSON 생성. **아래 주의사항 참조** |
+| **scripts/ai-matrix-smoke.mjs** | AI 상 난이도에 각 덱을 배정해 API 진행 확인. **실제 모든 행동/효과의 정답 검증 아님** |
+| **tests/*.test.mjs** | 모듈 단위·서버 통합/보안·판정 회귀 테스트 |
+| **.github/workflows/ci.yml, test.yml** | 문법/데이터/테스트/AI 스모크 검증 |
+| **Dockerfile, .dockerignore** | 단일 프로세스 실험용 컨테이너 설정. 영속 볼륨·HTTPS/DB 추가 필요 |
+
+## 3. 현재 HTTP API 모양 (server.mjs에서 최종 확인)
+
+| 방식 | 엔드포인트 | 설명 |
+|---|---|---|
+| GET | /api/health | 서버 상태, 베타 버전 |
+| GET | /api/catalog | 24덱/254카드, 카드별 자동화 상태 |
+| POST | /api/ai | 본인 deckId, 상대 aiDeckId 또는 random, difficulty: easy/medium/hard, 본인 label로 AI 방 생성 |
+| POST | /api/rooms | 2인 방 생성 |
+| POST | /api/rooms/:CODE/join | 생성된 2인 방 참가 |
+| GET | /api/rooms/:CODE | 방 비밀 토큰으로 본인용 게임 상태 조회 |
+| POST | /api/rooms/:CODE/actions | 버전 검사(expectedVersion), 플레이어 토큰 인증 후 게임 행동 실행 |
+| GET | /api/rooms/:CODE/hand-preview | 특정 '카드 뺏기' 발동 가능 상태에서만 상대 패 임시 공개 API |
+
+- 방 생성/AI 시작 응답에는 **방 코드와 플레이어 비밀 토큰**이 포함됨. 그 뒤 접근에 Authorization: Bearer 토큰을 사용한다.
+- 서버에는 인증 토큰 자체가 아닌 SHA-256 해시를 저장한다. 브라우저 토큰 보관은 현재 **localStorage**, 공유 장치와 XSS/토큰 복구 정책에 주의.
+- 게임 행동은 **expectedVersion**을 검사하므로 다른 액션 후에는 새 상태를 가져와 재시도해야 한다.
+- 서버가 공개하는 publicState에서 다른 플레이어의 **손패는 null**. 숨겨진 덱 순서·비밀 토큰을 공개하지 않는 것이 목표.
+- 상대 패를 보는 합법적 특정 효과는 조건부 API가 있으나, 공개·선택·효과 해결·사용 후 정보 보관 문제에 대해 더 엄격한 권한 검증이 필요.
+- 일부 효과/공격에서 클라이언트가 직접 계산한 피해 값을 그대로 적용하지 않는다. 게임 서버가 직접 다이스를 굴린다.
+
+## 4. 데이터 저장과 배포 제한
+
+현재 서버 시작 시 DATA_DIR 아래 rooms.json 파일을 읽으며, 룸 상태를 저장할 때 임시 파일 작성 후 rename으로 교체한다. 코드가 파일 손상을 발견하면 덮어쓰지 않고 실패하도록 한다. 이는 **단일 Node 프로세스**를 전제로 한 개발 저장 방식이다.
+
+- **여러 서버 인스턴스에서 동일한 파일을 공유하지 않는다.** 분산 락/DB 충돌 제어가 없다.
+- 컨테이너/서버 재배포에서 파일이 삭제되지 않도록 DATA_DIR을 영속 볼륨에 연결해야 한다.
+- Dockerfile의 존재 = 정식 배포 완료가 아니다. 현재 공개 URL, 운영 DB, 도메인/HTTPS 인증서를 배포했다고 주장하지 말 것.
+- 정식 운영 시 적절한 DB에 room 및 이벤트 로그, 고정 룰 버전, 유저 세션, 재접속·권한·보존·백업 메타를 저장하고 DB 트랜잭션·낙관적 잠금을 확보할 것.
+- GitHub Pages/Cloudflare Pages 등 정적 사이트만으로는 **Node 서버 게임 API가 작동하지 않는다**. 지원되는 서버 호스팅(컨테이너/VM) 또는 API 런타임 이식이 필요.
+
+## 5. 테스트 신뢰도와 주의할 사항
+
+| 명령 | 실제 검증 | 검증하지 못하는 것 |
+|---|---|---|
+| npm test | tests/*의 구체적인 카드/서버/보안/판정 회귀 시나리오 | 임의의 254카드 전 효과·카드 간 모든 조합 |
+| npm run check:data | 24덱 254카드, 삭제 덱 및 기본 구조·장수 | 텍스트 원본과의 의미상 동일성, 각 효과 코드 완전성 |
+| npm run test:matrix | 24개 상대 AI 덱의 API 진행 스모크 검사 | 24×24 덱 실제 대전 완주·특수 효과 정답성 |
+| npm run check:coverage | 자동 효과 등록과 카드 상태 보고서 생성 | 효과별 세부 구현·룰 정확도·카드 완전 지원 인증 |
+| GitHub CI | Node 22 환경에서 위 검사 수행 | 운영 보안 부하 시험, 재접속 장기 테스트, 원본 DOCX 대조 |
+
+**중요: npm run check:coverage를 실행하면** scripts/audit-coverage.mjs이 **docs/AUTOMATION_COVERAGE.md를 재작성**한다. 지금 문서에 사람이 덧붙인 설명/확정 재정이 출력에서 사라질 수 있다. 생성 보고서와 수동 판정/설명을 별도 파일로 분리하거나 생성 코드를 확장하는 작업을 로드맵 P0으로 지정했다. 테스트를 통과했다고 덮어써진 보고서를 무심코 commit하지 말 것.
+
+## 6. 공개 전 보안 체크리스트
+
+- [ ] **사용자 계정/방 접근 정책**: 인증 토큰 수명, 재접속/토큰 분실 처리, 강제 퇴장, 세션 취소·게임 종료·방 정리
+- [ ] **비밀정보 차단**: 상대 손패, 덱 순서, 무작위 seed, 인증 토큰, 카드가 허용하지 않은 패 공개. 사람·AI가 서버 내부 숨겨진 정보를 전략/화면에 사용하지 않음
+- [ ] **행동 입력 검사**: phase, who, target, card instance UID, cost, active zone, material, 횟수, expectedVersion, 중복 사용/재전송
+- [ ] **일괄 실행 무결성**: 비용 차감 후 오류로 중간 손실이 없어야 하고, 난수와 상태 로그가 재현 가능한 단일 액션이어야 함
+- [ ] **부하 및 무한 반복 제한**: 무제한 응답/중첩/AI 상태 계산이 다른 룸을 마비시키지 않으며 안전한 중단 이유 표시
+- [ ] **HTTPS / CSP / CORS / CSRF / 쿠키 정책**: 현재 CSP·path validation·요청 크기 한도는 초기 방어만 제공. 운영 환경에서 전체 검토
+- [ ] **네트워크와 프록시**: 현재 rate-limit은 메모리와 req.socket.remoteAddress 기반. 다중 서버/프록시 환경에서 신뢰된 IP 전달과 중앙 rate-limit 필요
+- [ ] **정적 파일/DB**: 프로젝트 루트 및 .data, 원본 카드 비공개 파일/토큰이 웹 루트로 노출되지 않게 확인
+- [ ] **의존성·배포 비밀**: 비밀번호/토큰/운영 키를 GitHub 커밋에 넣지 않으며 GitHub Actions/호스팅 비밀 관리 사용
+- [ ] **복구**: 저장 파일 손상/서버 재시작/중단된 체인·턴/동시 접속/여러 인스턴스의 일관성 테스트
+- [ ] **권리·개인정보**: 원작 카드 텍스트 및 이미지 사용 권리, 회원 정보·로그 보유/삭제 정책 확인
+
+## 7. 다음 채팅 개발 시 작업 품질 규칙
+
+1. **현재 main 코드 및 테스트**를 먼저 읽고 서류만 믿지 않음.
+2. 카드 v1.3 원문과 공식 확정 재정을 명세로 쓰되 미확정은 별도 등록.
+3. 카드별 '일부'와 '전부' 구현을 구별; 관련 테스트 없이는 완전 지원 표기 금지.
+4. 새 기능의 조건·비용·대상·소스 이동/무효화·동시 피해·영역 이동 및 AI 선택권 테스트.
+5. 기존 테스트 실패를 덮거나 안전성 검사를 제거하지 않음. 실패 로그를 원인별 수정.
+6. GitHub Actions 성공을 **확인한 후** PR 병합. main에서 파일·자동화 현황이 올바른지 검증.
+7. 변경 시 docs/IMPLEMENTATION_HISTORY.md, docs/OPEN_RULINGS_REGISTER.md, docs/AUTOMATION_COVERAGE.md를 함께 갱신.
+
+**같이 읽기:** docs/START_HERE_NEW_CHAT.md / docs/ROADMAP_AND_ACCEPTANCE.md / docs/OPEN_RULINGS_REGISTER.md / README.md.
