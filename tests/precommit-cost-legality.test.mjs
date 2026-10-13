@@ -27,7 +27,9 @@ function room(deck='14',mode='pvp'){
 test('R20: a forbidden spell cannot consume a valid field-sacrifice cost',()=>{
  const {r,take}=room('21');
  const spell=take(0,'COC-21-004','hand');
- const sacrifice=take(0,'COC-21-009','field');
+ const sacrifice=r.players[0].deck.find(uid=>I.cards.get(r.units[uid].cardId)?.type==='몬스터');
+ assert.ok(sacrifice,'the sacrifice must be a real deck monster');
+ I.move(r,sacrifice,'field',0);
  const victim=take(1,'COC-03-002','field');
  r.units[sacrifice].atk=160;r.units[sacrifice].hp=120;
  r.players[0].spellForbiddenUntil=r.players[0].turnsTaken;
@@ -38,9 +40,8 @@ test('R20: a forbidden spell cannot consume a valid field-sacrifice cost',()=>{
 });
 
 test('R20: unsupported AI spell is rejected before its usage or planned action',()=>{
- const {r,take}=room('32','ai');
- const spell=take(0,'COC-32-010','hand');
- r.players[0].spellsThisTurn=1;
+ const {r,take}=room('01','ai');
+ const spell=take(0,'COC-01-007','hand');
  const before=structuredClone(r);
  assert.throws(()=>I.apply(r,0,'play',{unitId:spell}),/자동 판정을 지원하지 않습니다/);
  assert.deepEqual(r,before);
