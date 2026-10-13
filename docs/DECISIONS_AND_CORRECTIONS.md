@@ -95,8 +95,9 @@
 
 ## 5. 정식으로 확정하지 않은 것
 
-- 원문이 애매한 **강화 대상 수**, 자연속성 '지난 2턴' 해석, 양쪽 라인의 황금이 있을 때 토큰 1개 계산, 카툰 룩스 에터나의 반환 셔플 여부 등은 **아직 공식 결정되지 않았다**.
+- **옛 초기 기록 중 '자연속성 지난 2턴', '버닝 소울 강화 대상 수', '양쪽 황금 토큰 계산', '카툰 룩스 에터나 덱 반환'은 현재 미확정이 아니다.** 각각 R09·R10·R06·R24/R11로 **2026-10-13 공식 확정됨**. 과거 문구를 기반으로 같은 질문을 다시 하지 않는다.
 - 코드에 임시 동작이 존재하더라도 '사용자가 확정했다'고 기록하면 안 된다. docs/OPEN_RULINGS_REGISTER.md에 각 사실·임시 코드·추천안을 기재.
+- 현재 정말 확인되지 않은 **구체적인 다른 카드 조항**만 확인 대상으로 삼고, 13개 잔여 R 번호는 '미확정 질문 13개'가 아니라 대체로 구현·검증 트랙임을 구분한다. [Codex 최신 참조](CODEX_RULES_REFERENCE.md).
 - 현재 룰북/엔진은 전체 카드 자동 판정이 아직 되지 않은 **베타**이며, 이것이 정본 규칙의 변경을 뜻하지 않는다.
 
 **관련 코드·문서:** docs/GANDRAE_RULING.md, docs/CARTOON_CHAIN_RULING.md, docs/SIMULTANEOUS_DESTRUCTION.md, docs/BURNING_NATURE_RULINGS.md, docs/ACTIVATION_VALIDATION.md, docs/EFFECT_STACK_AND_PERSISTENCE.md.
