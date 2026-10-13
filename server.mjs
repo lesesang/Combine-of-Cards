@@ -533,7 +533,7 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
  if(c.type==='주문'&&r.mode==='ai'&&!hasAutoSpell(c.id))
   fail(409,'이 주문의 특수 효과는 아직 자동 판정을 지원하지 않습니다. 다른 카드를 사용해 주세요.');
  if(c.type==='일체화'&&p.integration)fail(409,'이미 일체화했습니다.');
- if(c.id==='COC-21-002')validateLifeEatingSwordTarget(r,body,H);
+ if(c.id==='COC-21-002')validateLifeEatingSwordTarget(r,body,H,who);
  const activation=planActivation({room:r,who,unitId:id,cards,body});
  if(c.type==='몬스터'&&!p.field.includes(null)&&
     !activation.costs.some(cost=>p.field.includes(cost.unitId)))
@@ -694,7 +694,7 @@ function chooseAISpellCost(r,who,sourceUnitId){
  )[0]||null;
 }
 function chooseAIMove(r){const who=1,p=r.players[who],level=r.aiDifficulty||'medium';
- const candidate=p.hand.filter(id=>{if(p.aiRejected?.includes(id))return false;try{planActivation({room:r,who,unitId:id,cards})}catch(e){if(e.status===409)return false;throw e}const c=cards.get(r.units[id].cardId);if(c.id==='COC-31-009'&&!chooseAISpellCost(r,who,id))return false;if(c.type==='주문')return hasAutoSpell(c.id);if(c.type==='일체화')return !p.integration&&!c.conditions.length;if(c.type==='몬스터')return p.field.includes(null)&&isSimpleSummonCard(c);return false});
+ const candidate=p.hand.filter(id=>{if(p.aiRejected?.includes(id))return false;try{planActivation({room:r,who,unitId:id,cards})}catch(e){if(e.status===409)return false;throw e}const c=cards.get(r.units[id].cardId);if(c.id==='COC-31-009'&&!chooseAISpellCost(r,who,id))return false;if(c.id==='COC-21-002'&&!p.integration&&!p.field.some(mid=>mid&&r.units[mid].hp>30))return false;if(c.type==='주문')return hasAutoSpell(c.id);if(c.type==='일체화')return !p.integration&&!c.conditions.length;if(c.type==='몬스터')return p.field.includes(null)&&isSimpleSummonCard(c);return false});
  if(!candidate.length)return null;
  const attack=(id)=>Math.max(0,Number(cards.get(r.units[id].cardId).atk)||0);
  const score=id=>{const c=cards.get(r.units[id].cardId);if(c.type==='몬스터')return attack(id)+40+(c.effects.length?25:0);if(c.type==='일체화')return 150+attack(id);if(c.id==='COC-30-007'&&p.hp>850)return -100;if(c.type==='주문')return 85;return 0};
@@ -736,6 +736,13 @@ function runAI(r){if(r.mode!=='ai'||r.status!=='active')return;
       const c=cards.get(r.units[id].cardId);
       const t=['COC-03-008','COC-17-003','COC-30-007','COC-32-006'].includes(c.id)?
        {type:'player',player:1}:chooseAITarget(r,id);
+      if(c.id==='COC-21-002'){
+       if(r.players[1].integration){t.type='player';t.player=1;delete t.id;}
+       else{
+        const bearer=r.players[1].field.find(mid=>mid&&r.units[mid].hp>30);
+        if(bearer){t.type='unit';t.id=bearer;delete t.player;}
+       }
+      }
       const enemyUnits=r.players[0].field.filter(Boolean);
       const allUnits=r.players.flatMap(p=>p.field.filter(Boolean));
       if(['COC-08-001','COC-08-008','COC-31-002','COC-05-007'].includes(c.id)&&enemyUnits.length){
