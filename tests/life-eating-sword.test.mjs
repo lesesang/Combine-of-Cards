@@ -112,3 +112,27 @@ test('confirmed sword: original spell stays in grave and effect ceases if target
  assert.ok(r.players[0].grave.includes(source));
  assert.ok(r.players[1].hand.includes(unit));
 });
+
+test('confirmed sword: enemy integrated player protection rejects activation without cost',()=>{
+ const {r,source}=setup();
+ const integration=I.instantiate(r,'COC-03-001',1);
+ I.move(r,integration,'integration',1);
+ r.players[1].spellProtectionUntilOpponentTurn=r.players[0].turnsTaken;
+ const before=structuredClone(r);
+ assert.throws(()=>I.apply(r,0,'play',{unitId:source,target:{type:'player',player:1}}),/보호막/);
+ assert.deepEqual(r,before);
+});
+test('confirmed sword: AI gives independent spell effect to own legal monster',()=>{
+ const {r,source}=setup();r.mode='ai';r.turn=1;
+ const aiSword=I.instantiate(r,'COC-21-002',1);
+ I.move(r,aiSword,'hand',1);
+ const ally=I.instantiate(r,'COC-21-007',1);
+ I.move(r,ally,'field',1);
+ r.units[ally].hp=100;
+ r.players[1].deck=[];
+ r.players[1].hand=[aiSword];
+ I.runAI(r);
+ assert.ok(r.players[1].grave.includes(aiSword));
+ assert.ok(r.effects.some(e=>e.type==='lifeEatingSword'&&e.target?.id===ally));
+ assert.ok(!r.units[ally].attachments?.includes(aiSword));
+});
