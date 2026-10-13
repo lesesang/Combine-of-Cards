@@ -215,3 +215,49 @@ test('R02: a failed final declaration preserves the awaiting choice',()=>{
  assert.equal(chooseAutomaticTriggerOrder(r,0,['b','a']).pending,false);
  assert.deepEqual(r.effectStack.map(e=>e.effectId),['B','A']);
 });
+
+test('R01/R02: batch declaration cannot partially spend stack capacity',()=>{
+ const r=room();
+ r.effectStack=Array.from({length:255},(_,i)=>({sequence:i+1,effectId:'existing-'+i}));
+ r.effectSequence=255;
+ const before=structuredClone(r);
+ const group=[{key:'first',owner:0,effectId:'A'},{key:'second',owner:1,effectId:'B'}];
+ assert.throws(()=>declareAutomaticGroup(r,group,0),/safe limit/);
+ assert.deepEqual(r,before,'neither first trigger nor sequence may commit');
+ r.effectStack.pop();
+ assert.equal(declareAutomaticGroup(r,group,0).length,2);
+ assert.equal(r.effectStack.length,256);
+ assert.equal(r.effectSequence,257);
+});
+
+test('R01/R02: invalid later trigger cannot leave earlier trigger declared',()=>{
+ const r=room();
+ declareEffect(r,{effectId:'existing',owner:0});
+ const before=structuredClone(r);
+ assert.throws(()=>declareAutomaticGroup(r,[
+  {key:'a',owner:0,effectId:'first',priority:0},
+  {key:'b',owner:1,effectId:'second',priority:0,exception:'unknown'}
+ ],0),/unknown resolution exception/);
+ assert.deepEqual(r,before);
+ assert.equal(declareAutomaticGroup(r,[
+  {key:'a',owner:0,effectId:'first'},
+  {key:'b',owner:1,effectId:'second',exception:'independent'}
+ ],0).length,2);
+});
+
+test('R02: final trigger choice remains pending after partial-capacity failure',()=>{
+ const r=room();
+ beginAutomaticTriggerOrder(r,[
+  {key:'a',owner:0,effectId:'A'},
+  {key:'b',owner:0,effectId:'B'}
+ ],0);
+ r.effectStack=Array.from({length:255},(_,i)=>({sequence:i+1,effectId:'prior-'+i}));
+ const before=structuredClone(r);
+ assert.throws(()=>chooseAutomaticTriggerOrder(r,0,['b','a']),/safe limit/);
+ assert.deepEqual(r,before);
+ r.effectStack.pop();
+ const result=chooseAutomaticTriggerOrder(r,0,['b','a']);
+ assert.equal(result.pending,false);
+ assert.equal(r.effectStack.length,256);
+ assert.deepEqual(r.effectStack.slice(-2).map(e=>e.effectId),['B','A']);
+});
