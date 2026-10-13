@@ -119,3 +119,38 @@ test('R05/R07: later token release counts as another event without double conver
   assert.equal(r.units[spare],undefined);
   assert.equal(r.logs.filter(e=>e.type==='destroy'&&e.text.includes('테스트 토큰')).length,0);
 });
+
+function tokenCostFixture(){
+ const r=room('14','11');
+ const fafnir=r.players[1].deck.find(id=>r.units[id].cardId==='COC-11-007');
+ assert.ok(fafnir);
+ I.move(r,fafnir,'banished',1);
+ const tokens=[I.H.summonToken(r,0,'스톰 토큰',0,50),I.H.summonToken(r,0,'스톰 토큰',0,50)];
+ assert.ok(tokens.every(id=>r.players[0].field.includes(id)));
+ I.move(r,fafnir,'deck',1);
+ I.H.summonToken(r,1,'스톰 토큰',0,50);
+ assert.equal(r.persistentEffects?.[0]?.owner,1);
+ assert.equal(r.persistentEffects[0].counters,1);
+ return {r,tokens};
+}
+
+test('R05: exclusion cost use and its newly spawned token are two separate events',()=>{
+ const {r,tokens}=tokenCostFixture();
+ const source=take(r,0,'COC-14-004','hand');
+ I.apply(r,0,'play',{unitId:source,costUnitIds:[tokens[0]]});
+ // The excluded token is used (+1); Storm Knight then creates a second token (+1).
+ assert.equal(r.persistentEffects[0].counters,3);
+ assert.equal(r.units[tokens[0]],undefined);
+ assert.ok(r.players[0].field.includes(source)||r.players[0].integration===source);
+ assert.ok(r.players[0].field.includes(tokens[1]));
+});
+
+test('R05: every token destroyed as an explicit summon cost emits one use event',()=>{
+ const {r,tokens}=tokenCostFixture();
+ const source=take(r,0,'COC-14-001','hand');
+ I.apply(r,0,'play',{unitId:source,costUnitIds:tokens});
+ assert.equal(r.persistentEffects[0].counters,3);
+ assert.ok(tokens.every(id=>!r.units[id]));
+ assert.equal(r.players[0].integration,source);
+ assert.equal(r.logs.filter(e=>e.type==='destroy'&&e.text.includes('스톰 토큰')).length,2);
+});

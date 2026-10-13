@@ -76,7 +76,7 @@ function destroyed(r,id){const z=zoneOwner(r,id),u=r.units[id];if(!z||!u)return;
 }
 const H={
  zone:zoneOwner,move,draw,fail,log,attackAvailable,roll:die,randomInt:n=>crypto.randomInt(n),hurt,healUnit,outcome:setOutcome,shuffle,onSummon:runSummonEffects,
- mill:dropFromDeck,summonToken,search:findCardInDeck,destroy:(r,id,{cause='effect'}={})=>{const u=r.units[id];if(u&&zoneOwner(r,id)){if(cause==='effect'&&u.effectDestructionImmune){log(r,'effect',`${unitName(r,id)}: 주문·효과에 의한 직접 파괴를 방지했습니다.`);return false;}
+ mill:dropFromDeck,summonToken,search:findCardInDeck,destroy:(r,id,{cause='effect'}={})=>{const u=r.units[id];if(u&&zoneOwner(r,id)){if((cause==='effect'||cause==='cost')&&u.effectDestructionImmune){log(r,'effect',`${unitName(r,id)}: 주문·효과에 의한 직접 파괴를 방지했습니다.`);return false;}
  destroyed(r,id);const z=zoneOwner(r,id);
   if(z.zone==='field'){
    r.destructionHistory??=[];
@@ -84,7 +84,7 @@ const H={
    if(r.destructionHistory.length>500)r.destructionHistory.shift();
   }
   const canRevive=u.cardId==='COC-10-011'&&!u.revivedOnce&&z.zone==='field';
- const name=cards.get(u.cardId)?.name||u.tokenCard?.name;move(r,id,'grave',u.owner);log(r,'destroy',`${name} 파괴`);if(u.cardId==='COC-11-007'&&z.zone==='field')onFafnirDestroyed(r,id,z.player,{zone:zoneOwner,move,log});if(u.cardId==='COC-05-002'&&z.zone==='field')onCartoonLandDestroyed(r,id,z.player,{zone:zoneOwner,move,destroy:H.destroy,log});
+ const name=cards.get(u.cardId)?.name||u.tokenCard?.name;move(r,id,'grave',u.owner);log(r,'destroy',`${name} 파괴`);if(u.created&&cause==='cost'&&z.zone==='field')onTokenActivity(r,'사용',z.player,{zone:zoneOwner,move,instantiate,log});if(u.cardId==='COC-11-007'&&z.zone==='field')onFafnirDestroyed(r,id,z.player,{zone:zoneOwner,move,log});if(u.cardId==='COC-05-002'&&z.zone==='field')onCartoonLandDestroyed(r,id,z.player,{zone:zoneOwner,move,destroy:H.destroy,log});
  if(canRevive&&r.units[id]&&r.players[z.player].field.includes(null)){
   u.revivedOnce=true;move(r,id,'field',z.player);log(r,'revive',`${name}: 파괴 후 효과 없이 1회 부활`)
  }
@@ -274,7 +274,7 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
  if(c.id==='COC-11-007')fail(409,'파프니르는 토큰 사용·생성 시 자동으로만 소환할 수 있습니다.');
  if(c.id==='COC-11-008'||c.id==='COC-11-009')fail(409,'이 생성 주문은 자동 발동 조건으로만 사용할 수 있습니다.');
  const activation=planActivation({room:r,who,unitId:id,cards,body});
- commitActivationCosts(r,activation,{move:(room,id,to,owner)=>move(room,id,to,owner,{tokenAction:to==='grave'?'릴리스':undefined}),destroy:H.destroy});
+ commitActivationCosts(r,activation,{move:(room,id,to,owner)=>move(room,id,to,owner,{tokenAction:to==='grave'?'릴리스':to==='banished'?'사용':undefined}),destroy:(room,id)=>H.destroy(room,id,{cause:'cost'})});
  if(c.type==='몬스터'){move(r,id,'field',who);runSummonEffects(r,who,id,body)}else if(c.type==='일체화'){if(p.integration)fail(409,'이미 일체화했습니다.');move(r,id,'integration',who);runIntegrationOnEnter(r,who,id)}else if(c.type==='주문'){
  if((p.spellForbiddenUntil||0)>=p.turnsTaken)fail(409,'상대의 주문 사용 금지 효과가 적용 중입니다.');
  const automated=hasAutoSpell(c.id);
