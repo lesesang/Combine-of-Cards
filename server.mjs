@@ -94,6 +94,27 @@ function attachCard(r,cardId,hostId){
  host.attachments??=[];
  host.attachments.push(cardId);
 }
+/**
+ * Remove one linked attachment without moving its host. Call only from an
+ * explicitly validated card effect; this is not a free player action.
+ * The attachment returns to its original owner's requested destination.
+ */
+function detachCard(r,cardId,to='grave'){
+ const card=r.units[cardId],hostId=card?.attachmentHostId,host=hostId&&r.units[hostId];
+ const hostLocation=hostId&&zoneOwner(r,hostId);
+ if(!card||!host||!hostLocation||!['field','integration'].includes(hostLocation.zone)||
+  !Array.isArray(host.attachments)||host.attachments.filter(id=>id===cardId).length!==1||
+  !['grave','hand','deck','banished'].includes(to))
+  fail(409,'장착 해제할 카드 또는 이동 영역이 유효하지 않습니다.');
+ // Check before altering the physical link. This avoids a failed unlink if
+ // the destination is not supported or the host relationship is corrupt.
+ const index=host.attachments.indexOf(cardId);
+ host.attachments.splice(index,1);
+ if(host.attachments.length===0)delete host.attachments;
+ delete card.attachmentHostId;
+ move(r,cardId,to,card.owner,{attachmentRelease:true});
+ return cardId;
+}
 function move(r,id,to,owner,options={}){const u=r.units[id];if(!u)fail(400,'카드를 찾을 수 없습니다.');
  if(u.overlayHostId&&!options.overlayRelease)fail(409,'겹쳐진 얼라이즈 소재는 독립적으로 이동할 수 없습니다.');
  if(u.attachmentHostId&&!options.attachmentRelease)fail(409,'장착 중인 카드는 관계 해제 없이 독립 이동할 수 없습니다.');
@@ -724,4 +745,4 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
 }
 
 // Purely programmatic internal test seam. No HTTP route exposes these internals.
-export const gameTestInternals={cards,catalog,createPlayer,instantiate,move,draw,runSummonEffects,runIntegrationOnEnter,processStartOfTurn,processEndOfTurn,attackAvailable,damageUnit,H,performExtraSummon,finishExtraSummon,queueAutomatedSpell,finishAutomatedSpell,attachOverlayMaterials,attachCard,resolveQueuedDestroyHeals,chooseAIExtra,chooseAIFieldAbility,chooseAIGraveAbility,chooseAISpellCost,runAI,maxAttacks,actualAttack,treatedAttackForCondition,applyFieldAbility,apply,publicState};
+export const gameTestInternals={cards,catalog,createPlayer,instantiate,move,draw,runSummonEffects,runIntegrationOnEnter,processStartOfTurn,processEndOfTurn,attackAvailable,damageUnit,H,performExtraSummon,finishExtraSummon,queueAutomatedSpell,finishAutomatedSpell,attachOverlayMaterials,attachCard,detachCard,resolveQueuedDestroyHeals,chooseAIExtra,chooseAIFieldAbility,chooseAIGraveAbility,chooseAISpellCost,runAI,maxAttacks,actualAttack,treatedAttackForCondition,applyFieldAbility,apply,publicState};
