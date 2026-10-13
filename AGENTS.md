@@ -47,3 +47,8 @@ This file is for a new coding assistant taking over the repository after the 202
 - Avoid claims of full automation or deployed production until acceptance criteria in docs/ROADMAP_AND_ACCEPTANCE.md are met.
 
 **Preferred first work:** bring the canonical v1.3 card source into the repository (rights permitting); reconcile generated coverage reports; integrate the common event/response chain and then cover missing effects with tests. Do not re-ask the user questions already resolved and recorded in docs/DECISIONS_AND_CORRECTIONS.md.
+
+
+## 2026-10-13 R01 follow-up (PR #44)
+
+- Ten targeted automated spells now use the persisted opponent-pass / LIFO spell stack (3 prior + 7 additional target-free cards). Other automatic spell effects are not presumed fully reactive. See `tests/spell-response-expanded.test.mjs` and `docs/EFFECT_STACK_AND_PERSISTENCE.md`.
