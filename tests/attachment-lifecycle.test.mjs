@@ -120,3 +120,36 @@ test('R15 confirmed: no voluntary unequip or generic player action',()=>{
  I.detachCard(r,equipment,'grave',{cause:'card-effect'});
  assert.ok(r.players[0].grave.includes(equipment));
 });
+
+
+test('R15: malformed second attachment cannot partly move host or first attachment',()=>{
+ const r=room(),host=create(r,'COC-09-002',0,'integration');
+ const first=create(r,'COC-09-005',0,'hand'),second=create(r,'COC-09-006',0,'hand');
+ I.attachCard(r,first,host);I.attachCard(r,second,host);
+ delete r.units[second].attachmentHostId;
+ const before=structuredClone(r);
+ assert.throws(()=>I.move(r,host,'grave',0),/장착 카드 연결 정보/);
+ assert.deepEqual(r,before);
+ assert.equal(r.players[0].integration,host);
+ assert.equal(r.units[first].attachmentHostId,host);
+});
+
+test('R15: duplicate equipment reference is rejected before movement',()=>{
+ const r=room(),host=create(r,'COC-09-002',0,'field');
+ const equipment=create(r,'COC-09-005',0,'hand');
+ I.attachCard(r,equipment,host);
+ r.units[host].attachments.push(equipment);
+ const before=structuredClone(r);
+ assert.throws(()=>I.move(r,host,'deck',0),/장착 카드 연결 정보/);
+ assert.deepEqual(r,before);
+});
+
+test('R15: a linked card duplicated in a physical zone rejects host exit',()=>{
+ const r=room(),host=create(r,'COC-09-002',0,'integration');
+ const equipment=create(r,'COC-09-005',0,'hand');
+ I.attachCard(r,equipment,host);
+ r.players[0].hand.push(equipment);
+ const before=structuredClone(r);
+ assert.throws(()=>I.move(r,host,'banished',0),/장착 카드 연결 정보/);
+ assert.deepEqual(r,before);
+});
