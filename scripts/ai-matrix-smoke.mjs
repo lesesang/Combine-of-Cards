@@ -19,8 +19,8 @@ try {
   if(x.http!==201){result.failures.push([d.id,x]);continue;}
   let state=x.state,attempts=0;
   while(attempts++<35&&state.status==='active'){
-   const type=state.pendingExtraSummon?'extraResponse':state.pendingAttack?.stage==='response'?'defend':state.phase==='DRAW'?'draw':'phase';
-   const action=await api('/api/rooms/'+x.code+'/actions',{method:'POST',token:x.token,body:{type,expectedVersion:state.version,skipAttack:true,...(type==='extraResponse'?{choice:'pass'}:{})}});
+   const type=state.pendingSpell?'spellResponse':state.pendingExtraSummon?'extraResponse':state.pendingAttack?.stage==='response'?'defend':state.phase==='DRAW'?'draw':'phase';
+   const action=await api('/api/rooms/'+x.code+'/actions',{method:'POST',token:x.token,body:{type,expectedVersion:state.version,skipAttack:true,...(['extraResponse','spellResponse'].includes(type)?{choice:'pass'}:{})}});
    result.totalActions++;
    if(action.http!==200){result.failures.push({deck:d.id,turn:state.turn,phase:state.phase,type,action});break;}
    state=action;
