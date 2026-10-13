@@ -194,16 +194,34 @@ function maxAttacks(u,turn){const base=u.cardId==='COC-09-003'?2:Math.max(1,u.ex
 function attackAvailable(u,turn){return u.attackCountTurn!==turn||(u.attackCount||0)<maxAttacks(u,turn)}
 function validateAggro(r,who,target){const aggro=r.players[1-who].field.filter(id=>id&&isAggro(r,id));if(aggro.length&&(!target||target.type!=='unit'||!aggro.includes(target.id)))fail(409,'공격 대상 강제(어그로): 해당 몬스터 중에서 선택해야 합니다.')}
 function isSimpleSummonCard(c){return c.type==='몬스터'&&(!c.conditions.length||c.conditions.every(s=>/공격|이 몬스터|효과|드로우|시작|턴/.test(s)))}
-function performExtraSummon(r,who,body){
+function performExtraSummon(r,who,body,{defer=false}={}){
  const p=r.players[who],extraUnitId=requireStr(body.extraUnitId,100);
  const recipe=validateExtraSummon({room:r,who,extraUnitId,materials:body.materials,spellUnitId:body.spellUnitId,cards});
  if(recipe.spellUnitId&&p.spellForbiddenUntil>0&&p.spellForbiddenUntil>=p.turnsTaken)fail(409,'주문 사용 금지 상태에서는 퓨전 주문을 발동할 수 없습니다.');
- // Validating all preconditions before spending materials or spells.
+ if(r.units[extraUnitId].cardId==='COC-12-012'){
+  const eligible=r.players[1-who].field.filter(Boolean).filter(id=>Math.max(0,Number(cards.get(r.units[id].cardId)?.atk)||0)<r.units[extraUnitId].atk);
+  if(eligible.length&&!eligible.includes(body.target?.id))fail(409,'파괴할 유효한 상대 몬스터를 지정하세요.');
+ }
  if(recipe.spellUnitId){
   if(r.units[recipe.spellUnitId].cardId===FUSION_UP_ID)markEffectUsed(r,who,FUSION_UP_ID,1);
   move(r,recipe.spellUnitId,'grave',who);
  }
  for(const id of recipe.materials){if(recipe.method==='wakeup')H.destroy(r,id);else move(r,id,'grave',r.units[id].owner)}
+ if(defer){
+  r.pendingExtraSummon={who,extraUnitId,recipe,targetId:body.target?.id||null,turnNumber:r.turnNumber};
+  log(r,'summon',`${p.label}: ${unitName(r,extraUnitId)} 특수 소환 선언 (비용 지불, 상대 대응 대기)`);
+  setOutcome(r);
+  return recipe;
+ }
+ return finishExtraSummon(r,{who,extraUnitId,recipe,targetId:body.target?.id||null});
+}
+function finishExtraSummon(r,pending){
+ const {who,extraUnitId,recipe,targetId}=pending,p=r.players[who];
+ if(!p.extra.includes(extraUnitId)||!p.field.includes(null)){
+  log(r,'summon',`${p.label}: 특수 소환 실패 (비용 반환 없음)`);
+  setOutcome(r);
+  return null;
+ }
  move(r,extraUnitId,'field',who);
  if(['COC-12-014','COC-26-012','COC-27-013'].includes(r.units[extraUnitId].cardId))r.units[extraUnitId].cannotAttack=true;
  if(recipe.method==='wakeup'){r.effects??=[];r.effects.push({type:'returnWakeup',spellId:recipe.spellUnitId,player:who,turn:r.turnNumber})}
@@ -211,7 +229,8 @@ function performExtraSummon(r,who,body){
  log(r,'fusion',`${p.label}: ${c.name} 소환 (소재 ${recipe.materials.length}장, ${recipe.method})`);
  if(c.id==='COC-12-012'){
   const eligible=r.players[1-who].field.filter(Boolean).filter(id=>Math.max(0,Number(cards.get(r.units[id].cardId)?.atk)||0)<r.units[extraUnitId].atk);
-  if(eligible.length){if(!eligible.includes(body.target?.id))fail(409,'파괴할 유효한 상대 몬스터를 지정하세요.');H.destroy(r,body.target.id)}
+  if(eligible.includes(targetId))H.destroy(r,targetId);
+  else if(eligible.length)log(r,'effect','소환 효과의 원래 대상 소실로 파괴 처리에 실패했습니다.');
  }
  if(c.id==='COC-22-015')findCardInDeck(r,who,'퓨전업')||findCardInDeck(r,who,'퓨전 업');
  setOutcome(r);
