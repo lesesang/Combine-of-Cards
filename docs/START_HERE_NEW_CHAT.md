@@ -25,7 +25,8 @@
 5. **docs/ROADMAP_AND_ACCEPTANCE.md** — 전체 자동화·AI·안전성·운영까지 우선순위/완료 기준.
 6. **docs/OPEN_RULINGS_REGISTER.md** — 아직 확정되지 않은 해석·충돌과 현재 임시 코드 처리. **확정 재정과 혼동 금지.**
 7. **docs/ARCHITECTURE_AND_RUNBOOK.md** — 파일 구조, 실행, 빌드, 테스트, 배포·보안 제한.
-8. **docs/AUTOMATION_COVERAGE.md** — 카드 ID별 '부분 지원 / 미지원' 최신 목록. 이 파일은 코드 기반으로 생성되는 자료일 수 있으므로 갱신 시 주의.
+8. **docs/SOURCE_DATA_PROVENANCE.md** — 이전 v1.3 정본 파일 이름, 현재 GitHub에 없는 원본과 정본 편입 방법.
+9. **docs/AUTOMATION_COVERAGE.md** — 카드 ID별 '부분 지원 / 미지원' 최신 목록. 이 파일은 코드 기반으로 생성되는 자료일 수 있으므로 갱신 시 주의.
 9. **docs/EFFECT_STACK_AND_PERSISTENCE.md** 및 각 카드별 docs — 구체적인 기술 판정과 이미 작성된 테스트.
 10. **server.mjs**, **src/**, **tests/**, **public/** — 실제 구현 코드가 최종 근거.
 
