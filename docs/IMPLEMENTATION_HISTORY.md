@@ -207,3 +207,11 @@
 - 상대 손패 선택 카드의 제한적 손패 조회 엔드포인트가 현재 주문/동시 트리거 대응 창을 간과하던 문제 수정. 서버가 카드 사용을 허용하지 않는 시점에는 조회 권한도 거부.
 - 주문 상대 pass 또는 동시 유발 선언 완료 후 카드 소유/턴/기타 조건이 합법이면 조회를 다시 허용.
 - `tests/hand-preview-response-windows.test.mjs`: HTTP 권한·정상 대응 전/후·상대 손패 일반 공개 금지·상태 저장 회귀 테스트. R17의 모든 비공개 카드 선택 엔진은 아직 미완료.
+
+
+## 2026-10-13 R01 response chain, cohort 3 (PR #47)
+
+- Adds four audited automated spells to the server-authoritative pay-now / opponent-pass / resolve-later stack: COC-07-004, COC-07-011, COC-17-004, COC-31-005. Total is now **14** enrolled spells, without claiming any of those cards has full secondary-effect automation.
+- Opponent draw/deck search, draw-plus-mill and conditional integration buff, mummy token generation, server coin toss and random opposing discard now happen after response, not at card-use declaration.
+- Tests: tests/spell-response-summon-search.test.mjs (including frozen state after declaration, serialized restoration, heads/tails branches and server-selected hidden discard). Actual counterspell cards, source movement exceptions and unresolved prerequisite/selection spells remain #22/#25.
+
