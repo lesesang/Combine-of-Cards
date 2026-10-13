@@ -17,6 +17,7 @@
 | [판정 애매함·충돌](docs/OPEN_RULINGS_REGISTER.md) | 확정 전 해석, 현 임시 처리, 권장 개선안 |
 | [전체 자동화 로드맵](docs/ROADMAP_AND_ACCEPTANCE.md) | 효과 엔진·AI·검증·운영의 우선순위와 완성 판정 기준 |
 | [아키텍처·운영 안내](docs/ARCHITECTURE_AND_RUNBOOK.md) | 서버/API/파일 구조, 테스트, DB·배포·보안 제한 |
+| [v1.3 원본 파일 및 정본 편입](docs/SOURCE_DATA_PROVENANCE.md) | 이전 채팅 원본 산출물 목록, 현재 GitHub에 없는 파일, 카드 JSON 편입 방법 |
 | [254개 카드별 자동화 상태](docs/AUTOMATION_COVERAGE.md) | 실제 코드 기반 부분 지원/미지원 목록 |
 
 카드별 상세 판정은 docs/EFFECT_STACK_AND_PERSISTENCE.md, docs/GANDRAE_RULING.md, docs/CARTOON_CHAIN_RULING.md, docs/SIMULTANEOUS_DESTRUCTION.md 및 기타 docs를 참고한다.
