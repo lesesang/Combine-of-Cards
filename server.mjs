@@ -94,6 +94,14 @@ function resolveQueuedDestroyHeals(r){
  if(r.pendingTriggerOrder)return;
  const results=resolveEffectStack(r,{
   getZone:id=>zoneOwner(r,id),
+  // Ignore log entries and monotonically increasing effect sequence numbers.
+  // A legal repeat can run as long as the actual board and counters progress.
+  fingerprint:room=>JSON.stringify({
+   hp:room.players.map(p=>p.hp),
+   places:room.players.map(p=>[p.field,p.integration,p.hand,p.grave,p.deck,p.banished]),
+   stats:Object.values(room.units).map(u=>[u.id,u.hp,u.atk]),
+   counters:room.persistentEffects?.map(e=>[e.id,e.counters])||[]
+  }),
   execute:e=>{
    if(e.effectId!=='batch-first-destroy-heal')throw new Error('unsupported trigger on destruction stack');
    r.players[e.owner].hp+=e.payload.amount;
