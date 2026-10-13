@@ -205,6 +205,7 @@ test('sword: real field-ability destruction from an enchanted monster schedules 
  const cost=I.instantiate(r,'COC-03-003',1);
  I.move(r,cost,'hand',1);
  const foe=unit(r,'COC-21-007',0,200,50);
+ r.phase='MAIN';
  I.apply(r,1,'ability',{sourceUnitId:bearer,costCardId:cost,target:{type:'unit',id:foe}});
  assert.ok(r.players[1].grave.includes(cost),'field ability cost was paid');
  assert.ok(r.players[0].grave.includes(foe),'enemy monster was destroyed by effect');
