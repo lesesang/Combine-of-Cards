@@ -1,109 +1,79 @@
 # Combine of Cards — 컴바인 오브 카드즈
 
-동호회 자작 TCG 《컴바인 오브 카드즈》의 온라인 대전 사이트 개발 저장소. **현재는 규칙 v1.3 기반 베타이며, 모든 카드 효과의 완전 자동 판정 및 공개 배포는 미완료**다.
+동호회 자작 TCG 《컴바인 오브 카드즈》를 플레이 가능한 온라인 대전 웹 서비스로 만드는 저장소다. **현재 v1.3 규칙 기반 개발 베타**이며 **254개 카드 모든 효과의 완전 자동화·정식 운영 배포는 아직 미완료**다.
 
-## 새 채팅에서 이 프로젝트를 이어서 개발한다면
+## Codex에서 개발 이어가기 — 가장 먼저 읽을 문서
 
-**[새 채팅 인수인계 — START_HERE_NEW_CHAT.md](docs/START_HERE_NEW_CHAT.md)** 를 **가장 먼저 읽는다.** 여기에는 개발 목적, 지금까지 확정된 규칙, GitHub 수정 이력, 남은 개발 과제, 실행 방법, 새 채팅용 복사용 시작 요청문이 정리되어 있다.
+**[Codex 통합 인수인계](docs/CODEX_HANDOFF.md)** · **[최신 확정 규칙·카드별 결정](docs/CODEX_RULES_REFERENCE.md)** · **[이슈 연동 작업 로드맵](docs/CODEX_IMPLEMENTATION_PLAN.md)**
 
-현재 [개발 이슈 #21~#29](https://github.com/lesesang/Combine-of-Cards/issues)에 남은 기능과 완료 기준을 등록해 추적하고 있다.
+Codex는 먼저 루트 [AGENTS.md](AGENTS.md)와 위 3개 문서를 읽고, 실제 main 코드·Actions CI·[이슈 #21~#29](https://github.com/lesesang/Combine-of-Cards/issues)를 대조한다. 이어서 [확정 원칙](docs/PRODUCT_VISION_AND_RULES.md), [카드 교정](docs/DECISIONS_AND_CORRECTIONS.md), [17개 추가 확정 재정](docs/RULINGS_CONFIRMED_2026-10-13.md), [13개 잔여 구현·검증](docs/OPEN_RULINGS_REGISTER.md), [구현 이력](docs/IMPLEMENTATION_HISTORY.md)을 확인한다.
 
-### 주요 문서 바로가기
+[구형 새 채팅 인계 문서](docs/START_HERE_NEW_CHAT.md)도 보존하지만, **최신 Codex 인계 문서가 현재 상태의 우선 탐색 지점**이다. 오래된 문구의 기술 미완료가 사용자 확정 규칙을 뒤집지 않는다.
 
-| 문서 | 내용 |
+## 현재 상태 — 2026-10-13, PR #58 병합 후
+
+| 항목 | 실제 코드/생성 보고서 기준 |
 |---|---|
-| [새 채팅 시작](docs/START_HERE_NEW_CHAT.md) | 현재 상태·우선 파일·재개 지시문 |
-| [개발 의도·v1.3 확정 규칙](docs/PRODUCT_VISION_AND_RULES.md) | 게임 목적, 사이트 최종 사양, 공통 룰·엔진 확정 개선안 |
-| [확정 수정과 카드 재정](docs/DECISIONS_AND_CORRECTIONS.md) | 삭제 덱·이전 데이터 교정, 사용자 승인 결정, 간드레이드래곤 자기 자신 제외 |
-| [PR #1~20 구현 이력](docs/IMPLEMENTATION_HISTORY.md) | 코드를 왜 고쳤는지, 해결된 버그와 아직 지원하지 않는 범위 |
-| [판정 애매함·충돌](docs/OPEN_RULINGS_REGISTER.md) | 확정 전 해석, 현 임시 처리, 권장 개선안 |
-| [전체 자동화 로드맵](docs/ROADMAP_AND_ACCEPTANCE.md) | 효과 엔진·AI·검증·운영의 우선순위와 완성 판정 기준 |
-| [아키텍처·운영 안내](docs/ARCHITECTURE_AND_RUNBOOK.md) | 서버/API/파일 구조, 테스트, DB·배포·보안 제한 |
-| [v1.3 원본 파일 및 정본 편입](docs/SOURCE_DATA_PROVENANCE.md) | 이전 채팅 원본 산출물 목록, 현재 GitHub에 없는 파일, 카드 JSON 편입 방법 |
-| [254개 카드별 자동화 상태](docs/AUTOMATION_COVERAGE.md) | 실제 코드 기반 부분 지원/미지원 목록 |
-
-카드별 상세 판정은 docs/EFFECT_STACK_AND_PERSISTENCE.md, docs/GANDRAE_RULING.md, docs/CARTOON_CHAIN_RULING.md, docs/SIMULTANEOUS_DESTRUCTION.md 및 기타 docs를 참고한다.
-
-## 현재 게임 데이터와 자동화 현황 (2026-10-13, v1.3-ai-beta.10)
-
-| 항목 | 수량/상태 |
-|---|---|
-| 플레이 가능 덱 | **24개** (삭제 확정 8개 제외) |
-| 전체 카드 레코드 | **254개** — 메인 215, 엑스트라 21, 생성/진화 18 |
-| **일부** 자동 지원 | **155개** |
-| 특수 효과 미지원 | **98개** |
-| 효과 없는 기본 카드 | **1개** |
-| 등록된 주문 자동 효과 핸들러 | **70개** |
-| 발동 조건 사전검사 | **80종** |
+| 대전 가능한 사전 구성 덱 | **24개** |
+| 전체 카드 항목 | **254개** = 메인 215 + 엑스트라 21 + 생성/진화 18 |
+| 카드 지원 집계 | **부분 지원 157 / 수동·미지원 96 / 기본 카드 1** |
+| 완전 자동화 인증 카드 | **0개** |
+| 자동 주문 핸들러 | **71개** (개별 효과 전체 완성 아님) |
+| 실제 상대 pass/LIFO 스택 연결 주문 | **14종** (실제 카운터 카드 사용 등은 아직 미지원) |
+| 일부 필드 발동 | **13종** |
 | 엑스트라 소환 레시피 | **21개** |
-| 전 카드 완전 자동화 | **아직 미완료** |
-| 정식 배포 URL/운영 DB | **아직 없음** |
+| 발동 조건 사전검사 | **80종** |
+| 문서화한 효과 번호별 증거 | **6건** (3장 카드의 일부 조항, 전수 추적 미완료) |
+| 공개 운영용 DB/실서비스 URL | **없음** |
+| 마지막 확인 main | **f7ce3612**, Node tests + Verify TCG beta 둘 다 성공 |
 
-**중요:** '155개 부분 지원'은 해당 카드의 **일부 효과만** 자동 판정되거나 소재/조건이 검증된다는 뜻이다. 155개 카드의 효과를 전부 구현했다는 의미가 아니다. 확정되지 않은 카드 효과를 임의로 처리하거나 완성이라고 표시하지 않는다.
+**부분 지원 ≠ 완전 지원.** 157장 전체 효과를 모두 자동화했다는 뜻이 아니다. 매 개발 시작마다 보고서와 실제 실행 코드를 기준으로 최신 집계를 다시 확인한다.
 
-삭제된 덱은 **합체 기계, 코미컬, 럭키, 카지노이드, 비트스타즈, 파트너 몬스터즈, 코브라, 아홉꼬리**다. 중간 단계의 27덱/25덱 정보로 회귀하거나 사전 덱 간 카드를 혼합하지 않는다.
+### 최근 확정 규칙 (예시)
 
-## 실행 및 테스트
+- **생명을 먹는 마검 (COC-21-002): 장착 카드가 아닌 주문**, 카드 본체는 사용 후 묘지로. 효과를 부여받은 몬스터/일체화 플레이어가 **자기 ATTACK 페이즈 시작**에 인스턴스마다 HP **30** 강제 지불(+ATK 100), HP **30 이하**면 지불 불가한 순간 몬스터 파괴 또는 직접 부여 플레이어 패배. 상대 몬스터 처치로 받은 **×2는 다음 자신의 턴 시작~종료**에 적용. 중복 2배 효과는 **×4·×8·×16…**. ATTACK을 건너뛰면 지불도 발생하지 않는다. ([PR #57](https://github.com/lesesang/Combine-of-Cards/pull/57), [PR #58](https://github.com/lesesang/Combine-of-Cards/pull/58))
+- **장착 해제는 자의로 불가.** 카드 효과/확정 규칙이 요구할 때만 처리. 마검을 장착 목록에 넣지 않는다.
+- **간드레이드래곤**은 소환 시 **자기 자신만 제외**하고 다른 몬스터를 파괴한다.
+- **블랙 메탈 매지션**은 실제 공격력 50/기본 1d50, 명시된 조건용으로만 공격력 250 취급.
+- 2026-10-13 확정 **R05/R06/R07/R08/R09/R10/R11/R12/R13/R21/R22/R23/R24/R25/R28/R29/R30**의 세부 사항을 다시 미확정으로 취급하지 않는다.
 
-Node.js **20 이상**이 필요하며, 런타임 외부 패키지 설치 없이 실행 가능하다.
+모든 규칙의 정식 설명은 [CODEX_RULES_REFERENCE](docs/CODEX_RULES_REFERENCE.md), [PRODUCT_VISION_AND_RULES](docs/PRODUCT_VISION_AND_RULES.md), [DECISIONS_AND_CORRECTIONS](docs/DECISIONS_AND_CORRECTIONS.md)를 참고한다.
 
-~~~bash
-npm start
-# http://localhost:3000
+## 개발·테스트 실행
+
+Node.js **20 이상**, ESM/Node 표준 라이브러리 기반.
+
+```bash
+git clone https://github.com/lesesang/Combine-of-Cards.git
+cd Combine-of-Cards
+npm start                           # http://localhost:3000
 npm test
 npm run check:data
 npm run test:matrix
 npm run check:coverage
-~~~
+npm run check:coverage -- --check
+```
 
-PORT 환경 변수로 포트를 변경하고 DATA_DIR로 저장 폴더를 지정할 수 있다. AI 상대 덱은 지정 또는 랜덤이며 난이도는 하/중/상. 초기 AI는 학습형 모델이 아니라 규칙 기반 휴리스틱이다.
+- `server.mjs`: Node HTTP API, 방/턴/룰/AI, `.data/rooms.json` 파일 저장(단일 프로세스). `PORT`, `DATA_DIR` 환경변수.
+- `src/automated-effects.mjs`, `src/effect-runtime.mjs`, `src/activation-rules.mjs`: 주문 처리, 스택, 발동 사전검사.
+- `src/life-eating-sword.mjs`: 최신 마검 ATTACK 타이밍/중첩 2배/독립 상태. `src/combat-stats.mjs`: 실제/취급 공격력.
+- `src/extra-summons.mjs`, `src/field-abilities.mjs`, `src/grave-abilities.mjs`, `src/dragon-gold.mjs`, `src/cartoon-land.mjs`: 기타 특수 소환/효과.
+- `public/`: 브라우저 UI, `public/data/catalog.json.gz.b64`: 서버가 우선 로드하는 압축 플레이 카탈로그.
+- `tests/`, `scripts/`: 판정/보안/AI·데이터 회귀 검사. **`npm run test:matrix`는 24덱 AI 스모크이며 576 매치 완주 인증이 아님**.
+- `npm run check:coverage`는 생성 보고서 3개를 덮어쓴다. 사람이 쓰는 설명은 `docs/AUTOMATION_NOTES.md`, 효과별 입력은 `docs/effect-coverage.json`에 쓰고 읽기 전용 `--check`로 일치 확인.
 
-**보고서:** npm run check:coverage는 자동 보고서 3개만 재생성한다. 수동 해설은 docs/AUTOMATION_NOTES.md에서 보존한다. CI는 npm run check:coverage -- --check로 수정 없이 출력 일치를 검사한다. npm run test:matrix는 24개 덱의 AI 진행 **스모크 테스트**이며 전체 효과 정답성을 검증한 것이 아니다.
+### 전체 구현/운영 한계
 
-## 이미 구현한 범위
+- 메인 덱은 **24개 원본 덱 각각 독립 사용**, 다른 덱 카드 사전 혼합 금지. 삭제된 8덱(합체 기계, 코미컬, 럭키, 카지노이드, 비트스타즈, 파트너 몬스터즈, 코브라, 아홉꼬리) 복원 금지.
+- 기존 GitHub에는 **v1.3 원본 룰북 DOCX/정본 JSON/구버전 비교 원본이 아직 미커밋**. 현재 카탈로그와 정본 자료를 혼동하지 않는다. [출처·편입 계획](docs/SOURCE_DATA_PROVENANCE.md).
+- 독립 지속·일부 실제 장착 링크/얼라이즈 이동/일부 응답 스택은 있으나 전체 카드 복사·대응 무효화·모든 효과·AI 전략은 미완성.
+- 실제 DB·사용자 인증 수명/재접속·보안·HTTPS·모니터링·권리 확인·운영 배포 등 [완료 기준](docs/ROADMAP_AND_ACCEPTANCE.md) 미충족. Dockerfile이 있어도 배포 완료가 아니다.
 
-- 반응형 사이트, 덱·카드 도감, 카드명 검색, 간략 규칙 안내
-- 2인 대전방/참가 코드/참가자 토큰 인증, 룸별 단일 서버 저장, 손패 비공개
-- 시작 HP 1000, 필드 3칸, 기본 소환/일체화, 드로우, 리로드(100, 150, 200 …), 1d공격력 공격, 상대 대응 확인/대상 재선택, 승패·동시 무승부
-- 덱 지정/랜덤 AI와 난이도 하·중·상, 제한된 범위의 개별 카드 자동 효과와 AI 행동
-- 엑스트라 21장 소환 자격 검증, 필드 발동 13종, 조건 사전검사 80종
-- 지속 상태와 LIFO 체인 기반 모듈, 파프니르–황금–반지, 카툰 랜드–데몬즈 드래곤–월드 가이드 등 부분 연동
-- 대전 기록, 안전한 서버 난수 사용, 기본 HTTP 검사 및 GitHub Actions 테스트
+## 기여·품질
 
-**미구현:** 일반 주문 전체의 반응형 효과 체인, 복사·장착·얼라이즈 소재의 전 영역 동반 이동, 254개 카드 모든 효과의 정확한 실행, AI의 전 특수 행동, 전체 재정 자동 충돌 검증, 운영 DB/재접속/보안·부하 점검. 자세한 완료 기준은 로드맵에 있다.
+1. 기존 확정 판정을 무효화하거나 원본 카드 수치/효과를 편의대로 바꾸지 않는다. **새 규칙이 필요하면 실제 사용자 미확정만 명시적으로 확인**한다.
+2. 한 카드 효과/공통 사건 단위로 서버·AI·UI·테스트를 함께 구현한다. 상대 비공개 카드/덱 순서·토큰/원소유권 보호, 비용·상태 원자성 검증.
+3. `docs/effect-coverage.json`, 역사·룰 변경 문서, GitHub 이슈에 구현 범위와 **미완료**를 남긴다.
+4. 두 GitHub Actions(**Node tests**, **Verify TCG beta**)가 **PR 최종 SHA에서 성공한 뒤** main에 병합하고 main 결과까지 확인한다.
 
-현재 2인 대전의 수동 효과 승인 기능은 남아 있다. **상대 승인은 카드 룰의 합법성 검사 대신이 될 수 없다**. AI 대전에서 미지원 효과도 아직 일부 사용하지 못한다.
-
-## 코드 구조
-
-- server.mjs: 단일 Node HTTP 서버, 게임 상태/저장/AI/기본 판정
-- src/automated-effects.mjs: 주문 ID별 자동 효과
-- src/activation-rules.mjs: 카드 발동 전 조건과 비용
-- src/field-abilities.mjs, extra-summons.mjs: 필드/엑스트라 조건
-- src/effect-runtime.mjs: JSON 직렬화 가능 LIFO·독립 지속 상태
-- src/dragon-gold.mjs, cartoon-land.mjs: 카드별 복합 트리거
-- src/automation-status.mjs: 카드별 지원 범위
-- public/: UI와 압축 카드 카탈로그
-- tests/, scripts/: 테스트 및 데이터·자동화 보고서 검증
-
-게임 플레이용 카탈로그는 public/data/catalog.json.gz.b64 이다. **v1.3 원본 JSON/Word 룰북/카드집 정본 파일은 현 GitHub에 아직 포함되지 않았다.** 원본을 추가하여 효과 원문과 코드 비교를 자동화하는 작업이 우선이다.
-
-## 배포·보안
-
-현재 상태는 **단일 Node 서버**에서 .data/rooms.json에 저장한다. Dockerfile과 CI가 있어도 공개 운영 완료는 아니다. 방 데이터는 영속 볼륨에 저장해야 하며, 운영용 DB/동시성 제어·재접속·HTTPS·권한 관리·백업·모니터링·레이트 제한/악용 방어가 필요하다. GitHub Pages 등 정적 호스팅만으로 대전 API가 동작하지 않는다.
-
-사용자·다른 플레이어의 비공개 패 및 덱 순서를 노출하면 안 된다. 서버 판정과 AI 행동은 반드시 같은 합법성 검증을 사용해야 한다. 세부 보안 체크리스트는 [ARCHITECTURE_AND_RUNBOOK](docs/ARCHITECTURE_AND_RUNBOOK.md) 참조.
-
-## 저작권·기여 원칙
-
-사용자 제공 오리지널 카드 텍스트/아트의 권리는 해당 제작자에게 있다. 공식 배포 전 공개·복제 허용 범위를 확인한다. 이미지/아트 자산은 이 저장소에 기본 포함되지 않았다.
-
-새 개발자는 먼저 [새 채팅 인수인계 문서](docs/START_HERE_NEW_CHAT.md)를 읽고, 변경 시 **확정 재정을 유지**, **미확정은 별도 기록**, **회귀 테스트/CI 통과 후 PR 병합**, **문서·자동화 현황 함께 업데이트** 원칙을 지킨다.
-
-## 최근 개발: beta.10
-
-- 블랙 메탈 퓨전 업: 묘지 회수·공격 기회 비용·효과별 독립 턴 제한.
-- 크래쉬볼티지: 패 버리기 파괴 및 기존 엔진 방식의 임시 관통 처리.
-- 부분 지원 **155**, 미지원 **98**, 기본 카드 **1**. 완전 자동화는 미완료.
-- [효과별 추적](docs/EFFECT_COVERAGE.md) · [자동화 해설](docs/AUTOMATION_NOTES.md) · [구현 범위/남은 재정](docs/GRAVE_RECOVERY_AND_CRASH_VOLTAGE.md).
-- `npm run check:coverage`로 보고서 갱신, `npm run check:coverage -- --check`로 CI와 같은 읽기 전용 검사.
+**바로 복사할 Codex 시작 요청문은 [CODEX_HANDOFF.md 하단](docs/CODEX_HANDOFF.md#7-작업-이력추적인계-유지)에 있다.**
