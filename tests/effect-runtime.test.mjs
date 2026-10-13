@@ -156,3 +156,49 @@ test('R02: unambiguous group resolves automatically and pending choices are excl
  assert.throws(()=>chooseAutomaticTriggerOrder(r,0,['a','other']),/exactly once/);
  assert.equal(r.pendingTriggerOrder.awaiting[0],0);
 });
+
+test('R26: detects an exact self-generating effect cycle without declaring a loss',()=>{
+ const r=room();r.turnNumber=6;
+ declareEffect(r,{effectId:'loop',sourceId:'a',owner:0,payload:{mode:'again'}});
+ let actions=0;
+ assert.throws(()=>resolveEffectStack(r,{
+  getZone:present,
+  fingerprint:state=>String(state.turnNumber),
+  execute:effect=>{actions++;declareEffect(r,{effectId:effect.effectId,sourceId:'a',owner:0,payload:{mode:'again'}})}
+ }),e=>e.code==='EFFECT_CYCLE'&&/no game-state progress/.test(e.message));
+ assert.equal(actions,1);
+ assert.equal(r.effectStack.length,1,'unresolved effect remains to diagnose, not silently discarded');
+ assert.equal(r.winner,undefined,'the safety guard never fabricates a victor');
+});
+test('R26: legal finite repetitions that change HP/counters are not mistaken for cycles',()=>{
+ const r=room();r.players=[{hp:1000}];r.progress=0;
+ declareEffect(r,{effectId:'gain',owner:0,payload:{points:1}});
+ const executed=[];
+ const result=resolveEffectStack(r,{
+  getZone:()=>null,
+  fingerprint:state=>JSON.stringify({hp:state.players[0].hp,progress:state.progress}),
+  execute:effect=>{
+   r.progress++;r.players[0].hp+=effect.payload.points;executed.push(effect.effectId);
+   if(r.progress<180)declareEffect(r,{effectId:'gain',owner:0,payload:{points:1}});
+  }
+ });
+ assert.equal(result.length,180);
+ assert.equal(executed.length,180);
+ assert.equal(r.players[0].hp,1180);
+ assert.equal(r.effectStack.length,0);
+});
+test('R26: hard safety cap preserves unresolved effects and does not assign a loss',()=>{
+ const r=room();
+ declareEffect(r,{effectId:'self',owner:0});
+ assert.throws(()=>resolveEffectStack(r,{
+  getZone:()=>null,
+  execute:()=>declareEffect(r,{effectId:'self',owner:0})
+ }),e=>e.code==='EFFECT_SAFETY_LIMIT');
+ assert.equal(r.effectStack.length,1);
+ assert.equal(r.winner,undefined);
+});
+test('R26: invalid cycle fingerprint is rejected instead of weakening protection',()=>{
+ const r=room();declareEffect(r,{effectId:'x',owner:0});
+ assert.throws(()=>resolveEffectStack(r,{getZone:()=>null,execute:()=>{},fingerprint:()=>42}),/bounded string/);
+ assert.equal(r.effectStack.length,1);
+});
