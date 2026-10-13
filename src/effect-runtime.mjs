@@ -206,21 +206,33 @@ export function resolveEffectStack(room, { getZone, execute, onResult, fingerpri
       error.code = 'EFFECT_SAFETY_LIMIT';
       throw error;
     }
+    // R01/R26: a failing executor is NOT a resolved effect. Snapshot the
+    // serialized room so failed handlers do not consume the popped effect,
+    // its nested declarations, paid HP or physical card movements.
+    const before = structuredClone(room);
     const effect = room.effectStack.pop();
-    const zone = effect.sourceId ? getZone(effect.sourceId) : null;
-    const protectedEffect = EXCEPTIONS.has(effect.exception);
-    const validSource = !effect.sourceId || protectedEffect ||
-      (zone && SAFE_ZONES.has(zone.zone) && (!validOwner(zone.player) || zone.player === effect.owner));
-    if (!validSource) {
-      const result = { effectId: effect.effectId, sequence: effect.sequence, status: 'negated-source-moved' };
-      results.push(result);
+    try {
+      const zone = effect.sourceId ? getZone(effect.sourceId) : null;
+      const protectedEffect = EXCEPTIONS.has(effect.exception);
+      const validSource = !effect.sourceId || protectedEffect ||
+        (zone && SAFE_ZONES.has(zone.zone) && (!validOwner(zone.player) || zone.player === effect.owner));
+      if (!validSource) {
+        const result = { effectId: effect.effectId, sequence: effect.sequence, status: 'negated-source-moved' };
+        onResult?.(result, effect);
+        results.push(result);
+        continue;
+      }
+      execute(effect);
+      const result = { effectId: effect.effectId, sequence: effect.sequence, status: 'resolved' };
       onResult?.(result, effect);
-      continue;
+      results.push(result);
+    } catch (error) {
+      // Preserve the room identity used by server callbacks. External I/O in
+      // callbacks is outside this rollback; those callbacks must be pure.
+      for (const key of Object.keys(room)) delete room[key];
+      Object.assign(room,before);
+      throw error;
     }
-    execute(effect);
-    const result = { effectId: effect.effectId, sequence: effect.sequence, status: 'resolved' };
-    results.push(result);
-    onResult?.(result, effect);
   }
   return results;
 }
