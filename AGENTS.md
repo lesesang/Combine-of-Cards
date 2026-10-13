@@ -23,8 +23,8 @@ This file is for a new coding assistant taking over the repository after the 202
 
 ## Latest implementation update (2026-10-13)
 
-- beta.10: 156 partial / 97 manual / 1 basic; 13 field abilities; Black Metal Fusion Up grave recovery and independent effect limits; Crash Voltage discard/destruction and provisional piercing.
-- Read docs/GRAVE_RECOVERY_AND_CRASH_VOLTAGE.md, docs/EFFECT_COVERAGE.md and new provisional rulings R28/R29. Do not treat them as user-approved decisions.
+- beta.10: 156 partial / 97 manual / 1 basic; 13 field abilities; Black Metal Fusion Up grave recovery and independent effect limits; Crash Voltage discard/destruction and confirmed dice-result piercing (R28).
+- **R05/R06/R07/R08/R09/R10/R11/R12/R13/R21/R22/R23/R24/R25/R28/R29/R30 were user-approved 2026-10-13**: see docs/RULINGS_CONFIRMED_2026-10-13.md. Never describe these 17 as open. Some confirmed behavior (notably R22 response window and all R05 token paths) remains incompletely implemented.
 - Generated coverage reports and manual notes are now separated. Edit docs/AUTOMATION_NOTES.md for prose and docs/effect-coverage.json for effect records. Run npm run check:coverage then npm run check:coverage -- --check. CI must reject stale reports without silently regenerating them.
 
 ## Non-negotiable rules
