@@ -34,9 +34,9 @@ test('AI: random and selected decks, independent three difficulties, private car
   const badJoin=await call(`/api/rooms/${a.json.code}/join`,{method:'POST',body:{deckId:'01',label:'침입'}});assert.equal(badJoin.status,409);
   const p={code:a.json.code,tokens:[a.json.token,null]};let state=g;
   for(let i=0;i<30&&state.status==='active';i++){
-   const t=state.pendingExtraSummon?'extraResponse':state.turn===0?(state.pendingAttack?.stage==='response'?'defend':state.phase==='DRAW'?'draw':state.phase==='MAIN'?'phase':state.phase==='ATTACK'?'phase':'phase'):'defend';
+   const t=state.pendingSpell?'spellResponse':state.pendingExtraSummon?'extraResponse':state.turn===0?(state.pendingAttack?.stage==='response'?'defend':state.phase==='DRAW'?'draw':state.phase==='MAIN'?'phase':state.phase==='ATTACK'?'phase':'phase'):'defend';
    const actType=t==='phase'&&state.phase==='MAIN'?'phase':t;
-   const r=await act(p,0,actType,actType==='extraResponse'?{choice:'pass'}:{});assert.equal(r.status,200,JSON.stringify(r.json));state=r.json;
+   const r=await act(p,0,actType,['extraResponse','spellResponse'].includes(actType)?{choice:'pass'}:{});assert.equal(r.status,200,JSON.stringify(r.json));state=r.json;
    assert.equal(state.players[1].hand,null);
   }
   assert.ok(state.version>g.version);
@@ -45,7 +45,7 @@ test('AI: random and selected decks, independent three difficulties, private car
 test('AI rejects unimplemented spell instead of silently consuming the card',async()=>{
  const a=await call('/api/ai',{method:'POST',body:{deckId:'01',aiDeckId:'03',difficulty:'medium'}});assert.equal(a.status,201);
  const p={code:a.json.code,tokens:[a.json.token,null]};let s=a.json.state;
- if(s.turn!==0){for(let i=0;i<60&&s.turn!==0&&s.status==='active';i++){const t=s.pendingExtraSummon?'extraResponse':s.pendingAttack?'defend':s.phase==='DRAW'?'draw':'phase';const r=await act(p,0,t,t==='extraResponse'?{choice:'pass'}:{});assert.equal(r.status,200);s=r.json}}
+ if(s.turn!==0){for(let i=0;i<60&&s.turn!==0&&s.status==='active';i++){const t=s.pendingSpell?'spellResponse':s.pendingExtraSummon?'extraResponse':s.pendingAttack?'defend':s.phase==='DRAW'?'draw':'phase';const r=await act(p,0,t,['extraResponse','spellResponse'].includes(t)?{choice:'pass'}:{});assert.equal(r.status,200);s=r.json}}
  if(s.status==='active'&&s.turn===0&&s.phase==='DRAW')s=(await act(p,0,'draw')).json;
  const unavailable=s.players[0].hand?.find(u=>u.card.type==='주문'&&!['COC-03-007','COC-03-008','COC-05-002'].includes(u.card.id));
  if(unavailable){const r=await act(p,0,'play',{unitId:unavailable.id});assert.equal(r.status,409);const again=(await call(`/api/rooms/${p.code}`,{token:p.tokens[0]})).json;assert.ok(again.players[0].hand.some(u=>u.id===unavailable.id))}
