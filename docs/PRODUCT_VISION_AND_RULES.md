@@ -1,5 +1,7 @@
 # 제품 목표 및 확정 공통 규칙 — 컴바인 오브 카드즈
 
+> **Codex용 최신 규칙·우선순위 색인:** [CODEX_RULES_REFERENCE.md](CODEX_RULES_REFERENCE.md) · [CODEX_HANDOFF.md](CODEX_HANDOFF.md) · [CODEX_IMPLEMENTATION_PLAN.md](CODEX_IMPLEMENTATION_PLAN.md). 카드 COC-21-002 마검의 ATTACK 페이즈 HP30 지불과 다음 자기 턴 ×2 곱셈 중복은 PR #58 최신 사용자 확정이며, 오래된 턴 시작 구현은 폐기됨.
+
 **기준:** 2026-10-13 인계 / 공식 규칙·카드 텍스트 v1.3. 이 문서는 *코드에 모두 구현되었다는 뜻이 아니다*. 카드별 특례가 일반 규칙보다 우선하며, 실제 카드 원문 정본이 저장소에 추가되면 그 문구와 반드시 대조한다.
 
 ## A. 개발 목적과 성공 모습
