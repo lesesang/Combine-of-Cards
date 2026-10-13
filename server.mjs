@@ -356,7 +356,44 @@ function runAI(r){if(r.mode!=='ai'||r.status!=='active')return;
     const ability=chooseAIFieldAbility(r);if(ability){const snapshot=structuredClone(r);try{apply(r,1,'ability',ability)}catch(e){for(const key of Object.keys(r))delete r[key];Object.assign(r,snapshot);r.players[1].aiRejectedAbilities??=[];r.players[1].aiRejectedAbilities.push(ability.sourceUnitId);log(r,'ai',`AI가 실행 불가능한 필드 효과를 건너뛰었습니다: ${e.message}`)}continue}
     const extra=chooseAIExtra(r);if(extra){apply(r,1,'extraSummon',extra);continue}
     const id=chooseAIMove(r);
-    if(id){const c=cards.get(r.units[id].cardId),t=['COC-03-008','COC-17-003','COC-30-007','COC-32-006'].includes(c.id)?{type:'player',player:1}:chooseAITarget(r,id);if(['COC-08-001','COC-08-008','COC-31-002'].includes(c.id)&&r.players[0].field.some(Boolean)){t.type='unit';t.id=r.players[0].field.find(Boolean);delete t.player;}const before=structuredClone(r);try{apply(r,1,'play',{unitId:id,target:t,targets:c.id==='COC-06-004'?[...r.players[0].field,...r.players[1].field].filter(Boolean).slice(0,2):undefined})}catch(e){for(const key of Object.keys(r))delete r[key];Object.assign(r,before);r.players[1].aiRejected??=[];r.players[1].aiRejected.push(id);if(r.players[1].aiRejected.length>20)r.players[1].aiRejected.shift();log(r,'ai',`AI가 사용 불가능한 ${c.name} 카드를 건너뛰었습니다.`)}continue}
+     if(id){
+      const c=cards.get(r.units[id].cardId);
+      const t=['COC-03-008','COC-17-003','COC-30-007','COC-32-006'].includes(c.id)?
+       {type:'player',player:1}:chooseAITarget(r,id);
+      const enemyUnits=r.players[0].field.filter(Boolean);
+      const allUnits=r.players.flatMap(p=>p.field.filter(Boolean));
+      if(['COC-08-001','COC-08-008','COC-31-002','COC-05-007'].includes(c.id)&&enemyUnits.length){
+       t.type='unit';t.id=enemyUnits[0];delete t.player;
+      }
+      if(['COC-01-004','COC-01-005','COC-31-006'].includes(c.id)){
+       const pool=c.id==='COC-31-006'?
+        allUnits.filter(mid=>!/마술사|마법사/.test(cards.get(r.units[mid].cardId)?.attribute||'')):allUnits;
+       if(pool.length){t.type='unit';t.id=pool[0];delete t.player;}
+      }
+      if(c.id==='COC-30-004'&&enemyUnits.length){
+       t.type='unit';t.id=[...enemyUnits].sort((a,b)=>(r.units[a].hp??1e9)-(r.units[b].hp??1e9))[0];delete t.player;
+      }
+      let targets=c.id==='COC-06-004'?allUnits.slice(0,2):undefined;
+      if(c.id==='COC-05-006'){
+       const eligible=allUnits.filter(mid=>{
+        const z=zoneOwner(r,mid),name=unitName(r,mid);
+        const land=z&&r.players[z.player].field.some(x=>x&&unitName(r,x).includes('카툰 랜드'));
+        return !land&&!r.units[mid].treatedAsToon&&!name.includes('카툰');
+       });
+       targets=eligible.slice(0,2);
+      }
+      const before=structuredClone(r);
+      try{apply(r,1,'play',{unitId:id,target:t,targets});}
+      catch(e){
+       for(const key of Object.keys(r))delete r[key];
+       Object.assign(r,before);
+       r.players[1].aiRejected??=[];
+       r.players[1].aiRejected.push(id);
+       if(r.players[1].aiRejected.length>20)r.players[1].aiRejected.shift();
+       log(r,'ai',`AI가 사용 불가능한 ${c.name} 카드를 건너뛰었습니다.`);
+      }
+      continue;
+     }
     apply(r,1,'phase',{});continue;
    }
    if(r.phase==='ATTACK'){
