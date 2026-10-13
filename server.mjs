@@ -16,7 +16,7 @@ const ROOT=path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC=path.join(ROOT,'public');
 const DATA_DIR=process.env.DATA_DIR || path.join(ROOT,'.data');
 const STORAGE=path.join(DATA_DIR,'rooms.json');
-const RULES='1.3-ai-beta.8';
+const RULES='1.3-ai-beta.9';
 const CARD_PATH=path.join(PUBLIC,'data','catalog.json.gz.b64');
 function loadCatalog(){
  if(fs.existsSync(CARD_PATH))return JSON.parse(zlib.gunzipSync(Buffer.from(fs.readFileSync(CARD_PATH,'utf8').trim(),'base64')).toString('utf8'));
@@ -249,7 +249,7 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
  p.roundPlays=(p.roundPlays||0)+1;
  if(/원소|금속/.test(c.attribute)){p.roundElementUses=(p.roundElementUses||0)+1;p.metalElementUsedGame=(p.metalElementUsedGame||0)+1;}
  if(c.type==='주문'){p.spellsThisTurn=(p.spellsThisTurn||0)+1;if(c.attribute==='원소')p.elementSpellPlaysThisTurn=(p.elementSpellPlaysThisTurn||0)+1;}
- if(c.attribute==='자연'&&c.type==='주문'){p.naturalStreak=(p.naturalStreak||0)+1;p.natureSpellsUsedGame=(p.natureSpellsUsedGame||0)+1;}
+ if(c.attribute==='자연'&&c.type==='주문'){p.naturalStreak=(p.naturalStreak||0)+1;p.natureSpellsUsedGame=(p.natureSpellsUsedGame||0)+1;p.natureSpellTurns??=[];if(!p.natureSpellTurns.includes(r.turnNumber)){p.natureSpellTurns.push(r.turnNumber);if(p.natureSpellTurns.length>10)p.natureSpellTurns.shift();}}
  log(r,'play',`${p.label}: ${c.name} 사용`);setOutcome(r);break}
  case 'ability':{requireTurn(r,who);if(r.phase!=='MAIN'||r.pendingAttack||r.pendingManual)fail(409,'지금은 일반 필드 효과를 사용할 수 없습니다.');const result=applyFieldAbility(r,who,body,H);log(r,'effect',`${p.label}: ${cards.get(result.cardId)?.name} 필드 효과 자동 처리`);setOutcome(r);break}
  case 'extraSummon':{
@@ -394,7 +394,12 @@ function runAI(r){if(r.mode!=='ai'||r.status!=='active')return;
         allUnits.filter(mid=>!/마술사|마법사/.test(cards.get(r.units[mid].cardId)?.attribute||'')):allUnits;
        if(pool.length){t.type='unit';t.id=pool[0];delete t.player;}
       }
-      if(c.id==='COC-20-011'){
+      if(c.id==='COC-30-011'){t.type='player';t.player=0;delete t.id;}
+       if(c.id==='COC-20-004'){
+        const burning=r.players[1].field.find(mid=>mid&&/버닝\s*데몬즈?/.test(unitName(r,mid)));
+        if(burning){t.type='unit';t.id=burning;delete t.player;}
+       }
+       if(c.id==='COC-20-011'){
         const burning=r.players[1].field.find(mid=>mid&&/버닝\s*데몬즈/.test(unitName(r,mid)));
         if(burning){t.type='unit';t.id=burning;delete t.player;}
        }
