@@ -6,6 +6,8 @@
 
 **[새 채팅 인수인계 — START_HERE_NEW_CHAT.md](docs/START_HERE_NEW_CHAT.md)** 를 **가장 먼저 읽는다.** 여기에는 개발 목적, 지금까지 확정된 규칙, GitHub 수정 이력, 남은 개발 과제, 실행 방법, 새 채팅용 복사용 시작 요청문이 정리되어 있다.
 
+현재 [개발 이슈 #21~#29](https://github.com/lesesang/Combine-of-Cards/issues)에 남은 기능과 완료 기준을 등록해 추적하고 있다.
+
 ### 주요 문서 바로가기
 
 | 문서 | 내용 |
