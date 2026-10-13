@@ -116,3 +116,7 @@ npm run check:coverage -- --check
 > GitHub 저장소 lesesang/Combine-of-Cards의 main에서 개발을 이어해줘. 먼저 AGENTS.md, docs/CODEX_HANDOFF.md, docs/CODEX_RULES_REFERENCE.md, docs/CODEX_IMPLEMENTATION_PLAN.md를 읽고 연결된 확정 룰북·수정 이력·잔여 이슈와 실제 소스·CI를 대조해. 컴바인 오브 카드즈 v1.3의 24덱 254카드에 대해 모든 카드 효과 자동화와 사람/AI 대전·안전한 배포를 목표로 해. 사용자 승인 규칙을 임의 변경하지 말고, 특히 생명을 먹는 마검의 공격 페이즈 HP 30 지불·다음 자기 턴 ×2 곱셈 중복·묘지행 주문, 자의적 장착 해제 금지, 간드레이드래곤 자기 자신 제외를 지켜. 최신 GitHub #21~#29의 P0부터 작은 PR 단위로 실제 코드를 구현하고, 회귀 테스트·생성 문서 검증·두 Actions CI 통과 후 main에 병합해. 매 PR마다 구현·미구현·추가 검증을 GitHub 문서/이슈에 갱신해. 이전에 확정된 규칙을 다시 묻지 말고, 진짜 미확정 사항만 별도 등록해. 부분 지원을 완전 지원이라고 주장하거나 존재하지 않는 정본 파일을 가정하지 마.
 
 **이 파일도 새로운 결정/작업 이후 업데이트하며, 재개 시점을 변경해 보존할 것.**
+
+## 2026-10-13 개발 재개 — 효과 등록 안정성
+
+`feat/effect-registration-atomicity`는 #22의 등록 실패·저장 불일치를 수정한다. 선택 창 이전 선언 검증, 지속 효과 등록 원자성, JSON 비호환 데이터 거부와 HTTP 롤백·재시작 회귀를 추가했다. 실제 카운터 카드는 아직 미구현이다. PR/두 Actions/병합 여부를 별도 확인하고 다음 작업을 시작한다. 수정 근거와 테스트는 `EFFECT_STACK_AND_PERSISTENCE.md`, `IMPLEMENTATION_HISTORY.md`에 기록한다. 정본 자료는 현재 작업 공간에도 없으므로 원문을 창작하지 않는다.

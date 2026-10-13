@@ -15,6 +15,36 @@ function requireRecord(value, label) {
 function validOwner(value) { return Number.isInteger(value) && (value === 0 || value === 1); }
 function validId(value) { return typeof value === 'string' && value.length > 0 && value.length <= 128; }
 
+// structuredClone alone accepts Maps, BigInts, cycles and non-finite numbers,
+// which either fail JSON persistence or change meaning after a restart.
+function cloneSavedData(value) {
+  const copy = structuredClone(value);
+  const ancestors = new Set();
+  function validate(item) {
+    if (item === null || typeof item === 'string' || typeof item === 'boolean') return;
+    if (typeof item === 'number' && Number.isFinite(item)) return;
+    if (typeof item !== 'object' || ancestors.has(item)) {
+      throw new TypeError('effect data must be acyclic JSON data with finite numbers');
+    }
+    const array = Array.isArray(item);
+    if (!array && Object.getPrototypeOf(item) !== Object.prototype &&
+        Object.getPrototypeOf(item) !== null) {
+      throw new TypeError('effect data must use JSON objects and arrays');
+    }
+    ancestors.add(item);
+    if (array) {
+      for (const entry of item) validate(entry);
+    } else {
+      // AI requests use undefined for omitted optional fields. Normalize them
+      // now, exactly as HTTP JSON does, instead of changing state on restore.
+      for (const entry of Object.values(item)) if (entry !== undefined) validate(entry);
+    }
+    ancestors.delete(item);
+  }
+  validate(copy);
+  return JSON.parse(JSON.stringify(copy));
+}
+
 export function declareEffect(room, effect) {
   requireRecord(room, 'room');
   requireRecord(effect, 'effect');
@@ -36,7 +66,7 @@ export function declareEffect(room, effect) {
   if (!Number.isSafeInteger(nextSequence)) throw new Error('effect sequence overflow');
   // Prepare the entire payload before changing sequence or stack. Invalid
   // serialized data must not consume an effect declaration.
-  const entry = {
+  const entry = cloneSavedData({
     sequence: nextSequence,
     key: effect.key ?? null,
     effectId: effect.effectId,
@@ -45,9 +75,9 @@ export function declareEffect(room, effect) {
     sourceZone: effect.sourceZone || 'field',
     exception: effect.exception || null,
     priority: effect.priority || 0,
-    payload: structuredClone(effect.payload ?? {}),
+    payload: effect.payload ?? {},
     declaredAtTurn: room.turnNumber || 0
-  };
+  });
   room.effectStack = stack;
   stack.push(entry);
   room.effectSequence = nextSequence;
@@ -114,7 +144,12 @@ export function beginAutomaticTriggerOrder(room, effects, activePlayer) {
     }
     keys.add(effect.key);
   }
-  const snapshot = structuredClone(effects);
+  const snapshot = cloneSavedData(effects);
+  // Validate the same source, exception, payload and sequence constraints as
+  // actual declaration BEFORE opening a choice that blocks other actions.
+  // Staging does not consume the live sequence or commit a default order.
+  const staged = {effectSequence:room.effectSequence || 0,turnNumber:room.turnNumber || 0};
+  declareAutomaticGroup(staged,snapshot,activePlayer);
   // One trigger per owner per priority requires no user-supplied ordering.
   const needsChoice = [activePlayer,1-activePlayer].filter(who => {
     const counts = new Map();
@@ -125,7 +160,8 @@ export function beginAutomaticTriggerOrder(room, effects, activePlayer) {
     return [...counts.values()].some(count => count > 1);
   });
   if (!needsChoice.length) {
-    declareAutomaticGroup(room,snapshot,activePlayer);
+    room.effectStack = staged.effectStack;
+    room.effectSequence = staged.effectSequence;
     return {pending:false,awaiting:null};
   }
   room.pendingTriggerOrder = {
@@ -243,23 +279,26 @@ export function registerPersistent(room, item) {
   if (!validId(item.kind) || !validOwner(item.owner) || !validId(item.sourceId)) {
     throw new TypeError('persistent effect requires kind, owner and sourceId');
   }
-  room.persistentEffects ??= [];
-  const duplicate = room.persistentEffects.find(e => e.sourceId === item.sourceId && e.kind === item.kind);
+  const effects = room.persistentEffects || [];
+  const duplicate = effects.find(e => e.sourceId === item.sourceId && e.kind === item.kind);
   if (duplicate) return duplicate;
-  if (room.persistentEffects.length >= 256) throw new Error('persistent effect limit exceeded');
-  room.persistentSequence = (room.persistentSequence || 0) + 1;
-  const entry = {
-    id: 'continuous-' + room.persistentSequence,
+  if (effects.length >= 256) throw new Error('persistent effect limit exceeded');
+  const nextSequence = (room.persistentSequence || 0) + 1;
+  if (!Number.isSafeInteger(nextSequence)) throw new Error('persistent effect sequence overflow');
+  const entry = cloneSavedData({
+    id: 'continuous-' + nextSequence,
     owner: item.owner,
     kind: item.kind,
     sourceId: item.sourceId,
     anchorId: item.anchorId ?? null,
     counters: Math.max(0, Math.floor(item.counters || 0)),
-    data: structuredClone(item.data ?? {}),
+    data: item.data ?? {},
     expires: item.expires || 'manual',
     createdAtTurn: room.turnNumber || 0
-  };
-  room.persistentEffects.push(entry);
+  });
+  room.persistentEffects = effects;
+  effects.push(entry);
+  room.persistentSequence = nextSequence;
   return entry;
 }
 
