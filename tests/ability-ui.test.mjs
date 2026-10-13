@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 function ui(){
- const nodes=new Map(),requests=[];
+ const nodes=new Map(),requests=[],listeners={};
  const node=id=>{
   if(!nodes.has(id)){
    let html='';
@@ -17,7 +17,7 @@ function ui(){
   }
   return nodes.get(id);
  };
- const document={querySelector:s=>node(s.slice(1)),querySelectorAll:()=>[],addEventListener(){},createElement:()=>({className:'',textContent:'',remove(){}})};
+ const document={querySelector:s=>node(s.slice(1)),querySelectorAll:()=>[],addEventListener:(name,fn)=>listeners[name]=fn,createElement:()=>({className:'',textContent:'',remove(){}})};
  const context=vm.createContext({document,window:{addEventListener(){}},location:{hash:'#battle'},setTimeout(){},clearTimeout(){},fetch:async(url,options)=>{requests.push({url,body:options.body?JSON.parse(options.body):undefined});return {ok:true,json:async()=>url.includes('hand-preview')?{cards:[{id:'hidden',name:'상대의 숨겨진 카드'}]}:game}},console});
  const source=fs.readFileSync(new URL('../public/app.js',import.meta.url),'utf8').replace(/boot\(\);\s*$/,'');
  vm.runInContext(source,context);
@@ -27,13 +27,28 @@ function ui(){
  const game={code:'ABC123',you:0,turn:0,turnNumber:1,phase:'MAIN',status:'active',version:7,graveAbilities:[{sourceUnitId:sourceUnit.id,costUnitId:payer.id}],automation:{fieldAbilityIds:['COC-12-013']},players:[{hand:[cost],grave:[sourceUnit],field:[payer,crash,null],integration:null},{field:[enemy,null,null],hand:null}]};
  game.players[0].hand.push(unit('steal','COC-13-008','카드 뺏기'));game.players[1].handCount=1;
   context.fixture=game;vm.runInContext("state.game=fixture;state.room='ABC123';state.token='token';render=()=>{}",context);
- return {node,requests,run:code=>vm.runInContext(code,context)};
+ return {node,requests,listeners,run:code=>vm.runInContext(code,context)};
 }
 test('grave-effect UI sends the server-provided choice and optimistic version with the explicit attack cost',async()=>{
  const t=ui();t.run('openGraveAbility()');
  assert.match(t.node('modalRoot').innerHTML,/공격 기회 1회/);
  t.node('graveChoice').value='0';await t.node('graveSubmit').onclick();
  assert.deepEqual(t.requests,[{url:'/api/rooms/ABC123/actions',body:{type:'graveAbility',expectedVersion:7,sourceUnitId:'fusion',costUnitId:'falcon'}}]);
+});
+
+test('Storm UI: only current responder sees counters and sends the selected source with version',async()=>{
+ const t=ui();
+ t.run("state.game.pendingSpell={who:1,awaiting:0,card:{name:'회복'},counters:[{sourceUnitId:'storm',name:'스톰블레이거 드래곤'}]}");
+ const html=t.run('battlePending(state.game)');
+ assert.match(html,/data-spell-counter="storm"/);assert.match(html,/게임당 1회/);
+ await t.listeners.click({target:{closest:()=>({id:'',dataset:{spellCounter:'storm'}})}});
+ assert.deepEqual(t.requests,[{url:'/api/rooms/ABC123/actions',body:{type:'spellResponse',expectedVersion:7,choice:'counter',sourceUnitId:'storm'}}]);
+ t.run('state.game.pendingSpell.awaiting=1');
+ assert.doesNotMatch(t.run('battlePending(state.game)'),/data-spell-counter=|id="spellPass"/);
+ t.run("state.game.pendingSpell={who:0,awaiting:0,card:{name:'회복'},counter:{name:'스톰블레이거 드래곤'},counters:[]}");
+ assert.match(t.run('battlePending(state.game)'),/id="spellPass"/);
+ await t.listeners.click({target:{closest:()=>({id:'spellPass',dataset:{}})}});
+ assert.equal(t.requests[1].body.choice,'pass');
 });
 test('Crash Voltage UI labels a discard cost and submits the selected hand card and enemy target',async()=>{
  const t=ui();t.run('openFieldAbility()');

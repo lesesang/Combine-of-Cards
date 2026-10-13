@@ -2,6 +2,12 @@
 
 **기록 기준:** GitHub lesesang/Combine-of-Cards 의 2026-10-12 ~ 2026-10-13 병합된 PR 이력과 실제 main 코드. 각 PR에서 추가한 내용과 **다 하지 못한 부분**을 분리했다. 이 문서는 작업의 맥락을 보존하기 위한 이력이지, PR을 병합했다는 이유로 전체 카드 효과 완료를 인증하지 않는다.
 
+## 스톰블레이거 주문 무효화 부분 구현 (2026-10-13)
+
+`COC-14-001`의 게임당 1회 주문 무효화를 15종 응답 주문에 연결했다. 선언 시 사용 기록 소비, 원 주문 발동자의 pass 후 LIFO 무효화/비용 미반환, 소스 이탈·무효 불발, 재시작 복구 및 하·중·상 AI/브라우저 대응을 검증한다. **소환 무효화와 다른 카드/전역 체인은 미완료**다. 현재 158 partial / 95 manual / 1 basic, 효과 증거 7건(4장), 완전 인증 0. 확정 규칙 충돌·새 판정 결정은 없으며 v1.3 원본 자료는 여전히 부재다. 상세 명세와 다음 범위는 [STORM_SPELL_COUNTER.md](STORM_SPELL_COUNTER.md)를 참조한다.
+
+- 브랜치 `feat/storm-spell-counter`, 관련 #22/#23/#25/#27. 회귀: `tests/storm-spell-counter.test.mjs`, `tests/storm-counter-api.test.mjs`, `tests/ability-ui.test.mjs`. 로컬 검증: Node.js 24.19.0, 284개 테스트 통과(실패/스킵 0), 24덱 AI 스모크 785행동(실패/중단 0), 데이터·보고서·문법·diff 검사 통과. 최종 GitHub CI 결과는 PR/이슈에 기록한다.
+
 ## 2026-10-13 개발 재개 — #23 확정 재정 증거와 응답 주문 집계
 
 - [PR #61](https://github.com/lesesang/Combine-of-Cards/pull/61), 브랜치 `feat/confirmed-effect-evidence`. 최종 Actions/병합 상태는 PR에서 확인한다.

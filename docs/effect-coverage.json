@@ -209,5 +209,58 @@
         "name": "sword: sequential payment fails on fourth duplicate when HP is exhausted"
       }
     ]
+  },
+  {
+    "cardId": "COC-14-001",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "상대의 주문의 발동 또는 몬스터의 소환을 한 게임당 1회 무효화 합니다.",
+    "trigger": "상대의 등록된 15종 주문 선언 후 spellResponse 대응 창",
+    "condition": "자신의 유효한 일체화 스톰블레이거, 현재 대응권자, 같은 UID의 게임당 1회 미사용",
+    "cost": "추가 자원 비용 없음; 선언 시 게임당 1회 사용 기록 소비",
+    "target": "상대가 선언한 원래 주문 스택 항목",
+    "resolution": "카운터를 후발 선언하고 원 주문 발동자 pass 후 LIFO 해결; 대상 주문 핸들러 생략, 비용 미반환; 소스 이탈/조종권 변경/무효 시 카운터 불발",
+    "duration": "같은 물리 카드 게임당 1회; 영역 이동·JSON 저장·재시작 보존",
+    "remaining": "몬스터 소환 무효화, 나머지 주문 대응 창, 모든 소스 이동/복사 조합. 원본 v1.3 DOCX/JSON 부재로 런타임 카탈로그 문구 기준",
+    "implementation": [
+      "src/spell-counters.mjs",
+      "src/effect-runtime.mjs",
+      "server.mjs",
+      "public/app.js"
+    ],
+    "tests": [
+      {
+        "path": "tests/storm-spell-counter.test.mjs",
+        "name": "Storm counter: LIFO negates a paid spell after caster pass without refund"
+      },
+      {
+        "path": "tests/storm-spell-counter.test.mjs",
+        "name": "Storm counter: invalid source, controller, usage and response preserve state"
+      },
+      {
+        "path": "tests/storm-spell-counter.test.mjs",
+        "name": "Storm counter: moved or negated source fails while usage remains spent"
+      },
+      {
+        "path": "tests/storm-spell-counter.test.mjs",
+        "name": "Storm counter: JSON restoration and re-entry cannot reset once-per-game usage"
+      },
+      {
+        "path": "tests/storm-spell-counter.test.mjs",
+        "name": "Storm counter: all AI levels use legal responses and acknowledge human counters"
+      },
+      {
+        "path": "tests/storm-spell-counter.test.mjs",
+        "name": "Storm counter: every registered queued spell skips its handler when negated"
+      },
+      {
+        "path": "tests/storm-counter-api.test.mjs",
+        "name": "Storm HTTP: identity/version rejection and restart preserve the pending counter and spent limit"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "Storm UI: only current responder sees counters and sends the selected source with version"
+      }
+    ]
   }
 ]

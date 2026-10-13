@@ -226,7 +226,7 @@ export function resolveEffectStack(room, { getZone, execute, onResult, fingerpri
         throw new TypeError('fingerprint must return a bounded string');
       }
       const stackKey = JSON.stringify(room.effectStack.map(e=>[
-        e.effectId,e.owner,e.sourceId,e.exception,e.priority,e.payload
+        e.effectId,e.owner,e.sourceId,e.exception,e.priority,e.payload,e.negatedBy
       ]));
       const key = signature + '\\n' + stackKey;
       if (seen.has(key)) {
@@ -248,6 +248,12 @@ export function resolveEffectStack(room, { getZone, execute, onResult, fingerpri
     const before = structuredClone(room);
     const effect = room.effectStack.pop();
     try {
+      if (Number.isSafeInteger(effect.negatedBy) && effect.negatedBy > 0) {
+        const result = {effectId:effect.effectId,sequence:effect.sequence,status:'negated-by-effect'};
+        onResult?.(result,effect);
+        results.push(result);
+        continue;
+      }
       const zone = effect.sourceId ? getZone(effect.sourceId) : null;
       const protectedEffect = EXCEPTIONS.has(effect.exception);
       const validSource = !effect.sourceId || protectedEffect ||
