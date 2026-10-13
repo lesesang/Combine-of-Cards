@@ -36,7 +36,7 @@ test('R01: first supported automated spell pays card use and queues a JSON respo
  assert.equal(I.publicState(r,1).players[0].hand,null);
  assert.equal(I.publicState(r,1).pendingSpell.sourceId,undefined,'internal UID is private');
  assert.throws(()=>I.apply(r,0,'spellResponse',{choice:'pass'}),/상대가/);
- assert.throws(()=>I.apply(r,1,'spellResponse',{choice:'negate'}),/아직|지원하지/);
+ assert.throws(()=>I.apply(r,1,'spellResponse',{choice:'negate'}),/무효화 응답은 사용할 수 없습니다/);
  assert.throws(()=>I.apply(r,0,'phase',{}),/주문 대응/);
  assert.throws(()=>I.apply(r,0,'play',{unitId:source}),/주문 대응/);
  const result=I.apply(r,1,'spellResponse',{choice:'pass'});
@@ -91,7 +91,7 @@ test('R01: bogus counterspell request leaves pending state unchanged',()=>{
  const {r,source}=setup();
  I.apply(r,0,'play',{unitId:source});
  const before=structuredClone(r);
- assert.throws(()=>I.apply(r,1,'spellResponse',{choice:'negate',target:source}),/지원하지/);
+ assert.throws(()=>I.apply(r,1,'spellResponse',{choice:'negate',target:source}),/무효화 응답은 사용할 수 없습니다/);
  assert.deepEqual(r,before);
 });
 
