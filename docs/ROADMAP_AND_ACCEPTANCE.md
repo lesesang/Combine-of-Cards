@@ -6,6 +6,23 @@
 
 > **완료 표시 원칙:** 화면이 작동하거나 테스트 하나를 통과했다고 '완료' 처리하지 않는다. 사용 가능한 행동/발동·실패·상대 대응·지속·카드 이동·동시 사건·승패·AI를 포함해 관련 테스트에서 정답성을 확인해야 한다.
 
+
+## GitHub 이슈로 추적할 대형 작업
+
+모든 이슈의 세부 완료 조건은 해당 GitHub 페이지와 이 문서 각 단계에 작성되어 있다.
+
+| 이슈 | 업무 |
+|---|---|
+| [#21](https://github.com/lesesang/Combine-of-Cards/issues/21) | P0 · v1.3 정본 데이터 편입 |
+| [#22](https://github.com/lesesang/Combine-of-Cards/issues/22) | P0 · 전역 효과 체인 |
+| [#23](https://github.com/lesesang/Combine-of-Cards/issues/23) | P0 · 효과별 자동화 추적·보고서 생성기 |
+| [#24](https://github.com/lesesang/Combine-of-Cards/issues/24) | P1 · 소유권/조종권/장착/일체화/소재 |
+| [#25](https://github.com/lesesang/Combine-of-Cards/issues/25) | P1 · 카드 254개 전 효과 자동화 |
+| [#26](https://github.com/lesesang/Combine-of-Cards/issues/26) | P1 · 미확정 재정 R01~R27 해결 |
+| [#27](https://github.com/lesesang/Combine-of-Cards/issues/27) | P2 · AI 전 행동·난이도 |
+| [#28](https://github.com/lesesang/Combine-of-Cards/issues/28) | P2 · 576 덱 조합·보안/판정 검사 |
+| [#29](https://github.com/lesesang/Combine-of-Cards/issues/29) | P3 · 영속 DB·운영 배포 |
+
 ## P0. 데이터 정본 및 자동 판정 기반 일치 (가장 먼저)
 
 - [ ] 과거 대화에서 생성된 **v1.3 룰북, 24개 덱 카드집, 정본 카드 JSON, 원문 비교 데이터**를 저장소의 versioned source/ 디렉터리에 추가. 이전 산출물의 정확한 파일명은 docs/SOURCE_DATA_PROVENANCE.md 참조. 8개 삭제 덱이 다시 들어오지 않게 검증.
