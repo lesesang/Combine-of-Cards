@@ -147,3 +147,10 @@
 - `commitActivationCosts`를 통해 카드 사용 시 토큰을 묘지로 릴리스하면 '릴리스', 제외 비용이면 '사용', 파괴 비용이면 실제 파괴 성공 뒤 '사용' 이벤트 발행. 일반 효과 파괴는 별개.
 - 각각 한 토큰 비용의 이벤트는 한 번만 적립하고 R06 양측 황금 귀속 및 R07 비파괴 전환은 기존 그대로 유지.
 - `tests/confirmed-rulings.test.mjs`에 스톰 블레이거 계열의 실제 비용 선택·제외/파괴 시나리오를 추가. 모든 카드의 토큰 비용 경로 통합과 전체 LIFO는 미완료.
+
+
+## 2026-10-13 · R01/R02 동시 발동 선언 순서·효과 스택 부분 통합 (PR #38)
+
+- 공통 `beginAutomaticTriggerOrder` / `chooseAutomaticTriggerOrder`: 동일 우선도에서 각 조종자가 자기 유발 효과 순서를 지정. 현재 턴 플레이어가 먼저, 상대 다음, 선언 역순 해결. 명시 우선도는 선수 선택보다 우선하며 선택 상태는 JSON 직렬화.
+- 첫 실제 연결: `H.destroyBatch`의 다수 `firstDestroyHeal`. 파괴 직전 HP 최대 스냅샷, 자동 효과 키 등록, 플레이어 선택 대기, 해결 스택 및 판정 로그. 서버는 잘못된 선택/권한/대기 중 행동을 거부하고 AI는 자동 선택. 대전 UI에 선택 메뉴 추가.
+- `tests/effect-runtime.test.mjs`, `tests/simultaneous-destruction.test.mjs`로 선언 선택·실제 스택·복원·권한·동시 파괴 검증. 전체 소환/주문/묘지/복사 등의 전역 대응 체인은 #22에 남음.
