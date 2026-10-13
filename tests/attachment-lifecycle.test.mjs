@@ -115,7 +115,7 @@ test('R15 confirmed: no voluntary unequip or generic player action',()=>{
  const original=structuredClone(r);
  assert.throws(()=>I.detachCard(r,equipment,'grave'),/임의로 할 수 없습니다/);
  assert.throws(()=>I.detachCard(r,equipment,'grave',{cause:'voluntary'}),/임의로 할 수 없습니다/);
- assert.throws(()=>I.apply(r,0,'detach',{unitId:equipment}),/지원하지|알 수 없는|올바르지|행동/);
+ assert.throws(()=>I.apply(r,0,'detach',{unitId:equipment}),/알 수 없는 행동/);
  assert.deepEqual(r,original,'no voluntary unequip may mutate physical or effect state');
  I.detachCard(r,equipment,'grave',{cause:'card-effect'});
  assert.ok(r.players[0].grave.includes(equipment));
