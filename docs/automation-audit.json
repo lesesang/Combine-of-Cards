@@ -1,6 +1,24 @@
 {
   "sourceRuleVersion": "1.3",
   "automatedSpellHandlerCount": 71,
+  "responseSpellCount": 15,
+  "responseSpellIds": [
+    "COC-07-003",
+    "COC-13-007",
+    "COC-17-003",
+    "COC-07-010",
+    "COC-08-007",
+    "COC-10-009",
+    "COC-19-004",
+    "COC-20-005",
+    "COC-30-005",
+    "COC-21-002",
+    "COC-30-007",
+    "COC-07-004",
+    "COC-07-011",
+    "COC-17-004",
+    "COC-31-005"
+  ],
   "generatedAt": "repository build time",
   "counts": {
     "partial": 157,

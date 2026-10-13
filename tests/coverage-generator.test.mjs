@@ -18,6 +18,18 @@ test('coverage regeneration preserves manual notes and read-only CI check reject
   const report=path.join(temporary,'docs/AUTOMATION_COVERAGE.md'),expected=fs.readFileSync(report,'utf8');
   result=run();assert.equal(result.status,0,result.stderr);assert.equal(fs.readFileSync(report,'utf8'),expected);
   result=run('--check');assert.equal(result.status,0,result.stderr);
+  const registry=path.join(temporary,'src/spell-response-registry.mjs');
+  const registrySource=fs.readFileSync(registry,'utf8');
+  for(const [id,message] of [
+   ['COC-00-000',/Invalid response spell registration/],
+   ['COC-01-007',/Invalid response spell registration/],
+   ['COC-07-003',/Duplicate response spell ID/]
+  ]){
+   fs.writeFileSync(registry,registrySource.replace('Object.freeze([','Object.freeze(['+JSON.stringify(id)+','));
+   result=run('--check');assert.notEqual(result.status,0);assert.match(result.stderr,message);
+   assert.equal(fs.readFileSync(report,'utf8'),expected,'invalid registry must not rewrite coverage');
+  }
+  fs.writeFileSync(registry,registrySource);
   fs.writeFileSync(report,expected+'stale\n');result=run('--check');assert.notEqual(result.status,0);assert.match(result.stderr,/Stale generated report/);
   assert.equal(fs.readFileSync(report,'utf8'),expected+'stale\n','CI must not silently repair a stale report');
   fs.writeFileSync(report,expected);

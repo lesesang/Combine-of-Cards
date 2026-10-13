@@ -6,6 +6,7 @@ import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import { castAutomatedSpell, hasAutoSpell, spellHandlerIds, validateLifeEatingSwordTarget } from './src/automated-effects.mjs';
 import {automationStatus} from './src/automation-status.mjs';
+import {responseSpellIds} from './src/spell-response-registry.mjs';
 import {planActivation,commitActivationCosts} from './src/activation-rules.mjs';
 import {validateExtraSummon, EXTRA_RECIPES} from './src/extra-summons.mjs';
 import {applyFieldAbility,FIELD_ABILITY_IDS} from './src/field-abilities.mjs';
@@ -22,24 +23,9 @@ const PUBLIC=path.join(ROOT,'public');
 const DATA_DIR=process.env.DATA_DIR || path.join(ROOT,'.data');
 const STORAGE=path.join(DATA_DIR,'rooms.json');
 const RULES='1.3-ai-beta.10';
-// Only standalone, target-free handlers with no unresolved activation costs.
-// Do not add a spell with a selection, field-retention, or resolution-time
-// precondition without a declaration-time legality audit.
-const REACTIVE_SPELL_IDS=new Set([
- 'COC-07-003','COC-13-007','COC-17-003', // already audited response spells
- 'COC-07-010', // opponent draw, then mill based on previous-turn use
- 'COC-08-007', // own recovery based on current field Yokai
- 'COC-10-009', // register one-shot independent first-destroy heal
- 'COC-19-004', // search one monster from own deck (if present)
- 'COC-20-005', // one shared dice roll damages both players
- 'COC-30-005', // spell bonus and next-turn draw registration
- 'COC-21-002', // independent Life-Eating Sword effect granted to selected unit/player
- 'COC-30-007', // own recovery
- 'COC-07-004', // opponent draw and own fixed-name deck search
- 'COC-07-011', // opponent draw/mill; self heal and optional integration buff
- 'COC-17-004', // create up to three Mummy Soldier tokens
- 'COC-31-005'  // draw followed by a coin-flip random opposing discard
-]);
+// Add a spell only after auditing declaration-time conditions, target choices,
+// costs and retention. This shared registry also drives coverage reporting.
+const REACTIVE_SPELL_IDS=new Set(responseSpellIds);
 const CARD_PATH=path.join(PUBLIC,'data','catalog.json.gz.b64');
 function loadCatalog(){
  if(fs.existsSync(CARD_PATH))return JSON.parse(zlib.gunzipSync(Buffer.from(fs.readFileSync(CARD_PATH,'utf8').trim(),'base64')).toString('utf8'));
