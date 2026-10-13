@@ -79,3 +79,42 @@ test('R16: rejecting invalid overlay construction is atomic',()=>{
  assert.throws(()=>I.attachOverlayMaterials(r,extra,ids),/필드/);
  assert.deepEqual(r,before);
 });
+
+
+test('R16: invalid later overlay reference cannot partly release earlier material',()=>{
+ const {r,ids,extra}=make();
+ I.apply(r,0,'extraSummon',{extraUnitId:extra,materials:ids});
+ I.apply(r,1,'extraResponse',{choice:'pass'});
+ delete r.units[ids.at(-1)].overlayHostId;
+ const before=structuredClone(r);
+ assert.throws(()=>I.move(r,extra,'grave',0),/얼라이즈 소재 연결 정보/);
+ assert.deepEqual(r,before);
+ assert.ok(r.players[0].field.includes(extra));
+ assert.equal(r.units[ids[0]].overlayHostId,extra);
+});
+test('R15/R16: invalid attached equipment blocks overlay host exit before any material moves',()=>{
+ const {r,ids,extra}=make();
+ I.apply(r,0,'extraSummon',{extraUnitId:extra,materials:ids});
+ I.apply(r,1,'extraResponse',{choice:'pass'});
+ const equipment=I.instantiate(r,'COC-09-005',1);
+ I.move(r,equipment,'hand',1);
+ I.attachCard(r,equipment,extra);
+ delete r.units[equipment].attachmentHostId;
+ const before=structuredClone(r);
+ assert.throws(()=>I.move(r,extra,'hand',0),/장착 카드 연결 정보/);
+ assert.deepEqual(r,before);
+ assert.ok(ids.every(id=>r.units[id].overlayHostId===extra));
+});
+test('R15/R16: valid overlay and equipment leave together for their own owners',()=>{
+ const {r,ids,extra}=make();
+ I.apply(r,0,'extraSummon',{extraUnitId:extra,materials:ids});
+ I.apply(r,1,'extraResponse',{choice:'pass'});
+ const equipment=I.instantiate(r,'COC-09-005',1);
+ I.move(r,equipment,'hand',1);
+ I.attachCard(r,equipment,extra);
+ I.move(r,extra,'grave',0);
+ assert.ok(ids.every(id=>r.players[0].grave.includes(id)));
+ assert.ok(r.players[1].grave.includes(equipment));
+ assert.equal(r.units[equipment].attachmentHostId,undefined);
+ assert.equal(r.units[extra].attachments,undefined);
+});
