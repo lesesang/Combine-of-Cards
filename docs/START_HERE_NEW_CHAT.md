@@ -89,6 +89,12 @@
 - 상대 pass / 선언 순서 선택을 정상 마치고 여전히 카드를 사용할 수 있으면 같은 합법 손패 조회를 재허용. `tests/hand-preview-response-windows.test.mjs` 실제 HTTP/로그인/비공개 상태 검증.
 - 일반적인 모든 카드의 비공개 선택·상대 대응 카드 자체는 여전히 미구현.
 
+## 2026-10-13 R01 response chain, cohort 3 (PR #47)
+
+- Adds four audited automated spells to the server-authoritative pay-now / opponent-pass / resolve-later stack: COC-07-004, COC-07-011, COC-17-004, COC-31-005. Total is now **14** enrolled spells, without claiming any of those cards has full secondary-effect automation.
+- Opponent draw/deck search, draw-plus-mill and conditional integration buff, mummy token generation, server coin toss and random opposing discard now happen after response, not at card-use declaration.
+- Tests: tests/spell-response-summon-search.test.mjs (including frozen state after declaration, serialized restoration, heads/tails branches and server-selected hidden discard). Actual counterspell cards, source movement exceptions and unresolved prerequisite/selection spells remain #22/#25.
+
 ## 1. 새 채팅에서 읽을 순서
 
 1. **docs/START_HERE_NEW_CHAT.md** — 현재 상태와 재개 요령(이 파일).
