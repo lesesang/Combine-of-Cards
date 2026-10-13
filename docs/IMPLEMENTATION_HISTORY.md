@@ -4,7 +4,7 @@
 
 ## 2026-10-13 개발 재개 — #23 확정 재정 증거와 응답 주문 집계
 
-- 브랜치 `feat/confirmed-effect-evidence`; PR/Actions/병합 상태는 별도 확인한다.
+- [PR #61](https://github.com/lesesang/Combine-of-Cards/pull/61), 브랜치 `feat/confirmed-effect-evidence`. 최종 Actions/병합 상태는 PR에서 확인한다.
 - 발견한 문서 충돌: 서버에는 마검을 포함한 응답 주문 15종이 등록되어 있었지만 현재 상태 문서는 14종으로 표기. 효과 추적표는 공식 확정된 R28을 provisional/공식 확인 필요로, R29를 가능 여부 확인 대상으로 남겨 두었다. 이는 새 규칙 질문이 아닌 과거 기록의 잔존이다.
 - 구현: 서버와 생성기가 `src/spell-response-registry.mjs`를 공유하고 응답 주문 수·ID를 보고서에 생성한다. 기존 15개 ID와 순서는 보존. 중복·존재하지 않는 카드·핸들러 없는 응답 등록은 검사 실패. 현행 README/인수인계/런북/로드맵/AGENTS 집계를 수정하며 PR #47 당시 14종이라는 역사 기록은 유지.
 - R28은 공격 다이스 결과에서 대상 파괴 직전 HP를 뺀 양수 부분이며 별도 추가 피해는 포함하지 않는다. R29는 동결·공격 금지·공격력 0에서도 남은 공격권을 비용으로 쓸 수 있다. 기존 확정 재정 테스트를 효과별 증거에 연결하고 R28 상태를 partial로 정정; 원본 sourceText와 카드 수치·동작은 변경하지 않는다.
@@ -329,3 +329,14 @@
 - 신규 문서 정합성 테스트는 실제 코드의 주문 핸들러·자동화 보고서 수치 및 규칙·링크 참조를 검사한다. **이번 변경은 규칙 구현 기능 추가가 아닌 개발 인수인계 및 계획 문서화 작업**이다. 254장 효과 전체 완료 또는 서비스 배포가 아님.
 - 앞으로 새 결정/새 PR이 병합되면 Codex 인계 3개 문서와 해당 이슈 #21~#29, 효과별 추적 및 주요 현황 숫자를 함께 갱신한다.
 
+
+## 2026-10-13 후속 작업 — R01/R02 효과 등록 원자성과 JSON 저장
+
+- 관련 이슈: #22. [PR #60](https://github.com/lesesang/Combine-of-Cards/pull/60)은 최종 HEAD `5808dac`의 Node tests 및 Verify TCG beta 통과 후 main `cae2e2e`로 squash 병합했다. [Node tests](https://github.com/lesesang/Combine-of-Cards/actions/runs/38401298505) · [Verify TCG beta](https://github.com/lesesang/Combine-of-Cards/actions/runs/38401298437).
+- 재현한 오류: 잘못된 소스/예외가 선택 대기를 만든 뒤 해결 불가, 지속 효과 복사 실패가 등록 번호를 소비, Infinity 등의 페이로드가 JSON 저장 시 null로 변환됨.
+- 구현: 등록 데이터의 JSON 사전검사, 선택 대기 이전 전체 그룹 검증, 지속 효과 등록의 준비 후 일괄 반영 및 ID 오버플로 거부. 확정된 선택권·우선도·LIFO·마검·장착·간드레이드래곤 판정은 유지.
+- 회귀: `tests/effect-registration.test.mjs`, `tests/effect-registration-api.test.mjs`. HTTP 비용·버전·파일 롤백과 정상 재시도/재시작 후 한 번만 해결을 검증한다. 기존 카드 통합 테스트도 함께 실행한다.
+- 지원 집계는 157 partial / 96 manual / 1 basic, 71 주문 핸들러, 효과 증거 6건 유지. 공통 등록 기반 수정이므로 카드 전체 완료나 신규 효과 증거로 계산하지 않는다.
+- 미완료/다음: #21 원본 확보, #22 실제 대응 카드·전역 사건, #23 문서의 15종 집계와 R28/R29 증거 정정은 PR #61에서 처리. 새 사용자 재정이 필요한 사항은 발견하지 않았다.
+
+- 이 브랜치 로컬 검증: Node.js 24.19.0에서 **273개 테스트 전부 통과**, 실패/스킵 0; 24덱 AI 스모크 **779개 행동, 실패/중단 0**; 데이터/보고서 재생성·일치/문법 검사 통과. GitHub Actions 통과와 구분한다.
