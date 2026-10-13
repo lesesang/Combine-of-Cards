@@ -124,11 +124,20 @@ export function planActivation({room,who,unitId,cards,body={}}){
 }
 
 export function commitActivationCosts(room,plan,{move,destroy}){
+ // Validate the entire cost set before moving the first card; one protected
+ // material must not let the action partially pay the other materials.
  for(const cost of plan.costs){
   const unit=room.units[cost.unitId];
   if(!unit)deny('소재나 비용으로 지정한 카드가 존재하지 않습니다.');
-  if(cost.to==='destroy')destroy(room,cost.unitId);
-  else move(room,cost.unitId,cost.to==='banished'?'banished':'grave',unit.owner);
+  if(cost.to==='destroy'&&unit.effectDestructionImmune)
+   deny('파괴할 수 없는 몬스터는 파괴 비용으로 지불할 수 없습니다.');
+ }
+ for(const cost of plan.costs){
+  const unit=room.units[cost.unitId];
+  if(cost.to==='destroy'){
+   if(destroy(room,cost.unitId)===false)
+    deny('몬스터 파괴 비용 지불에 실패했습니다.');
+  }else move(room,cost.unitId,cost.to==='banished'?'banished':'grave',unit.owner);
  }
 }
 export const PRECHECKED_ACTIVATION_IDS=Object.freeze([...SPEC.keys()].sort());
