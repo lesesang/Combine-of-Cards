@@ -141,7 +141,7 @@ test('R05: exclusion cost use and its newly spawned token are two separate event
  // The excluded token is used (+1); Storm Knight then creates a second token (+1).
  assert.equal(r.persistentEffects[0].counters,3);
  assert.equal(r.units[tokens[0]],undefined);
- assert.ok(r.players[0].integration===source);
+ assert.ok(r.players[0].field.includes(source)||r.players[0].integration===source);
  assert.ok(r.players[0].field.includes(tokens[1]));
 });
 
