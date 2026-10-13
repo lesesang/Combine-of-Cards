@@ -68,7 +68,20 @@ export function declareAutomaticGroup(room, effects, activePlayer, orderedIds = 
     (Number(a.owner !== activePlayer) - Number(b.owner !== activePlayer)) ||
     (rank ? rank.get(a.key) - rank.get(b.key) : 0)
   );
-  return ordered.map(effect => declareEffect(room, effect));
+  // Stage all entries in a separate stack. A late invalid effect, JSON clone
+  // error, or sequence overflow must never leave a partially declared group.
+  requireRecord(room,'room');
+  const staged = {
+    effectStack:[...(room.effectStack || [])],
+    effectSequence:room.effectSequence || 0,
+    turnNumber:room.turnNumber || 0
+  };
+  if(staged.effectStack.length+ordered.length>256)
+    throw new Error('effect stack exceeds safe limit');
+  const entries=ordered.map(effect=>declareEffect(staged,effect));
+  room.effectStack=staged.effectStack;
+  room.effectSequence=staged.effectSequence;
+  return entries;
 }
 
 
