@@ -48,7 +48,7 @@ function instantiate(r,cardId,owner){const c=cards.get(cardId);if(!c)fail(400,'�
 function createPlayer(r,deckId,label,auth){const d=decks.get(deckId);if(!d)fail(400,'유효하지 않은 덱입니다.');const i=r.players.length;const p={label:requireStr(label??'',24)||`플레이어 ${i+1}`,authHash:hash(auth),deckId,hp:1000,reloads:0,deck:[],hand:[],grave:[],banished:[],extra:[],field:[null,null,null],integration:null,turnsTaken:0,roundPlays:0,lastRoundPlays:0,roundElementUses:0,naturalStreak:0,metalElementUsedGame:0,natureSpellsUsedGame:0,elementSpellPlaysThisTurn:0,spellsThisTurn:0};r.players.push(p);for(const id of d.main)p.deck.push(instantiate(r,id,i));for(const id of d.extra)p.extra.push(instantiate(r,id,i));return p}
 function draw(r,who){const p=r.players[who];if(!p.deck.length){const feedback=100+50*p.reloads;p.reloads++;if(p.grave.length){p.deck.push(...p.grave.splice(0));shuffle(p.deck)}p.hp-=feedback;log(r,'reload',`${p.label}: 리로드 피해 ${feedback}, 덱 ${p.deck.length}장`);setOutcome(r);if(r.status==='finished')return;if(!p.deck.length){log(r,'draw',`${p.label}: 드로우 실패 (덱과 묘지에 카드 없음)`);
 if(r.players[1-who].integration&&r.units[r.players[1-who].integration]?.cardId==='COC-07-007'){p.hp=0;log(r,'effect','포식자 알리자 라팍스: 상대의 드로우 실패로 패배');setOutcome(r)}return;}}const id=p.deck.shift();p.hand.push(id);log(r,'draw',`${p.label}가 카드를 1장 뽑았습니다.`)}
-function move(r,id,to,owner){const u=r.units[id];if(!u)fail(400,'카드를 찾을 수 없습니다.');if(to==='field'&&!r.players[owner??u.owner].field.includes(null))fail(409,'필드 세 칸이 모두 차 있습니다.');if(to==='integration'&&r.players[owner??u.owner].integration)fail(409,'이미 일체화 중입니다.');for(const p of r.players){for(const zone of ['field']){for(let i=0;i<p[zone].length;i++)if(p[zone][i]===id)p[zone][i]=null;}if(p.integration===id)p.integration=null;for(const zone of ['deck','hand','grave','banished','extra'])p[zone]=p[zone].filter(v=>v!==id)}const p=r.players[owner??u.owner];if(!['field','integration'].includes(to)){u.frozen=false;u.battleInvulnerable=false;u.effectsNegated=false;u.diceMax=undefined;u.diceMin=undefined;u.cannotAttack=false;u.attackTurn=-1;u.attackCount=0;u.attackCountTurn=-1;const original=cards.get(u.cardId);if(original){u.atk=Number.isFinite(+original.atk)?Math.max(0,Math.floor(+original.atk)):0;u.hp=Number.isFinite(+original.hp)?Math.floor(+original.hp):null;u.baseAtk=u.atk;}delete u.temporaryBuff;delete u.buffExpiresAt;delete u.treatedAsToon;}if(u.created&&to!=='field'&&to!=='integration'){delete r.units[id];return}if(to==='field'){const slot=p.field.findIndex(x=>x===null);if(slot<0)fail(409,'필드 세 칸이 모두 차 있습니다.');p.field[slot]=id;u.owner=u.owner??owner;u.attackTurn=-1;}else if(to==='integration'){if(p.integration)fail(409,'이미 일체화 중입니다.');p.integration=id;}else if(to==='banished')p.banished.push(id);else if(to==='deck'){p.deck.unshift(id);}else if(to==='hand')p.hand.push(id);else if(to==='grave'){p.grave.push(id);u.atk=Math.max(0,Number(cards.get(u.cardId)?.atk)||0);u.hp=Number.isFinite(+cards.get(u.cardId)?.hp)?+cards.get(u.cardId).hp:null;u.attackTurn=-1;}else fail(400,'이동 위치가 유효하지 않습니다.');}
+function move(r,id,to,owner){const u=r.units[id];if(!u)fail(400,'카드를 찾을 수 없습니다.');if(to==='field'&&!r.players[owner??u.owner].field.includes(null))fail(409,'필드 세 칸이 모두 차 있습니다.');if(to==='integration'&&r.players[owner??u.owner].integration)fail(409,'이미 일체화 중입니다.');for(const p of r.players){for(const zone of ['field']){for(let i=0;i<p[zone].length;i++)if(p[zone][i]===id)p[zone][i]=null;}if(p.integration===id)p.integration=null;for(const zone of ['deck','hand','grave','banished','extra'])p[zone]=p[zone].filter(v=>v!==id)}const p=r.players[owner??u.owner];if(!['field','integration'].includes(to)){u.frozen=false;u.battleInvulnerable=false;u.effectsNegated=false;u.diceMax=undefined;u.diceMin=undefined;u.cannotAttack=false;u.attackTurn=-1;u.attackCount=0;u.attackCountTurn=-1;const original=cards.get(u.cardId);if(original){u.atk=Number.isFinite(+original.atk)?Math.max(0,Math.floor(+original.atk)):0;u.hp=Number.isFinite(+original.hp)?Math.floor(+original.hp):null;u.baseAtk=u.atk;}delete u.temporaryBuff;delete u.buffExpiresAt;delete u.treatedAsToon;delete u.superiorClaw;}if(u.created&&to!=='field'&&to!=='integration'){delete r.units[id];return}if(to==='field'){const slot=p.field.findIndex(x=>x===null);if(slot<0)fail(409,'필드 세 칸이 모두 차 있습니다.');p.field[slot]=id;u.owner=u.owner??owner;u.attackTurn=-1;}else if(to==='integration'){if(p.integration)fail(409,'이미 일체화 중입니다.');p.integration=id;}else if(to==='banished')p.banished.push(id);else if(to==='deck'){p.deck.unshift(id);}else if(to==='hand')p.hand.push(id);else if(to==='grave'){p.grave.push(id);u.atk=Math.max(0,Number(cards.get(u.cardId)?.atk)||0);u.hp=Number.isFinite(+cards.get(u.cardId)?.hp)?+cards.get(u.cardId).hp:null;u.attackTurn=-1;}else fail(400,'이동 위치가 유효하지 않습니다.');}
 function zoneOwner(r,id){for(let i=0;i<r.players.length;i++){const p=r.players[i];for(const z of ['deck','hand','grave','extra','banished'])if(p[z].includes(id))return {player:i,zone:z};if(p.field.includes(id))return {player:i,zone:'field'};if(p.integration===id)return {player:i,zone:'integration'};}return null}
 function damageUnit(r,id,value,{battle=false}={}){const u=r.units[id];if(!u||u.hp===null)fail(409,'체력이 없는 카드입니다.');if(value<0&&u.cardId==='COC-09-002')value=Math.max(-1,value);u.preDamageHp=u.hp;u.hp+=value;if(u.hp<=0){if(battle&&u.cardId==='COC-26-011'){u.hp=1;return false}H.destroy(r,id);return true}return false}
 function dropFromDeck(r,who,count){
@@ -73,7 +73,13 @@ function destroyed(r,id){const z=zoneOwner(r,id),u=r.units[id];if(!z||!u)return;
 const H={
  zone:zoneOwner,move,draw,fail,roll:die,randomInt:n=>crypto.randomInt(n),hurt,healUnit,outcome:setOutcome,shuffle,onSummon:runSummonEffects,
  mill:dropFromDeck,summonToken,search:findCardInDeck,destroy:(r,id)=>{const u=r.units[id];if(u&&zoneOwner(r,id)){
- destroyed(r,id);const z=zoneOwner(r,id),canRevive=u.cardId==='COC-10-011'&&!u.revivedOnce&&z.zone==='field';
+ destroyed(r,id);const z=zoneOwner(r,id);
+  if(z.zone==='field'){
+   r.destructionHistory??=[];
+   r.destructionHistory.push({turnNumber:r.turnNumber,activePlayer:r.turn,controller:z.player,cardId:u.cardId});
+   if(r.destructionHistory.length>500)r.destructionHistory.shift();
+  }
+  const canRevive=u.cardId==='COC-10-011'&&!u.revivedOnce&&z.zone==='field';
  const name=cards.get(u.cardId)?.name||u.tokenCard?.name;move(r,id,'grave',u.owner);log(r,'destroy',`${name} 파괴`);
  if(canRevive&&r.units[id]&&r.players[z.player].field.includes(null)){
   u.revivedOnce=true;move(r,id,'field',z.player);log(r,'revive',`${name}: 파괴 후 효과 없이 1회 부활`)
@@ -243,7 +249,8 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
   const partner=r.players[r.turn].field.some(mid=>mid&&r.units[mid].cardId==='COC-12-006');
   if(partner&&cards.get(src.cardId)?.attribute==='영웅')dealt+=100;
   const targetUnit=r.units[a.target.id],prior=Math.max(0,targetUnit.hp??0),targetAtk=targetUnit.atk,invulnerable=targetUnit.battleInvulnerable;
-  if(!invulnerable){const destroyed=damageUnit(r,a.target.id,-dealt,{battle:true});if(src.cardId==='COC-12-008'&&destroyed){r.players[who].hp-=Math.max(0,dealt-prior)}if(destroyed&&src.cardId==='COC-12-011'){r.players[who].hp-=Math.max(0,targetAtk);log(r,'effect',`버디 히트토네이도: 파괴한 몬스터의 공격력 ${Math.max(0,targetAtk)}만큼 상대에게 피해`)}if((destroyed&&src.cardId==='COC-32-011')||(src.cardId==='COC-32-001'&&src.atk>targetAtk)){if(src.bonusAttackTurn!==r.turnNumber){src.bonusAttackTurn=r.turnNumber;src.bonusAttackCount=1;log(r,'effect',`${unitName(r,src.id)}: 이 턴 추가 공격 기회 1회 획득`)}}}
+  if(!invulnerable){const destroyed=damageUnit(r,a.target.id,-dealt,{battle:true});if(src.cardId==='COC-12-008'&&destroyed){r.players[who].hp-=Math.max(0,dealt-prior)}if(destroyed&&src.cardId==='COC-12-011'){r.players[who].hp-=Math.max(0,targetAtk);log(r,'effect',`버디 히트토네이도: 파괴한 몬스터의 공격력 ${Math.max(0,targetAtk)}만큼 상대에게 피해`)}
+   if(destroyed&&src.superiorClaw){const bonus=Math.max(0,Math.floor(targetAtk));r.players[who].hp-=bonus;log(r,'effect',`슈페리얼 클로: 전투로 파괴한 몬스터의 공격력 ${bonus}만큼 상대에게 피해`)}if((destroyed&&src.cardId==='COC-32-011')||(src.cardId==='COC-32-001'&&src.atk>targetAtk)){if(src.bonusAttackTurn!==r.turnNumber){src.bonusAttackTurn=r.turnNumber;src.bonusAttackCount=1;log(r,'effect',`${unitName(r,src.id)}: 이 턴 추가 공격 기회 1회 획득`)}}}
   else dealt=0;
   if(src.cardId==='COC-10-006')r.players[r.turn].hp+=Math.min(prior,dealt);
   if(src.cardId==='COC-21-007')r.players[r.turn].hp+=Math.floor(Math.min(prior,dealt)/3);
@@ -370,7 +377,11 @@ function runAI(r){if(r.mode!=='ai'||r.status!=='active')return;
         allUnits.filter(mid=>!/마술사|마법사/.test(cards.get(r.units[mid].cardId)?.attribute||'')):allUnits;
        if(pool.length){t.type='unit';t.id=pool[0];delete t.player;}
       }
-      if(c.id==='COC-30-004'&&enemyUnits.length){
+      if(c.id==='COC-27-010'){
+        const fighter=r.players[1].field.find(mid=>mid&&unitName(r,mid).includes('슈페리얼 파이터'));
+        if(fighter){t.type='unit';t.id=fighter;delete t.player;}
+       }
+       if(c.id==='COC-30-004'&&enemyUnits.length){
        t.type='unit';t.id=[...enemyUnits].sort((a,b)=>(r.units[a].hp??1e9)-(r.units[b].hp??1e9))[0];delete t.player;
       }
       let targets=c.id==='COC-06-004'?allUnits.slice(0,2):undefined;

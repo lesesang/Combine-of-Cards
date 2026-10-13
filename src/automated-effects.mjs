@@ -159,6 +159,26 @@ register('COC-30-004',ctx=>{
  if(t.id&&before>0&&before<=amount)return {retain:'hand'};
 });
 
+
+// Persistent destruction ledger allows effects to refer to a *previous own turn*.
+register('COC-30-002',ctx=>{
+ const previousOwnTurn=ctx.r.turnNumber-2;
+ const count=(ctx.r.destructionHistory||[]).filter(e=>
+  e.turnNumber===previousOwnTurn&&e.activePlayer===ctx.who&&e.controller===1-ctx.who
+ ).length;
+ hit(ctx,enemy(ctx),count*100);
+});
+// The granted combat trigger belongs to the specified Superior Fighter, not this spell.
+register('COC-27-010',ctx=>{
+ const t=ctx.body.target,id=t?.type==='unit'?t.id:null,z=id&&ctx.H.zone(ctx.r,id);
+ if(!z||z.zone!=='field'||z.player!==ctx.who||
+    !ctx.H.name(ctx.r,id).includes('슈페리얼 파이터'))
+  ctx.H.fail(409,'자신 필드의 슈페리얼 파이터 몬스터를 선택해야 합니다.');
+ ctx.r.units[id].superiorClaw=true;
+ ctx.r.players[ctx.who].hp-=200;
+ ctx.H.outcome(ctx.r);
+});
+
 export function hasAutoSpell(cardId){return Object.hasOwn(aliases,cardId)}
 export const spellHandlerIds=Object.keys(aliases);
 export function castAutomatedSpell(r,who,c,body,H){const f=aliases[c.id];if(!f)return {supported:false};const ctx={r,who,c,body,H};const result=f(ctx)||{};return {supported:true,...result}}
