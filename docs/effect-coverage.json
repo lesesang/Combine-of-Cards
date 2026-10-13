@@ -125,5 +125,81 @@
         "name": "Crash Voltage battle destruction deals only the actual damage exceeding prior HP"
       }
     ]
+  },
+  {
+    "cardId": "COC-21-002",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "선택한 몬스터 또는 일체화 플레이어는 자신의 턴마다 체력 30을 강제로 지불하고 공격력 +100을 얻는다. 몬스터를 공격 또는 효과로 처치하면 그다음 자신의 턴에 한 턴 동안 공격력이 2배가 된다.",
+    "trigger": "주문 발동/상대 대응 pass, 부여 대상의 자기 ATTACK 페이즈 진입, 대상의 상대 몬스터 전투·효과 처치",
+    "condition": "필드의 체력 있는 몬스터 또는 일체화 플레이어를 명시적으로 선택, 원본 주문은 발동 시 묘지로",
+    "cost": "대상 자신의 ATTACK 페이즈 시작마다 HP 30 강제 지불, 중복 부여 효과마다 독립 지불",
+    "target": "선택한 필드 몬스터 UID 또는 일체화 플레이어, 장착 카드가 아님",
+    "resolution": "각 부여 효과마다 지불 성공 시 ATK +100; 상대 몬스터 처치를 원인과 연결해 다음 자기 턴 공격력 ×2 예약, 독립 마검/처치 유발로 다음 턴 겹치는 2배 효과 n개면 ×(2^n)",
+    "duration": "독립 부여 효과는 대상 필드 이탈까지; 예약된 ×2는 다음 자신의 턴 시작~턴 종료 1턴만 유효, JSON 보존",
+    "remaining": "일부 카드별 자동 유발 효과에서 처치 주체 attribution 미연결; 실제 무효화·복사·모든 동시 처치 대응과 고급 능력치 충돌은 #22/#25 추가 검증 필요",
+    "implementation": [
+      "src/automated-effects.mjs",
+      "src/life-eating-sword.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/life-eating-sword.test.mjs",
+        "name": "confirmed sword: spell grants independent effect and never attaches as equipment"
+      },
+      {
+        "path": "tests/life-eating-sword-stacking.test.mjs",
+        "name": "sword: no payment at turn start, payment and +100 only when attack phase starts"
+      },
+      {
+        "path": "tests/life-eating-sword-stacking.test.mjs",
+        "name": "sword: duplicate independent effects each charge 30 and apply +100"
+      },
+      {
+        "path": "tests/life-eating-sword-stacking.test.mjs",
+        "name": "sword: several enchantments and one battle kill grant x2, x4, x8, x16 next own turn only"
+      },
+      {
+        "path": "tests/life-eating-sword-stacking.test.mjs",
+        "name": "sword: real field-ability destruction from an enchanted monster schedules next-turn 2x"
+      },
+      {
+        "path": "tests/life-eating-sword-stacking.test.mjs",
+        "name": "sword: two independent effect kills produce 4x even from one enchanted source"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-21-002",
+    "effectNumber": 2,
+    "status": "partial",
+    "sourceText": "강제 체력 지불을 할 수 없으면 이 카드를 적용받는 몬스터·카드를 파괴한다. 플레이어가 직접 효과를 사용한 상태라면 그 플레이어는 패배한다.",
+    "trigger": "부여 대상 자신의 ATTACK 페이즈 시작 HP 30 의무 지불 검사",
+    "condition": "대상의 현재 HP가 30 이하이면 30을 지불할 수 없음; 여러 부여 효과는 순차 처리",
+    "cost": "지불 가능 시 HP 30 소모, 불가능 시 HP를 지불하지 않고 파괴 또는 직접 적용 플레이어 패배",
+    "target": "부여 몬스터 UID 또는 일체화 플레이어",
+    "resolution": "몬스터는 해당 비용 실패 시 파괴; 플레이어 직접 대상이면 패배(HP를 0으로 처리), 승패 서버 확정",
+    "duration": "비용 지불 불가 사건 즉시 처리; 대상 이탈 및 파괴 시 해당 부여 기록 종료",
+    "remaining": "동시 비용/승패 및 특수 효과 파괴 면역의 모든 결합, 응답 중 무효화 및 복사 처리는 #22/#25 후속",
+    "implementation": [
+      "src/automated-effects.mjs",
+      "src/life-eating-sword.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/life-eating-sword.test.mjs",
+        "name": "confirmed sword: HP 31 can pay, HP 30 and below fail at payment"
+      },
+      {
+        "path": "tests/life-eating-sword.test.mjs",
+        "name": "confirmed sword: non-payment for an integrated player is a loss, not destruction of the spell"
+      },
+      {
+        "path": "tests/life-eating-sword-stacking.test.mjs",
+        "name": "sword: sequential payment fails on fourth duplicate when HP is exhausted"
+      }
+    ]
   }
 ]
