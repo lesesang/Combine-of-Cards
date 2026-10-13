@@ -101,4 +101,43 @@ test('R02: active and non-active players choose in turn; pending state blocks ac
  assert.equal(r.players[0].hp,1200);
  assert.equal(r.players[1].hp,1200);
 });
+test('R01: one on-field destruction heals through the serializable effect stack',()=>{
+ const {r,place}=make();
+ const victim=place(1,'COC-03-002','field');
+ r.units[victim].hp=140;r.players[0].hp=300;
+ r.effects.push({type:'firstDestroyHeal',player:0,turn:1});
+ I.H.destroy(r,victim);
+ assert.ok(r.players[1].grave.includes(victim));
+ assert.equal(r.players[0].hp,440);
+ assert.equal(r.pendingTriggerOrder??null,null);
+ assert.equal(r.effectStack.length,0);
+ assert.ok(r.logs.some(e=>e.type==='effect'&&e.text.includes('140 HP 회복')));
+});
+test('R02: individual destruction suspends two same-owner heals pending explicit order',()=>{
+ const {r,place}=make();
+ const victim=place(1,'COC-03-002','field');
+ r.units[victim].hp=90;r.players[0].hp=100;
+ r.effects.push({type:'firstDestroyHeal',player:0,turn:1});
+ r.effects.push({type:'firstDestroyHeal',player:0,turn:1});
+ I.H.destroy(r,victim);
+ assert.equal(r.players[0].hp,100);
+ assert.equal(r.pendingTriggerOrder.awaiting[0],0);
+ assert.ok(r.players[1].grave.includes(victim));
+ const keys=I.publicState(r,0).pendingTriggerOrder.options.map(e=>e.key);
+ I.apply(r,0,'triggerOrder',{orderedKeys:keys.reverse()});
+ assert.equal(r.pendingTriggerOrder,null);
+ assert.equal(r.players[0].hp,280);
+ assert.equal(r.effectStack.length,0);
+});
+test('R24: destroying a card from hand does not fire an on-field first-destroy trigger',()=>{
+ const {r,place}=make();
+ const handCard=place(1,'COC-03-002','hand');
+ r.players[0].hp=500;
+ r.effects.push({type:'firstDestroyHeal',player:0,turn:1});
+ I.H.destroy(r,handCard);
+ assert.ok(r.players[1].grave.includes(handCard));
+ assert.equal(r.players[0].hp,500);
+ assert.equal(r.effects.length,1);
+ assert.equal(r.pendingTriggerOrder,undefined);
+});
 test.after(()=>fs.rmSync(tmp,{recursive:true,force:true}));

@@ -83,15 +83,32 @@ function resolveQueuedDestroyHeals(r){
  if(results.length)setOutcome(r);
  return results;
 }
-function destroyed(r,id){const z=zoneOwner(r,id),u=r.units[id];if(!z||!u)return;const before=Math.max(0,u.hp??0);
- // One-time effects inspect the pre-destruction HP. Current health on lethal damage is already <=0;
- // reliable previous HP is captured by caller below.
- for(const eff of [...(r.effects||[])])if(eff.type==='firstDestroyHeal'&&eff.turn===r.turnNumber){r.players[eff.player].hp+=u.hp<=0?Math.max(0,u.preDamageHp||0):before;r.effects.splice(r.effects.indexOf(eff),1)}
+function destroyed(r,id){
+ const z=zoneOwner(r,id),u=r.units[id];if(!z||!u)return null;
+ // A field/integration destruction is not the same event as destroying a hand card.
+ if(!['field','integration'].includes(z.zone))return null;
+ const before=Math.max(0,u.hp??0);
+ const amount=u.hp<=0?Math.max(0,u.preDamageHp||0):before;
+ const triggered=(r.effects||[]).filter(e=>e.type==='firstDestroyHeal'&&e.turn===r.turnNumber);
+ for(const e of triggered)r.effects.splice(r.effects.indexOf(e),1);
+ return triggered.length?{triggered,amount}:null;
 }
+function scheduleSingleDestroyHeals(r,heals){
+ if(!heals)return;
+ const group=heals.triggered.map((e,i)=>({
+  key:`single-heal-${r.turnNumber}-${i}`,effectId:'batch-first-destroy-heal',
+  owner:e.player,sourceId:null,exception:'independent',priority:0,
+  title:`첫 파괴 회복 (플레이어 ${e.player+1} / 효과 ${i+1})`,
+  payload:{amount:heals.amount}
+ }));
+ beginAutomaticTriggerOrder(r,group,r.turn);
+ if(!r.pendingTriggerOrder)resolveQueuedDestroyHeals(r);
+}
+
 const H={
  zone:zoneOwner,move,draw,fail,log,attackAvailable,roll:die,randomInt:n=>crypto.randomInt(n),hurt,healUnit,outcome:setOutcome,shuffle,onSummon:runSummonEffects,
  mill:dropFromDeck,summonToken,search:findCardInDeck,destroy:(r,id,{cause='effect'}={})=>{const u=r.units[id];if(u&&zoneOwner(r,id)){if((cause==='effect'||cause==='cost')&&u.effectDestructionImmune){log(r,'effect',`${unitName(r,id)}: 주문·효과에 의한 직접 파괴를 방지했습니다.`);return false;}
- destroyed(r,id);const z=zoneOwner(r,id);
+ const singleHeals=destroyed(r,id);const z=zoneOwner(r,id);
   if(z.zone==='field'){
    r.destructionHistory??=[];
    r.destructionHistory.push({turnNumber:r.turnNumber,activePlayer:r.turn,controller:z.player,cardId:u.cardId});
@@ -99,6 +116,7 @@ const H={
   }
   const canRevive=u.cardId==='COC-10-011'&&!u.revivedOnce&&z.zone==='field';
  const name=cards.get(u.cardId)?.name||u.tokenCard?.name;move(r,id,'grave',u.owner);log(r,'destroy',`${name} 파괴`);if(u.created&&cause==='cost'&&z.zone==='field')onTokenActivity(r,'사용',z.player,{zone:zoneOwner,move,instantiate,log});if(u.cardId==='COC-11-007'&&z.zone==='field')onFafnirDestroyed(r,id,z.player,{zone:zoneOwner,move,log});if(u.cardId==='COC-05-002'&&z.zone==='field')onCartoonLandDestroyed(r,id,z.player,{zone:zoneOwner,move,destroy:H.destroy,log});
+ if(singleHeals)scheduleSingleDestroyHeals(r,singleHeals);
  if(canRevive&&r.units[id]&&r.players[z.player].field.includes(null)){
   u.revivedOnce=true;move(r,id,'field',z.player);log(r,'revive',`${name}: 파괴 후 효과 없이 1회 부활`)
  }

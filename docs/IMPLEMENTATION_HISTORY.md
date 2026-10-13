@@ -154,3 +154,11 @@
 - 공통 `beginAutomaticTriggerOrder` / `chooseAutomaticTriggerOrder`: 동일 우선도에서 각 조종자가 자기 유발 효과 순서를 지정. 현재 턴 플레이어가 먼저, 상대 다음, 선언 역순 해결. 명시 우선도는 선수 선택보다 우선하며 선택 상태는 JSON 직렬화.
 - 첫 실제 연결: `H.destroyBatch`의 다수 `firstDestroyHeal`. 파괴 직전 HP 최대 스냅샷, 자동 효과 키 등록, 플레이어 선택 대기, 해결 스택 및 판정 로그. 서버는 잘못된 선택/권한/대기 중 행동을 거부하고 AI는 자동 선택. 대전 UI에 선택 메뉴 추가.
 - `tests/effect-runtime.test.mjs`, `tests/simultaneous-destruction.test.mjs`로 선언 선택·실제 스택·복원·권한·동시 파괴 검증. 전체 소환/주문/묘지/복사 등의 전역 대응 체인은 #22에 남음.
+
+
+## 2026-10-13 · 단일 파괴 유발 효과의 공통 스택 연결 (PR #39)
+
+- 기존 `destroyed`가 첫 파괴 회복을 직접 즉시 적용하던 경로를 분리. 필드·일체화 파괴 직전 HP 스냅샷/트리거 수집 → 카드 파괴/영역 이동 → 선택할 동일 우선도 트리거가 있으면 선언 순서 대기 → LIFO 회복.
+- 일반 카드의 패 파괴는 `firstDestroyHeal`을 유발하지 않아 R24의 필드 파괴 사건과 구분. 단일 트리거는 선택 대기 없이 해결.
+- `tests/simultaneous-destruction.test.mjs` 개별 파괴·복수 트리거/패 파괴 및 기존 배치 파괴 회귀 테스트.
+- 카드 전 효과의 전역 대응 완성 전까지 R01/R02 및 R19는 부분 지원.
