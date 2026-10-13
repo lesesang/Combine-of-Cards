@@ -16,8 +16,8 @@ const legacy=read('docs/START_HERE_NEW_CHAT.md');
 test('Codex handoff files are discoverable from AGENTS and README and map to real documents',()=>{
  for(const path of ['docs/CODEX_HANDOFF.md','docs/CODEX_RULES_REFERENCE.md','docs/CODEX_IMPLEMENTATION_PLAN.md']){
   assert.ok(fs.existsSync(new URL(path,root)),path);
-  assert.ok(agents.includes(path),\`AGENTS must reference \${path}\`);
-  assert.ok(readme.includes(path.replace('docs/','docs/')),\`README must reference \${path}\`);
+  assert.ok(agents.includes(path),`AGENTS must reference ${path}`);
+  assert.ok(readme.includes(path.replace('docs/','docs/')),`README must reference ${path}`);
   assert.ok(handoff.includes(path.split('/').at(-1)),'handoff should crosslink '+path);
  }
  assert.ok(legacy.includes('CODEX_HANDOFF.md'),'legacy handoff should direct Codex to current entrypoint');
@@ -28,12 +28,12 @@ test('Codex current automation statistics match generated code-derived audit',()
  assert.equal(audit.automatedSpellHandlerCount,spellHandlerIds.length);
  const {partial,manual,basic}=audit.counts;
  assert.equal(partial+manual+basic,audit.cards.length);
- assert.match(readme,new RegExp(\`부분 지원 \${partial} / 수동·미지원 \${manual} / 기본 카드 \${basic}\`));
+ assert.match(readme,new RegExp(`부분 지원 ${partial} / 수동·미지원 ${manual} / 기본 카드 ${basic}`));
  for(const doc of [handoff,rules,plan,agents]){
   assert.ok(doc.includes(String(partial)), 'current partial count missing from current Codex documentation');
   assert.ok(doc.includes(String(manual)), 'current unsupported count missing from current Codex documentation');
  }
- assert.ok(handoff.includes(\`핸들러 \${spellHandlerIds.length}개\`));
+ assert.ok(handoff.includes(`핸들러 ${spellHandlerIds.length}개`));
  assert.ok(readme.includes('완전 자동화 인증 카드'));
  assert.ok(readme.includes('**0개**'));
 });
