@@ -31,7 +31,11 @@ const REACTIVE_SPELL_IDS=new Set([
  'COC-19-004', // search one monster from own deck (if present)
  'COC-20-005', // one shared dice roll damages both players
  'COC-30-005', // spell bonus and next-turn draw registration
- 'COC-30-007'  // own recovery
+ 'COC-30-007', // own recovery
+ 'COC-07-004', // opponent draw and own fixed-name deck search
+ 'COC-07-011', // opponent draw/mill; self heal and optional integration buff
+ 'COC-17-004', // create up to three Mummy Soldier tokens
+ 'COC-31-005'  // draw followed by a coin-flip random opposing discard
 ]);
 const CARD_PATH=path.join(PUBLIC,'data','catalog.json.gz.b64');
 function loadCatalog(){
