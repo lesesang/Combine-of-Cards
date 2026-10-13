@@ -148,6 +148,13 @@ function validateLeavingLinks(r,hostId){
  }
 }
 function move(r,id,to,owner,options={}){const u=r.units[id];if(!u)fail(400,'카드를 찾을 수 없습니다.');
+ // Preflight the entire destination before unlinkPhysical or deleting a token.
+ // Invalid zone/recipient input must never orphan physical cards or overlays.
+ if(!['field','integration','grave','hand','deck','banished'].includes(to))
+  fail(400,'이동 위치가 유효하지 않습니다.');
+ const recipient=owner??u.owner;
+ if(!Number.isInteger(recipient)||![0,1].includes(recipient)||!r.players[recipient])
+  fail(400,'이동할 카드의 소유자 또는 조종자가 유효하지 않습니다.');
  if(u.overlayHostId&&!options.overlayRelease)fail(409,'겹쳐진 얼라이즈 소재는 독립적으로 이동할 수 없습니다.');
  if(u.attachmentHostId&&!options.attachmentRelease)fail(409,'장착 중인 카드는 관계 해제 없이 독립 이동할 수 없습니다.');
  const attached=Array.isArray(u.overlayMaterials)&&!['field','integration'].includes(to)?[...u.overlayMaterials]:[];
