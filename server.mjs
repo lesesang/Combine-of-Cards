@@ -48,7 +48,7 @@ function instantiate(r,cardId,owner){const c=cards.get(cardId);if(!c)fail(400,'�
 function createPlayer(r,deckId,label,auth){const d=decks.get(deckId);if(!d)fail(400,'유효하지 않은 덱입니다.');const i=r.players.length;const p={label:requireStr(label??'',24)||`플레이어 ${i+1}`,authHash:hash(auth),deckId,hp:1000,reloads:0,deck:[],hand:[],grave:[],banished:[],extra:[],field:[null,null,null],integration:null,turnsTaken:0,roundPlays:0,lastRoundPlays:0,roundElementUses:0,naturalStreak:0,metalElementUsedGame:0,natureSpellsUsedGame:0,elementSpellPlaysThisTurn:0,spellsThisTurn:0};r.players.push(p);for(const id of d.main)p.deck.push(instantiate(r,id,i));for(const id of d.extra)p.extra.push(instantiate(r,id,i));return p}
 function draw(r,who){const p=r.players[who];if(!p.deck.length){const feedback=100+50*p.reloads;p.reloads++;if(p.grave.length){p.deck.push(...p.grave.splice(0));shuffle(p.deck)}p.hp-=feedback;log(r,'reload',`${p.label}: 리로드 피해 ${feedback}, 덱 ${p.deck.length}장`);setOutcome(r);if(r.status==='finished')return;if(!p.deck.length){log(r,'draw',`${p.label}: 드로우 실패 (덱과 묘지에 카드 없음)`);
 if(r.players[1-who].integration&&r.units[r.players[1-who].integration]?.cardId==='COC-07-007'){p.hp=0;log(r,'effect','포식자 알리자 라팍스: 상대의 드로우 실패로 패배');setOutcome(r)}return;}}const id=p.deck.shift();p.hand.push(id);log(r,'draw',`${p.label}가 카드를 1장 뽑았습니다.`)}
-function move(r,id,to,owner){const u=r.units[id];if(!u)fail(400,'카드를 찾을 수 없습니다.');if(to==='field'&&!r.players[owner??u.owner].field.includes(null))fail(409,'필드 세 칸이 모두 차 있습니다.');if(to==='integration'&&r.players[owner??u.owner].integration)fail(409,'이미 일체화 중입니다.');for(const p of r.players){for(const zone of ['field']){for(let i=0;i<p[zone].length;i++)if(p[zone][i]===id)p[zone][i]=null;}if(p.integration===id)p.integration=null;for(const zone of ['deck','hand','grave','banished','extra'])p[zone]=p[zone].filter(v=>v!==id)}const p=r.players[owner??u.owner];if(!['field','integration'].includes(to)){u.frozen=false;u.battleInvulnerable=false;u.effectsNegated=false;u.diceMax=undefined;u.diceMin=undefined;u.cannotAttack=false;u.attackTurn=-1;u.attackCount=0;u.attackCountTurn=-1;const original=cards.get(u.cardId);if(original){u.atk=Number.isFinite(+original.atk)?Math.max(0,Math.floor(+original.atk)):0;u.hp=Number.isFinite(+original.hp)?Math.floor(+original.hp):null;u.baseAtk=u.atk;}delete u.temporaryBuff;delete u.buffExpiresAt;}if(u.created&&to!=='field'&&to!=='integration'){delete r.units[id];return}if(to==='field'){const slot=p.field.findIndex(x=>x===null);if(slot<0)fail(409,'필드 세 칸이 모두 차 있습니다.');p.field[slot]=id;u.owner=u.owner??owner;u.attackTurn=-1;}else if(to==='integration'){if(p.integration)fail(409,'이미 일체화 중입니다.');p.integration=id;}else if(to==='banished')p.banished.push(id);else if(to==='deck'){p.deck.unshift(id);}else if(to==='hand')p.hand.push(id);else if(to==='grave'){p.grave.push(id);u.atk=Math.max(0,Number(cards.get(u.cardId)?.atk)||0);u.hp=Number.isFinite(+cards.get(u.cardId)?.hp)?+cards.get(u.cardId).hp:null;u.attackTurn=-1;}else fail(400,'이동 위치가 유효하지 않습니다.');}
+function move(r,id,to,owner){const u=r.units[id];if(!u)fail(400,'카드를 찾을 수 없습니다.');if(to==='field'&&!r.players[owner??u.owner].field.includes(null))fail(409,'필드 세 칸이 모두 차 있습니다.');if(to==='integration'&&r.players[owner??u.owner].integration)fail(409,'이미 일체화 중입니다.');for(const p of r.players){for(const zone of ['field']){for(let i=0;i<p[zone].length;i++)if(p[zone][i]===id)p[zone][i]=null;}if(p.integration===id)p.integration=null;for(const zone of ['deck','hand','grave','banished','extra'])p[zone]=p[zone].filter(v=>v!==id)}const p=r.players[owner??u.owner];if(!['field','integration'].includes(to)){u.frozen=false;u.battleInvulnerable=false;u.effectsNegated=false;u.diceMax=undefined;u.diceMin=undefined;u.cannotAttack=false;u.attackTurn=-1;u.attackCount=0;u.attackCountTurn=-1;const original=cards.get(u.cardId);if(original){u.atk=Number.isFinite(+original.atk)?Math.max(0,Math.floor(+original.atk)):0;u.hp=Number.isFinite(+original.hp)?Math.floor(+original.hp):null;u.baseAtk=u.atk;}delete u.temporaryBuff;delete u.buffExpiresAt;delete u.treatedAsToon;}if(u.created&&to!=='field'&&to!=='integration'){delete r.units[id];return}if(to==='field'){const slot=p.field.findIndex(x=>x===null);if(slot<0)fail(409,'필드 세 칸이 모두 차 있습니다.');p.field[slot]=id;u.owner=u.owner??owner;u.attackTurn=-1;}else if(to==='integration'){if(p.integration)fail(409,'이미 일체화 중입니다.');p.integration=id;}else if(to==='banished')p.banished.push(id);else if(to==='deck'){p.deck.unshift(id);}else if(to==='hand')p.hand.push(id);else if(to==='grave'){p.grave.push(id);u.atk=Math.max(0,Number(cards.get(u.cardId)?.atk)||0);u.hp=Number.isFinite(+cards.get(u.cardId)?.hp)?+cards.get(u.cardId).hp:null;u.attackTurn=-1;}else fail(400,'이동 위치가 유효하지 않습니다.');}
 function zoneOwner(r,id){for(let i=0;i<r.players.length;i++){const p=r.players[i];for(const z of ['deck','hand','grave','extra','banished'])if(p[z].includes(id))return {player:i,zone:z};if(p.field.includes(id))return {player:i,zone:'field'};if(p.integration===id)return {player:i,zone:'integration'};}return null}
 function damageUnit(r,id,value,{battle=false}={}){const u=r.units[id];if(!u||u.hp===null)fail(409,'체력이 없는 카드입니다.');if(value<0&&u.cardId==='COC-09-002')value=Math.max(-1,value);u.preDamageHp=u.hp;u.hp+=value;if(u.hp<=0){if(battle&&u.cardId==='COC-26-011'){u.hp=1;return false}H.destroy(r,id);return true}return false}
 function dropFromDeck(r,who,count){
@@ -219,7 +219,7 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
  if((p.spellForbiddenUntil||0)>=p.turnsTaken)fail(409,'상대의 주문 사용 금지 효과가 적용 중입니다.');
  const automated=hasAutoSpell(c.id);
  if(!automated&&r.mode==='ai')fail(409,'이 주문의 특수 효과는 아직 자동 판정을 지원하지 않습니다. 다른 카드를 사용해 주세요.');
- if(automated){const result=castAutomatedSpell(r,who,c,body,H);if(result.retain==='field'){move(r,id,'field',who);if(result.monsterized){r.units[id].atk=result.atk;r.units[id].hp=result.hp;r.units[id].cannotAttack=true}}else move(r,id,'grave',who);
+ if(automated){const result=castAutomatedSpell(r,who,c,body,H);if(result.retain==='field'){move(r,id,'field',who);if(result.monsterized){r.units[id].atk=result.atk;r.units[id].hp=result.hp;r.units[id].cannotAttack=true}}else if(result.retain!=='hand')move(r,id,'grave',who);
   log(r,'effect',`${p.label}: ${c.name} 자동 효과 처리`);
  }else{move(r,id,'grave',who);log(r,'manual',`${p.label}: ${c.name} 주문 사용 — 상대 승인 기반 수동 판정 필요`)}
  }else fail(409,'이 카드 종류는 직접 사용할 수 없습니다.');
@@ -356,7 +356,44 @@ function runAI(r){if(r.mode!=='ai'||r.status!=='active')return;
     const ability=chooseAIFieldAbility(r);if(ability){const snapshot=structuredClone(r);try{apply(r,1,'ability',ability)}catch(e){for(const key of Object.keys(r))delete r[key];Object.assign(r,snapshot);r.players[1].aiRejectedAbilities??=[];r.players[1].aiRejectedAbilities.push(ability.sourceUnitId);log(r,'ai',`AI가 실행 불가능한 필드 효과를 건너뛰었습니다: ${e.message}`)}continue}
     const extra=chooseAIExtra(r);if(extra){apply(r,1,'extraSummon',extra);continue}
     const id=chooseAIMove(r);
-    if(id){const c=cards.get(r.units[id].cardId),t=['COC-03-008','COC-17-003','COC-30-007','COC-32-006'].includes(c.id)?{type:'player',player:1}:chooseAITarget(r,id);if(['COC-08-001','COC-08-008','COC-31-002'].includes(c.id)&&r.players[0].field.some(Boolean)){t.type='unit';t.id=r.players[0].field.find(Boolean);delete t.player;}const before=structuredClone(r);try{apply(r,1,'play',{unitId:id,target:t,targets:c.id==='COC-06-004'?[...r.players[0].field,...r.players[1].field].filter(Boolean).slice(0,2):undefined})}catch(e){for(const key of Object.keys(r))delete r[key];Object.assign(r,before);r.players[1].aiRejected??=[];r.players[1].aiRejected.push(id);if(r.players[1].aiRejected.length>20)r.players[1].aiRejected.shift();log(r,'ai',`AI가 사용 불가능한 ${c.name} 카드를 건너뛰었습니다.`)}continue}
+     if(id){
+      const c=cards.get(r.units[id].cardId);
+      const t=['COC-03-008','COC-17-003','COC-30-007','COC-32-006'].includes(c.id)?
+       {type:'player',player:1}:chooseAITarget(r,id);
+      const enemyUnits=r.players[0].field.filter(Boolean);
+      const allUnits=r.players.flatMap(p=>p.field.filter(Boolean));
+      if(['COC-08-001','COC-08-008','COC-31-002','COC-05-007'].includes(c.id)&&enemyUnits.length){
+       t.type='unit';t.id=enemyUnits[0];delete t.player;
+      }
+      if(['COC-01-004','COC-01-005','COC-31-006'].includes(c.id)){
+       const pool=c.id==='COC-31-006'?
+        allUnits.filter(mid=>!/마술사|마법사/.test(cards.get(r.units[mid].cardId)?.attribute||'')):allUnits;
+       if(pool.length){t.type='unit';t.id=pool[0];delete t.player;}
+      }
+      if(c.id==='COC-30-004'&&enemyUnits.length){
+       t.type='unit';t.id=[...enemyUnits].sort((a,b)=>(r.units[a].hp??1e9)-(r.units[b].hp??1e9))[0];delete t.player;
+      }
+      let targets=c.id==='COC-06-004'?allUnits.slice(0,2):undefined;
+      if(c.id==='COC-05-006'){
+       const eligible=allUnits.filter(mid=>{
+        const z=zoneOwner(r,mid),name=unitName(r,mid);
+        const land=z&&r.players[z.player].field.some(x=>x&&unitName(r,x).includes('카툰 랜드'));
+        return !land&&!r.units[mid].treatedAsToon&&!name.includes('카툰');
+       });
+       targets=eligible.slice(0,2);
+      }
+      const before=structuredClone(r);
+      try{apply(r,1,'play',{unitId:id,target:t,targets});}
+      catch(e){
+       for(const key of Object.keys(r))delete r[key];
+       Object.assign(r,before);
+       r.players[1].aiRejected??=[];
+       r.players[1].aiRejected.push(id);
+       if(r.players[1].aiRejected.length>20)r.players[1].aiRejected.shift();
+       log(r,'ai',`AI가 사용 불가능한 ${c.name} 카드를 건너뛰었습니다.`);
+      }
+      continue;
+     }
     apply(r,1,'phase',{});continue;
    }
    if(r.phase==='ATTACK'){

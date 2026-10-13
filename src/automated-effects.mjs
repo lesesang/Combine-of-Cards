@@ -87,6 +87,78 @@ register('COC-21-004',ctx=>{
  if(!z||z.player===ctx.who||z.zone!=='field')ctx.H.fail(409,'상대 필드의 파괴 대상 몬스터를 지정해야 합니다.');
  ctx.H.destroy(ctx.r,id);
 });
+
+// Additional v1.3-verified spell effects. Complex secondary/triggered clauses
+// are still tracked as partial automation, not complete card certification.
+function selectedFieldUnit(ctx,{enemyOnly=false}={}){
+ const id=ctx.body.target?.type==='unit'?ctx.body.target.id:null;
+ const z=id&&ctx.H.zone(ctx.r,id);
+ if(!z||z.zone!=='field'||(enemyOnly&&z.player!==1-ctx.who))
+  ctx.H.fail(409,'유효한 필드 몬스터를 효과 대상으로 선택해야 합니다.');
+ return {id,controller:z.player,unit:ctx.r.units[id]};
+}
+function toonOnField(ctx,id){
+ const z=ctx.H.zone(ctx.r,id);
+ if(!z||z.zone!=='field')return false;
+ return Boolean(ctx.r.units[id].treatedAsToon)||
+  ctx.H.name(ctx.r,id).includes('카툰')||
+  ctx.r.players[z.player].field.some(other=>other&&ctx.H.name(ctx.r,other).includes('카툰 랜드'));
+}
+// G tool: normal spell effect. Its monsterized/equipment clauses remain unsupported.
+register('COC-01-004',ctx=>{
+ const {id}=selectedFieldUnit(ctx);
+ ctx.H.hurt(ctx.r,id,100);
+});
+// Deck return plus one draw for the physical card's original owner.
+register('COC-01-005',ctx=>{
+ const {id}=selectedFieldUnit(ctx);
+ const owner=ctx.H.originalOwner(ctx.r,id);
+ ctx.H.move(ctx.r,id,'deck',owner);
+ ctx.H.draw(ctx.r,owner);
+});
+// One 1d150 roll is shared by the two selected non-Cartoon monsters.
+register('COC-05-006',ctx=>{
+ const ids=ctx.body.targets;
+ if(!Array.isArray(ids)||ids.length!==2||new Set(ids).size!==2)
+  ctx.H.fail(409,'카툰이 아닌 필드 몬스터 두 장을 선택해야 합니다.');
+ for(const id of ids){
+  const z=typeof id==='string'&&ctx.H.zone(ctx.r,id);
+  if(!z||z.zone!=='field'||toonOnField(ctx,id))
+   ctx.H.fail(409,'카툰 몬스터 또는 필드에 없는 카드는 대상으로 지정할 수 없습니다.');
+ }
+ const rolled=ctx.H.roll(150);
+ for(const id of ids)if(ctx.H.zone(ctx.r,id)?.zone==='field')ctx.H.hurt(ctx.r,id,rolled);
+});
+register('COC-05-007',ctx=>{
+ requireField(ctx,'카툰 랜드');
+ const {id}=selectedFieldUnit(ctx,{enemyOnly:true});
+ if(!ctx.r.players[ctx.who].field.includes(null))
+  ctx.H.fail(409,'카드를 가져올 빈 필드 칸이 없습니다.');
+ ctx.H.capture(ctx.r,ctx.who,id);
+ ctx.r.units[id].treatedAsToon=true;
+});
+register('COC-31-006',ctx=>{
+ const {id,unit}=selectedFieldUnit(ctx);
+ if(/마술사|마법사/.test(ctx.H.attribute(ctx.r,id)))
+  ctx.H.fail(409,'마술사·마법사 속성은 대상으로 지정할 수 없습니다.');
+ let heads=0;for(let i=0;i<3;i++)if(ctx.H.roll(2)===1)heads++;
+ const previous=unit.atk;
+ unit.atk=Math.max(0,Math.floor(previous-heads*50));
+ if(previous>0&&unit.atk===0)ctx.H.destroy(ctx.r,id);
+});
+register('COC-31-008',ctx=>{
+ if(ctx.H.roll(2)!==1)return;
+ const targets=ctx.r.players.flatMap(p=>p.field.filter(Boolean));
+ for(const id of targets)if(ctx.H.zone(ctx.r,id)?.zone==='field')ctx.H.destroy(ctx.r,id);
+});
+// Returns to hand only when *this damage* kills the targeted enemy monster.
+register('COC-30-004',ctx=>{
+ const t=enemy(ctx),before=t.id?ctx.r.units[t.id]?.hp:null;
+ const amount=ctx.H.roll(200);
+ hit(ctx,t,amount);
+ if(t.id&&before>0&&before<=amount)return {retain:'hand'};
+});
+
 export function hasAutoSpell(cardId){return Object.hasOwn(aliases,cardId)}
 export const spellHandlerIds=Object.keys(aliases);
 export function castAutomatedSpell(r,who,c,body,H){const f=aliases[c.id];if(!f)return {supported:false};const ctx={r,who,c,body,H};const result=f(ctx)||{};return {supported:true,...result}}
