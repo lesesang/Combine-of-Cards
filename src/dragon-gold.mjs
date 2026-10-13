@@ -43,6 +43,13 @@ function findFafnir(room, who) {
  */
 export function onTokenCreation(room, tokenId, controller, H) {
   if (!room.units[tokenId] || !room.units[tokenId].created) return;
+  onTokenActivity(room, '생성', controller, H, tokenId);
+}
+
+// Creation/summon is one successful placement action. Independent uses and
+// releases create new events; never re-trigger release on treasure conversion.
+export function onTokenActivity(room, eventType, controller, H, tokenId=null) {
+  if (!['생성','소환','사용','릴리스'].includes(eventType)) return;
   if (!Number.isInteger(controller) || controller < 0 || controller > 1) return;
   const active = room.turn === 0 || room.turn === 1 ? room.turn : controller;
   const order = [active, 1 - active];
@@ -51,7 +58,7 @@ export function onTokenCreation(room, tokenId, controller, H) {
     const candidate = findFafnir(room, who);
     if (!candidate || !room.players[who].field.includes(null)) continue;
     H.move(room, candidate, 'field', who);
-    H.log(room, 'summon', `${room.players[who].label}: 토큰 생성으로 파프니르 자동 소환`);
+    H.log(room, 'summon', `${room.players[who].label}: 토큰 ${eventType}으로 파프니르 자동 소환`);
     const goldId = H.instantiate(room, DRAGON_CARDS.gold, who);
     const ringId = H.instantiate(room, DRAGON_CARDS.ring, who);
     H.move(room, goldId, 'hand', who);
@@ -68,9 +75,12 @@ export function onTokenCreation(room, tokenId, controller, H) {
   }
   const golds = dragonGoldEffects(room);
   if (!golds.length) return;
-  for (const gold of golds) addTreasure(room, gold, 1, H);
-  // Conversion is not destruction; token ceases existing instead of entering graveyard.
-  const where = H.zone(room, tokenId);
+  // One token event can count for only one Gold. Controller wins ties.
+  const receiver = golds.find(gold => gold.owner === controller) || golds[0];
+  addTreasure(room, receiver, 1, H);
+  // A released/used token has already left the field. Never convert it again.
+  if (eventType !== '생성' && eventType !== '소환') return;
+  const where = tokenId && H.zone(room, tokenId);
   if (where?.zone === 'field') {
     H.move(room, tokenId, 'banished', controller);
     H.log(room, 'effect', '생성된 토큰을 보물로 전환했습니다.');

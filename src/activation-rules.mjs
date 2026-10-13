@@ -35,7 +35,7 @@ register('COC-05-007',c=>require_(c.hasField('카툰 랜드'),'카툰 랜드가 
 register('COC-05-010',c=>require_(!c.hasField('카툰 랜드'),'카툰 랜드가 필드에 없어야 합니다.'));
 register('COC-06-001',c=>require_((c.player.metalElementUsedGame||0)>=5,'금속 또는 원소 카드 5장 사용 기록이 필요합니다.'));
 register('COC-06-005',c=>require_((c.player.elementSpellPlaysThisTurn||0)>=2,'이번 턴에 원소 주문을 2장 이상 사용해야 합니다.'));
-register('COC-06-007',c=>require_((c.player.roundPlays||0)>=5,'이번 턴에 이 주문 이전 카드 5장을 사용해야 합니다.'));
+register('COC-06-007',c=>require_((c.player.roundPlays||0)>=5,'이 카드를 제외하고 이번 턴에 카드 5장을 먼저 사용해야 합니다.'));
 register('COC-08-001',c=>require_(c.deckCount('요괴')>=2,'덱에 요괴 속성 카드가 2장 이상 있어야 합니다.'));
 register('COC-08-003',c=>require_(c.fieldCount('요괴')>=1,'필드에 요괴 몬스터가 필요합니다.'));
 register('COC-08-004',c=>require_(c.fieldCount('요괴')>=3,'필드에 요괴 몬스터 3장이 필요합니다.'));

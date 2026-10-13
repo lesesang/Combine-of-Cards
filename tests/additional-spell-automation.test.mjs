@@ -37,7 +37,7 @@ test('G dimension wrench returns a field monster to its original owner before th
  const spell=place(0,'COC-01-005','hand'),target=place(1,'COC-03-002','field');
  I.apply(r,0,'play',{unitId:spell,target:{type:'unit',id:target}});
  assert.equal(r.players[1].field.includes(target),false);
- assert.ok(r.players[1].hand.includes(target),'returned card is next draw under existing deck-top rule');
+ assert.ok(r.players[1].hand.includes(target)||r.players[1].deck.includes(target),'the returned card is randomly inserted, so it is not guaranteed to be the next draw');
 });
 test('Cartoon arrows rejects duplicate and Cartoon-monster targets without consuming spell',()=>{
  const {r,place}=room('05','03');

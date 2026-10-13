@@ -84,13 +84,13 @@ test('Ring resolves before Gold deletion and grants player health and persistent
  I.move(r,dragonId,'integration',0);
  assert.equal(r.units[dragonId].atk,110,'player attack bonus carries into future integration');
 });
-test('both Dragon players can observe one token event and independently count treasure',()=>{
+test('both Dragon players see a token event but only its controller gains treasure',()=>{
  const r=make('11','11');
  const token=I.H.summonToken(r,0,'스톰 토큰',0,50);
  assert.ok(token);
  assert.equal(r.persistentEffects.length,2);
  assert.deepEqual(r.persistentEffects.map(e=>e.owner),[0,1]);
- assert.ok(r.persistentEffects.every(e=>e.counters===1));
+ assert.deepEqual(r.persistentEffects.map(e=>e.counters),[1,0]);
  assert.ok(r.players.every(p=>p.field.some(id=>r.units[id]?.cardId==='COC-11-007')));
  assert.equal(JSON.parse(JSON.stringify(r)).persistentEffects.length,2);
 });

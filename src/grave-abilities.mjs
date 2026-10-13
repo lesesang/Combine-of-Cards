@@ -12,8 +12,7 @@ export function planGraveAbility(r,who,{sourceUnitId,costUnitId},H){
  const unit=r.units[costUnitId];
  if(!p.field.includes(costUnitId)||!unit||!H.type(r,costUnitId)?.includes('몬스터')||!H.name(r,costUnitId).startsWith('블랙 메탈'))
   H.fail(409,'자신 필드의 블랙 메탈 몬스터를 비용으로 선택해야 합니다.');
- if(unit.atk<1||unit.cannotAttack||unit.cannotAttackUntil===r.turnNumber||unit.frozen||
-    ((p.noAttackUntil||0)>0&&p.noAttackUntil>=p.turnsTaken)||!H.attackAvailable(unit,r.turnNumber))
+ if(!H.attackAvailable(unit,r.turnNumber))
   H.fail(409,'비용으로 소모할 공격 기회가 없습니다.');
  return {sourceUnitId,costUnitId};
 }
