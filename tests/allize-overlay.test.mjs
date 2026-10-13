@@ -32,7 +32,7 @@ test('R16/R22: Allize materials are paid, then overlay under the host after resp
  I.apply(r,1,'extraResponse',{choice:'pass'});
  assert.ok(r.players[0].field.includes(extra));
  assert.deepEqual(r.units[extra].overlayMaterials,ids);
- assert.ok(ids.every(id=>I.zone(r,id)?.zone==='overlay'));
+ assert.ok(ids.every(id=>I.H.zone(r,id)?.zone==='overlay'));
  assert.ok(ids.every(id=>!r.players[0].grave.includes(id)));
  assert.equal(r.players[0].field.filter(Boolean).length,1);
  assert.throws(()=>I.move(r,ids[0],'hand',0),/겹쳐진/);
@@ -48,7 +48,7 @@ for(const dest of ['grave','hand','deck','banished']){
   assert.ok(r.players[0][dest].includes(extra));
   assert.ok(ids.every(id=>r.players[0][dest].includes(id)));
   assert.ok(ids.every(id=>r.units[id].overlayHostId===undefined));
-  assert.ok(ids.every(id=>I.zone(r,id)?.zone===dest));
+  assert.ok(ids.every(id=>I.H.zone(r,id)?.zone===dest));
   if(dest==='deck')assert.deepEqual(r.players[0].deck.filter(id=>previousDeck.includes(id)),previousDeck,'unrelated deck order never shuffled');
  });
 }
@@ -58,7 +58,7 @@ test('R16: moving an overlaid host between controllers carries materials without
  I.apply(r,1,'extraResponse',{choice:'pass'});
  I.move(r,extra,'field',1);
  assert.ok(r.players[1].field.includes(extra));
- assert.ok(ids.every(id=>I.zone(r,id)?.zone==='overlay'));
+ assert.ok(ids.every(id=>I.H.zone(r,id)?.zone==='overlay'));
  assert.equal(r.players[0].field.filter(Boolean).length,0);
  I.move(r,extra,'hand',0);
  assert.ok(ids.every(id=>r.players[0].hand.includes(id)));
