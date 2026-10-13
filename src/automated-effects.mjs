@@ -203,6 +203,18 @@ register('COC-01-009',ctx=>{
  self.spellProtectionUntilOpponentTurn=Math.max(self.spellProtectionUntilOpponentTurn||0,nextOppTurn);
 });
 
+
+// Burningdemons Armor: direct destruction immunity lasts until leaving the field.
+// Damage causing 0 HP remains a state-based destruction, not direct effect destruction.
+register('COC-20-011',ctx=>{
+ const id=ctx.body.target?.type==='unit'?ctx.body.target.id:null;
+ const z=id&&ctx.H.zone(ctx.r,id);
+ const name=id&&ctx.H.name(ctx.r,id)||'';
+ if(!z||z.zone!=='field'||z.player!==ctx.who||!/버닝\s*데몬즈/.test(name))
+  ctx.H.fail(409,'자신 필드의 버닝데몬즈 몬스터를 지정해야 합니다.');
+ ctx.r.units[id].effectDestructionImmune=true;
+});
+
 export function hasAutoSpell(cardId){return Object.hasOwn(aliases,cardId)}
 export const spellHandlerIds=Object.keys(aliases);
 export function castAutomatedSpell(r,who,c,body,H){const f=aliases[c.id];if(!f)return {supported:false};const ctx={r,who,c,body,H};const result=f(ctx)||{};return {supported:true,...result}}
