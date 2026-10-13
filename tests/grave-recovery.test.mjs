@@ -67,6 +67,7 @@ test('fusion and grave recovery have independent once-per-turn limits, checked b
  const a=s.take('COC-22-002','hand'),b=s.take('COC-22-003','hand');
  const extra=s.take('COC-22-014');
  I.apply(s.r,0,'extraSummon',{extraUnitId:extra,materials:[a,b],spellUnitId:s.sourceUnitId});
+  I.apply(s.r,1,'extraResponse',{choice:'pass'});
  const before=structuredClone(s.r);
  assert.throws(()=>s.use(),/이번 턴/);
  assert.deepEqual(s.r,before);
@@ -82,6 +83,7 @@ test('effect 1 followed by recovery is legal and a normal hand-play cannot silen
  assert.deepEqual(s.r,before);
  const a=s.take('COC-22-002','hand'),b=s.take('COC-22-003','hand');
  I.apply(s.r,0,'extraSummon',{extraUnitId:s.take('COC-22-014'),materials:[a,b],spellUnitId:s.sourceUnitId});
+  I.apply(s.r,1,'extraResponse',{choice:'pass'});
  s.use();assert.ok(s.r.players[0].hand.includes(s.sourceUnitId));
 });
 test('AI grave recovery choices share validation and never depend on an opponent hand',()=>{
