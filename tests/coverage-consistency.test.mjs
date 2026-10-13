@@ -31,3 +31,18 @@ test('coverage registry never advertises completed automation for a partially su
  for(const id of spellHandlerIds)assert.ok(catalog.cards.some(c=>c.id===id),'unknown card registered: '+id);
  assert.ok(catalog.cards.every(c=>automationStatus(c)!=='complete'),'full certification requires card-specific proof');
 });
+
+test('card-level audit rows agree with runtime support for each card',()=>{
+ const rows=report.split('\n').filter(line=>/^\| COC-\d{2}-\d{3} \|/.test(line));
+ const byId=new Map(rows.map(line=>{
+  const parts=line.split('|').map(x=>x.trim());
+  return [parts[1],parts[3]];
+ }));
+ assert.equal(rows.length,253,'only the one basic card is omitted from the detailed support table');
+ for(const card of catalog.cards){
+  const expected=automationStatus(card);
+  const display=byId.get(card.id);
+  if(expected==='basic'){assert.equal(display,undefined);continue;}
+  assert.equal(display,expected==='partial'?'부분 지원':'미지원',card.id+': outdated support label');
+ }
+});
