@@ -458,7 +458,12 @@ function runAI(r){if(r.mode!=='ai'||r.status!=='active')return;
         allUnits.filter(mid=>!/마술사|마법사/.test(cards.get(r.units[mid].cardId)?.attribute||'')):allUnits;
        if(pool.length){t.type='unit';t.id=pool[0];delete t.player;}
       }
-      if(c.id==='COC-30-011'){t.type='player';t.player=0;delete t.id;}
+      if(c.id==='COC-13-008'&&r.players[0].hand.length){
+        // AI may evaluate the opponent hand only while using this permitted effect.
+        const chosen=[...r.players[0].hand].sort((a,b)=>(Number(cards.get(r.units[b].cardId)?.atk)||0)-(Number(cards.get(r.units[a].cardId)?.atk)||0))[0];
+        t.type='unit';t.id=chosen;delete t.player;
+       }
+       if(c.id==='COC-30-011'){t.type='player';t.player=0;delete t.id;}
        if(c.id==='COC-20-004'){
         const burning=r.players[1].field.find(mid=>mid&&/버닝\s*데몬즈?/.test(unitName(r,mid)));
         if(burning){t.type='unit';t.id=burning;delete t.player;}
@@ -515,7 +520,7 @@ async function readBody(req){let size=0;const chunks=[];for await(const b of req
 export function createApp(){return http.createServer(async(req,res)=>{try{rateLimit(req);const url=new URL(req.url,'http://localhost');if(req.method==='GET'&&url.pathname==='/api/health')return reply(res,200,{status:'ok',version:RULES});if(req.method==='GET'&&url.pathname==='/api/catalog')return reply(res,200,{...catalog,cards:catalog.cards.map(c=>({...c,automation:automationStatus(c)}))});
  const preview=/^\/api\/rooms\/([A-Z0-9]{6})\/hand-preview$/.exec(url.pathname);
  if(req.method==='GET'&&preview){const r=getRoom(preview[1]);const token=req.headers.authorization?.replace(/^Bearer /,'');const who=indexFor(r,token);
- if(r.status!=='active'||r.turn!==who||r.phase!=='MAIN'||!r.players[who].hand.some(id=>r.units[id].cardId==='COC-13-008'))fail(403,'이 카드를 사용 가능한 상태가 아닙니다.');
+ if(r.status!=='active'||r.turn!==who||r.phase!=='MAIN'||r.pendingExtraSummon||r.pendingAttack||r.pendingManual||((r.players[who].spellForbiddenUntil||0)>=r.players[who].turnsTaken&&r.players[who].turnsTaken>0)||!r.players[who].hand.some(id=>r.units[id].cardId==='COC-13-008'))fail(403,'이 카드를 사용 가능한 상태가 아닙니다.');
  return reply(res,200,{cards:r.players[1-who].hand.map(id=>({id,name:cards.get(r.units[id].cardId).name}))})
  }
 if(req.method==='POST'&&url.pathname==='/api/ai'){
