@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
- declareEffect, declareAutomaticGroup, resolveEffectStack,
+ declareEffect, declareAutomaticGroup, beginAutomaticTriggerOrder, chooseAutomaticTriggerOrder, resolveEffectStack,
  registerPersistent, endPersistent, tickPersistent
 } from '../src/effect-runtime.mjs';
 
@@ -108,4 +108,51 @@ test('new nested effects are pushed safely during resolution',()=>{
  }});
  assert.deepEqual(executed,['first','reaction']);
  assert.equal(r.effectStack.length,0);
+});
+
+test('R02: choice is required only for competing own triggers with equal priority',()=>{
+ const r=room();
+ const e=[{key:'a',owner:0,effectId:'A',sourceId:'a',priority:0},
+  {key:'b',owner:0,effectId:'B',sourceId:'a',priority:0},
+  {key:'c',owner:1,effectId:'C',sourceId:'b',priority:0}];
+ assert.deepEqual(beginAutomaticTriggerOrder(r,e,0),{pending:true,awaiting:0});
+ assert.equal(r.effectStack.length,0);
+ const serialized=JSON.parse(JSON.stringify(r));
+ assert.equal(serialized.pendingTriggerOrder.effects.length,3);
+ assert.throws(()=>chooseAutomaticTriggerOrder(serialized,1,['c']),/controller/);
+ assert.throws(()=>chooseAutomaticTriggerOrder(serialized,0,['a','a']),/exactly once/);
+ assert.equal(serialized.effectStack.length,0);
+ assert.deepEqual(chooseAutomaticTriggerOrder(serialized,0,['b','a']),{pending:false,awaiting:null});
+ assert.equal(serialized.pendingTriggerOrder,null);
+ assert.deepEqual(serialized.effectStack.map(e=>e.effectId),['B','A','C']);
+ const ran=[];resolveEffectStack(serialized,{getZone:present,execute:e=>ran.push(e.effectId)});
+ assert.deepEqual(ran,['C','A','B']);
+});
+test('R02: active owner selects first, non-active owner second; priority still wins',()=>{
+ const r=room();
+ const fx=[
+  {key:'na',owner:1,effectId:'NA',priority:0},
+  {key:'nb',owner:1,effectId:'NB',priority:0},
+  {key:'aa',owner:0,effectId:'AA',priority:0},
+  {key:'ab',owner:0,effectId:'AB',priority:0},
+  {key:'forced',owner:0,effectId:'forced',priority:10}
+ ];
+ assert.equal(beginAutomaticTriggerOrder(r,fx,0).awaiting,0);
+ assert.equal(chooseAutomaticTriggerOrder(r,0,['ab','forced','aa']).awaiting,1);
+ assert.equal(chooseAutomaticTriggerOrder(r,1,['nb','na']).pending,false);
+ const ran=[];resolveEffectStack(r,{getZone:()=>null,execute:e=>ran.push(e.effectId)});
+ assert.deepEqual(ran,['forced','NA','NB','AA','AB']);
+});
+test('R02: unambiguous group resolves automatically and pending choices are exclusive',()=>{
+ const r=room();
+ const one=[{key:'a',owner:0,effectId:'A'},{key:'b',owner:1,effectId:'B'}];
+ assert.equal(beginAutomaticTriggerOrder(r,one,0).pending,false);
+ assert.deepEqual(r.effectStack.map(x=>x.effectId),['A','B']);
+ assert.throws(()=>beginAutomaticTriggerOrder(r,one,0),/cannot open/);
+ resolveEffectStack(r,{getZone:()=>null,execute:()=>{}});
+ const conflict=[{key:'a',owner:0,effectId:'A'},{key:'b',owner:0,effectId:'B'}];
+ beginAutomaticTriggerOrder(r,conflict,0);
+ assert.throws(()=>beginAutomaticTriggerOrder(r,conflict,0),/cannot open/);
+ assert.throws(()=>chooseAutomaticTriggerOrder(r,0,['a','other']),/exactly once/);
+ assert.equal(r.pendingTriggerOrder.awaiting[0],0);
 });
