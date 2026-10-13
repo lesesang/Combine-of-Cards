@@ -215,7 +215,7 @@
     "effectNumber": 1,
     "status": "partial",
     "sourceText": "상대의 주문의 발동 또는 몬스터의 소환을 한 게임당 1회 무효화 합니다.",
-    "trigger": "상대의 등록된 15종 주문 선언 후 spellResponse 대응 창",
+    "trigger": "상대의 등록된 16종 주문 선언 후 spellResponse 대응 창",
     "condition": "자신의 유효한 일체화 스톰블레이거, 현재 대응권자, 같은 UID의 게임당 1회 미사용",
     "cost": "추가 자원 비용 없음; 선언 시 게임당 1회 사용 기록 소비",
     "target": "상대가 선언한 원래 주문 스택 항목",
@@ -260,6 +260,56 @@
       {
         "path": "tests/ability-ui.test.mjs",
         "name": "Storm UI: only current responder sees counters and sends the selected source with version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-31-009",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "패를 1장 버리고 발동 할 수 있다. 현재 상대 필드에 존재하는 모든 몬스터의 효과를 무효화합니다. 각 몬스터가 파괴되거나 패/덱으로 돌아갈 때까지 해당 몬스터에 대한 무효화가 유지된다.",
+    "trigger": "자신의 메인 페이즈 play 선언 → 상대 spellResponse → LIFO 해결",
+    "condition": "주문 사용 금지 아님; 발동 주문과 다른 자신의 손패 1장을 명시적으로 선택",
+    "cost": "선택 손패를 원소유자 묘지로, 발동 주문도 묘지로 이동한 뒤 대응 창 개방",
+    "target": "해결 시 현재 상대 필드 몬스터 전부; 개별 대상 선택 없음, 일체화 제외",
+    "resolution": "상대 pass 후 effectsNegated 적용; 스톰블레이거 카운터 시 효과 생략, 이미 지불한 두 카드 미반환; 해결 시 재지불 없음",
+    "duration": "대상 몬스터의 파괴/패·덱 반환 등 필드 이탈까지; 현재 필드 상태와 JSON에 보존",
+    "remaining": "전 카드 수동/부분 핸들러의 효과 무효 준수 전수 검증, 독립 지속/복사/여러 무효 원인 간 충돌. v1.3 원본 자료 부재",
+    "implementation": [
+      "src/activation-rules.mjs",
+      "src/automated-effects.mjs",
+      "src/spell-response-registry.mjs",
+      "server.mjs",
+      "public/app.js"
+    ],
+    "tests": [
+      {
+        "path": "tests/magician-negation-cost.test.mjs",
+        "name": "magician negation requires a chosen distinct own hand card without changing state on invalid cost"
+      },
+      {
+        "path": "tests/magician-negation-cost.test.mjs",
+        "name": "BLOCK: counter preserves both paid cards and does not negate the opposing field"
+      },
+      {
+        "path": "tests/magician-negation-cost.test.mjs",
+        "name": "BLOCK: resolution uses the current opposing field and never pays a second discard"
+      },
+      {
+        "path": "tests/magician-negation-cost.test.mjs",
+        "name": "BLOCK: forged paid flags and spell prohibition cannot bypass the discard"
+      },
+      {
+        "path": "tests/magician-negation-cost.test.mjs",
+        "name": "BLOCK: all AI levels plan the discard and wait for the human response"
+      },
+      {
+        "path": "tests/block-response-api.test.mjs",
+        "name": "BLOCK HTTP: failed registration rolls back both costs; restart preserves pass and counter outcomes"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "BLOCK UI: requires a selected other hand card and submits its UID with the version"
       }
     ]
   }
