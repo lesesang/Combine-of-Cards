@@ -4,22 +4,33 @@ This file is for a new coding assistant taking over the repository after the 202
 
 ## Read these before changing source
 
-1. docs/START_HERE_NEW_CHAT.md — current implementation status and the full restart prompt.
-2. docs/PRODUCT_VISION_AND_RULES.md — approved rules and product intent.
-3. docs/DECISIONS_AND_CORRECTIONS.md — user-approved card/engine corrections. **Do not revert Gandrae Dragon's self-exclusion.**
-4. docs/OPEN_RULINGS_REGISTER.md — ambiguous rulings, proposed fixes and provisional code behavior.
-5. docs/ROADMAP_AND_ACCEPTANCE.md — prioritized acceptance criteria.
-6. docs/ARCHITECTURE_AND_RUNBOOK.md — commands, APIs, storage and security.
-7. docs/AUTOMATION_COVERAGE.md — card coverage; **partial is not complete**.
-8. Current main source, tests and GitHub Actions. Check their actual state before editing.
+1. **docs/CODEX_HANDOFF.md** — CURRENT Codex entrypoint, latest merged PR, implementation scope, actionable continuation prompt.
+2. **docs/CODEX_RULES_REFERENCE.md** — approved game rules, 17 officially confirmed rulings, card-by-card corrections and latest Magic Sword ruling.
+3. **docs/CODEX_IMPLEMENTATION_PLAN.md** — issue-mapped P0/P1/P2/P3 roadmap and testable PR acceptance criteria.
+4. docs/START_HERE_NEW_CHAT.md — historical ChatGPT handoff, later addenda; earlier text may be superseded by latest confirmed corrections.
+5. docs/PRODUCT_VISION_AND_RULES.md — approved rules and product intent.
+6. docs/DECISIONS_AND_CORRECTIONS.md — user-approved card/engine corrections. **Do not revert Gandrae Dragon's self-exclusion.**
+7. docs/OPEN_RULINGS_REGISTER.md — ambiguous rulings, proposed fixes and provisional code behavior.
+8. docs/ROADMAP_AND_ACCEPTANCE.md — prioritized acceptance criteria.
+9. docs/ARCHITECTURE_AND_RUNBOOK.md — commands, APIs, storage and security.
+10. docs/AUTOMATION_COVERAGE.md — card coverage; **partial is not complete**.
+11. Current main source, tests and GitHub Actions. Check their actual state before editing.
 
 ## Product requirements
 
 - Preserve the user's custom TCG v1.3: **24 premade playable decks**, **254 card records**, no card mixing across premade decks.
 - Never restore the deleted decks: 합체 기계, 코미컬, 럭키, 카지노이드, 비트스타즈, 파트너 몬스터즈, 코브라, 아홉꼬리.
 - The goal is **fully automatic server-authoritative card effects**, AI duels (choose opponent deck/random; easy, medium, hard), PvP, rules conflict diagnostics and production-ready deployment.
-- As of beta.10, the code supports **157 partially**, **96 manually/unsupported**, **1 basic**; 71 spell handlers. **Full automation is not achieved.**
+- **Latest as of PR #58 (main f7ce3612, 2026-10-13): 157 partially supported / 96 manually unsupported / 1 basic, 71 registered spell handlers, 14 spells in opponent-pass effect stack and only 6 effect-number evidence records. Complete coverage certified: 0.** The older server banner remains beta.10, not an accurate support inventory. Full automation is not achieved.
 - Source v1.3 DOCX and comparison JSON were created in a prior conversation but are **not yet committed** to this public repository. See docs/SOURCE_DATA_PROVENANCE.md.
+
+## Latest user-confirmed rules to preserve (PR #57–#58)
+
+- **COC-21-002 Life-Eating Sword is a SPELL to grave, NOT equipment.** Selected field monster / integrated player gains independent persistent effects. Each instance forces **30 HP payment and +100 ATK at the START OF ITS OWN ATTACK PHASE** (not TURN_START); 30 HP or less means cannot pay and that monster is destroyed / directly affected player loses. Skipped ATTACK phase means no payment.
+- A qualifying enemy-monster kill by the enchanted bearer schedules **x2 ATK during the bearer's entire NEXT own turn**, not permanently; multiple x2 triggers/instances multiply x4/x8/x16/... (no arbitrary once-per-turn cap).
+- **Voluntary equipment removal is forbidden**; physical equip detachment only by explicit card effect/rule. Sword is unrelated to physical attachment mechanics.
+- Keep Gandrae Dragon's self-exclusion; true ATK 50 vs condition-treated 250 for Black Metal Magician; R05/R06/R07/R08/R09/R10/R11/R12/R13/R21/R22/R23/R24/R25/R28/R29/R30 official approval.
+- All these are CONFIRMED rules; missing implementation is NOT a reason to ask for approval again. Explicitly distinguish unsupported effect or missing v1.3 source files from actual unresolved interpretations.
 
 ## Latest implementation update (2026-10-13)
 
@@ -54,3 +65,11 @@ This file is for a new coding assistant taking over the repository after the 202
 ## 2026-10-13 R01 follow-up (PR #44)
 
 - Ten targeted automated spells now use the persisted opponent-pass / LIFO spell stack (3 prior + 7 additional target-free cards). Other automatic spell effects are not presumed fully reactive. See `tests/spell-response-expanded.test.mjs` and `docs/EFFECT_STACK_AND_PERSISTENCE.md`.
+
+
+## Codex handoff and continuous maintenance
+
+- Start with [docs/CODEX_HANDOFF.md](docs/CODEX_HANDOFF.md), [docs/CODEX_RULES_REFERENCE.md](docs/CODEX_RULES_REFERENCE.md), and [docs/CODEX_IMPLEMENTATION_PLAN.md](docs/CODEX_IMPLEMENTATION_PLAN.md); compare every claim to current main and open issues #21–#29.
+- The user's original v1.3 DOCX/JSON master documents have NOT yet been committed; do not fabricate source files, effect words, card IDs, dates or completed card automation. Current live catalog is `public/data/catalog.json.gz.b64`.
+- For a code PR, update effect-level evidence and current summaries, use branch tests + both GitHub CI workflows at final head SHA, then squash-merge, verify post-merge main CI, and comment on the corresponding issue.
+- Older PR comments and old counts (155/98 and 156/97) are HISTORICAL; use the latest generated audit for current figures. Remove contradictory *current* claims in user-facing docs rather than merely appending conflicting statements.
