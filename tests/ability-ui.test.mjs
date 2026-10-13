@@ -49,6 +49,7 @@ test('card steal UI privately previews the opponent full hand, then submits a ch
  await t.node('playPick').onchange();
  assert.equal(t.node('stealPreviewWrap').style.display,'');
  assert.match(t.node('stealPreviewPick').innerHTML,/상대의 숨겨진 카드/);
+ t.node('stealPreviewPick').value='hidden'; // Simulate user choosing the revealed card in the test DOM.
  assert.equal(t.node('stealPreviewPick').value,'hidden');
  await t.node('playSubmit').onclick();
  const played=t.requests.filter(x=>x.body?.type==='play');
