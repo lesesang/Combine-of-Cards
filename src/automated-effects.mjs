@@ -39,7 +39,7 @@ function requireField(ctx,phrase){if(!fieldHas(ctx,phrase))ctx.H.fail(409,`${phr
 function addCurse(ctx,id){ctx.r.players[ctx.who].effects??=[];ctx.r.players[ctx.who].effects.push({type:'burn',id,amount:50,ownerTurn:true});}
 // COC-21-002 is a spell granting an independent effect, NOT equipment.
 // Target is selected at activation (never silently chosen by default).
-export function validateLifeEatingSwordTarget(room, body, H){
+export function validateLifeEatingSwordTarget(room, body, H, caster=null){
  const target=body?.target;
  if(target?.type==='unit' && typeof target.id==='string'){
   const z=H.zone(room,target.id);
@@ -50,13 +50,17 @@ export function validateLifeEatingSwordTarget(room, body, H){
  if(target?.type==='player' && (target.player===0||target.player===1)){
   if(!room.players[target.player]?.integration)
    H.fail(409,'생명을 먹는 마검은 일체화 플레이어에게만 부여할 수 있습니다.');
+  if((caster===0||caster===1)&&caster!==target.player){
+   const until=room.players[target.player].spellProtectionUntilOpponentTurn||0;
+   if(until>0&&until>=(room.players[caster]?.turnsTaken||0))
+    H.fail(409,'보호막 효과로 해당 플레이어를 주문의 대상으로 지정할 수 없습니다.');
+  }
   return {kind:'player',player:target.player};
  }
  H.fail(409,'생명을 먹는 마검의 몬스터 또는 일체화 플레이어 대상을 선택해야 합니다.');
 }
 register('COC-21-002',ctx=>{
- const target=validateLifeEatingSwordTarget(ctx.r,ctx.body,ctx.H);
- if(target.kind==='player')checkSpellPlayerTarget(ctx,target.player);
+ const target=validateLifeEatingSwordTarget(ctx.r,ctx.body,ctx.H,ctx.who);
  ctx.r.effects??=[];
  ctx.r.effects.push({
   type:'lifeEatingSword',sourceCardId:ctx.c.id,
