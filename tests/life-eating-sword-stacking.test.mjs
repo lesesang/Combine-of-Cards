@@ -196,3 +196,34 @@ test('sword: player-targeted duplicates lose exactly when the next 30 cannot be 
  assert.equal(r.winner,1);
  assert.equal(r.players[0].hp,0);
 });
+
+
+test('sword: real field-ability destruction from an enchanted monster schedules next-turn 2x',()=>{
+ const r=setup(),bearer=unit(r,'COC-12-013',1,900,150);
+ grant(r,0,{type:'unit',id:bearer},2);
+ ownTurn(r,1,4);
+ const cost=I.instantiate(r,'COC-03-003',1);
+ I.move(r,cost,'hand',1);
+ const foe=unit(r,'COC-21-007',0,200,50);
+ I.apply(r,1,'ability',{sourceUnitId:bearer,costCardId:cost,target:{type:'unit',id:foe}});
+ assert.ok(r.players[1].grave.includes(cost),'field ability cost was paid');
+ assert.ok(r.players[0].grave.includes(foe),'enemy monster was destroyed by effect');
+ assert.deepEqual(r.effects.filter(e=>e.type==='lifeEatingSword').map(e=>e.pendingDoubleTurns.length),[1,1]);
+ ownTurn(r,0,5);ownTurn(r,1,6);
+ assert.equal(I.swordActualAttack(r,bearer),r.units[bearer].atk*4);
+});
+test('sword: integrated player is eligible for effect-destruction next-turn doubling',()=>{
+ const r=setup(),integrated=I.instantiate(r,'COC-21-001',0);
+ I.move(r,integrated,'integration',0);
+ r.players[0].hp=900;
+ grant(r,0,{type:'player',player:0},3);
+ const foe=unit(r,'COC-03-002',1,100,50);
+ I.H.destroy(r,foe,{sourcePlayer:0});
+ assert.equal(r.effects.filter(e=>e.type==='lifeEatingSword').length,3);
+ ownTurn(r,1,4);ownTurn(r,0,5);
+ assert.equal(I.swordActualAttack(r,integrated),r.units[integrated].atk*8);
+ const view=I.publicState(r,0);
+ assert.equal(view.players[0].integration.swordDoubleStacks,3);
+ I.processEndOfTurn(r);
+ assert.equal(I.swordActualAttack(r,integrated),r.units[integrated].atk);
+});
