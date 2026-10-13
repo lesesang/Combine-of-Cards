@@ -38,6 +38,10 @@ export function recordSwordKill(room,{sourceId=null,sourcePlayer=null,victimCont
    (sourcePlayer===sourceController||room.players[sourceController].integration===sourceId);
   if(!matches)continue;
   e.pendingDoubleTurns??=[];
+  // "The effect can be applied repeatedly" means distinct granted swords
+  // stack, not an unlimited multiplier per enemy killed by one sword during
+  // the same upcoming-turn window. Each sword earns at most one pending x2.
+  if(e.pendingDoubleTurns.length)continue;
   e.pendingDoubleTurns.push(room.turnNumber);
   count++;
  }
@@ -59,7 +63,7 @@ export function beginSwordTurn(room,who,{getZone,log}={}){
   e.pendingDoubleTurns=queued.filter(turn=>Number.isInteger(turn)&&turn>=room.turnNumber);
   if(!ready.length)continue;
   e.activeDoubleTurn=room.turnNumber;
-  e.activeDoubleCount=ready.length;
+  e.activeDoubleCount=1;
   log?.(room,'effect',`생명을 먹는 마검: 다음 자기 턴 공격력 2배 × ${ready.length} 중첩 발동`);
  }
 }
