@@ -215,6 +215,32 @@ register('COC-20-011',ctx=>{
  ctx.r.units[id].effectDestructionImmune=true;
 });
 
+
+// Burning Soul: one declared Burningdemons monster gains the exact self-damage roll.
+register('COC-20-004',ctx=>{
+ const id=ctx.body.target?.type==='unit'?ctx.body.target.id:null;
+ const z=id&&ctx.H.zone(ctx.r,id);
+ const name=id&&ctx.H.name(ctx.r,id)||'';
+ if(!z||z.zone!=='field'||z.player!==ctx.who||!/버닝\s*데몬즈?/.test(name))
+  ctx.H.fail(409,'자신 필드의 버닝데몬즈 몬스터를 1장 선택해야 합니다.');
+ const bonus=ctx.H.roll(5)*100;
+ ctx.r.players[ctx.who].hp-=bonus;
+ ctx.r.units[id].atk+=bonus;
+ ctx.H.outcome(ctx.r);
+});
+// Two previous own turns must each contain at least one Nature-attribute spell.
+// Current activation never counts toward that prerequisite.
+register('COC-30-011',ctx=>{
+ const p=ctx.r.players[ctx.who];
+ const used=new Set(p.natureSpellTurns||[]);
+ if(!used.has(ctx.r.turnNumber-2)||!used.has(ctx.r.turnNumber-4))
+  ctx.H.fail(409,'지난 자신의 두 턴 모두 자연 속성 주문을 사용했어야 합니다.');
+ const selected=ctx.body.target;
+ if(selected?.type!=='player'||selected.player!==1-ctx.who)
+  ctx.H.fail(409,'상대 플레이어 본체를 대상으로 선택해야 합니다.');
+ hit(ctx,enemy(ctx),200);
+});
+
 export function hasAutoSpell(cardId){return Object.hasOwn(aliases,cardId)}
 export const spellHandlerIds=Object.keys(aliases);
 export function castAutomatedSpell(r,who,c,body,H){const f=aliases[c.id];if(!f)return {supported:false};const ctx={r,who,c,body,H};const result=f(ctx)||{};return {supported:true,...result}}
