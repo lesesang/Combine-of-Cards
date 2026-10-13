@@ -123,7 +123,7 @@ test('sword: several enchantments and one battle kill grant x2, x4, x8, x16 next
    'x2 stack is gone after one own turn');
  }
 });
-test('sword: one granted instance schedules at most one double for the next turn despite several kills',()=>{
+test('sword: two independent effect kills produce 4x even from one enchanted source',()=>{
  const r=setup(),attacker=unit(r,'COC-03-002',1,900,100);
  grant(r,0,{type:'unit',id:attacker});
  ownTurn(r,1,4);attackPhase(r,1);
@@ -131,11 +131,11 @@ test('sword: one granted instance schedules at most one double for the next turn
  const b=unit(r,'COC-21-008',0,10,20);
  I.H.destroy(r,a,{sourceId:attacker});
  I.H.hurt(r,b,100,{sourceId:attacker});
- assert.equal(r.effects[0].pendingDoubleTurns.length,1);
+ assert.equal(r.effects[0].pendingDoubleTurns.length,2);
  I.processEndOfTurn(r);
  ownTurn(r,0,5);
  ownTurn(r,1,6);
- assert.equal(I.swordActualAttack(r,attacker),r.units[attacker].atk*2);
+ assert.equal(I.swordActualAttack(r,attacker),r.units[attacker].atk*4);
 });
 test('sword: a source-kill only counts enemy monsters and does not reward sacrifices',()=>{
  const r=setup(),attacker=unit(r,'COC-03-002',1,900,100);
