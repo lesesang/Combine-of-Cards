@@ -4,6 +4,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {automationStatus} from '../src/automation-status.mjs';
 import {spellHandlerIds} from '../src/automated-effects.mjs';
+import {responseSpellIds} from '../src/spell-response-registry.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const readable=path.join(root,'public/data/catalog.json');
 const compressed=path.join(root,'public/data/catalog.json.gz.b64');
@@ -11,7 +12,12 @@ const catalog=JSON.parse(fs.existsSync(compressed)?zlib.gunzipSync(Buffer.from(f
 const byDeck=new Map(catalog.decks.map(d=>[d.id,d.name]));
 const entries=catalog.cards.map(c=>({id:c.id,deck:byDeck.get(c.deckId),name:c.name,type:c.type,zone:c.zone,status:automationStatus(c),conditions:c.conditions,effects:c.effects}));
 const tally=entries.reduce((a,c)=>(a[c.status]=(a[c.status]||0)+1,a),{});
-const out={sourceRuleVersion:'1.3',automatedSpellHandlerCount:spellHandlerIds.length,generatedAt:'repository build time',counts:tally,notes:['partial = only some card behavior; no card has complete formal proof','manual = effects not safely automated by current engine','basic = card has no conditional/effect text, but global mechanics still require validation'],cards:entries};
+if(new Set(responseSpellIds).size!==responseSpellIds.length)throw Error('Duplicate response spell ID');
+for(const id of responseSpellIds){
+ const card=catalog.cards.find(c=>c.id===id);
+ if(!card||card.type!=='주문'||!spellHandlerIds.includes(id))throw Error('Invalid response spell registration: '+id);
+}
+const out={sourceRuleVersion:'1.3',automatedSpellHandlerCount:spellHandlerIds.length,responseSpellCount:responseSpellIds.length,responseSpellIds,generatedAt:'repository build time',counts:tally,notes:['partial = only some card behavior; no card has complete formal proof','manual = effects not safely automated by current engine','basic = card has no conditional/effect text, but global mechanics still require validation'],cards:entries};
 const outputs={'automation-audit.json':JSON.stringify(out,null,2)+'\n'};
 const lines=[
  '# 카드 자동 판정 적용 범위 — 실제 코드 기준',
@@ -19,6 +25,7 @@ const lines=[
  '> 카드 ID별 상태는 자동화 구현을 보수적으로 표시합니다. **부분 지원 ≠ 완전 자동화**. ',
  '',
  `- 카드 ${entries.length}개 · 주문 핸들러 ${spellHandlerIds.length}개`,
+ `- 상대 pass/저장 가능한 스택에 연결된 주문 ${responseSpellIds.length}종 (실제 카운터·완전 자동화 인증 아님)`,
  `- 부분 지원 ${tally.partial||0}개, 일반 카드만 ${tally.basic||0}개, 수동/미지원 ${tally.manual||0}개`,
  '- 카드의 수동/부분 지원 상태를 전체 자동 지원으로 변경해서는 안 됩니다.',
  '- 소환 소재/복사/장착/상대 턴의 반응형 효과, 선택권/공개, 효과 우선도 등은 추가 엔진과 검증이 필요합니다.',

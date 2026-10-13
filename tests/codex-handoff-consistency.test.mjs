@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {spellHandlerIds} from '../src/automated-effects.mjs';
+import {responseSpellIds} from '../src/spell-response-registry.mjs';
 
 const root=new URL('../',import.meta.url);
 const read=path=>fs.readFileSync(new URL(path,root),'utf8');
@@ -61,4 +62,36 @@ test('Codex references keep approved RIDs separate from 13 outstanding engineeri
   assert.ok(rules.includes(id),id+' must remain tracked for engineering');
  assert.ok(handoff.includes('R05/R06/R07'));
  assert.ok(plan.includes('576'),'full directed 24x24 match testing must be tracked');
+});
+
+test('current response-window counts include the Sword and match the shared runtime registry',()=>{
+ const count=responseSpellIds.length;
+ assert.ok(responseSpellIds.includes('COC-21-002'),'the Sword response window must not disappear from coverage');
+ assert.equal(audit.responseSpellCount,count);
+ assert.deepEqual(audit.responseSpellIds,[...responseSpellIds]);
+ const summaries=[
+  [readme,/스택 연결 주문 \| \*\*(\d+)종/],
+  [handoff,/공통 체인에 통합된 주문은 \*\*(\d+)종/],
+  [plan,/pass·스택에 연결된 \*\*(\d+)종/],
+  [agents,/(\d+) spells in opponent-pass effect stack/],
+  [legacy,/주문 응답 스택 \*\*(\d+)종/],
+  [read('docs/ARCHITECTURE_AND_RUNBOOK.md'),/(\d+) 일반 주문 응답 스택/],
+  [read('docs/OPEN_RULINGS_REGISTER.md'),/실제 주문 응답 스택 (\d+)종/],
+  [read('docs/ROADMAP_AND_ACCEPTANCE.md'),/자동 주문 (\d+)종 pass→LIFO/]
+ ];
+ for(const [doc,pattern] of summaries)assert.equal(Number(doc.match(pattern)?.[1]),count,String(pattern));
+});
+
+test('effect evidence preserves confirmed R28 and R29 while keeping automation partial',()=>{
+ const evidence=JSON.parse(read('docs/effect-coverage.json'));
+ for(const [cardId,effectNumber,testName] of [
+  ['COC-12-013',2,'R28: piercing uses the dice result, not attack stat or unrelated bonus damage'],
+  ['COC-22-008',2,'R29: frozen, forbidden and zero-ATK units still have a spendable attack opportunity']
+ ]){
+  const effect=evidence.find(e=>e.cardId===cardId&&e.effectNumber===effectNumber);
+  assert.equal(effect.status,'partial');
+  assert.ok(effect.tests.some(t=>t.path==='tests/confirmed-rulings.test.mjs'&&t.name===testName));
+  assert.doesNotMatch(effect.remaining,/공식 확인|가능 여부/);
+ }
+ assert.match(evidence.find(e=>e.cardId==='COC-12-013'&&e.effectNumber===2).resolution,/다이스 결과/);
 });
