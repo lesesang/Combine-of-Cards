@@ -134,11 +134,12 @@ function tokenCostFixture(){
  return {r,tokens};
 }
 
-test('R05: a token excluded as a real summon cost counts as use exactly once',()=>{
+test('R05: exclusion cost use and its newly spawned token are two separate events',()=>{
  const {r,tokens}=tokenCostFixture();
  const source=take(r,0,'COC-14-004','hand');
  I.apply(r,0,'play',{unitId:source,costUnitIds:[tokens[0]]});
- assert.equal(r.persistentEffects[0].counters,2);
+ // The excluded token is used (+1); Storm Knight then creates a second token (+1).
+ assert.equal(r.persistentEffects[0].counters,3);
  assert.equal(r.units[tokens[0]],undefined);
  assert.ok(r.players[0].integration===source);
  assert.ok(r.players[0].field.includes(tokens[1]));
