@@ -24,9 +24,10 @@ export const integrationAutomations = new Set([
  'COC-05-009','COC-17-001','COC-19-006','COC-30-010'
 ]);
 export const dragonAutomations = new Set(['COC-11-007','COC-11-008','COC-11-009']);
+export const cartoonTriggerAutomations = new Set(['COC-05-008']);
 export function automationStatus(card){
  if(card.type==='주문'&&hasAutoSpell(card.id))return 'partial';
- if(summonAutomations.has(card.id)||passiveAutomations.has(card.id)||integrationAutomations.has(card.id)||combatAutomations.has(card.id)||FIELD_ABILITY_IDS.includes(card.id)||SUPPORTED_EXTRA_IDS.includes(card.id)||dragonAutomations.has(card.id))return 'partial';
+ if(summonAutomations.has(card.id)||passiveAutomations.has(card.id)||integrationAutomations.has(card.id)||combatAutomations.has(card.id)||FIELD_ABILITY_IDS.includes(card.id)||SUPPORTED_EXTRA_IDS.includes(card.id)||dragonAutomations.has(card.id)||cartoonTriggerAutomations.has(card.id))return 'partial';
  if(!card.effects?.length&&!card.conditions?.length)return 'basic';
  return 'manual';
 }
