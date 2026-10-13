@@ -36,6 +36,7 @@ export function declareEffect(room, effect) {
   if (!Number.isSafeInteger(room.effectSequence)) throw new Error('effect sequence overflow');
   const entry = {
     sequence: room.effectSequence,
+    key: effect.key ?? null,
     effectId: effect.effectId,
     owner: effect.owner,
     sourceId: effect.sourceId ?? null,
