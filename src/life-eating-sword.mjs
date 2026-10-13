@@ -37,11 +37,9 @@ export function recordSwordKill(room,{sourceId=null,sourcePlayer=null,victimCont
    sourceId===e.target.id && sourceZone?.zone==='field':
    (sourcePlayer===sourceController||room.players[sourceController].integration===sourceId);
   if(!matches)continue;
+  // Every eligible destruction trigger is distinct. Do not invent a
+  // once-per-turn restriction: overlapping x2 effects multiply together.
   e.pendingDoubleTurns??=[];
-  // "The effect can be applied repeatedly" means distinct granted swords
-  // stack, not an unlimited multiplier per enemy killed by one sword during
-  // the same upcoming-turn window. Each sword earns at most one pending x2.
-  if(e.pendingDoubleTurns.length)continue;
   e.pendingDoubleTurns.push(room.turnNumber);
   count++;
  }
@@ -63,7 +61,7 @@ export function beginSwordTurn(room,who,{getZone,log}={}){
   e.pendingDoubleTurns=queued.filter(turn=>Number.isInteger(turn)&&turn>=room.turnNumber);
   if(!ready.length)continue;
   e.activeDoubleTurn=room.turnNumber;
-  e.activeDoubleCount=1;
+  e.activeDoubleCount=ready.length;
   log?.(room,'effect',`생명을 먹는 마검: 다음 자기 턴 공격력 2배 × ${ready.length} 중첩 발동`);
  }
 }
