@@ -62,3 +62,49 @@ test('R15: destroyed host releases attached card to its original owner grave',()
  assert.ok(r.players[0].grave.includes(equipment));
  assert.equal(r.units[equipment].attachmentHostId,undefined);
 });
+
+
+test('R15: detach one of two attachments without moving host or the other card',()=>{
+ const r=room(),host=create(r,'COC-09-002',0,'integration');
+ const sword=create(r,'COC-09-005',0,'hand'),shield=create(r,'COC-09-006',0,'hand');
+ I.attachCard(r,sword,host);I.attachCard(r,shield,host);
+ const serialized=JSON.parse(JSON.stringify(r));
+ assert.equal(I.detachCard(serialized,sword,'grave'),sword);
+ assert.equal(serialized.players[0].integration,host);
+ assert.deepEqual(serialized.units[host].attachments,[shield]);
+ assert.equal(serialized.units[shield].attachmentHostId,host);
+ assert.ok(serialized.players[0].grave.includes(sword));
+ assert.equal(serialized.units[sword].attachmentHostId,undefined);
+ assert.ok(!serialized.players[0].hand.includes(shield));
+ I.move(serialized,host,'hand',0);
+ assert.ok(serialized.players[0].hand.includes(host));
+ assert.ok(serialized.players[0].hand.includes(shield));
+ assert.ok(serialized.players[0].grave.includes(sword));
+});
+test('R15: detach uses equipment original owner even after opponent captures host',()=>{
+ for(const destination of ['grave','hand','deck','banished']){
+  const r=room(),host=create(r,'COC-09-002',0,'field'),equipment=create(r,'COC-09-005',1,'hand');
+  I.attachCard(r,equipment,host);
+  I.move(r,host,'field',1);
+  I.detachCard(r,equipment,destination);
+  assert.ok(r.players[1][destination].includes(equipment));
+  assert.ok(!r.players[0][destination]?.includes(equipment));
+  assert.ok(r.players[1].field.includes(host));
+  assert.equal(r.units[host].attachments,undefined);
+  assert.equal(r.units[equipment].attachmentHostId,undefined);
+ }
+});
+test('R15: invalid detach does not alter saved attachment state',()=>{
+ const r=room(),host=create(r,'COC-09-002',0,'field');
+ const equipment=create(r,'COC-09-005',0,'hand');
+ I.attachCard(r,equipment,host);
+ const snapshot=structuredClone(r);
+ assert.throws(()=>I.detachCard(r,equipment,'field'),/장착 해제/);
+ assert.throws(()=>I.detachCard(r,host,'grave'),/장착 해제/);
+ assert.throws(()=>I.detachCard(r,'forged','grave'),/장착 해제/);
+ assert.deepEqual(r,snapshot);
+ I.detachCard(r,equipment,'hand');
+ const after=structuredClone(r);
+ assert.throws(()=>I.detachCard(r,equipment,'grave'),/장착 해제/);
+ assert.deepEqual(r,after);
+});
