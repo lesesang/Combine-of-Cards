@@ -115,7 +115,7 @@ function runSummonEffects(r,who,id,body={}){const u=r.units[id],p=r.players[who]
  }
  case 'COC-19-006':{const snapshots=r.players.flatMap((pp,controller)=>pp.field.filter(Boolean).map(mid=>({mid,controller})));for(const {mid} of snapshots)H.destroy(r,mid);for(const {mid,controller} of snapshots){if(r.units[mid]&&zoneOwner(r,mid)?.zone==='grave'&&r.players[controller].field.includes(null)){move(r,mid,'field',controller);r.units[mid].cannotAttackUntil=r.turnNumber;}}break}
  case 'COC-27-003':{let n=0;for(let k=0;k<2;k++){if(!p.deck.length)break;const mid=p.deck.shift();const mc=cards.get(r.units[mid].cardId);p.grave.push(mid);n++;if(k===0&&mc.type!=='몬스터')break}u.atk+=50*n;u.hp=(u.hp??0)+50*n;log(r,'mill',`${p.label}: 분쇄차 티라노 소재 ${n}장 묘지 이동`);break}
- case 'COC-27-004':for(const pp of r.players)for(const mid of [...pp.field].filter(Boolean))H.destroy(r,mid);break;
+ case 'COC-27-004':for(const pp of r.players)for(const mid of [...pp.field].filter(mid=>mid&&mid!==id))H.destroy(r,mid);break;
  case 'COC-31-001':draw(r,die(2)===1?who:1-who);break;
  case 'COC-31-002':{const enemyMonsters=r.players[1-who].field.filter(Boolean),mid=body.target?.id,z=mid&&zoneOwner(r,mid);if(enemyMonsters.length&&(!z||z.player!==1-who||z.zone!=='field'))fail(409,'동전 판정 전에 상대 필드 몬스터를 지정해 주세요.');let h=0;for(let k=0;k<3;k++)if(die(2)===1)h++;if(h===2&&enemyMonsters.length){r.units[mid].atk=Math.max(0,r.units[mid].atk-100);if(r.units[mid].atk===0)H.destroy(r,mid)}break}
  case 'COC-31-003':{let h=0;for(let k=0;k<5;k++)if(die(2)===1)h++;r.players[1-who].hp-=h*100;setOutcome(r);break}

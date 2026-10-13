@@ -30,7 +30,7 @@ test('server discards all non-self hand cards when summoning Gandrae Dragon',()=
  const {r,position}=room('27','03');const id=position(0,'COC-27-004','hand');
  const a=position(0,'COC-27-001','hand'),b=position(0,'COC-27-003','hand');
  I.apply(r,0,'play',{unitId:id});
- assert.ok(r.players[0].grave.includes(a));assert.ok(r.players[0].grave.includes(b));assert.ok(r.players[0].grave.includes(id)); // Its effect destroys the entire field, itself included.
+ assert.ok(r.players[0].grave.includes(a));assert.ok(r.players[0].grave.includes(b));assert.ok(r.players[0].field.includes(id),'간드레이드래곤은 자신의 전체 파괴 효과에서 제외된다');
 });
 test('incorrect elemental wizard rejects LAND spell even if FLAME is present',()=>{
  const {r,position}=room('32','03');const spell=position(0,'COC-32-008','hand');position(0,'COC-32-001','field');
@@ -56,4 +56,19 @@ test('Mummy general requires and releases a mummy token without consuming other 
  const soldier=I.H.summonToken(r,0,'미라 병사',80,100);
  I.apply(r,0,'play',{unitId:id,costUnitIds:[soldier]});
  assert.ok(r.players[0].field.includes(id));assert.ok(!r.units[soldier]);
+});
+test('Gandrae Dragon destroys every other field monster but not itself',()=>{
+ const {r,position}=room('27','03');
+ const id=position(0,'COC-27-004','hand');
+ const ally=position(0,'COC-27-001','field');
+ const enemy=position(1,'COC-03-002','field');
+ const enemy2=position(1,'COC-03-005','field');
+ I.apply(r,0,'play',{unitId:id});
+ assert.ok(r.players[0].field.includes(id),'summoned Gandrae Dragon survives');
+ assert.ok(!r.players[0].grave.includes(id),'Gandrae Dragon is not destroyed');
+ for(const target of [ally,enemy,enemy2]){
+  assert.ok(r.players[r.units[target].owner].grave.includes(target),'other monster destroyed: '+target);
+ }
+ assert.equal(r.players[0].field.filter(Boolean).length,1,'only Gandrae Dragon remains on controller side');
+ assert.equal(r.players[1].field.filter(Boolean).length,0,'enemy field is cleared');
 });
