@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { castAutomatedSpell, hasAutoSpell, spellHandlerIds, validateLifeEatingSwordTarget } from './src/automated-effects.mjs';
 import {automationStatus} from './src/automation-status.mjs';
 import {responseSpellIds} from './src/spell-response-registry.mjs';
+import {legalSpellCounters,declareSpellCounter,spellResponsePlayer} from './src/spell-counters.mjs';
 import {planActivation,commitActivationCosts} from './src/activation-rules.mjs';
 import {validateExtraSummon, EXTRA_RECIPES} from './src/extra-summons.mjs';
 import {applyFieldAbility,FIELD_ABILITY_IDS} from './src/field-abilities.mjs';
@@ -421,6 +422,18 @@ function finishAutomatedSpell(r){
  const outcomes=resolveEffectStack(r,{
   getZone:id=>zoneOwner(r,id),
   execute:effect=>{
+   if(effect.effectId==='storm-spell-counter'){
+    if(effect.sequence!==pending.counter?.sequence||effect.sourceId!==pending.counter.sourceId||
+       effect.owner!==pending.counter.who)throw new Error('unexpected spell counter');
+    const source=r.units[effect.sourceId];
+    const target=r.effectStack.find(e=>e.sequence===effect.payload.targetSequence&&
+     e.effectId==='auto-spell-resolution'&&e.owner===pending.who&&e.sourceId===pending.sourceId);
+    if(!target)throw new Error('counter target is missing from spell stack');
+    if(source.effectsNegated||r.players[effect.owner].integration!==effect.sourceId){log(r,'effect','스톰블레이거 드래곤: 소스 효과 무효로 주문 무효화 불발');return;}
+    target.negatedBy=effect.sequence;
+    log(r,'effect','스톰블레이거 드래곤: 상대 주문 발동 무효화');
+    return;
+   }
    if(effect.effectId!=='auto-spell-resolution'||effect.owner!==pending.who||
       effect.sourceId!==pending.sourceId||effect.payload.cardId!==pending.cardId)
     throw new Error('unexpected spell effect in response stack');
@@ -429,6 +442,10 @@ function finishAutomatedSpell(r){
    const result=castAutomatedSpell(r,effect.owner,card,effect.payload.body,H);
    if(result?.retain)throw new Error('queued spell unexpectedly changed its retention zone');
    log(r,'effect',`${r.players[effect.owner].label}: ${card.name} 주문 효과 해결`);
+  },
+  onResult:(result,effect)=>{
+   if(result.status==='negated-by-effect')log(r,'effect',`${cards.get(effect.payload.cardId)?.name}: 무효화되어 해결하지 않음 (비용 반환 없음)`);
+   if(result.status==='negated-source-moved')log(r,'effect','대응 효과 소스 이탈/조종권 변경으로 무효');
   }
  });
  if(!outcomes.length)throw new Error('queued spell had no stack entry');
@@ -457,7 +474,7 @@ function publicState(r,viewer){const mapId=id=>id?{...r.units[id],atk:swordActua
  count:r.pendingTriggerOrder.effects.length,
  options:r.pendingTriggerOrder.effects.filter(e=>e.owner===viewer&&r.pendingTriggerOrder.awaiting[0]===viewer)
   .map(e=>({key:e.key,title:e.title||e.effectId,priority:e.priority||0}))
- }:null,pendingSpell:r.pendingSpell?{who:r.pendingSpell.who,card:{id:r.pendingSpell.cardId,name:cards.get(r.pendingSpell.cardId)?.name},stage:'response'}:null,pendingExtraSummon:r.pendingExtraSummon?{who:r.pendingExtraSummon.who,card:{id:r.units[r.pendingExtraSummon.extraUnitId].cardId,name:unitName(r,r.pendingExtraSummon.extraUnitId)},method:r.pendingExtraSummon.recipe.method,materialCount:r.pendingExtraSummon.recipe.materials.length,stage:'response'}:null,pendingManual:r.pendingManual?{...r.pendingManual}:null,persistentEffects:(r.persistentEffects||[]).map(e=>({kind:e.kind,owner:e.owner,counters:e.counters})),logs:r.logs.slice(-80),you:viewer,players:r.players.map((p,i)=>({index:i,label:p.label,deckId:p.deckId,deckName:decks.get(p.deckId)?.name,hp:p.hp,playerAtkBonus:p.playerAtkBonus||0,reloads:p.reloads,deckCount:p.deck.length,handCount:p.hand.length,grave:p.grave.map(mapId),banishedCount:p.banished.length,extraCount:p.extra.length,field:p.field.map(mapId),integration:mapId(p.integration),hand:i===viewer?p.hand.map(mapId):null,extra:i===viewer?p.extra.map(mapId):null}))}}
+ }:null,pendingSpell:r.pendingSpell?{who:r.pendingSpell.who,card:{id:r.pendingSpell.cardId,name:cards.get(r.pendingSpell.cardId)?.name},stage:'response',awaiting:spellResponsePlayer(r),counter:r.pendingSpell.counter?{who:r.pendingSpell.counter.who,name:unitName(r,r.pendingSpell.counter.sourceId)}:null,counters:legalSpellCounters(r,viewer).map(id=>({sourceUnitId:id,name:unitName(r,id)}))}:null,pendingExtraSummon:r.pendingExtraSummon?{who:r.pendingExtraSummon.who,card:{id:r.units[r.pendingExtraSummon.extraUnitId].cardId,name:unitName(r,r.pendingExtraSummon.extraUnitId)},method:r.pendingExtraSummon.recipe.method,materialCount:r.pendingExtraSummon.recipe.materials.length,stage:'response'}:null,pendingManual:r.pendingManual?{...r.pendingManual}:null,persistentEffects:(r.persistentEffects||[]).map(e=>({kind:e.kind,owner:e.owner,counters:e.counters})),logs:r.logs.slice(-80),you:viewer,players:r.players.map((p,i)=>({index:i,label:p.label,deckId:p.deckId,deckName:decks.get(p.deckId)?.name,hp:p.hp,playerAtkBonus:p.playerAtkBonus||0,reloads:p.reloads,deckCount:p.deck.length,handCount:p.hand.length,grave:p.grave.map(mapId),banishedCount:p.banished.length,extraCount:p.extra.length,field:p.field.map(mapId),integration:mapId(p.integration),hand:i===viewer?p.hand.map(mapId):null,extra:i===viewer?p.extra.map(mapId):null}))}}
 function apply(r,who,type,body){const p=r.players[who];let changed=true;
  if(r.pendingExtraSummon&&!['extraResponse','concede'].includes(type))fail(409,'특수 소환 대응 중에는 다른 행동을 할 수 없습니다.');
  if(r.pendingSpell&&!['spellResponse','concede'].includes(type))fail(409,'주문 대응 창이 닫히기 전에는 다른 행동을 할 수 없습니다.');
@@ -520,8 +537,13 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
   break;
  }
  case 'spellResponse':{
-  if(r.status!=='active'||!r.pendingSpell||r.pendingSpell.who===who)fail(403,'상대가 선언한 주문에만 대응할 수 있습니다.');
-  if(body.choice!=='pass')fail(409,'자동화되지 않은 주문 무효화 응답은 사용할 수 없습니다. 대응 없음만 지원합니다.');
+  if(r.status!=='active'||!r.pendingSpell||spellResponsePlayer(r)!==who)fail(403,'상대가 선언한 효과의 현재 대응권자만 행동할 수 있습니다.');
+  if(body.choice==='counter'){
+   declareSpellCounter(r,who,body.sourceUnitId);
+   log(r,'response',`${p.label}: 스톰블레이거 드래곤 주문 무효화 선언 (게임당 1회 사용)`);
+   break;
+  }
+  if(body.choice!=='pass')fail(409,'자동화되지 않은 주문 무효화 응답은 사용할 수 없습니다.');
   log(r,'response',`${p.label}: 주문 대응 없음`);
   finishAutomatedSpell(r);
   break;
@@ -665,7 +687,10 @@ function runAI(r){if(r.mode!=='ai'||r.status!=='active')return;
  let steps=0;while(r.status==='active'&&steps++<70){
   if(r.pendingManual)break;
   if(r.pendingSpell){
-   if(r.pendingSpell.who===0){apply(r,1,'spellResponse',{choice:'pass'});continue;}
+   if(spellResponsePlayer(r)===1){
+    const sourceUnitId=legalSpellCounters(r,1)[0];
+    apply(r,1,'spellResponse',sourceUnitId?{choice:'counter',sourceUnitId}:{choice:'pass'});continue;
+   }
    break;
   }
   if(r.pendingTriggerOrder){
