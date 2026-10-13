@@ -95,6 +95,12 @@
 - Opponent draw/deck search, draw-plus-mill and conditional integration buff, mummy token generation, server coin toss and random opposing discard now happen after response, not at card-use declaration.
 - Tests: tests/spell-response-summon-search.test.mjs (including frozen state after declaration, serialized restoration, heads/tails branches and server-selected hidden discard). Actual counterspell cards, source movement exceptions and unresolved prerequisite/selection spells remain #22/#25.
 
+## 2026-10-13 후속 개발 — R01/R02 일괄 효과 등록 원자성 (PR #48)
+
+- `declareAutomaticGroup`은 여러 자동 트리거의 우선순위/LIFO 선언을 **임시 스택과 임시 시퀀스**에서 모두 검증한 뒤에만 실제 게임 상태에 반영한다.
+- 마지막 효과가 잘못되었거나 스택 256개 상한을 넘으면 앞쪽 트리거도 등록하지 않는다. R02 선택 대기 상태도 훼손되지 않아 정상 시점에 재시도할 수 있다.
+- `tests/effect-runtime.test.mjs`에 부분 용량 실패, 잘못된 후행 효과, 성공적 재시도 검증. 카드 효과 전체 대응·복사는 여전히 미완료.
+
 ## 1. 새 채팅에서 읽을 순서
 
 1. **docs/START_HERE_NEW_CHAT.md** — 현재 상태와 재개 요령(이 파일).
