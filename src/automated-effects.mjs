@@ -2,6 +2,13 @@
 // A handler must be backed by a particular v1.3 card wording.
 const aliases={};
 const register=(ids,handler)=>{for(const id of ids.split(' '))aliases[id]=handler;};
+function checkSpellPlayerTarget(ctx,player){
+ if(player===ctx.who)return;
+ const protectedUntil=ctx.r.players[player]?.spellProtectionUntilOpponentTurn||0;
+ const currentTurn=ctx.r.players[ctx.who]?.turnsTaken||0;
+ if(protectedUntil>0&&protectedUntil>=currentTurn)
+  ctx.H.fail(409,'보호막 효과로 해당 플레이어를 주문의 대상으로 지정할 수 없습니다.');
+}
 const getTarget=(ctx,kind='enemy')=>{
  const {r,who,body,H}=ctx;
  const target=body.target;
@@ -10,10 +17,11 @@ const getTarget=(ctx,kind='enemy')=>{
   if(z&&['field','integration'].includes(z.zone)&&(kind==='any'||z.player===(kind==='own'?who:1-who)))return {id:target.id,player:z.player};
   H.fail(409,'선택할 수 없는 카드입니다.');
  }
- if(target?.type==='player'){if(![0,1].includes(target.player)||!(kind==='any'||target.player===(kind==='own'?who:1-who)))H.fail(409,'선택할 수 없는 플레이어입니다.');return {player:target.player};}
+ if(target?.type==='player'){if(![0,1].includes(target.player)||!(kind==='any'||target.player===(kind==='own'?who:1-who)))H.fail(409,'선택할 수 없는 플레이어입니다.');checkSpellPlayerTarget(ctx,target.player);return {player:target.player};}
  const enemy=1-who,p=r.players[kind==='own'?who:enemy];
  
  const candidate=p.field.find(Boolean);
+ if(!candidate)checkSpellPlayerTarget(ctx,kind==='own'?who:enemy);
  return candidate?{id:candidate,player:kind==='own'?who:enemy}:{player:kind==='own'?who:enemy};
 };
 const hit=(ctx,target,amount)=>{if(!Number.isFinite(amount))throw Error('잘못된 피해 수치');amount=Math.max(0,Math.floor(amount));if(target.id)ctx.H.hurt(ctx.r,target.id,amount);else{ctx.r.players[target.player].hp-=amount;ctx.H.outcome(ctx.r)}};
@@ -177,6 +185,17 @@ register('COC-27-010',ctx=>{
  ctx.r.units[id].superiorClaw=true;
  ctx.r.players[ctx.who].hp-=200;
  ctx.H.outcome(ctx.r);
+});
+
+
+register('COC-01-009',ctx=>{
+ if(!ctx.r.players[ctx.who].integration)
+  ctx.H.fail(409,'일체화 중일 때만 사용할 수 있습니다.');
+ const other=ctx.r.players[1-ctx.who];
+ const nextOppTurn=(other.turnsTaken||0)+1;
+ other.noDirectAttackUntil=Math.max(other.noDirectAttackUntil||0,nextOppTurn);
+ const self=ctx.r.players[ctx.who];
+ self.spellProtectionUntilOpponentTurn=Math.max(self.spellProtectionUntilOpponentTurn||0,nextOppTurn);
 });
 
 export function hasAutoSpell(cardId){return Object.hasOwn(aliases,cardId)}
