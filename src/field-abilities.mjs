@@ -59,7 +59,7 @@ export function applyFieldAbility(r,who,body,H){
   const t=fieldTarget(r,body,who,H,'enemy');H.move(r,t,'deck',r.units[t].owner);break;
  }
  case 'COC-08-003':{
-  const cost=handTarget(r,body,who,H);H.move(r,cost,'deck',who);H.shuffle(p.deck);H.draw(r,who);break;
+  const cost=handTarget(r,body,who,H);H.move(r,cost,'deck',who);H.draw(r,who);break;
  }
  case 'COC-10-005':{
   if((unit.abilityGameCount||0)>=3)invalid(H,'이번 게임의 최대 3회 사용 한도를 초과했습니다.');
@@ -78,7 +78,7 @@ export function applyFieldAbility(r,who,body,H){
  case 'COC-22-010':{
   const t=fieldTarget(r,body,who,H,'own');
   if(t===id)invalid(H,'공격 기회를 줄 다른 몬스터를 선택해야 합니다.');
-  if(unit.atk<1||unit.cannotAttack||unit.frozen||unit.attackCountTurn===r.turnNumber&&unit.attackCount>=(unit.extraAttacks||1))invalid(H,'포기할 공격 기회가 없습니다.');
+  if(!H.attackAvailable(unit,r.turnNumber))invalid(H,'포기할 공격 기회가 없습니다.');
   if(unit.attackCountTurn!==r.turnNumber){unit.attackCountTurn=r.turnNumber;unit.attackCount=0}
   unit.attackCount=(unit.attackCount||0)+1;
   const target=r.units[t];
