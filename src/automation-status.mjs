@@ -5,7 +5,7 @@ import {FIELD_ABILITY_IDS} from './field-abilities.mjs';
 import {GRAVE_ABILITY_IDS} from './grave-abilities.mjs';
 
 export const summonAutomations = new Set([
- 'COC-05-010','COC-07-002','COC-08-001','COC-08-008','COC-10-003',
+ 'COC-03-005','COC-05-010','COC-07-002','COC-08-001','COC-08-008','COC-10-003',
  'COC-10-004','COC-12-010','COC-14-005','COC-19-006','COC-27-003',
  'COC-27-004','COC-31-001','COC-31-002','COC-31-003',
  'COC-12-003','COC-12-004','COC-27-001','COC-23-003','COC-24-002',
