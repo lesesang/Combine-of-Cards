@@ -5,7 +5,7 @@
 const REGISTERED=[
  'COC-03-002','COC-05-004','COC-08-003','COC-10-005',
  'COC-13-001','COC-13-002','COC-13-005','COC-22-010',
- 'COC-23-002','COC-24-003','COC-26-003','COC-31-004'
+ 'COC-23-002','COC-24-003','COC-26-003','COC-31-004','COC-12-013'
 ];
 export const FIELD_ABILITY_IDS=Object.freeze(REGISTERED);
 function invalid(H,message){H.fail(409,message)}
@@ -38,10 +38,18 @@ export function applyFieldAbility(r,who,body,H){
   invalid(H,'효과 발동 카드는 자신의 필드 또는 일체화 영역에 있어야 합니다.');
  if(!FIELD_ABILITY_IDS.includes(unit.cardId))invalid(H,'이 카드의 필드 효과는 아직 자동 판정을 지원하지 않습니다.');
  const p=r.players[who],c=unit.cardId;
- p.abilityUsed??={};
- if(p.abilityUsed[c]===r.turnNumber)invalid(H,'이 효과는 이번 턴에 이미 사용했습니다.');
+ if(p.abilityUsed?.[c]===r.turnNumber)invalid(H,'이 효과는 이번 턴에 이미 사용했습니다.');
  if(unit.abilityGameUsed)invalid(H,'이 효과의 게임당 사용 횟수를 모두 사용했습니다.');
  switch(c){
+ case 'COC-12-013':{
+  if(z.zone!=='field'||unit.effectsNegated)invalid(H,'필드에서 효과가 유효한 크래쉬볼티지가 필요합니다.');
+  const cost=body.costCardId;
+  if(!p.hand.includes(cost))invalid(H,'버릴 자신의 패 1장을 선택해야 합니다.');
+  const target=fieldTarget(r,body,who,H,'enemy');
+  H.move(r,cost,'grave',r.units[cost].owner);
+  H.log(r,'cost',`${p.label}: 크래쉬볼티지 효과 비용으로 ${H.name(r,cost)} 1장을 버렸습니다.`);
+  H.destroy(r,target);break;
+ }
  case 'COC-03-002':{
   const integrated=p.integration&&r.units[p.integration]?.cardId==='COC-03-001';
   searchEverywhere(r,who,integrated?'COC-03-003':'COC-03-001',H);
@@ -94,6 +102,6 @@ export function applyFieldAbility(r,who,body,H){
   H.move(r,croix,'field',who);H.onSummon?.(r,who,croix);break;
  }
  }
- p.abilityUsed[c]=r.turnNumber;
+ p.abilityUsed??={};p.abilityUsed[c]=r.turnNumber;
  return {supported:true,cardId:c};
 }

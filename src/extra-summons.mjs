@@ -2,6 +2,7 @@
  * Strict v1.3 extra-deck recipes. No text guessing, no generic-material fallback.
  * Verifies summon eligibility only; triggered and continuous effects have separate support.
  */
+import {FUSION_UP_ID,requireUnusedEffect} from './effect-usage.mjs';
 const id=(...ids)=>ids.map(value=>({kind:'id',value}));
 export const EXTRA_RECIPES=Object.freeze({
  'COC-12-011':{method:'hero',parts:id('COC-12-001','COC-12-002')},
@@ -75,6 +76,7 @@ export function validateExtraSummon({room,who,extraUnitId,materials,spellUnitId,
  }else if(recipe.method==='fusion'||recipe.method==='wakeup'){
   const allowed=recipe.method==='wakeup'?['COC-32-009']:(spellForDeck[extra.cardId.slice(4,6)]||[]);
   if(!player.hand.includes(spellUnitId)||!allowed.includes(room.units[spellUnitId]?.cardId))reject('이 소환에 필요한 지정 주문을 패에서 사용해야 합니다.');
+  if(room.units[spellUnitId].cardId===FUSION_UP_ID)requireUnusedEffect(room,who,FUSION_UP_ID,1);
  }else if(spellUnitId)reject('해당 소환에는 퓨전 주문을 소비하지 않습니다.');
  return {method:recipe.method,spellUnitId:spellUnitId||null,materials:[...materials]};
 }
