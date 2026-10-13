@@ -105,6 +105,17 @@ const H={
  originalOwner:(r,id)=>r.units[id].owner,type:(r,id)=>cards.get(r.units[id].cardId)?.type,capture:(r,who,id)=>move(r,id,'field',who),cardNamed:(r,who,name)=>catalog.cards.find(c=>c.deckId===r.players[who].deckId&&c.name.replace(/\s+/g,'').includes(name.replace(/\s+/g,''))),evolve
 };
 function runSummonEffects(r,who,id,body={}){const u=r.units[id],p=r.players[who];switch(u.cardId){
+ case 'COC-03-005':{
+  // Confirmed base without Beria: 0 ATK / 1 HP. Beria's current ATK
+  // determines both values at summon; later live-link behavior is unresolved (R30).
+  const beriaId=p.integration;
+  const beria=beriaId&&r.units[beriaId]?.cardId==='COC-03-001'?r.units[beriaId]:null;
+  const currentAtk=beria?Math.max(0,Math.floor(Number(beria.atk)||0)):0;
+  u.atk=currentAtk;
+  u.hp=beria?currentAtk:1;
+  if(u.hp<=0)H.destroy(r,id,{cause:'lethal'});
+  break;
+ }
  case 'COC-12-003':findCardInDeck(r,who,'F=HERO');break;
  case 'COC-12-004':if(p.hand.length<=1){draw(r,who);if(r.status==='active')draw(r,who)}break;
  case 'COC-27-001':draw(r,who);if(r.status==='active')draw(r,1-who);break;

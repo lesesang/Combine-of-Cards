@@ -3,8 +3,8 @@
   "automatedSpellHandlerCount": 70,
   "generatedAt": "repository build time",
   "counts": {
-    "partial": 155,
-    "manual": 98,
+    "partial": 156,
+    "manual": 97,
     "basic": 1
   },
   "notes": [
@@ -188,7 +188,7 @@
       "name": "길 잃은 원혼",
       "type": "몬스터",
       "zone": "main",
-      "status": "manual",
+      "status": "partial",
       "conditions": [],
       "effects": [
         "영매사 베리아가 존재하면 이 카드의 공격력과 체력은 베리아의 현재 공격력과 같은 값이 된다. 베리아가 존재하지 않으면 이 카드는 공격력 0 / 체력 1이다."
