@@ -2,6 +2,7 @@
 import {hasAutoSpell} from './automated-effects.mjs';
 import {SUPPORTED_EXTRA_IDS} from './extra-summons.mjs';
 import {FIELD_ABILITY_IDS} from './field-abilities.mjs';
+import {GRAVE_ABILITY_IDS} from './grave-abilities.mjs';
 
 export const summonAutomations = new Set([
  'COC-05-010','COC-07-002','COC-08-001','COC-08-008','COC-10-003',
@@ -26,6 +27,7 @@ export const integrationAutomations = new Set([
 export const dragonAutomations = new Set(['COC-11-007','COC-11-008','COC-11-009']);
 export const cartoonTriggerAutomations = new Set(['COC-05-008']);
 export function automationStatus(card){
+ if(GRAVE_ABILITY_IDS.includes(card.id))return 'partial';
  if(card.type==='주문'&&hasAutoSpell(card.id))return 'partial';
  if(summonAutomations.has(card.id)||passiveAutomations.has(card.id)||integrationAutomations.has(card.id)||combatAutomations.has(card.id)||FIELD_ABILITY_IDS.includes(card.id)||SUPPORTED_EXTRA_IDS.includes(card.id)||dragonAutomations.has(card.id)||cartoonTriggerAutomations.has(card.id))return 'partial';
  if(!card.effects?.length&&!card.conditions?.length)return 'basic';

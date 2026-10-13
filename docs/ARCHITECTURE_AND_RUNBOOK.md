@@ -9,7 +9,7 @@
 - Node.js **20 이상**, GitHub Actions에서는 Node 22. 외부 npm 런타임 패키지 없이 node 표준 라이브러리 기반.
 - 기본 서버 주소: http://localhost:3000, PORT 환경 변수로 변경.
 - 데이터 위치: 기본 **.data/rooms.json**, DATA_DIR 환경 변수로 변경.
-- 룰/엔진 식별 문자열: server.mjs 안의 **1.3-ai-beta.9**. 카드/룰북 정본은 v1.3.
+- 룰/엔진 식별 문자열: server.mjs 안의 **1.3-ai-beta.10**. 카드/룰북 정본은 v1.3.
 - 테스트/빌드/운영 명령:
 
 ~~~bash
@@ -32,7 +32,7 @@ Windows PowerShell에서도 동일하게 npm 명령 사용. npm run check:covera
 | **server.mjs** | HTTP/API, 룸 비밀 토큰·인증, 룸 저장·복원, 턴/페이즈/다이스/드로우/리로드/승패, AI 행동 루프, 카드별 소환·전투 예외, 지속 효과 훅 |
 | **src/activation-rules.mjs** | 카드 발동 전 조건과 비용 검사. 80종 기준이나 전 카드 검증 완료가 아님 |
 | **src/automated-effects.mjs** | 카드 ID 기반 주문 효과 실행 핸들러 70종(효과 전체 완료 아님) |
-| **src/field-abilities.mjs** | 메인 페이즈 일부 카드의 필드 발동 12종·AI 행동 |
+| **src/field-abilities.mjs** | 메인 페이즈 일부 카드의 필드 발동 13종·AI 행동 |
 | **src/extra-summons.mjs** | 엑스트라 21개 지정 소재, 소환 수단, 필드 공간 검사 및 AI 소환 선택 |
 | **src/effect-runtime.mjs** | JSON 저장 가능한 LIFO 효과 선언/해결, 소스 이탈 예외, 독립 지속 효과와 종료 트리거의 공통 기반 |
 | **src/dragon-gold.mjs** | 파프니르/라인의 황금/니벨룽겐의 반지 부분 실연동 |
@@ -88,7 +88,9 @@ Windows PowerShell에서도 동일하게 npm 명령 사용. npm run check:covera
 | npm run check:coverage | 자동 효과 등록과 카드 상태 보고서 생성 | 효과별 세부 구현·룰 정확도·카드 완전 지원 인증 |
 | GitHub CI | Node 22 환경에서 위 검사 수행 | 운영 보안 부하 시험, 재접속 장기 테스트, 원본 DOCX 대조 |
 
-**중요: npm run check:coverage를 실행하면** scripts/audit-coverage.mjs이 **docs/AUTOMATION_COVERAGE.md를 재작성**한다. 지금 문서에 사람이 덧붙인 설명/확정 재정이 출력에서 사라질 수 있다. 생성 보고서와 수동 판정/설명을 별도 파일로 분리하거나 생성 코드를 확장하는 작업을 로드맵 P0으로 지정했다. 테스트를 통과했다고 덮어써진 보고서를 무심코 commit하지 말 것.
+**보고서 갱신:** `npm run check:coverage`는 AUTOMATION_COVERAGE.md / automation-audit.json / EFFECT_COVERAGE.md만 재생성한다. 수동 설명은 **AUTOMATION_NOTES.md**, 효과 명세는 **effect-coverage.json**에 쓴다. `npm run check:coverage -- --check`는 파일을 바꾸지 않고 출력 일치·원문/효과 번호·구현 경로·테스트 이름을 검증한다. CI는 이 읽기 전용 검사를 사용한다. 정본 전체 검증이나 완전 자동화 인증을 뜻하지 않는다.
+
+신규 `src/grave-abilities.mjs`는 순수 비용 검사와 묘지 회수, `src/effect-usage.mjs`는 효과 번호별 턴 제한을 담당한다. actions API의 `graveAbility`는 `sourceUnitId`, `costUnitId`, `expectedVersion`을 받는다. 본인 상태의 `graveAbilities`에 현재 합법적인 조합만 제공하고 상대 비공개 영역은 포함하지 않는다. 규칙/엔진 버전은 beta.10이며, 기존 방에 없던 `effectUsage`는 첫 사용부터 생성된다. 이전 버전에서 수행한 효과 횟수를 소급 복원하지는 않는다.
 
 ## 6. 공개 전 보안 체크리스트
 
