@@ -372,8 +372,13 @@ function chooseAIExtra(r){
  return null;
 }
 // Server-only AI: never receives or exposes an opponent's hand to the browser.
+function chooseAISpellCost(r,who,sourceUnitId){
+ return r.players[who].hand.filter(id=>id!==sourceUnitId).sort((a,b)=>
+  (Number(cards.get(r.units[a]?.cardId)?.atk)||0)-(Number(cards.get(r.units[b]?.cardId)?.atk)||0)
+ )[0]||null;
+}
 function chooseAIMove(r){const who=1,p=r.players[who],level=r.aiDifficulty||'medium';
- const candidate=p.hand.filter(id=>{if(p.aiRejected?.includes(id))return false;try{planActivation({room:r,who,unitId:id,cards})}catch(e){if(e.status===409)return false;throw e}const c=cards.get(r.units[id].cardId);if(c.type==='주문')return hasAutoSpell(c.id);if(c.type==='일체화')return !p.integration&&!c.conditions.length;if(c.type==='몬스터')return p.field.includes(null)&&isSimpleSummonCard(c);return false});
+ const candidate=p.hand.filter(id=>{if(p.aiRejected?.includes(id))return false;try{planActivation({room:r,who,unitId:id,cards})}catch(e){if(e.status===409)return false;throw e}const c=cards.get(r.units[id].cardId);if(c.id==='COC-31-009'&&!chooseAISpellCost(r,who,id))return false;if(c.type==='주문')return hasAutoSpell(c.id);if(c.type==='일체화')return !p.integration&&!c.conditions.length;if(c.type==='몬스터')return p.field.includes(null)&&isSimpleSummonCard(c);return false});
  if(!candidate.length)return null;
  const attack=(id)=>Math.max(0,Number(cards.get(r.units[id].cardId).atk)||0);
  const score=id=>{const c=cards.get(r.units[id].cardId);if(c.type==='몬스터')return attack(id)+40+(c.effects.length?25:0);if(c.type==='일체화')return 150+attack(id);if(c.id==='COC-30-007'&&p.hp>850)return -100;if(c.type==='주문')return 85;return 0};
@@ -439,7 +444,7 @@ function runAI(r){if(r.mode!=='ai'||r.status!=='active')return;
        targets=eligible.slice(0,2);
       }
       const before=structuredClone(r);
-      try{apply(r,1,'play',{unitId:id,target:t,targets});}
+      try{apply(r,1,'play',{unitId:id,target:t,targets,costCardId:c.id==='COC-31-009'?chooseAISpellCost(r,1,id):undefined});}
       catch(e){
        for(const key of Object.keys(r))delete r[key];
        Object.assign(r,before);
@@ -489,4 +494,4 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
 }
 
 // Purely programmatic internal test seam. No HTTP route exposes these internals.
-export const gameTestInternals={cards,catalog,createPlayer,instantiate,move,draw,runSummonEffects,runIntegrationOnEnter,processStartOfTurn,processEndOfTurn,attackAvailable,damageUnit,H,performExtraSummon,chooseAIExtra,chooseAIFieldAbility,chooseAIGraveAbility,runAI,maxAttacks,applyFieldAbility,apply,publicState};
+export const gameTestInternals={cards,catalog,createPlayer,instantiate,move,draw,runSummonEffects,runIntegrationOnEnter,processStartOfTurn,processEndOfTurn,attackAvailable,damageUnit,H,performExtraSummon,chooseAIExtra,chooseAIFieldAbility,chooseAIGraveAbility,chooseAISpellCost,runAI,maxAttacks,applyFieldAbility,apply,publicState};

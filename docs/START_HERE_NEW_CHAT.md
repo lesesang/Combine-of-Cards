@@ -24,6 +24,10 @@
 - 자동 보고서는 `AUTOMATION_COVERAGE.md`, `automation-audit.json`, `EFFECT_COVERAGE.md`; 수동 설명은 **AUTOMATION_NOTES.md**로 분리. `docs/effect-coverage.json`에는 이번 **2장 4효과**만 등록. `npm run check:coverage -- --check`는 수정 없이 오래된 결과/잘못된 테스트 참조를 검출.
 - 상세: [묘지 회수·크래쉬볼티지 구현 범위](GRAVE_RECOVERY_AND_CRASH_VOLTAGE.md). #21~#29 대형 이슈는 전체 완료가 아니므로 열린 상태로 유지.
 
+## 2026-10-13 후속 개발 기록
+- **COC-31-009**: 다른 자기 손패의 명시적 버리기 비용을 서버에서 검증하고 UI·AI가 선택하도록 보완. 무지정 시 첫 패 강제 소모 제거. 카드 효과의 공통 대응 체인은 미완료(#22·#25). 지원 상태는 여전히 **부분 지원**.
+- 실제 main 병합 및 CI 완료 여부는 해당 작업 PR과 최신 workflow를 확인해야 한다.
+
 ## 1. 새 채팅에서 읽을 순서
 
 1. **docs/START_HERE_NEW_CHAT.md** — 현재 상태와 재개 요령(이 파일).
