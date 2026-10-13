@@ -15,6 +15,7 @@ import {applyGraveAbility,legalGraveAbilities,GRAVE_ABILITY_IDS} from './src/gra
 import {FUSION_UP_ID,markEffectUsed} from './src/effect-usage.mjs';
 import {declareEffect,beginAutomaticTriggerOrder,chooseAutomaticTriggerOrder,resolveEffectStack} from './src/effect-runtime.mjs';
 import {actualAttack,treatedAttackForCondition} from './src/combat-stats.mjs';
+import {recordSwordKill,beginSwordTurn,endSwordTurn,processSwordAttackPhase,swordMultiplierCount,swordActualAttack} from './src/life-eating-sword.mjs';
 
 const ROOT=path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC=path.join(ROOT,'public');
@@ -179,13 +180,13 @@ const previousZone=options.tokenAction&&u.created?zoneOwner(r,id):null;if(to==='
  }
 }
 function zoneOwner(r,id){if(r.units[id]?.attachmentHostId){const hostId=r.units[id].attachmentHostId,z=zoneOwner(r,hostId);return z?{player:z.player,zone:'attachment',hostId}:null;}if(r.units[id]?.overlayHostId){const hostId=r.units[id].overlayHostId,z=zoneOwner(r,hostId);return z?{player:z.player,zone:'overlay',hostId}:null;}for(let i=0;i<r.players.length;i++){const p=r.players[i];for(const z of ['deck','hand','grave','extra','banished'])if(p[z].includes(id))return {player:i,zone:z};if(p.field.includes(id))return {player:i,zone:'field'};if(p.integration===id)return {player:i,zone:'integration'};}return null}
-function damageUnit(r,id,value,{battle=false}={}){const u=r.units[id];if(!u||u.hp===null)fail(409,'체력이 없는 카드입니다.');if(value<0&&u.cardId==='COC-09-002')value=Math.max(-1,value);u.preDamageHp=u.hp;u.hp+=value;if(u.hp<=0){if(battle&&(u.cardId==='COC-26-011'||u.cardId==='COC-05-002')){u.hp=1;return false}H.destroy(r,id,{cause:'lethal'});return true}return false}
+function damageUnit(r,id,value,{battle=false,sourceId=null,sourcePlayer=null}={}){const u=r.units[id];if(!u||u.hp===null)fail(409,'체력이 없는 카드입니다.');if(value<0&&u.cardId==='COC-09-002')value=Math.max(-1,value);u.preDamageHp=u.hp;u.hp+=value;if(u.hp<=0){if(battle&&(u.cardId==='COC-26-011'||u.cardId==='COC-05-002')){u.hp=1;return false}H.destroy(r,id,{cause:'lethal',sourceId,sourcePlayer});return true}return false}
 function dropFromDeck(r,who,count){
  const p=r.players[who];for(let i=0;i<count&&p.deck.length;i++){const id=p.deck.shift();p.grave.push(id);log(r,'mill',`${p.label}가 덱 맨 위의 카드 1장을 묘지로 보냈습니다.`)}
 }
 function findCardInDeck(r,who,name){const p=r.players[who];const id=p.deck.find(id=>cards.get(r.units[id].cardId)?.name.includes(name));if(id){move(r,id,'hand',who);log(r,'search',`${p.label}가 덱에서 ${cards.get(r.units[id].cardId).name}를 공개하고 패로 가져왔습니다.`)}return id}
 function die(n,min=1){const maximum=Math.min(Math.max(1,Math.floor(n)),100_000_000);const minimum=Math.max(1,Math.min(maximum,Math.floor(min)));return crypto.randomInt(minimum,maximum+1)}
-function hurt(r,id,n){damageUnit(r,id,-n)}
+function hurt(r,id,n,attribution={}){damageUnit(r,id,-n,attribution)}
 function healUnit(r,id,n){damageUnit(r,id,n)}
 function evolve(r,id,c){const u=r.units[id];const prev=u.cardId;u.cardId=c.id;u.atk+=Math.max(0,Number(c.atk)||0);u.hp=(u.hp??0)+(Number(c.hp)||0);log(r,'evolve',`${cards.get(prev)?.name} → ${c.name}`)}
 function summonToken(r,who,name,atk,hp){
@@ -239,7 +240,7 @@ function scheduleSingleDestroyHeals(r,heals){
 
 const H={
  zone:zoneOwner,move,draw,fail,log,attackAvailable,roll:die,randomInt:n=>crypto.randomInt(n),hurt,healUnit,outcome:setOutcome,shuffle,onSummon:runSummonEffects,
- mill:dropFromDeck,summonToken,search:findCardInDeck,destroy:(r,id,{cause='effect'}={})=>{const u=r.units[id];if(u&&zoneOwner(r,id)){if((cause==='effect'||cause==='cost')&&u.effectDestructionImmune){log(r,'effect',`${unitName(r,id)}: 주문·효과에 의한 직접 파괴를 방지했습니다.`);return false;}
+ mill:dropFromDeck,summonToken,search:findCardInDeck,destroy:(r,id,{cause='effect',sourceId=null,sourcePlayer=null}={})=>{const u=r.units[id];if(u&&zoneOwner(r,id)){if((cause==='effect'||cause==='cost')&&u.effectDestructionImmune){log(r,'effect',`${unitName(r,id)}: 주문·효과에 의한 직접 파괴를 방지했습니다.`);return false;}
  const singleHeals=destroyed(r,id);const z=zoneOwner(r,id);
   if(z.zone==='field'){
    r.destructionHistory??=[];
@@ -247,13 +248,13 @@ const H={
    if(r.destructionHistory.length>500)r.destructionHistory.shift();
   }
   const canRevive=u.cardId==='COC-10-011'&&!u.revivedOnce&&z.zone==='field';
- const name=cards.get(u.cardId)?.name||u.tokenCard?.name;move(r,id,'grave',u.owner);log(r,'destroy',`${name} 파괴`);if(u.created&&cause==='cost'&&z.zone==='field')onTokenActivity(r,'사용',z.player,{zone:zoneOwner,move,instantiate,log});if(u.cardId==='COC-11-007'&&z.zone==='field')onFafnirDestroyed(r,id,z.player,{zone:zoneOwner,move,log});if(u.cardId==='COC-05-002'&&z.zone==='field')onCartoonLandDestroyed(r,id,z.player,{zone:zoneOwner,move,destroy:H.destroy,log});
+ const name=cards.get(u.cardId)?.name||u.tokenCard?.name;move(r,id,'grave',u.owner);log(r,'destroy',`${name} 파괴`);if(z.zone==='field')recordSwordKill(r,{sourceId,sourcePlayer,victimController:z.player},{getZone:zoneOwner,log});if(u.created&&cause==='cost'&&z.zone==='field')onTokenActivity(r,'사용',z.player,{zone:zoneOwner,move,instantiate,log});if(u.cardId==='COC-11-007'&&z.zone==='field')onFafnirDestroyed(r,id,z.player,{zone:zoneOwner,move,log});if(u.cardId==='COC-05-002'&&z.zone==='field')onCartoonLandDestroyed(r,id,z.player,{zone:zoneOwner,move,destroy:H.destroy,log});
  if(singleHeals)scheduleSingleDestroyHeals(r,singleHeals);
  if(canRevive&&r.units[id]&&r.players[z.player].field.includes(null)){
   u.revivedOnce=true;move(r,id,'field',z.player);log(r,'revive',`${name}: 파괴 후 효과 없이 1회 부활`)
  }
  }} ,
- destroyBatch:(r,ids)=>{
+ destroyBatch:(r,ids,attribution={})=>{
   // Snapshot all destruction targets before resolving destruction-triggered effects.
   const chosen=[...new Set(ids)].filter(id=>r.units[id]&&zoneOwner(r,id)?.zone==='field'&&!r.units[id].effectDestructionImmune);
   if(!chosen.length)return;
@@ -269,7 +270,7 @@ const H={
    beginAutomaticTriggerOrder(r,entries,r.turn);
    for(const e of firstDestroy)r.effects.splice(r.effects.indexOf(e),1);
   }
-  for(const id of chosen)if(zoneOwner(r,id)?.zone==='field')H.destroy(r,id);
+  for(const id of chosen)if(zoneOwner(r,id)?.zone==='field')H.destroy(r,id,attribution);
   if(!r.pendingTriggerOrder){
    if(firstDestroy.length)resolveQueuedDestroyHeals(r);
    else setOutcome(r);
@@ -337,47 +338,7 @@ function runIntegrationOnEnter(r,who,id){const u=r.units[id],p=r.players[who];sw
  case 'COC-30-010':p.hp+=800;break;
  default:break;
  }}
-// The spell has gone to grave; this is a serialized, independent effect.
-// The bearer must pay 30 HP on each of their OWN subsequent turns. HP <= 30
-// cannot pay the full cost, so the unit is destroyed or the player loses.
-function processLifeEatingSwordTurn(r,who){
- for(const effect of [...(r.effects||[])].filter(e=>e.type==='lifeEatingSword')){
-  const target=effect.target;
-  const zone=target?.kind==='unit'?zoneOwner(r,target.id):null;
-  if(target?.kind==='unit'&&(!zone||zone.zone!=='field')){
-   r.effects.splice(r.effects.indexOf(effect),1);continue;
-  }
-  const bearer=target?.kind==='unit'?zone?.player:target?.player;
-  if(bearer!==who||r.turnNumber<=effect.appliedAtTurn)continue;
-  const unit=target.kind==='unit'?r.units[target.id]:null;
-  const hp=unit?unit.hp:r.players[who].hp;
-  if(!Number.isFinite(hp)||hp<=30){
-   r.effects.splice(r.effects.indexOf(effect),1);
-   if(unit){
-    H.destroy(r,target.id,{cause:'lethal'});
-    log(r,'effect','생명을 먹는 마검: 체력 30을 지불할 수 없어 대상 몬스터 파괴');
-   }else{
-    r.players[who].hp=0;
-    log(r,'effect','생명을 먹는 마검: 체력 30을 지불할 수 없어 플레이어 패배');
-   }
-   setOutcome(r);
-  }else if(unit){
-   unit.hp-=30;unit.atk+=100;
-   log(r,'effect','생명을 먹는 마검: 대상 몬스터 체력 30 지불 / 공격력 +100');
-  }else{
-   r.players[who].hp-=30;
-   const p=r.players[who];
-   p.playerAtkBonus=(p.playerAtkBonus||0)+100;
-   if(p.integration){
-    r.units[p.integration].atk+=100;
-    r.units[p.integration].playerAttackBonusApplied=(r.units[p.integration].playerAttackBonusApplied||0)+100;
-   }
-   log(r,'effect','생명을 먹는 마검: 일체화 플레이어 체력 30 지불 / 공격력 +100');
-  }
-  if(r.status==='finished')return;
- }
-}
-function processStartOfTurn(r){const who=r.turn,p=r.players[who];p.turnsTaken=(p.turnsTaken||0)+1;processLifeEatingSwordTurn(r,who);if(r.status==='finished')return;p.aiRejected=[];p.aiRejectedAbilities=[];for(const u of Object.values(r.units)){if(u.buffExpiresAt&&u.buffExpiresAt<=p.turnsTaken&&u.owner===who){u.atk=Math.max(0,u.atk-(u.temporaryBuff||0));u.temporaryBuff=0;u.buffExpiresAt=0}}p.lastRoundPlays=p.roundPlays||0;p.roundPlays=0;p.roundElementUses=0;p.elementSpellPlaysThisTurn=0;p.spellsThisTurn=0;
+function processStartOfTurn(r){const who=r.turn,p=r.players[who];p.turnsTaken=(p.turnsTaken||0)+1;beginSwordTurn(r,who,{getZone:zoneOwner,log});if(r.status==='finished')return;p.aiRejected=[];p.aiRejectedAbilities=[];for(const u of Object.values(r.units)){if(u.buffExpiresAt&&u.buffExpiresAt<=p.turnsTaken&&u.owner===who){u.atk=Math.max(0,u.atk-(u.temporaryBuff||0));u.temporaryBuff=0;u.buffExpiresAt=0}}p.lastRoundPlays=p.roundPlays||0;p.roundPlays=0;p.roundElementUses=0;p.elementSpellPlaysThisTurn=0;p.spellsThisTurn=0;
  
  // Passive draw-phase triggers happen before the normal draw action.
  const enemyIntegration=r.players[1-who].integration;
@@ -401,6 +362,7 @@ function processEndOfTurn(r){
   r.effects.splice(r.effects.indexOf(e),1);
  }
  const p=r.players[r.turn];for(const id of [...p.field].filter(Boolean))if(r.units[id].cardId==='COC-20-001'){hurt(r,id,150)}
+ endSwordTurn(r,r.turn);
  setOutcome(r);
 }
 function isAggro(r,id){const c=cards.get(r.units[id]?.cardId);return c?.id==='COC-12-007'||c?.id==='COC-08-002'||c?.id==='COC-09-004'||c?.id==='COC-21-008'}
@@ -499,7 +461,7 @@ function runManual(r,m){const x=m.payload;const p=r.players;switch(m.kind){
  case 'note':break;
  default:fail(400,'허용되지 않는 수동 판정 유형');
  }}
-function publicState(r,viewer){const mapId=id=>id?{...r.units[id],card:cards.get(r.units[id].cardId)||r.units[id].tokenCard}:null;return {code:r.code,status:r.status,version:r.version,rulesVersion:RULES,mode:r.mode||'pvp',difficulty:r.aiDifficulty||null,aiDeckId:r.mode==='ai'?r.players[1]?.deckId:null,automation:{supportedSpells:spellHandlerIds.length,totalSpells:catalog.cards.filter(c=>c.type==='주문').length,fieldAbilityIds:FIELD_ABILITY_IDS,graveAbilityIds:GRAVE_ABILITY_IDS},graveAbilities:legalGraveAbilities(r,viewer,H),turn:r.turn,phase:r.phase,turnNumber:r.turnNumber,winner:r.winner,pendingAttack:r.pendingAttack?{...r.pendingAttack,attacker:mapId(r.pendingAttack.attackerId),target:r.pendingAttack.target}:null,pendingTriggerOrder:r.pendingTriggerOrder?{
+function publicState(r,viewer){const mapId=id=>id?{...r.units[id],atk:swordActualAttack(r,id,{getZone:zoneOwner}),swordDoubleStacks:swordMultiplierCount(r,id,{getZone:zoneOwner}),card:cards.get(r.units[id].cardId)||r.units[id].tokenCard}:null;return {code:r.code,status:r.status,version:r.version,rulesVersion:RULES,mode:r.mode||'pvp',difficulty:r.aiDifficulty||null,aiDeckId:r.mode==='ai'?r.players[1]?.deckId:null,automation:{supportedSpells:spellHandlerIds.length,totalSpells:catalog.cards.filter(c=>c.type==='주문').length,fieldAbilityIds:FIELD_ABILITY_IDS,graveAbilityIds:GRAVE_ABILITY_IDS},graveAbilities:legalGraveAbilities(r,viewer,H),turn:r.turn,phase:r.phase,turnNumber:r.turnNumber,winner:r.winner,pendingAttack:r.pendingAttack?{...r.pendingAttack,attacker:mapId(r.pendingAttack.attackerId),target:r.pendingAttack.target}:null,pendingTriggerOrder:r.pendingTriggerOrder?{
  awaiting:r.pendingTriggerOrder.awaiting[0],
  count:r.pendingTriggerOrder.effects.length,
  options:r.pendingTriggerOrder.effects.filter(e=>e.owner===viewer&&r.pendingTriggerOrder.awaiting[0]===viewer)
@@ -520,7 +482,7 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
  }
  for(let k=0;k<2;k++)for(let i=0;i<2;i++)if(r.players[i].hand.length<2)draw(r,i);log(r,'start',`코인 토스로 ${r.players[r.turn].label} 선공 결정`);processStartOfTurn(r);break}
  case 'draw':{requireTurn(r,who);if(r.phase!=='DRAW')fail(409,'드로우 페이즈가 아닙니다.');draw(r,who);if(r.status==='active')r.phase='MAIN';break}
- case 'phase':{requireTurn(r,who);if(r.pendingAttack||r.pendingManual)fail(409,'대응·협의 중에는 페이즈를 변경할 수 없습니다.');if(r.phase==='MAIN'){r.phase=body.skipAttack?'END':'ATTACK';if(r.phase==='ATTACK')onDragonAttackPhase(r,who,{log});}else if(r.phase==='ATTACK'){r.phase='END';}else if(r.phase==='END'){processEndOfTurn(r);if(r.status!=='active')break;r.turn=1-who;r.turnNumber++;r.phase='DRAW';processStartOfTurn(r);}else fail(409,'먼저 드로우해야 합니다.');for(const unit of Object.values(r.units))if(unit.attackTurn<r.turnNumber-2)unit.attackTurn=-1;log(r,'phase',`${r.players[r.turn].label} / ${r.phase}`);break}
+ case 'phase':{requireTurn(r,who);if(r.pendingAttack||r.pendingManual)fail(409,'대응·협의 중에는 페이즈를 변경할 수 없습니다.');if(r.phase==='MAIN'){r.phase=body.skipAttack?'END':'ATTACK';if(r.phase==='ATTACK'){processSwordAttackPhase(r,who,{getZone:zoneOwner,destroy:H.destroy,outcome:setOutcome,log});if(r.status==='active')onDragonAttackPhase(r,who,{log});}}else if(r.phase==='ATTACK'){r.phase='END';}else if(r.phase==='END'){processEndOfTurn(r);if(r.status!=='active')break;r.turn=1-who;r.turnNumber++;r.phase='DRAW';processStartOfTurn(r);}else fail(409,'먼저 드로우해야 합니다.');for(const unit of Object.values(r.units))if(unit.attackTurn<r.turnNumber-2)unit.attackTurn=-1;log(r,'phase',`${r.players[r.turn].label} / ${r.phase}`);break}
  case 'play':{requireTurn(r,who);if(r.phase!=='MAIN')fail(409,'메인 페이즈에서만 사용할 수 있습니다.');if(r.pendingAttack||r.pendingManual)fail(409,'현재 협의 중입니다.');const id=requireStr(body.unitId,100);if(!p.hand.includes(id))fail(403,'패에 없는 카드입니다.');const u=r.units[id],c=cards.get(u.cardId);
  if(c.id===FUSION_UP_ID)fail(409,'블랙 메탈 퓨전 업은 엑스트라 특수 소환에서 소재와 함께 사용하세요.');
  if(c.id==='COC-05-008')fail(409,'카툰 월드 가이드는 카툰 랜드 파괴 시 덱에서 자동 발동합니다.');
@@ -551,7 +513,7 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
  if(c.type==='주문'){p.spellsThisTurn=(p.spellsThisTurn||0)+1;if(c.attribute==='원소')p.elementSpellPlaysThisTurn=(p.elementSpellPlaysThisTurn||0)+1;}
  if(c.attribute==='자연'&&c.type==='주문'){p.naturalStreak=(p.naturalStreak||0)+1;p.natureSpellsUsedGame=(p.natureSpellsUsedGame||0)+1;p.natureSpellTurns??=[];if(!p.natureSpellTurns.includes(r.turnNumber)){p.natureSpellTurns.push(r.turnNumber);if(p.natureSpellTurns.length>10)p.natureSpellTurns.shift();}}
  log(r,'play',`${p.label}: ${c.name} 사용`);setOutcome(r);break}
- case 'ability':{requireTurn(r,who);if(r.phase!=='MAIN'||r.pendingAttack||r.pendingManual)fail(409,'지금은 일반 필드 효과를 사용할 수 없습니다.');const result=applyFieldAbility(r,who,body,H);log(r,'effect',`${p.label}: ${cards.get(result.cardId)?.name} 필드 효과 자동 처리`);setOutcome(r);break}
+ case 'ability':{requireTurn(r,who);if(r.phase!=='MAIN'||r.pendingAttack||r.pendingManual)fail(409,'지금은 일반 필드 효과를 사용할 수 없습니다.');const result=applyFieldAbility(r,who,body,{...H,destroy:(room,id,options={})=>H.destroy(room,id,{...options,sourceId:body.sourceUnitId}),hurt:(room,id,n,options={})=>hurt(room,id,n,{...options,sourceId:body.sourceUnitId}),destroyBatch:(room,ids,options={})=>H.destroyBatch(room,ids,{...options,sourceId:body.sourceUnitId})});log(r,'effect',`${p.label}: ${cards.get(result.cardId)?.name} 필드 효과 자동 처리`);setOutcome(r);break}
  case 'graveAbility':{requireTurn(r,who);applyGraveAbility(r,who,body,H);setOutcome(r);break}
  case 'extraSummon':{
   requireTurn(r,who);
@@ -584,12 +546,12 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
  case 'attack':{requireTurn(r,who);if(r.phase!=='ATTACK'||r.pendingAttack||r.pendingManual||((p.noAttackUntil||0)>=p.turnsTaken))fail(409,'현재 공격할 수 없습니다.');const attacker=r.units[requireStr(body.attackerId,100)];const z=attacker&&zoneOwner(r,attacker.id);if(!z||z.player!==who||!['field','integration'].includes(z.zone)||attacker.cannotAttack||attacker.cannotAttackUntil===r.turnNumber||attacker.frozen||!attackAvailable(attacker,r.turnNumber))fail(409,'공격 가능한 카드가 아닙니다.');const target=body.target;if(!target||!['player','unit'].includes(target.type))fail(400,'공격 대상을 지정해 주세요.');if(target.type==='player'&&target.player!==undefined&&target.player!==1-who)fail(409,'상대 플레이어만 공격할 수 있습니다.');if(target.type==='unit'){const zz=zoneOwner(r,target.id);if(!zz||zz.player===who||zz.zone!=='field')fail(409,'공격할 수 없는 대상입니다.');}if(target.type==='player'&&(p.noDirectAttackUntil||0)>0&&p.noDirectAttackUntil>=p.turnsTaken)fail(409,'보호막 효과로 이번 턴에는 플레이어 직접 공격이 불가능합니다.');if(attacker.cardId==='COC-05-003'&&!p.field.some(mid=>mid&&unitName(r,mid).includes('카툰 랜드')))fail(409,'카툰 랜드가 없어 공격할 수 없습니다.');
  if(attacker.cardId==='COC-01-006'&&p.integration)fail(409,'일체화 중에는 골드마그마가 공격할 수 없습니다.');
  if(attacker.cardId==='COC-05-001'&&target.type==='player')fail(409,'카툰 데몬즈 드래곤은 플레이어를 직접 공격할 수 없습니다.');validateAggro(r,who,target);attacker.attackTurn=r.turnNumber;if(attacker.attackCountTurn!==r.turnNumber){attacker.attackCount=0;attacker.attackCountTurn=r.turnNumber}attacker.attackCount++;r.pendingAttack={attackerId:attacker.id,target:target.type==='player'?{type:'player',player:1-who}:{type:'unit',id:target.id},stage:'response'};log(r,'attack',`${p.label}: ${unitName(r,attacker.id)} 공격 선언`);break}
- case 'defend':{if(r.status!=='active'||!r.pendingAttack||who===r.turn||r.pendingManual)fail(409,'대응할 공격이 없습니다.');const a=r.pendingAttack,src=r.units[a.attackerId],sourceZone=zoneOwner(r,a.attackerId);if(!sourceZone||sourceZone.player!==r.turn){r.pendingAttack=null;log(r,'attack','공격자가 사라져 공격이 무효화되었습니다.');break;}const tz=a.target.type==='unit'?zoneOwner(r,a.target.id):null;if(a.target.type==='unit'&&(!tz||tz.player!==who||tz.zone!=='field')){a.stage='retarget';log(r,'attack','상대 대응으로 대상이 사라져 공격자가 재선택합니다.');break;}const targetName=a.target.type==='unit'?unitName(r,a.target.id):'플레이어';const currentAtk=actualAttack(src);const max=Math.min(currentAtk,src.diceMax??currentAtk);const dice=max>0?die(max,src.diceMin??1):0;let dealt=dice;
+ case 'defend':{if(r.status!=='active'||!r.pendingAttack||who===r.turn||r.pendingManual)fail(409,'대응할 공격이 없습니다.');const a=r.pendingAttack,src=r.units[a.attackerId],sourceZone=zoneOwner(r,a.attackerId);if(!sourceZone||sourceZone.player!==r.turn){r.pendingAttack=null;log(r,'attack','공격자가 사라져 공격이 무효화되었습니다.');break;}const tz=a.target.type==='unit'?zoneOwner(r,a.target.id):null;if(a.target.type==='unit'&&(!tz||tz.player!==who||tz.zone!=='field')){a.stage='retarget';log(r,'attack','상대 대응으로 대상이 사라져 공격자가 재선택합니다.');break;}const targetName=a.target.type==='unit'?unitName(r,a.target.id):'플레이어';const currentAtk=swordActualAttack(r,src.id,{getZone:zoneOwner});const max=Math.min(currentAtk,src.diceMax??currentAtk);const dice=max>0?die(max,src.diceMin??1):0;let dealt=dice;
  if(a.target.type==='unit'){
   const partner=r.players[r.turn].field.some(mid=>mid&&r.units[mid].cardId==='COC-12-006');
   if(partner&&cards.get(src.cardId)?.attribute==='영웅')dealt+=100;
   const targetUnit=r.units[a.target.id],prior=Math.max(0,targetUnit.hp??0),targetAtk=targetUnit.atk,invulnerable=targetUnit.battleInvulnerable;
-  if(!invulnerable){const destroyed=dealt>0?damageUnit(r,a.target.id,-dealt,{battle:true}):false;if(['COC-12-008','COC-12-013'].includes(src.cardId)&&!src.effectsNegated&&destroyed){r.players[who].hp-=Math.max(0,dice-prior)}if(destroyed&&src.cardId==='COC-12-011'){r.players[who].hp-=Math.max(0,targetAtk);log(r,'effect',`버디 히트토네이도: 파괴한 몬스터의 공격력 ${Math.max(0,targetAtk)}만큼 상대에게 피해`)}
+  if(!invulnerable){const destroyed=dealt>0?damageUnit(r,a.target.id,-dealt,{battle:true,sourceId:src.id}):false;if(['COC-12-008','COC-12-013'].includes(src.cardId)&&!src.effectsNegated&&destroyed){r.players[who].hp-=Math.max(0,dice-prior)}if(destroyed&&src.cardId==='COC-12-011'){r.players[who].hp-=Math.max(0,targetAtk);log(r,'effect',`버디 히트토네이도: 파괴한 몬스터의 공격력 ${Math.max(0,targetAtk)}만큼 상대에게 피해`)}
    if(destroyed&&src.superiorClaw){const bonus=Math.max(0,Math.floor(targetAtk));r.players[who].hp-=bonus;log(r,'effect',`슈페리얼 클로: 전투로 파괴한 몬스터의 공격력 ${bonus}만큼 상대에게 피해`)}if((destroyed&&src.cardId==='COC-32-011')||(src.cardId==='COC-32-001'&&src.atk>targetAtk)){if(src.bonusAttackTurn!==r.turnNumber){src.bonusAttackTurn=r.turnNumber;src.bonusAttackCount=1;log(r,'effect',`${unitName(r,src.id)}: 이 턴 추가 공격 기회 1회 획득`)}}}
   else dealt=0;
   if(src.cardId==='COC-10-006')r.players[r.turn].hp+=Math.min(prior,dealt);
@@ -703,7 +665,7 @@ function chooseAIMove(r){const who=1,p=r.players[who],level=r.aiDifficulty||'med
 }
 function chooseAITarget(r,attacker,{forAttack=false}={}){const level=r.aiDifficulty,foe=r.players[0],aggro=foe.field.filter(id=>id&&isAggro(r,id));if(aggro.length)return {type:'unit',id:aggro[0]};
  const options=foe.field.filter(Boolean);if(forAttack&&(r.players[1].noDirectAttackUntil||0)>0&&r.players[1].noDirectAttackUntil>=r.players[1].turnsTaken)return options.length?{type:'unit',id:options[0]}:null;if(level==='easy')return options.length&&crypto.randomInt(2)===0?{type:'unit',id:options[crypto.randomInt(options.length)]}:{type:'player'};
- const atk=r.units[attacker].atk;const killable=options.filter(id=>r.units[id].hp<=Math.max(1,atk/2));
+ const atk=swordActualAttack(r,attacker,{getZone:zoneOwner});const killable=options.filter(id=>r.units[id].hp<=Math.max(1,atk/2));
  if(level==='hard'&&killable.length){killable.sort((a,b)=>r.units[b].atk-r.units[a].atk);return {type:'unit',id:killable[0]}}
  if(level==='medium'&&options.length&&crypto.randomInt(3)===0)return {type:'unit',id:options[0]};
  return {type:'player'};
@@ -834,4 +796,4 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
 }
 
 // Purely programmatic internal test seam. No HTTP route exposes these internals.
-export const gameTestInternals={cards,catalog,createPlayer,instantiate,move,draw,runSummonEffects,runIntegrationOnEnter,processStartOfTurn,processEndOfTurn,attackAvailable,damageUnit,H,performExtraSummon,finishExtraSummon,queueAutomatedSpell,finishAutomatedSpell,attachOverlayMaterials,attachCard,detachCard,processLifeEatingSwordTurn,resolveQueuedDestroyHeals,chooseAIExtra,chooseAIFieldAbility,chooseAIGraveAbility,chooseAISpellCost,runAI,maxAttacks,actualAttack,treatedAttackForCondition,applyFieldAbility,apply,publicState};
+export const gameTestInternals={cards,catalog,createPlayer,instantiate,move,draw,runSummonEffects,runIntegrationOnEnter,processStartOfTurn,processEndOfTurn,attackAvailable,damageUnit,H,performExtraSummon,finishExtraSummon,queueAutomatedSpell,finishAutomatedSpell,attachOverlayMaterials,attachCard,detachCard,processSwordAttackPhase,beginSwordTurn,recordSwordKill,swordMultiplierCount,swordActualAttack,resolveQueuedDestroyHeals,chooseAIExtra,chooseAIFieldAbility,chooseAIGraveAbility,chooseAISpellCost,runAI,maxAttacks,actualAttack,treatedAttackForCondition,applyFieldAbility,apply,publicState};
