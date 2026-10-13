@@ -18,12 +18,12 @@ This file is for a new coding assistant taking over the repository after the 202
 - Preserve the user's custom TCG v1.3: **24 premade playable decks**, **254 card records**, no card mixing across premade decks.
 - Never restore the deleted decks: 합체 기계, 코미컬, 럭키, 카지노이드, 비트스타즈, 파트너 몬스터즈, 코브라, 아홉꼬리.
 - The goal is **fully automatic server-authoritative card effects**, AI duels (choose opponent deck/random; easy, medium, hard), PvP, rules conflict diagnostics and production-ready deployment.
-- As of beta.10, the code supports **155 partially**, **98 manually/unsupported**, **1 basic**; 70 spell handlers. **Full automation is not achieved.**
+- As of beta.10, the code supports **156 partially**, **97 manually/unsupported**, **1 basic**; 70 spell handlers. **Full automation is not achieved.**
 - Source v1.3 DOCX and comparison JSON were created in a prior conversation but are **not yet committed** to this public repository. See docs/SOURCE_DATA_PROVENANCE.md.
 
 ## Latest implementation update (2026-10-13)
 
-- beta.10: 155 partial / 98 manual / 1 basic; 13 field abilities; Black Metal Fusion Up grave recovery and independent effect limits; Crash Voltage discard/destruction and provisional piercing.
+- beta.10: 156 partial / 97 manual / 1 basic; 13 field abilities; Black Metal Fusion Up grave recovery and independent effect limits; Crash Voltage discard/destruction and provisional piercing.
 - Read docs/GRAVE_RECOVERY_AND_CRASH_VOLTAGE.md, docs/EFFECT_COVERAGE.md and new provisional rulings R28/R29. Do not treat them as user-approved decisions.
 - Generated coverage reports and manual notes are now separated. Edit docs/AUTOMATION_NOTES.md for prose and docs/effect-coverage.json for effect records. Run npm run check:coverage then npm run check:coverage -- --check. CI must reject stale reports without silently regenerating them.
 
