@@ -10,12 +10,13 @@ import {planActivation,commitActivationCosts} from './src/activation-rules.mjs';
 import {validateExtraSummon, EXTRA_RECIPES} from './src/extra-summons.mjs';
 import {applyFieldAbility,FIELD_ABILITY_IDS} from './src/field-abilities.mjs';
 import {onTokenCreation,onDragonAttackPhase,onFafnirDestroyed} from './src/dragon-gold.mjs';
+import {onCartoonLandDestroyed} from './src/cartoon-land.mjs';
 
 const ROOT=path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC=path.join(ROOT,'public');
 const DATA_DIR=process.env.DATA_DIR || path.join(ROOT,'.data');
 const STORAGE=path.join(DATA_DIR,'rooms.json');
-const RULES='1.3-ai-beta.7';
+const RULES='1.3-ai-beta.8';
 const CARD_PATH=path.join(PUBLIC,'data','catalog.json.gz.b64');
 function loadCatalog(){
  if(fs.existsSync(CARD_PATH))return JSON.parse(zlib.gunzipSync(Buffer.from(fs.readFileSync(CARD_PATH,'utf8').trim(),'base64')).toString('utf8'));
@@ -51,7 +52,7 @@ function draw(r,who){const p=r.players[who];if(!p.deck.length){const feedback=10
 if(r.players[1-who].integration&&r.units[r.players[1-who].integration]?.cardId==='COC-07-007'){p.hp=0;log(r,'effect','포식자 알리자 라팍스: 상대의 드로우 실패로 패배');setOutcome(r)}return;}}const id=p.deck.shift();p.hand.push(id);log(r,'draw',`${p.label}가 카드를 1장 뽑았습니다.`)}
 function move(r,id,to,owner){const u=r.units[id];if(!u)fail(400,'카드를 찾을 수 없습니다.');if(to==='field'&&!r.players[owner??u.owner].field.includes(null))fail(409,'필드 세 칸이 모두 차 있습니다.');if(to==='integration'&&r.players[owner??u.owner].integration)fail(409,'이미 일체화 중입니다.');for(const p of r.players){for(const zone of ['field']){for(let i=0;i<p[zone].length;i++)if(p[zone][i]===id)p[zone][i]=null;}if(p.integration===id)p.integration=null;for(const zone of ['deck','hand','grave','banished','extra'])p[zone]=p[zone].filter(v=>v!==id)}const p=r.players[owner??u.owner];if(!['field','integration'].includes(to)){u.frozen=false;u.battleInvulnerable=false;u.effectsNegated=false;u.diceMax=undefined;u.diceMin=undefined;u.cannotAttack=false;u.attackTurn=-1;u.attackCount=0;u.attackCountTurn=-1;const original=cards.get(u.cardId);if(original){u.atk=Number.isFinite(+original.atk)?Math.max(0,Math.floor(+original.atk)):0;u.hp=Number.isFinite(+original.hp)?Math.floor(+original.hp):null;u.baseAtk=u.atk;}delete u.temporaryBuff;delete u.buffExpiresAt;delete u.treatedAsToon;delete u.superiorClaw;delete u.effectDestructionImmune;delete u.playerAttackBonusApplied;}if(u.created&&to!=='field'&&to!=='integration'){delete r.units[id];return}if(to==='field'){const slot=p.field.findIndex(x=>x===null);if(slot<0)fail(409,'필드 세 칸이 모두 차 있습니다.');p.field[slot]=id;u.owner=u.owner??owner;u.attackTurn=-1;}else if(to==='integration'){if(p.integration)fail(409,'이미 일체화 중입니다.');p.integration=id;const bonus=Math.max(0,(p.playerAtkBonus||0)-(u.playerAttackBonusApplied||0));if(bonus){u.atk+=bonus;u.playerAttackBonusApplied=(u.playerAttackBonusApplied||0)+bonus;}}else if(to==='banished')p.banished.push(id);else if(to==='deck'){p.deck.unshift(id);}else if(to==='hand')p.hand.push(id);else if(to==='grave'){p.grave.push(id);u.atk=Math.max(0,Number(cards.get(u.cardId)?.atk)||0);u.hp=Number.isFinite(+cards.get(u.cardId)?.hp)?+cards.get(u.cardId).hp:null;u.attackTurn=-1;}else fail(400,'이동 위치가 유효하지 않습니다.');}
 function zoneOwner(r,id){for(let i=0;i<r.players.length;i++){const p=r.players[i];for(const z of ['deck','hand','grave','extra','banished'])if(p[z].includes(id))return {player:i,zone:z};if(p.field.includes(id))return {player:i,zone:'field'};if(p.integration===id)return {player:i,zone:'integration'};}return null}
-function damageUnit(r,id,value,{battle=false}={}){const u=r.units[id];if(!u||u.hp===null)fail(409,'체력이 없는 카드입니다.');if(value<0&&u.cardId==='COC-09-002')value=Math.max(-1,value);u.preDamageHp=u.hp;u.hp+=value;if(u.hp<=0){if(battle&&u.cardId==='COC-26-011'){u.hp=1;return false}H.destroy(r,id,{cause:'lethal'});return true}return false}
+function damageUnit(r,id,value,{battle=false}={}){const u=r.units[id];if(!u||u.hp===null)fail(409,'체력이 없는 카드입니다.');if(value<0&&u.cardId==='COC-09-002')value=Math.max(-1,value);u.preDamageHp=u.hp;u.hp+=value;if(u.hp<=0){if(battle&&(u.cardId==='COC-26-011'||u.cardId==='COC-05-002')){u.hp=1;return false}H.destroy(r,id,{cause:'lethal'});return true}return false}
 function dropFromDeck(r,who,count){
  const p=r.players[who];for(let i=0;i<count&&p.deck.length;i++){const id=p.deck.shift();p.grave.push(id);log(r,'mill',`${p.label}가 덱 맨 위의 카드 1장을 묘지로 보냈습니다.`)}
 }
@@ -81,7 +82,7 @@ const H={
    if(r.destructionHistory.length>500)r.destructionHistory.shift();
   }
   const canRevive=u.cardId==='COC-10-011'&&!u.revivedOnce&&z.zone==='field';
- const name=cards.get(u.cardId)?.name||u.tokenCard?.name;move(r,id,'grave',u.owner);log(r,'destroy',`${name} 파괴`);if(u.cardId==='COC-11-007'&&z.zone==='field')onFafnirDestroyed(r,id,z.player,{zone:zoneOwner,move,log});
+ const name=cards.get(u.cardId)?.name||u.tokenCard?.name;move(r,id,'grave',u.owner);log(r,'destroy',`${name} 파괴`);if(u.cardId==='COC-11-007'&&z.zone==='field')onFafnirDestroyed(r,id,z.player,{zone:zoneOwner,move,log});if(u.cardId==='COC-05-002'&&z.zone==='field')onCartoonLandDestroyed(r,id,z.player,{zone:zoneOwner,move,destroy:H.destroy,log});
  if(canRevive&&r.units[id]&&r.players[z.player].field.includes(null)){
   u.revivedOnce=true;move(r,id,'field',z.player);log(r,'revive',`${name}: 파괴 후 효과 없이 1회 부활`)
  }
@@ -232,6 +233,7 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
  case 'draw':{requireTurn(r,who);if(r.phase!=='DRAW')fail(409,'드로우 페이즈가 아닙니다.');draw(r,who);if(r.status==='active')r.phase='MAIN';break}
  case 'phase':{requireTurn(r,who);if(r.pendingAttack||r.pendingManual)fail(409,'대응·협의 중에는 페이즈를 변경할 수 없습니다.');if(r.phase==='MAIN'){r.phase=body.skipAttack?'END':'ATTACK';if(r.phase==='ATTACK')onDragonAttackPhase(r,who,{log});}else if(r.phase==='ATTACK'){r.phase='END';}else if(r.phase==='END'){processEndOfTurn(r);if(r.status!=='active')break;r.turn=1-who;r.turnNumber++;r.phase='DRAW';processStartOfTurn(r);}else fail(409,'먼저 드로우해야 합니다.');for(const unit of Object.values(r.units))if(unit.attackTurn<r.turnNumber-2)unit.attackTurn=-1;log(r,'phase',`${r.players[r.turn].label} / ${r.phase}`);break}
  case 'play':{requireTurn(r,who);if(r.phase!=='MAIN')fail(409,'메인 페이즈에서만 사용할 수 있습니다.');if(r.pendingAttack||r.pendingManual)fail(409,'현재 협의 중입니다.');const id=requireStr(body.unitId,100);if(!p.hand.includes(id))fail(403,'패에 없는 카드입니다.');const u=r.units[id],c=cards.get(u.cardId);
+ if(c.id==='COC-05-008')fail(409,'카툰 월드 가이드는 카툰 랜드 파괴 시 덱에서 자동 발동합니다.');
  if(c.id==='COC-11-007')fail(409,'파프니르는 토큰 사용·생성 시 자동으로만 소환할 수 있습니다.');
  if(c.id==='COC-11-008'||c.id==='COC-11-009')fail(409,'이 생성 주문은 자동 발동 조건으로만 사용할 수 있습니다.');
  const activation=planActivation({room:r,who,unitId:id,cards,body});
