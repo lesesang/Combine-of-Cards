@@ -145,16 +145,44 @@ export function chooseAutomaticTriggerOrder(room, owner, keys) {
   return {pending:false,awaiting:null};
 }
 
-export function resolveEffectStack(room, { getZone, execute, onResult } = {}) {
+export function resolveEffectStack(room, { getZone, execute, onResult, fingerprint } = {}) {
   requireRecord(room, 'room');
   if (typeof getZone !== 'function' || typeof execute !== 'function') {
     throw new TypeError('getZone and execute callbacks required');
   }
   room.effectStack ??= [];
+  if (fingerprint !== undefined && typeof fingerprint !== 'function') {
+    throw new TypeError('fingerprint must be a function');
+  }
   const results = [];
+  const seen = new Set();
   let steps = 0;
   while (room.effectStack.length) {
-    if (++steps > 256) throw new Error('effect resolution exceeded safe limit');
+    // R26: never mistake a finite repeated action for a deadlocked chain.
+    // The caller supplies a stable signature of *meaningful game state*.
+    // A repeated stack and repeated game state means no observable progress.
+    if (fingerprint) {
+      const signature = fingerprint(room);
+      if (typeof signature !== 'string' || signature.length > 500_000) {
+        throw new TypeError('fingerprint must return a bounded string');
+      }
+      const stackKey = JSON.stringify(room.effectStack.map(e=>[
+        e.effectId,e.owner,e.sourceId,e.exception,e.priority,e.payload
+      ]));
+      const key = signature + '\\n' + stackKey;
+      if (seen.has(key)) {
+        const error = new Error('effect cycle detected with no game-state progress');
+        error.code = 'EFFECT_CYCLE';
+        error.steps = steps;
+        throw error;
+      }
+      seen.add(key);
+    }
+    if (++steps > 256) {
+      const error = new Error('effect resolution safety budget reached; no winner assigned');
+      error.code = 'EFFECT_SAFETY_LIMIT';
+      throw error;
+    }
     const effect = room.effectStack.pop();
     const zone = effect.sourceId ? getZone(effect.sourceId) : null;
     const protectedEffect = EXCEPTIONS.has(effect.exception);
