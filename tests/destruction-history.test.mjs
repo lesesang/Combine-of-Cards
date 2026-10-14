@@ -34,6 +34,7 @@ test('fertilizer spell deals 100 per enemy monster destroyed during previous own
  r.turnNumber=5;
  const spell=place(0,'COC-30-002','hand');
  I.apply(r,0,'play',{unitId:spell,target:{type:'player',player:1}});
+ I.apply(r,1,'spellResponse',{choice:'pass'});
  assert.equal(r.players[1].hp,800);
  assert.ok(r.players[0].grave.includes(spell));
 });
@@ -44,6 +45,7 @@ test('fertilizer ignores monsters destroyed on the opponent turn',()=>{
  r.turn=0;r.turnNumber=5;
  const spell=place(0,'COC-30-002','hand');
  I.apply(r,0,'play',{unitId:spell,target:{type:'player',player:1}});
+ I.apply(r,1,'spellResponse',{choice:'pass'});
  assert.equal(r.players[1].hp,1000);
 });
 test('Superior Claw rejects non-Fighter and does not consume 200 HP',()=>{

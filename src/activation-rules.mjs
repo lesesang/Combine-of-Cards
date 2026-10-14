@@ -55,7 +55,7 @@ register('COC-17-005 COC-17-006',c=>require_(c.hasIntegration('호루스의 현�
 register('COC-20-003',c=>require_(c.player.hp<=600,'체력이 600 이하여야 합니다.'));
 register('COC-20-006',c=>require_(c.player.hp<=700,'체력이 700 이하여야 합니다.'));
 register('COC-20-007',c=>require_(c.player.hp<=500&&c.hasIntegration('버닝 데몬즈'),'버닝데몬즈 일체화와 체력 500 이하가 필요합니다.'));
-register('COC-20-011',c=>require_(c.hasField('버닝데몬즈')||c.hasField('버닝 데몬즈'),'버닝데몬즈가 필드에 있어야 합니다.'));
+register('COC-20-011',c=>require_(c.fieldAnywhere('버닝데몬즈')||c.fieldAnywhere('버닝 데몬즈'),'버닝데몬즈가 필드에 있어야 합니다.'));
 register('COC-23-002 COC-23-003 COC-23-005 COC-23-008',c=>require_(c.hasIntegration('라이드 위저드'),'라이드 위저드와 일체화해야 합니다.'));
 register('COC-23-004',c=>require_(c.deckCount('라이드 위저드')>=1,'덱에 라이드 위저드가 있어야 합니다.'));
 register('COC-23-006 COC-23-009',c=>require_(c.hasIntegration('라이드 위저드'),'라이드 위저드와 일체화해야 합니다.'));
@@ -72,10 +72,10 @@ register('COC-31-002',c=>require_(c.fieldAnywhere('크로와'),'필드에 크로
 register('COC-31-003',c=>require_(c.fieldAnywhere('크로와')&&c.fieldAnywhere('카스테'),'필드에 크로와와 카스테가 필요합니다.'));
 register('COC-31-010',c=>require_(c.hasIntegration('슈'),'최광의 대마법사 슈와 일체화해야 합니다.'));
 register('COC-32-001 COC-32-002 COC-32-003 COC-32-004',c=>require_(c.player.hand.some(id=>id!==c.unitId&&c.type(id)==='주문'),'패에 주문 카드가 있어야 합니다.'));
-register('COC-32-005',c=>require_(c.hasField('플레임'),'원소의 마법사 플레임이 필드에 있어야 합니다.'));
-register('COC-32-006',c=>require_(c.hasField('워터'),'원소의 마법사 워터가 필드에 있어야 합니다.'));
-register('COC-32-007',c=>require_(c.hasField('윈드'),'원소의 마법사 윈드가 필드에 있어야 합니다.'));
-register('COC-32-008',c=>require_(c.hasField('랜드'),'원소의 마법사 랜드가 필드에 있어야 합니다.'));
+register('COC-32-005',c=>require_(c.fieldAnywhere('플레임'),'원소의 마법사 플레임이 필드에 있어야 합니다.'));
+register('COC-32-006',c=>require_(c.fieldAnywhere('워터'),'원소의 마법사 워터가 필드에 있어야 합니다.'));
+register('COC-32-007',c=>require_(c.fieldAnywhere('윈드'),'원소의 마법사 윈드가 필드에 있어야 합니다.'));
+register('COC-32-008',c=>require_(c.fieldAnywhere('랜드'),'원소의 마법사 랜드가 필드에 있어야 합니다.'));
 register('COC-32-009',c=>require_(c.ownField.some(id=>c.named(id).includes('원소의 마법사')),'원소의 마법사 몬스터가 필드에 있어야 합니다.'));
 register('COC-32-010',c=>require_((c.player.spellsThisTurn||0)>=1,'이번 턴에 주문을 사용한 기록이 있어야 합니다.'));
 

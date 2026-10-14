@@ -20,6 +20,7 @@ function activateBarrier(r,place){
  const barrier=place(0,'COC-01-009','hand');
  place(0,'COC-01-002','integration');
  I.apply(r,0,'play',{unitId:barrier});
+ I.apply(r,1,'spellResponse',{choice:'pass'});
  assert.ok(r.players[0].grave.includes(barrier));
  return barrier;
 }
@@ -46,6 +47,7 @@ test('barrier stops explicit enemy spell targets then expires on later opponent 
  assert.ok(r.players[1].hand.includes(enemySpell));
  r.turnNumber=4;r.players[1].turnsTaken=2;
  I.apply(r,1,'play',{unitId:enemySpell,target:{type:'player',player:0}});
+ I.apply(r,0,'spellResponse',{choice:'pass'});
  assert.equal(r.players[0].hp,900);
 });
 test('when opponent removed the target, blocked direct attacks may legally terminate retarget',()=>{

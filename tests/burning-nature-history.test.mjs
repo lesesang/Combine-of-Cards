@@ -63,6 +63,7 @@ test('Burning Soul self-damage equals the attack bonus from a single 1d5 roll',(
  const spell=place(0,'COC-20-004','hand');
  const initial=r.units[monster].atk;
  I.apply(r,0,'play',{unitId:spell,target:{type:'unit',id:monster}});
+ I.apply(r,1,'spellResponse',{choice:'pass'});
  const delta=1000-r.players[0].hp;
  assert.ok(delta>=100&&delta<=500&&delta%100===0,'roll must be 1d5 multiplied by 100');
  assert.equal(r.units[monster].atk,initial+delta);

@@ -1,3 +1,4 @@
+import {batchResponseSpellIds} from '../src/spell-response-targets.mjs';
 // DOM interaction contract tests; these do not replace rendered browser QA.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -86,4 +87,15 @@ test('card steal UI privately previews the opponent full hand, then submits a ch
  assert.equal(played[0].body.unitId,'steal');
  assert.deepEqual(played[0].body.target,{type:'unit',id:'hidden'});
  assert.equal(t.requests.filter(x=>x.url.endsWith('/hand-preview')).length,1);
+});
+
+test('batch UI: all 23 spell IDs use the chosen target and optimistic version',async()=>{
+ for(const cardId of batchResponseSpellIds){
+  const t=ui();t.run(`state.game.players[0].hand.push({id:'batch',card:{id:'${cardId}',name:'주문'}})`);
+  t.run('openPlay()');t.node('playPick').value='batch';await t.node('playPick').onchange();
+  t.node('spellTarget').value='enemy';await t.node('playSubmit').onclick();
+  assert.equal(t.requests[0].body.unitId,'batch',cardId);
+  assert.deepEqual(t.requests[0].body.target,{type:'unit',id:'enemy'},cardId);
+  assert.equal(t.requests[0].body.expectedVersion,7,cardId);
+ }
 });

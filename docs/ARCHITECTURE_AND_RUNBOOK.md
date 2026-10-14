@@ -92,7 +92,7 @@ Windows PowerShell에서도 동일하게 npm 명령 사용. npm run check:covera
 
 **보고서 갱신:** `npm run check:coverage`는 AUTOMATION_COVERAGE.md / automation-audit.json / EFFECT_COVERAGE.md만 재생성한다. 수동 설명은 **AUTOMATION_NOTES.md**, 효과 명세는 **effect-coverage.json**에 쓴다. `npm run check:coverage -- --check`는 파일을 바꾸지 않고 출력 일치·원문/효과 번호·구현 경로·테스트 이름을 검증한다. CI는 이 읽기 전용 검사를 사용한다. 정본 전체 검증이나 완전 자동화 인증을 뜻하지 않는다.
 
-**Codex 현행 문서:** [CODEX_HANDOFF](CODEX_HANDOFF.md) · [CODEX_IMPLEMENTATION_PLAN](CODEX_IMPLEMENTATION_PLAN.md) · [CODEX_RULES_REFERENCE](CODEX_RULES_REFERENCE.md). 최신 158 partial/95 manual/1 basic, 71 주문 핸들러, 16 일반 주문 응답 스택, 8개 효과별 추적 등록. `1.3-ai-beta.10` 서버 버전 문자열은 이 자동화 범위 집계를 나타내지 않는다.
+**Codex 현행 문서:** [CODEX_HANDOFF](CODEX_HANDOFF.md) · [CODEX_IMPLEMENTATION_PLAN](CODEX_IMPLEMENTATION_PLAN.md) · [CODEX_RULES_REFERENCE](CODEX_RULES_REFERENCE.md). 최신 158 partial/95 manual/1 basic, 71 주문 핸들러, 39 일반 주문 응답 스택, 31개 효과별 추적 등록. `1.3-ai-beta.10` 서버 버전 문자열은 이 자동화 범위 집계를 나타내지 않는다.
 
 신규 `src/grave-abilities.mjs`는 순수 비용 검사와 묘지 회수, `src/effect-usage.mjs`는 효과 번호별 턴 제한을 담당한다. actions API의 `graveAbility`는 `sourceUnitId`, `costUnitId`, `expectedVersion`을 받는다. 본인 상태의 `graveAbilities`에 현재 합법적인 조합만 제공하고 상대 비공개 영역은 포함하지 않는다. 규칙/엔진 버전은 beta.10이며, 기존 방에 없던 `effectUsage`는 첫 사용부터 생성된다. 이전 버전에서 수행한 효과 횟수를 소급 복원하지는 않는다.
 
