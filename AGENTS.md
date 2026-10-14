@@ -52,6 +52,8 @@ This file is for a new coding assistant taking over the repository after the 202
 
 - **2026-10-14 latest user clarification:** different physical cards may each activate the same effect independently. Never share usage by effect text, card name, or catalog ID across UIDs. Keep each card’s explicit turn/game/resummon exceptions and independent effect numbers.
 
+- **2026-10-14 explicit shared exception:** Elemental Magicians COC-32-001/002/003/004 share ONE activation per turn for effect 1 only. Their effect 2 is not part of that group. Replacement summon execution remains unsupported; cross-player scope is awaiting clarification.
+
 ## Non-negotiable rules
 
 - Confirmed user rulings override incorrect older text and code. **간드레이드래곤 destroys every other monster, not itself**. It discards its other hand cards on summon.
