@@ -92,7 +92,7 @@ Windows PowerShell에서도 동일하게 npm 명령 사용. npm run check:covera
 
 **보고서 갱신:** `npm run check:coverage`는 AUTOMATION_COVERAGE.md / automation-audit.json / EFFECT_COVERAGE.md만 재생성한다. 수동 설명은 **AUTOMATION_NOTES.md**, 효과 명세는 **effect-coverage.json**에 쓴다. `npm run check:coverage -- --check`는 파일을 바꾸지 않고 출력 일치·원문/효과 번호·구현 경로·테스트 이름을 검증한다. CI는 이 읽기 전용 검사를 사용한다. 정본 전체 검증이나 완전 자동화 인증을 뜻하지 않는다.
 
-**Codex 현행 문서:** [CODEX_HANDOFF](CODEX_HANDOFF.md) · [CODEX_IMPLEMENTATION_PLAN](CODEX_IMPLEMENTATION_PLAN.md) · [CODEX_RULES_REFERENCE](CODEX_RULES_REFERENCE.md). 최신 161 partial/92 manual/1 basic, 71 주문 핸들러, 61 일반 주문 응답 스택, 59개 효과별 추적 등록. `1.3-ai-beta.10` 서버 버전 문자열은 이 자동화 범위 집계를 나타내지 않는다.
+**Codex 현행 문서:** [CODEX_HANDOFF](CODEX_HANDOFF.md) · [CODEX_IMPLEMENTATION_PLAN](CODEX_IMPLEMENTATION_PLAN.md) · [CODEX_RULES_REFERENCE](CODEX_RULES_REFERENCE.md). 최신 161 partial/92 manual/1 basic, 71 주문 핸들러, 61 일반 주문 응답 스택, 65개 효과별 추적 등록. `1.3-ai-beta.10` 서버 버전 문자열은 이 자동화 범위 집계를 나타내지 않는다.
 
 신규 `src/grave-abilities.mjs`는 순수 비용 검사와 묘지 회수, `src/effect-usage.mjs`는 효과 번호별 턴 제한을 담당한다. actions API의 `graveAbility`는 `sourceUnitId`, `costUnitId`, `expectedVersion`을 받는다. 본인 상태의 `graveAbilities`에 현재 합법적인 조합만 제공하고 상대 비공개 영역은 포함하지 않는다. 규칙/엔진 버전은 beta.10이며, 기존 방에 없던 `effectUsage`는 첫 사용부터 생성된다. 이전 버전에서 수행한 효과 횟수를 소급 복원하지는 않는다.
 
@@ -136,3 +136,11 @@ Windows PowerShell에서도 동일하게 npm 명령 사용. npm run check:covera
 ## 필드 무효화·다중 대응 (2026-10-14)
 
 `src/counter-effects.mjs`가 카드별 소스 영역·대상 종류·사용 상태와 LIFO 카운터 등록/해결을 공유한다. `pendingSpell`/`pendingExtraSummon`의 `counter`는 마지막 선언이며 내부 `countersDeclared`는 저장용 목록이다. 공개 `counters`에는 현재 합법 후보의 UID/이름/`limitText`만 제공한다. 필드 카드 `counterUsedThisStay`는 필드 밖에서 재진입 시 초기화하지만 필드 간 조종권 이동에는 유지한다. `fieldRevision`/기존 `integrationRevision`은 선언 후 이탈·재진입을 식별한다. API는 기존 `spellResponse`/`extraResponse`를 재사용하며 대상은 서버가 마지막 상대 효과로 고정한다. 클라이언트가 임의 스택 대상을 정하지 못한다.
+
+## 2026-10-14 필드 발동7종 대응과 다음 작업
+
+기존 필드 발동 **7종(몬스터5·일체화2)**을 선언·비용 선지불→상대 대응→LIFO 해결에 연결했다. 윈드 걸은 몬스터5종과 기존 몬스터 카운터3종에만 대응하며 일체화2종은 제외한다. 크래쉬볼티지는 확정 공통 규칙의 자기 턴1회를 유지하며 패1장 비용을 선언 시 지불한다. 카이저 공격권 비용·소스/대상 재검사·재시작·HTTP 원자성·UI·AI3난이도를 연결했다. **161 partial /92 manual /1 basic, 효과 증거65건(62장), 완전 인증0**. [범위·검증·남은 작업](FIELD_ABILITY_RESPONSES.md).
+
+다음은 남은 필드 발동6종의 비용/사용 제한·조건을 원문과 대조하여 대응 창에 연결하고, 소환/파괴/묘지 유발을 통합한다. 확정 공통 규칙의 기본 자기 턴1회와 카드별 특례를 구분하고, ATK 0 공격 가능과 별도 능력치 변화/파괴 규칙도 함께 대조한다.
+
+**최신 사용자 명확화:** 동일 효과라도 서로 다른 실제 카드는 독립적으로 발동한다. 필드13종·퓨전 업·AI의 기록을 UID/효과 번호별로 분리했다. 구 저장의 UID 없는 다중 카드 사용 기록은 특정 카드에 소급 귀속할 수 없어 별도로 보존한다. [실제 카드별 기록과 저장 형식 한계](FIELD_ABILITY_RESPONSES.md).

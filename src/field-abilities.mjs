@@ -1,6 +1,10 @@
+import {requireUnusedEffect,markEffectUsed} from './effect-usage.mjs';
+import {FIELD_RESPONSE_IDS,prepareFieldEffect,payFieldEffect,resolveFieldEffect} from './field-ability-effects.mjs';
 /**
  * Explicit, audited main-phase card abilities.
- * These handlers do not pretend to implement reactions, copy effects, or the full 254-card catalog.
+ * Seven effects share the audited preparation/resolution helpers below.
+ * The server opens their response window; the other six remain legacy handlers.
+ * Copy effects and the full 254-card catalog remain incomplete.
  */
 const REGISTERED=[
  'COC-03-002','COC-05-004','COC-08-003','COC-10-005',
@@ -20,44 +24,16 @@ function handTarget(r,body,who,H){
  return id;
 }
 function freeSpace(r,who,H){if(!r.players[who].field.includes(null))invalid(H,'내 필드에 빈 자리가 필요합니다.')}
-function searchEverywhere(r,who,cardId,H){
- const p=r.players[who];
- const areas=['deck','grave','banished','extra','field','integration'];
- let id;
- for(const area of areas){
-  if(area==='integration'){if(p.integration&&r.units[p.integration]?.cardId===cardId){id=p.integration;break}}
-  else if((id=p[area].filter(Boolean).find(u=>r.units[u]?.cardId===cardId)))break;
- }
- if(!id)invalid(H,'대상 카드가 자신의 영역에 없습니다.');
- H.move(r,id,'hand',who);
- return id;
-}
 export function applyFieldAbility(r,who,body,H){
+ if(FIELD_RESPONSE_IDS.includes(r.units[body.sourceUnitId]?.cardId)){const plan=prepareFieldEffect(r,who,body,H);payFieldEffect(r,who,plan,H);resolveFieldEffect(r,who,plan,H);return {supported:true,cardId:plan.cardId};}
  const id=body.sourceUnitId,z=id&&H.zone(r,id),unit=id&&r.units[id];
  if(!unit||!z||z.player!==who||!['field','integration'].includes(z.zone))
   invalid(H,'효과 발동 카드는 자신의 필드 또는 일체화 영역에 있어야 합니다.');
  if(!FIELD_ABILITY_IDS.includes(unit.cardId))invalid(H,'이 카드의 필드 효과는 아직 자동 판정을 지원하지 않습니다.');
  const p=r.players[who],c=unit.cardId;
- if(p.abilityUsed?.[c]===r.turnNumber)invalid(H,'이 효과는 이번 턴에 이미 사용했습니다.');
+ requireUnusedEffect(r,who,id,1);
  if(unit.abilityGameUsed)invalid(H,'이 효과의 게임당 사용 횟수를 모두 사용했습니다.');
  switch(c){
- case 'COC-12-013':{
-  if(z.zone!=='field'||unit.effectsNegated)invalid(H,'필드에서 효과가 유효한 크래쉬볼티지가 필요합니다.');
-  const cost=body.costCardId;
-  if(!p.hand.includes(cost))invalid(H,'버릴 자신의 패 1장을 선택해야 합니다.');
-  const target=fieldTarget(r,body,who,H,'enemy');
-  H.move(r,cost,'grave',r.units[cost].owner);
-  H.log(r,'cost',`${p.label}: 크래쉬볼티지 효과 비용으로 ${H.name(r,cost)} 1장을 버렸습니다.`);
-  H.destroy(r,target);break;
- }
- case 'COC-03-002':{
-  const integrated=p.integration&&r.units[p.integration]?.cardId==='COC-03-001';
-  searchEverywhere(r,who,integrated?'COC-03-003':'COC-03-001',H);
-  break;
- }
- case 'COC-05-004':{
-  const t=fieldTarget(r,body,who,H,'enemy');H.move(r,t,'deck',r.units[t].owner);break;
- }
  case 'COC-08-003':{
   const cost=handTarget(r,body,who,H);H.move(r,cost,'deck',who);H.draw(r,who);break;
  }
@@ -67,23 +43,6 @@ export function applyFieldAbility(r,who,body,H){
   const enemy=fieldTarget(r,body,who,H,'enemy');
   if(own===enemy)invalid(H,'서로 다른 몬스터를 선택해야 합니다.');
   H.destroy(r,own);H.destroy(r,enemy);unit.abilityGameCount=(unit.abilityGameCount||0)+1;break;
- }
- case 'COC-13-001':
- case 'COC-13-002':
- case 'COC-13-005':{
-  freeSpace(r,who,H);const t=fieldTarget(r,body,who,H,'enemy'),attack=Math.max(0,r.units[t].atk);
-  if(c!=='COC-13-002'||H.roll(2)===1){H.capture(r,who,t);if(c==='COC-13-005'){r.players[1-who].hp-=attack;H.outcome(r)}}
-  break;
- }
- case 'COC-22-010':{
-  const t=fieldTarget(r,body,who,H,'own');
-  if(t===id)invalid(H,'공격 기회를 줄 다른 몬스터를 선택해야 합니다.');
-  if(!H.attackAvailable(unit,r.turnNumber))invalid(H,'포기할 공격 기회가 없습니다.');
-  if(unit.attackCountTurn!==r.turnNumber){unit.attackCountTurn=r.turnNumber;unit.attackCount=0}
-  unit.attackCount=(unit.attackCount||0)+1;
-  const target=r.units[t];
-  if(target.bonusAttackTurn!==r.turnNumber){target.bonusAttackTurn=r.turnNumber;target.bonusAttackCount=0}
-  target.bonusAttackCount++;break;
  }
  case 'COC-23-002':{
   if(!p.integration||r.units[p.integration].cardId!=='COC-23-001')invalid(H,'라이드 위저드와 일체화해야 합니다.');
@@ -102,6 +61,6 @@ export function applyFieldAbility(r,who,body,H){
   H.move(r,croix,'field',who);H.onSummon?.(r,who,croix);break;
  }
  }
- p.abilityUsed??={};p.abilityUsed[c]=r.turnNumber;
+ markEffectUsed(r,who,id,1);
  return {supported:true,cardId:c};
 }

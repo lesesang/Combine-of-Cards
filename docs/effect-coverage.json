@@ -9,7 +9,7 @@
     "cost": "자신의 패·필드에서 레시피에 맞는 서로 다른 소재; 주문과 소재를 묘지로 이동",
     "target": "자신의 엑스트라 덱에 있는 지정 퓨전 몬스터",
     "resolution": "소재/주문 선지불·효과 1 사용 기록 후 대응 대기, pass 시 필드 소환; 스톰블레이거 무효 시 엑스트라 덱 유지·비용 미반환",
-    "duration": "플레이어·카드 ID·효과 번호별 턴당 1회, 효과 2와 독립, JSON 저장",
+    "duration": "플레이어·카드 ID·효과 번호별 턴당 1회, 효과 2와 독립, JSON 저장; 효과 번호별 제한은 실제 카드 UID마다 독립",
     "remaining": "다른 소환 대응 카드·전역 소환/묘지 이동 유발, 모든 복사 조합",
     "implementation": [
       "src/extra-summons.mjs",
@@ -33,6 +33,10 @@
       {
         "path": "tests/summon-counter-api.test.mjs",
         "name": "summon HTTP: all 21 paid declarations and counters restore without leaking private data or refunding costs"
+      },
+      {
+        "path": "tests/physical-effect-usage.test.mjs",
+        "name": "physical effect usage: two Fusion Up copies have separate fusion and grave recovery limits"
       }
     ]
   },
@@ -46,7 +50,7 @@
     "cost": "지정 몬스터의 이번 턴 공격 기회 1회; 기본·추가 공격 횟수와 동일 계산",
     "target": "발동 카드 자신; 비용 몬스터는 플레이어가 선택",
     "resolution": "검증 완료 후 비용 지불, 같은 UID를 묘지에서 자신의 패로 이동",
-    "duration": "효과 1과 독립된 턴당 1회; 이동·저장·복원으로 사용 횟수 초기화 불가",
+    "duration": "효과 1과 독립된 턴당 1회; 이동·저장·복원으로 사용 횟수 초기화 불가; 효과 번호별 제한은 실제 카드 UID마다 독립",
     "remaining": "공통 묘지 발동/대응/이동 유발(#22); 블랙 메탈 전용 카운터 공격 횟수 전체 구현(#25). R29에 따라 공격 금지·동결·공격력 0에서도 남은 공격권 비용 사용 가능하며 공식 확정",
     "implementation": [
       "src/grave-abilities.mjs",
@@ -78,6 +82,10 @@
       {
         "path": "tests/confirmed-rulings.test.mjs",
         "name": "R29: frozen, forbidden and zero-ATK units still have a spendable attack opportunity"
+      },
+      {
+        "path": "tests/physical-effect-usage.test.mjs",
+        "name": "physical effect usage: two Fusion Up copies have separate fusion and grave recovery limits"
       }
     ]
   },
@@ -86,34 +94,69 @@
     "effectNumber": 1,
     "status": "partial",
     "sourceText": "패를 1장을 버리고 발동할 수 있다. 상대 필드 위에 존재하는 몬스터 1장을 선택하고 파괴한다.",
-    "trigger": "자신의 메인 페이즈, ability 행동",
-    "condition": "자신이 조종하는 필드의 크래쉬볼티지; 효과 무효 상태가 아님; 이번 턴 미사용",
-    "cost": "자신의 손패에서 선택한 카드 1장을 원소유자의 묘지로 버림",
-    "target": "상대 필드 몬스터 1장, 발동자가 선택",
-    "resolution": "필수 비용·대상을 먼저 검증 후 버리기와 직접 파괴; 파괴 면역이면 비용/사용은 소비하고 대상 유지",
-    "duration": "기존 공통 필드 효과 제한인 자신의 턴당 1회",
-    "remaining": "필드 발동/상대 대응/대상 이동/소스 이탈 공통 체인(#22)",
+    "trigger": "자신의 MAIN에서 ability 선언 → 상대 abilityResponse → pass 후 후발 우선 해결",
+    "condition": "정확한 자기 필드, 소스 효과 유효, 상대 필드 대상/패 비용 사전검사; 확정 공통 규칙의 자기 턴1회 미사용",
+    "cost": "패 1장을 원소유자 묘지로 선지불, 무효/불발 시 반환 없음",
+    "target": "상대 필드 몬스터 1장",
+    "resolution": "선언한 상대 몬스터 직접 파괴; 파괴 면역이면 유지, 효과 파괴에는 관통 피해 없음; 마검 처치 소스와 기존 파괴 유발 유지; 일반 소스 이탈/재진입·무효/조종자 변경 또는 대상 소실 시 불발. 몬스터 효과5종은 윈드 걸로 무효화 가능, 일체화2종은 제외",
+    "duration": "확정 공통 기본 효과 횟수: 자기 턴1회. 무효화되어도 비용/사용 기록 유지; 같은 효과라도 실제 카드 UID가 다르면 사용 기록 독립",
+    "remaining": "이 카드의 모든 발동/파괴/소환/묘지 유발·복사·지속 조합은 완전 인증하지 않음. 다른 6종 필드 발동은 아직 공통 대응 창 미연결",
     "implementation": [
-      "src/field-abilities.mjs",
+      "src/field-ability-effects.mjs",
+      "src/ability-responses.mjs",
+      "src/counter-effects.mjs",
       "server.mjs",
-      "public/app.js"
+      "public/app.js",
+      "src/effect-usage.mjs"
     ],
     "tests": [
       {
-        "path": "tests/crash-voltage.test.mjs",
-        "name": "Crash Voltage discards chosen hand cost and destroys an opposing monster once per own turn"
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: seven declarations defer effects, preserve paid costs and resolve after pass"
       },
       {
-        "path": "tests/crash-voltage.test.mjs",
-        "name": "Crash Voltage rejects invalid cost/target, negated source and opponent control without mutation"
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: Wind Girl negates five monster effects but never the two integrations"
       },
       {
-        "path": "tests/crash-voltage.test.mjs",
-        "name": "direct destruction protection preserves target while the paid cost and usage are consumed"
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: counter-counter LIFO restores the original monster effect"
       },
       {
-        "path": "tests/crash-voltage.test.mjs",
-        "name": "AI can use Crash Voltage through the same field ability action and avoid protected targets"
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: source removal, re-entry, negation and control transfer fizzle all seven effects"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: invalid declarations preserve state and target movement fizzles without refund"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: paid costs and turn limits survive negation and frozen Kaiser still pays attack rights"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: coin RNG runs only at resolution and full fields prevent capture"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: failed declaration and resolution atomically restore costs, stack and response window"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: AI uses monster-only counters at all levels and waits for human responses"
+      },
+      {
+        "path": "tests/field-ability-response-api.test.mjs",
+        "name": "field response HTTP: seven abilities persist declaration and counters, hide plans and reject stale or unauthorized actions"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "field response UI: monster-only counter and pass use the current responder and version"
+      },
+      {
+        "path": "tests/physical-effect-usage.test.mjs",
+        "name": "physical effect usage: identical card copies each activate while one UID cannot reuse after movement or restore"
       }
     ]
   },
@@ -2193,13 +2236,13 @@
     "effectNumber": 1,
     "status": "partial",
     "sourceText": "1회 상대 몬스터의 효과를 무효로 합니다.",
-    "trigger": "등록된 주문 대응 창의 마지막 상대 몬스터 카운터 효과",
+    "trigger": "등록된 주문/필드 발동 대응 창의 마지막 상대 몬스터 효과",
     "condition": "자신이 현재 대응권자, 유효한 자기 필드 소스, 현재 필드 체류 중 미사용",
     "cost": "추가 자원 비용 없음; 선언 시 해당 필드 체류의 사용 횟수 소비",
-    "target": "마지막 상대 몬스터 효과 (현재 블래스트 보이·디텍티브 매치·윈드 걸). 주문·스톰블레이거 일체화 효과·소환 자체 제외",
+    "target": "몬스터 카운터3종 및 등록된 몬스터 필드 발동5종; 주문·일체화·소환 자체 제외",
     "resolution": "후발 무효화 선언·대응권 교대·pass 후 LIFO. 무효된 효과만 생략, 앞서 지불한 비용/횟수 미반환. 소스 이탈/재진입·무효·조종자 변경 시 불발; 이전 저장의 주문/일체화 대상 선언은 불발 처리하고 사용 횟수 유지",
     "duration": "2026-10-14 사용자 확정: 재소환하면 재사용 가능. 필드 간 조종권 이동만으로 초기화하지 않으며 JSON 저장/재접속은 사용 상태 유지",
-    "remaining": "범용 몬스터 필드/묘지 발동·소환/파괴 유발 대응은 미통합. 퓨전 주문 별도 발동 창·모든 복사 조합도 미완료",
+    "remaining": "다른 몬스터 필드/묘지 발동·소환/파괴 유발 전체는 미통합. 모든 복사 조합도 미완료",
     "implementation": [
       "src/counter-effects.mjs",
       "src/spell-counters.mjs",
@@ -2239,6 +2282,10 @@
       {
         "path": "tests/field-counter-chain.test.mjs",
         "name": "field counters: all AI levels pass spells and Storm effects but counter opposing monster effects with Wind Girl"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: Wind Girl negates five monster effects but never the two integrations"
       }
     ]
   },
@@ -2285,6 +2332,432 @@
       {
         "path": "tests/ability-ui.test.mjs",
         "name": "field counter UI: uses the card-specific reset label and submits Wind Girl against a counter"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-03-002",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "영매사 베리아를 어느 영역에서든 자신의 패로 가져온다. 이미 일체화 중이라면 대신 혼령의 맹약을 어느 영역에서든 자신의 패로 가져온다.",
+    "trigger": "자신의 MAIN에서 ability 선언 → 상대 abilityResponse → pass 후 후발 우선 해결",
+    "condition": "정확한 자기 필드/일체화 영역, 소스 효과 유효, 유효 대상/필수 비용 및 빈 칸 사전검사; 턴당1회 미사용 (퇴마부는 기존 사용자 확정)",
+    "cost": "별도 자원 비용 없음; 선언 시 턴당 사용 횟수 소비",
+    "target": "자기 영역의 베리아 또는 혼령의 맹약",
+    "resolution": "선언 시 베리아 일체화 여부로 가져올 카드 종류 고정; 해결 시 자기 영역에서 베리아/혼령의 맹약을 패로 가져옴; 일반 소스 이탈/재진입·무효/조종자 변경 또는 대상 소실 시 불발. 몬스터 효과5종은 윈드 걸로 무효화 가능, 일체화2종은 제외",
+    "duration": "이번 턴 사용 기록 유지; 무효화되어도 사용 횟수 반환 없음; 같은 효과라도 실제 카드 UID가 다르면 사용 기록 독립",
+    "remaining": "이 카드의 모든 발동/파괴/소환/묘지 유발·복사·지속 조합은 완전 인증하지 않음. 다른 6종 필드 발동은 아직 공통 대응 창 미연결",
+    "implementation": [
+      "src/field-ability-effects.mjs",
+      "src/ability-responses.mjs",
+      "src/counter-effects.mjs",
+      "server.mjs",
+      "public/app.js",
+      "src/effect-usage.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: seven declarations defer effects, preserve paid costs and resolve after pass"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: Wind Girl negates five monster effects but never the two integrations"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: counter-counter LIFO restores the original monster effect"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: source removal, re-entry, negation and control transfer fizzle all seven effects"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: invalid declarations preserve state and target movement fizzles without refund"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: paid costs and turn limits survive negation and frozen Kaiser still pays attack rights"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: coin RNG runs only at resolution and full fields prevent capture"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: failed declaration and resolution atomically restore costs, stack and response window"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: AI uses monster-only counters at all levels and waits for human responses"
+      },
+      {
+        "path": "tests/field-ability-response-api.test.mjs",
+        "name": "field response HTTP: seven abilities persist declaration and counters, hide plans and reject stale or unauthorized actions"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "field response UI: monster-only counter and pass use the current responder and version"
+      },
+      {
+        "path": "tests/physical-effect-usage.test.mjs",
+        "name": "physical effect usage: identical card copies each activate while one UID cannot reuse after movement or restore"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-05-004",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "한 턴에 1회 상대 몬스터를 하나 덱으로 되돌린다.",
+    "trigger": "자신의 MAIN에서 ability 선언 → 상대 abilityResponse → pass 후 후발 우선 해결",
+    "condition": "정확한 자기 필드/일체화 영역, 소스 효과 유효, 유효 대상/필수 비용 및 빈 칸 사전검사; 턴당1회 미사용 (퇴마부는 기존 사용자 확정)",
+    "cost": "별도 자원 비용 없음; 선언 시 턴당 사용 횟수 소비",
+    "target": "상대 필드 몬스터 1장",
+    "resolution": "선언한 상대 몬스터를 원소유자 덱에 삽입; 기존 덱 순서 유지(R11); 일반 소스 이탈/재진입·무효/조종자 변경 또는 대상 소실 시 불발. 몬스터 효과5종은 윈드 걸로 무효화 가능, 일체화2종은 제외",
+    "duration": "이번 턴 사용 기록 유지; 무효화되어도 사용 횟수 반환 없음; 같은 효과라도 실제 카드 UID가 다르면 사용 기록 독립",
+    "remaining": "이 카드의 모든 발동/파괴/소환/묘지 유발·복사·지속 조합은 완전 인증하지 않음. 다른 6종 필드 발동은 아직 공통 대응 창 미연결",
+    "implementation": [
+      "src/field-ability-effects.mjs",
+      "src/ability-responses.mjs",
+      "src/counter-effects.mjs",
+      "server.mjs",
+      "public/app.js",
+      "src/effect-usage.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: seven declarations defer effects, preserve paid costs and resolve after pass"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: Wind Girl negates five monster effects but never the two integrations"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: counter-counter LIFO restores the original monster effect"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: source removal, re-entry, negation and control transfer fizzle all seven effects"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: invalid declarations preserve state and target movement fizzles without refund"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: paid costs and turn limits survive negation and frozen Kaiser still pays attack rights"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: coin RNG runs only at resolution and full fields prevent capture"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: failed declaration and resolution atomically restore costs, stack and response window"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: AI uses monster-only counters at all levels and waits for human responses"
+      },
+      {
+        "path": "tests/field-ability-response-api.test.mjs",
+        "name": "field response HTTP: seven abilities persist declaration and counters, hide plans and reject stale or unauthorized actions"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "field response UI: monster-only counter and pass use the current responder and version"
+      },
+      {
+        "path": "tests/physical-effect-usage.test.mjs",
+        "name": "physical effect usage: identical card copies each activate while one UID cannot reuse after movement or restore"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-13-001",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "한 턴에 1회 상대 필드의 몬스터를 자신의 필드로 가져온다.",
+    "trigger": "자신의 MAIN에서 ability 선언 → 상대 abilityResponse → pass 후 후발 우선 해결",
+    "condition": "정확한 자기 필드/일체화 영역, 소스 효과 유효, 유효 대상/필수 비용 및 빈 칸 사전검사; 턴당1회 미사용 (퇴마부는 기존 사용자 확정)",
+    "cost": "별도 자원 비용 없음; 선언 시 턴당 사용 횟수 소비",
+    "target": "상대 필드 몬스터 1장",
+    "resolution": "선언한 상대 몬스터를 빈 자기 필드로 가져오고 원소유자 유지; 일반 소스 이탈/재진입·무효/조종자 변경 또는 대상 소실 시 불발. 몬스터 효과5종은 윈드 걸로 무효화 가능, 일체화2종은 제외",
+    "duration": "이번 턴 사용 기록 유지; 무효화되어도 사용 횟수 반환 없음; 같은 효과라도 실제 카드 UID가 다르면 사용 기록 독립",
+    "remaining": "이 카드의 모든 발동/파괴/소환/묘지 유발·복사·지속 조합은 완전 인증하지 않음. 다른 6종 필드 발동은 아직 공통 대응 창 미연결",
+    "implementation": [
+      "src/field-ability-effects.mjs",
+      "src/ability-responses.mjs",
+      "src/counter-effects.mjs",
+      "server.mjs",
+      "public/app.js",
+      "src/effect-usage.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: seven declarations defer effects, preserve paid costs and resolve after pass"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: Wind Girl negates five monster effects but never the two integrations"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: counter-counter LIFO restores the original monster effect"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: source removal, re-entry, negation and control transfer fizzle all seven effects"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: invalid declarations preserve state and target movement fizzles without refund"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: paid costs and turn limits survive negation and frozen Kaiser still pays attack rights"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: coin RNG runs only at resolution and full fields prevent capture"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: failed declaration and resolution atomically restore costs, stack and response window"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: AI uses monster-only counters at all levels and waits for human responses"
+      },
+      {
+        "path": "tests/field-ability-response-api.test.mjs",
+        "name": "field response HTTP: seven abilities persist declaration and counters, hide plans and reject stale or unauthorized actions"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "field response UI: monster-only counter and pass use the current responder and version"
+      },
+      {
+        "path": "tests/physical-effect-usage.test.mjs",
+        "name": "physical effect usage: identical card copies each activate while one UID cannot reuse after movement or restore"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-13-002",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "한 턴에 1회 코인 토스(1d2)를 하여 앞면(1)이 나왔을 경우, 상대 필드의 몬스터를 자신의 필드로 가져온다.",
+    "trigger": "자신의 MAIN에서 ability 선언 → 상대 abilityResponse → pass 후 후발 우선 해결",
+    "condition": "정확한 자기 필드/일체화 영역, 소스 효과 유효, 유효 대상/필수 비용 및 빈 칸 사전검사; 턴당1회 미사용 (퇴마부는 기존 사용자 확정)",
+    "cost": "별도 자원 비용 없음; 선언 시 턴당 사용 횟수 소비",
+    "target": "상대 필드 몬스터 1장",
+    "resolution": "해결 시 서버 1d2를 한 번 굴려 1일 때만 선택한 상대 몬스터를 자기 필드로 가져옴; 무효/불발에는 굴리지 않음; 일반 소스 이탈/재진입·무효/조종자 변경 또는 대상 소실 시 불발. 몬스터 효과5종은 윈드 걸로 무효화 가능, 일체화2종은 제외",
+    "duration": "이번 턴 사용 기록 유지; 무효화되어도 사용 횟수 반환 없음; 같은 효과라도 실제 카드 UID가 다르면 사용 기록 독립",
+    "remaining": "이 카드의 모든 발동/파괴/소환/묘지 유발·복사·지속 조합은 완전 인증하지 않음. 다른 6종 필드 발동은 아직 공통 대응 창 미연결",
+    "implementation": [
+      "src/field-ability-effects.mjs",
+      "src/ability-responses.mjs",
+      "src/counter-effects.mjs",
+      "server.mjs",
+      "public/app.js",
+      "src/effect-usage.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: seven declarations defer effects, preserve paid costs and resolve after pass"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: Wind Girl negates five monster effects but never the two integrations"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: counter-counter LIFO restores the original monster effect"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: source removal, re-entry, negation and control transfer fizzle all seven effects"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: invalid declarations preserve state and target movement fizzles without refund"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: paid costs and turn limits survive negation and frozen Kaiser still pays attack rights"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: coin RNG runs only at resolution and full fields prevent capture"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: failed declaration and resolution atomically restore costs, stack and response window"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: AI uses monster-only counters at all levels and waits for human responses"
+      },
+      {
+        "path": "tests/field-ability-response-api.test.mjs",
+        "name": "field response HTTP: seven abilities persist declaration and counters, hide plans and reject stale or unauthorized actions"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "field response UI: monster-only counter and pass use the current responder and version"
+      },
+      {
+        "path": "tests/physical-effect-usage.test.mjs",
+        "name": "physical effect usage: identical card copies each activate while one UID cannot reuse after movement or restore"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-13-005",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "한 턴에 1회 상대 필드의 몬스터를 자신의 필드로 가져오고, 가져온 몬스터의 공격력만큼 상대 본체에 피해를 입힌다.",
+    "trigger": "자신의 MAIN에서 ability 선언 → 상대 abilityResponse → pass 후 후발 우선 해결",
+    "condition": "정확한 자기 필드/일체화 영역, 소스 효과 유효, 유효 대상/필수 비용 및 빈 칸 사전검사; 턴당1회 미사용 (퇴마부는 기존 사용자 확정)",
+    "cost": "별도 자원 비용 없음; 선언 시 턴당 사용 횟수 소비",
+    "target": "상대 필드 몬스터 1장",
+    "resolution": "선언한 상대 몬스터를 자기 필드로 가져오고 가져오기 직전 실제 ATK(마검 배율 포함)만큼 상대 본체 피해; 원소유자 유지; 일반 소스 이탈/재진입·무효/조종자 변경 또는 대상 소실 시 불발. 몬스터 효과5종은 윈드 걸로 무효화 가능, 일체화2종은 제외",
+    "duration": "이번 턴 사용 기록 유지; 무효화되어도 사용 횟수 반환 없음; 같은 효과라도 실제 카드 UID가 다르면 사용 기록 독립",
+    "remaining": "이 카드의 모든 발동/파괴/소환/묘지 유발·복사·지속 조합은 완전 인증하지 않음. 다른 6종 필드 발동은 아직 공통 대응 창 미연결",
+    "implementation": [
+      "src/field-ability-effects.mjs",
+      "src/ability-responses.mjs",
+      "src/counter-effects.mjs",
+      "server.mjs",
+      "public/app.js",
+      "src/effect-usage.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: seven declarations defer effects, preserve paid costs and resolve after pass"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: Wind Girl negates five monster effects but never the two integrations"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: counter-counter LIFO restores the original monster effect"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: source removal, re-entry, negation and control transfer fizzle all seven effects"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: invalid declarations preserve state and target movement fizzles without refund"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: paid costs and turn limits survive negation and frozen Kaiser still pays attack rights"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: coin RNG runs only at resolution and full fields prevent capture"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: failed declaration and resolution atomically restore costs, stack and response window"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: AI uses monster-only counters at all levels and waits for human responses"
+      },
+      {
+        "path": "tests/field-ability-response-api.test.mjs",
+        "name": "field response HTTP: seven abilities persist declaration and counters, hide plans and reject stale or unauthorized actions"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "field response UI: monster-only counter and pass use the current responder and version"
+      },
+      {
+        "path": "tests/physical-effect-usage.test.mjs",
+        "name": "physical effect usage: identical card copies each activate while one UID cannot reuse after movement or restore"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-22-010",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "한 턴에 1회 이 카드의 공격권을 포기하고 지정한 몬스터의 공격 기회를 1 늘린다.",
+    "trigger": "자신의 MAIN에서 ability 선언 → 상대 abilityResponse → pass 후 후발 우선 해결",
+    "condition": "정확한 자기 필드/일체화 영역, 소스 효과 유효, 유효 대상/필수 비용 및 빈 칸 사전검사; 턴당1회 미사용 (퇴마부는 기존 사용자 확정)",
+    "cost": "자기 공격 기회 1회 선지불; 동결/공격 금지여도 남은 공격권 사용 가능(R29), 무효/불발 시 반환 없음",
+    "target": "다른 자기 필드 몬스터 1장",
+    "resolution": "지정한 자기 필드 몬스터에게 이번 턴 공격 기회 1회 추가; 발동 소스 공격 기회는 반환하지 않음; 일반 소스 이탈/재진입·무효/조종자 변경 또는 대상 소실 시 불발. 몬스터 효과5종은 윈드 걸로 무효화 가능, 일체화2종은 제외",
+    "duration": "이번 턴 사용 기록 유지; 무효화되어도 사용 횟수 반환 없음; 같은 효과라도 실제 카드 UID가 다르면 사용 기록 독립",
+    "remaining": "이 카드의 모든 발동/파괴/소환/묘지 유발·복사·지속 조합은 완전 인증하지 않음. 다른 6종 필드 발동은 아직 공통 대응 창 미연결",
+    "implementation": [
+      "src/field-ability-effects.mjs",
+      "src/ability-responses.mjs",
+      "src/counter-effects.mjs",
+      "server.mjs",
+      "public/app.js",
+      "src/effect-usage.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: seven declarations defer effects, preserve paid costs and resolve after pass"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: Wind Girl negates five monster effects but never the two integrations"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: counter-counter LIFO restores the original monster effect"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: source removal, re-entry, negation and control transfer fizzle all seven effects"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: invalid declarations preserve state and target movement fizzles without refund"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: paid costs and turn limits survive negation and frozen Kaiser still pays attack rights"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: coin RNG runs only at resolution and full fields prevent capture"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: failed declaration and resolution atomically restore costs, stack and response window"
+      },
+      {
+        "path": "tests/field-ability-response.test.mjs",
+        "name": "field response batch: AI uses monster-only counters at all levels and waits for human responses"
+      },
+      {
+        "path": "tests/field-ability-response-api.test.mjs",
+        "name": "field response HTTP: seven abilities persist declaration and counters, hide plans and reject stale or unauthorized actions"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "field response UI: monster-only counter and pass use the current responder and version"
+      },
+      {
+        "path": "tests/physical-effect-usage.test.mjs",
+        "name": "physical effect usage: identical card copies each activate while one UID cannot reuse after movement or restore"
       }
     ]
   }

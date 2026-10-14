@@ -38,6 +38,6 @@ test('HTTP recovery validates identity/version, rolls back invalid cost and pers
  await stop();await start('restored');
  assert.deepEqual((await call()).state,success.state);
  const persisted=JSON.parse(fs.readFileSync(path.join(temporary,'rooms.json'),'utf8')).REC123;
- assert.equal(persisted.players[0].effectUsage['COC-22-008:2'],3);
+ assert.equal(persisted.units[sourceUnitId].effectUsage['COC-22-008:2'],3);
  assert.equal(persisted.units[costUnitId].attackCount,1);
 });

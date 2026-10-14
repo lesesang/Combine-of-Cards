@@ -208,6 +208,8 @@ test('sword: real field-ability destruction from an enchanted monster schedules 
  r.phase='MAIN';
  I.apply(r,1,'ability',{sourceUnitId:bearer,costCardId:cost,target:{type:'unit',id:foe}});
  assert.ok(r.players[1].grave.includes(cost),'field ability cost was paid');
+ assert.ok(r.players[0].field.includes(foe),'destruction waits for opposing response');
+ I.apply(r,0,'abilityResponse',{choice:'pass'});
  assert.ok(r.players[0].grave.includes(foe),'enemy monster was destroyed by effect');
  assert.deepEqual(r.effects.filter(e=>e.type==='lifeEatingSword').map(e=>e.pendingDoubleTurns.length),[1,1]);
  ownTurn(r,0,5);ownTurn(r,1,6);

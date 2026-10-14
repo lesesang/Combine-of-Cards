@@ -157,3 +157,12 @@ test('field counter UI: uses the card-specific reset label and submits Wind Girl
  await t.listeners.click({target:{closest:()=>({dataset:{spellCounter:'wind'}})}});
  assert.deepEqual(t.requests[0].body,{type:'spellResponse',choice:'counter',sourceUnitId:'wind',expectedVersion:7});
 });
+
+test('field response UI: monster-only counter and pass use the current responder and version',async()=>{
+ const t=ui();t.run("state.game.pendingAbility={who:1,awaiting:0,card:{name:'크래쉬볼티지'},counters:[{sourceUnitId:'wind',name:'라이징 윈드 걸',limitText:'재소환 전 1회'}]}");
+ assert.equal(t.run('battleControls(state.game)'),'');const html=t.run('battlePending(state.game)');assert.match(html,/상대 몬스터 효과/);assert.match(html,/data-ability-counter="wind"/);assert.match(html,/재소환 전 1회/);
+ await t.listeners.click({target:{closest:()=>({id:'',dataset:{abilityCounter:'wind'}})}});
+ assert.deepEqual(t.requests[0].body,{type:'abilityResponse',expectedVersion:7,choice:'counter',sourceUnitId:'wind'});
+ t.run('state.game.pendingAbility.awaiting=1');assert.doesNotMatch(t.run('battlePending(state.game)'),/data-ability-counter|id="abilityPass"/);
+ t.run('state.game.pendingAbility.awaiting=0;state.game.pendingAbility.counters=[]');await t.listeners.click({target:{closest:()=>({id:'abilityPass',dataset:{}})}});assert.deepEqual(t.requests[1].body,{type:'abilityResponse',expectedVersion:7,choice:'pass'});
+});
