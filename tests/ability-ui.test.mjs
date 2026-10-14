@@ -19,7 +19,7 @@ function ui(){
   return nodes.get(id);
  };
  const document={querySelector:s=>node(s.slice(1)),querySelectorAll:()=>[],addEventListener:(name,fn)=>listeners[name]=fn,createElement:()=>({className:'',textContent:'',remove(){}})};
- const context=vm.createContext({document,window:{addEventListener(){}},location:{hash:'#battle'},setTimeout(){},clearTimeout(){},fetch:async(url,options)=>{requests.push({url,body:options.body?JSON.parse(options.body):undefined});return {ok:true,json:async()=>url.includes('hand-preview')?{cards:[{id:'hidden',name:'상대의 숨겨진 카드'}]}:game}},console});
+ const context=vm.createContext({document,window:{addEventListener(){}},location:{hash:'#battle'},setTimeout(){},clearTimeout(){},fetch:async(url,options)=>{requests.push({url,body:options.body?JSON.parse(options.body):undefined});return {ok:true,json:async()=>url.includes('evolution-costs')?{choices:[{id:'nature1',card:{name:'자연 카드 1'}},{id:'nature2',card:{name:'자연 카드 2'}}]}:url.includes('hand-preview')?{cards:[{id:'hidden',name:'상대의 숨겨진 카드'}]}:game}},console});
  const source=fs.readFileSync(new URL('../public/app.js',import.meta.url),'utf8').replace(/boot\(\);\s*$/,'');
  vm.runInContext(source,context);
  const unit=(id,cardId,name)=>({id,atk:100,hp:100,card:{id:cardId,name}});
@@ -117,4 +117,24 @@ test('choice UI: two distinct selected monster UIDs are submitted together',asyn
  t.run('openPlay()');t.node('playPick').value='arrows';await t.node('playPick').onchange();
  t.node('spellTarget').value='enemy';t.node('spellTarget2').value='falcon';await t.node('playSubmit').onclick();
  assert.deepEqual(t.requests[0].body.targets,['enemy','falcon']);assert.equal(t.requests[0].body.expectedVersion,7);
+});
+
+
+test('evolution UI: privately loads nature costs and requires two distinct UIDs',async()=>{
+ const t=ui();t.run("state.game.players[0].hand.push({id:'evolve',card:{id:'COC-30-009',name:'숲속의 맹약'}})");
+ t.run('openPlay()');t.node('playPick').value='evolve';await t.node('playPick').onchange();
+ assert.match(t.requests[0].url,/evolution-costs\?unitId=evolve$/);
+ assert.match(t.node('evolutionCost1').innerHTML,/자연 카드 1/);
+ t.node('evolutionCost1').value='nature1';t.node('evolutionCost2').value='nature1';await t.node('playSubmit').onclick();
+ assert.equal(t.requests.filter(r=>r.body?.type==='play').length,0);
+ t.node('evolutionCost2').value='nature2';await t.node('playSubmit').onclick();
+ const req=t.requests.find(r=>r.body?.type==='play');assert.deepEqual(req.body.costDeckIds,['nature1','nature2']);assert.equal(req.body.expectedVersion,7);
+});
+test('search UI: only the owner selects a deck card and other play controls are locked',async()=>{
+ const t=ui();t.run("state.game.pendingDeckSearch={who:0,cardId:'COC-24-008',choices:[{id:'chosen',card:{name:'검색 카드'}}]}");
+ assert.match(t.run('battlePending(state.game)'),/검색 카드/);assert.equal(t.run('battleControls(state.game)'),'');
+ t.node('deckSearchChoice').value='chosen';await t.listeners.click({target:{closest:()=>({id:'deckSearchSubmit',dataset:{}})}});
+ assert.deepEqual(t.requests[0].body,{type:'deckSearch',unitId:'chosen',expectedVersion:7});
+ t.run('state.game.pendingDeckSearch={who:1,cardId:"COC-24-008"}');
+ assert.doesNotMatch(t.run('battlePending(state.game)'),/deckSearchChoice|deckSearchSubmit|검색 카드/);
 });

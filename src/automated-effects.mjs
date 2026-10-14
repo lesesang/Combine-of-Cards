@@ -1,3 +1,4 @@
+import {evolutionSpellIds} from './evolution.mjs';
 import {isNonToonField} from './spell-choice-batch.mjs';
 // Audited, deterministic card-effect handlers. No free-form text execution.
 // A handler must be backed by a particular v1.3 card wording.
@@ -103,17 +104,17 @@ register('COC-32-006',ctx=>{requireField(ctx,'워터',true);heal(ctx,{player:ctx
 register('COC-32-008',ctx=>{requireField(ctx,'랜드',true);destroyTogether(ctx,ctx.r.players[1-ctx.who].field.filter(Boolean))});
 // More precisely scoped automatic spells with explicit prerequisites.
 register('COC-06-002',ctx=>{const count=ctx.r.players[ctx.who].roundElementUses||0;const atk=count*50,hp=50+count*50;ctx.H.summonToken(ctx.r,ctx.who,'인조 생물',atk,hp)});
-register('COC-07-004',ctx=>{ctx.H.draw(ctx.r,1-ctx.who);const a=ctx.H.search(ctx.r,ctx.who,'포식자 알리자');if(!a)ctx.H.search(ctx.r,ctx.who,'포식의 맹약')});
+register('COC-07-004',ctx=>{if(!ctx.activationValidated)ctx.H.draw(ctx.r,1-ctx.who);return {deckSearch:true};});
 register('COC-07-011',ctx=>{ctx.H.draw(ctx.r,1-ctx.who);ctx.H.mill(ctx.r,1-ctx.who,3);ctx.r.players[ctx.who].hp+=400;const id=ctx.r.players[ctx.who].integration;if(id){ctx.r.units[id].atk+=200;ctx.r.units[id].buffExpiresAt=(ctx.r.players[ctx.who].turnsTaken||0)+1;ctx.r.units[id].temporaryBuff=(ctx.r.units[id].temporaryBuff||0)+200}});
 register('COC-14-002',ctx=>{if(!ctx.activationValidated)ctx.H.mill(ctx.r,ctx.who,1);for(let i=0;i<2;i++)ctx.H.summonToken(ctx.r,ctx.who,'스톰 토큰',0,50)});
 register('COC-14-009',ctx=>{if(ctx.body.option===2){ctx.H.summonToken(ctx.r,ctx.who,'스톰 토큰',0,50)}else{hit(ctx,{player:1-ctx.who},50);for(const id of [...ctx.r.players[1-ctx.who].field].filter(Boolean))hit(ctx,{id},50)}});
 register('COC-17-004',ctx=>{for(let i=0;i<3;i++)if(!ctx.H.summonToken(ctx.r,ctx.who,'미라 병사',80,100))break});
 register('COC-19-004',ctx=>{const p=ctx.r.players[ctx.who],id=p.deck.find(id=>ctx.H.type(ctx.r,id)==='몬스터');if(id)ctx.H.move(ctx.r,id,'hand',ctx.who)});
 register('COC-19-005',ctx=>{const t=getTarget(ctx,'any');if(!t.id)ctx.H.fail(409,'필드의 몬스터가 필요합니다.');ctx.r.units[t.id].frozen=true;ctx.r.units[t.id].battleInvulnerable=true;ctx.r.units[t.id].damageInvulnerable=true;});
-register('COC-20-003',ctx=>{if(ctx.r.players[ctx.who].hp>600)ctx.H.fail(409,'체력 600 이하일 때만 사용 가능합니다.');ctx.H.search(ctx.r,ctx.who,'버닝 데몬즈')});
+register('COC-20-003',ctx=>{if(!ctx.activationValidated&&ctx.r.players[ctx.who].hp>600)ctx.H.fail(409,'체력 600 이하일 때만 사용 가능합니다.');return {deckSearch:true};});
 register('COC-23-009',ctx=>{if(!ctx.activationValidated&&!ctx.r.players[ctx.who].integration)ctx.H.fail(409,'일체화가 필요합니다.');const t=getTarget(ctx,ctx.body.option===1?'enemy':'any');if(ctx.body.option===1){if(!t.id)ctx.H.fail(409,'파괴할 몬스터가 없습니다.');ctx.H.destroy(ctx.r,t.id)}else hit(ctx,t,200)});
 register('COC-24-006',ctx=>{const id=ctx.r.players[ctx.who].integration;if(!id)ctx.H.fail(409,'일체화가 필요합니다.');for(const target of [...ctx.r.players[ctx.who].field].filter(Boolean))ctx.H.destroy(ctx.r,target);ctx.r.units[id].atk+=60});
-register('COC-24-008 COC-26-008',ctx=>{const p=ctx.r.players[ctx.who];if(p.field.filter(id=>id&&ctx.H.name(ctx.r,id).includes('매치')).length>1)ctx.H.fail(409,'필드의 매치는 최대 1장이어야 합니다.');const id=p.deck.find(id=>ctx.H.type(ctx.r,id)==='몬스터');if(id)ctx.H.move(ctx.r,id,'hand',ctx.who)});
+register('COC-24-008 COC-26-008',ctx=>{if(!ctx.activationValidated&&ctx.r.players[ctx.who].field.filter(id=>id&&ctx.H.name(ctx.r,id).includes('매치')).length>1)ctx.H.fail(409,'필드의 매치는 최대 1장이어야 합니다.');return {deckSearch:true};});
 register('COC-31-005',ctx=>{ctx.H.draw(ctx.r,ctx.who);if(ctx.H.roll(2)===1){const p=ctx.r.players[1-ctx.who];if(p.hand.length)ctx.H.move(ctx.r,p.hand[ctx.H.randomInt(p.hand.length)],'grave',1-ctx.who)}});
 register('COC-31-007',ctx=>{if(!ctx.activationValidated)charge(ctx,100);const t=enemy(ctx);if(!t.id)ctx.H.fail(409,'탈취할 몬스터가 없습니다.');ctx.H.capture(ctx.r,ctx.who,t.id)});
 register('COC-31-009',ctx=>{
@@ -128,9 +129,8 @@ register('COC-30-005',ctx=>{ctx.r.players[ctx.who].spellDiceBonus=(ctx.r.players
 register('COC-31-010',ctx=>{const p=ctx.r.players[ctx.who];if(!ctx.activationValidated&&(!p.integration||ctx.r.units[p.integration]?.cardId!=='COC-31-004'))ctx.H.fail(409,'최광의 대마법사 슈와 일체화해야 합니다.');let heads=0,tails=0;for(let i=0;i<5;i++){if(ctx.H.roll(2)===1)heads++;else tails++;}for(const id of p.field.filter(Boolean))ctx.r.units[id].atk+=heads*100;for(const id of [...ctx.r.players[1-ctx.who].field].filter(Boolean))if(tails>0)ctx.H.hurt(ctx.r,id,tails*150)});
 // G-deck integration attack becomes a two-sided effect, then its present attack becomes zero.
 register('COC-01-008',ctx=>{const id=ctx.r.players[ctx.who].integration;if(!id)ctx.H.fail(409,'일체화 중이어야 합니다.');const n=Math.max(0,ctx.r.units[id].atk);const t=enemy(ctx);ctx.r.players[ctx.who].hp-=n;if(t.id)ctx.H.hurt(ctx.r,t.id,n);else ctx.r.players[t.player].hp-=n;ctx.r.units[id].atk=0;ctx.H.outcome(ctx.r)});
-// Generic evolution: named created-card search, preserving integration identity by updating cardId.
-const evolves={'COC-03-003':'영매사 스트로베리아','COC-08-010':'오오 츠쿠모가미 백귀야행','COC-20-007':'버닝데몬즈 워리어 드라고닉','COC-23-006':'라이드 위저드 인피니티','COC-24-009':'인빈시블 지니어스','COC-26-009':'인빈시블 지니어스','COC-30-009':'대자연의 여신 유리카'};
-for(const [id,target] of Object.entries(evolves)){aliases[id]=(ctx)=>{const p=ctx.r.players[ctx.who];if(!p.integration)ctx.H.fail(409,'일체화 중이어야 합니다.');const matching=ctx.H.cardNamed(ctx.r,ctx.who,target);if(!matching)ctx.H.fail(409,'진화 대상이 카드 데이터에 없습니다.');ctx.H.evolve(ctx.r,p.integration,matching)};}
+// Evolution resolves through a declared physical source snapshot in the server.
+for(const id of evolutionSpellIds)register(id,()=>({evolution:true}));
 // Curse deck: source monster is sacrificed by the audited activation preflight.
 register('COC-21-004',ctx=>{
  const id=ctx.body.target?.id,z=id&&ctx.H.zone(ctx.r,id);

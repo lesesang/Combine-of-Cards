@@ -36,17 +36,19 @@ function pass(r){
  assert.equal(r.effectStack.length,0);
 }
 
-test('R01: the Predator banquet opponent draw and named search wait for response',()=>{
+test('R01: Predator banquet pays opponent draw before response and searches by explicit choice',()=>{
  const {r,spell}=room('07','COC-07-004');
  const candidate=r.players[0].deck.find(uid=>/포식자 알리자|포식의 맹약/.test(I.cards.get(r.units[uid].cardId)?.name||''));
  assert.ok(candidate,'source deck must have a searchable named card');
  const enemyDeck=r.players[1].deck.length;
  const saved=declare(r,spell);
  assert.equal(r.players[0].hand.length,0);
- assert.equal(r.players[1].deck.length,enemyDeck);
+ assert.equal(r.players[1].deck.length,enemyDeck-1);
  assert.ok(r.players[0].deck.includes(candidate));
  pass(saved);
  assert.equal(saved.players[1].hand.length,1);
+ assert.ok(saved.pendingDeckSearch);
+ I.apply(saved,0,'deckSearch',{unitId:candidate});
  assert.ok(saved.players[0].hand.includes(candidate));
  assert.equal(saved.players[1].deck.length,enemyDeck-1);
 });

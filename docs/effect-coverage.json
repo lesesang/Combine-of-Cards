@@ -215,7 +215,7 @@
     "effectNumber": 1,
     "status": "partial",
     "sourceText": "상대의 주문의 발동 또는 몬스터의 소환을 한 게임당 1회 무효화 합니다.",
-    "trigger": "상대의 등록된 51종 주문 선언 후 spellResponse 대응 창",
+    "trigger": "상대의 등록된 61종 주문 선언 후 spellResponse 대응 창",
     "condition": "자신의 유효한 일체화 스톰블레이거, 현재 대응권자, 같은 UID의 게임당 1회 미사용",
     "cost": "추가 자원 비용 없음; 선언 시 게임당 1회 사용 기록 소비",
     "target": "상대가 선언한 원래 주문 스택 항목",
@@ -1629,6 +1629,453 @@
       {
         "path": "tests/spell-choice-api.test.mjs",
         "name": "choice HTTP: all 12 paid declarations restore and resolve once with rollback and private hands"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-03-003",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "자신의 일체화 카드를 영매사 스트로베리아로 바꾼다.",
+    "trigger": "자신의 MAIN에서 주문 선언 → 비용 선지불 → 상대 대응 → LIFO 해결",
+    "condition": "자신의 일체화 카드 존재",
+    "cost": "주문을 원소유자 묘지로; 무효화·불발 시 반환하지 않음",
+    "target": "자신의 선언 시 일체화 UID·원본 카드 ID·영역 이동 세대 고정",
+    "resolution": "진화 기본 ATK로 교체 + 기존 강화 유지, UID·원소유자·공격 횟수·독립 지속 상태 유지",
+    "duration": "패·덱·묘지 이동 시 최초 원본 카드로 복원; 영역 이동에 따른 기존 수치 초기화 적용",
+    "remaining": "진화 카드의 별도 효과·전역 일체화/이동 유발·복사·소환 대응 통합 미완료; 제외 시 복원 여부는 이번 확정 범위 밖",
+    "implementation": [
+      "src/evolution.mjs",
+      "src/activation-rules.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution: all seven replace base ATK, preserve buffs and identity, and restore originals"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution: counter and source exit or re-entry cannot evolve a replacement"
+      },
+      {
+        "path": "tests/evolution-search-api.test.mjs",
+        "name": "evolution/search HTTP: eleven declarations roll back failures and restore paid responses and private selections"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution/search: three AI levels use all eleven spells and complete private selection"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-08-010",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "내 일체화 카드를 오오 츠쿠모가미 백귀야행으로 바꾼다.",
+    "trigger": "자신의 MAIN에서 주문 선언 → 비용 선지불 → 상대 대응 → LIFO 해결",
+    "condition": "내가 츠쿠모가미 야시키와 일체화 되있어야 한다.",
+    "cost": "주문을 원소유자 묘지로; 무효화·불발 시 반환하지 않음",
+    "target": "자신의 선언 시 일체화 UID·원본 카드 ID·영역 이동 세대 고정",
+    "resolution": "진화 기본 ATK로 교체 + 기존 강화 유지, UID·원소유자·공격 횟수·독립 지속 상태 유지",
+    "duration": "패·덱·묘지 이동 시 최초 원본 카드로 복원; 영역 이동에 따른 기존 수치 초기화 적용",
+    "remaining": "진화 카드의 별도 효과·전역 일체화/이동 유발·복사·소환 대응 통합 미완료; 제외 시 복원 여부는 이번 확정 범위 밖",
+    "implementation": [
+      "src/evolution.mjs",
+      "src/activation-rules.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution: all seven replace base ATK, preserve buffs and identity, and restore originals"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution: counter and source exit or re-entry cannot evolve a replacement"
+      },
+      {
+        "path": "tests/evolution-search-api.test.mjs",
+        "name": "evolution/search HTTP: eleven declarations roll back failures and restore paid responses and private selections"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution/search: three AI levels use all eleven spells and complete private selection"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-20-007",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "내 일체화 카드가 버닝데몬즈 워리어 드라고닉으로 바뀝니다.",
+    "trigger": "자신의 MAIN에서 주문 선언 → 비용 선지불 → 상대 대응 → LIFO 해결",
+    "condition": "내가 버닝데몬즈 카드와 일체화 되있고 체력이 500이하일 때 발동가능하다.",
+    "cost": "주문을 원소유자 묘지로; 무효화·불발 시 반환하지 않음",
+    "target": "자신의 선언 시 일체화 UID·원본 카드 ID·영역 이동 세대 고정",
+    "resolution": "진화 기본 ATK로 교체 + 기존 강화 유지, UID·원소유자·공격 횟수·독립 지속 상태 유지",
+    "duration": "패·덱·묘지 이동 시 최초 원본 카드로 복원; 영역 이동에 따른 기존 수치 초기화 적용",
+    "remaining": "진화 카드의 별도 효과·전역 일체화/이동 유발·복사·소환 대응 통합 미완료; 제외 시 복원 여부는 이번 확정 범위 밖",
+    "implementation": [
+      "src/evolution.mjs",
+      "src/activation-rules.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution: all seven replace base ATK, preserve buffs and identity, and restore originals"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution: counter and source exit or re-entry cannot evolve a replacement"
+      },
+      {
+        "path": "tests/evolution-search-api.test.mjs",
+        "name": "evolution/search HTTP: eleven declarations roll back failures and restore paid responses and private selections"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution/search: three AI levels use all eleven spells and complete private selection"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-23-006",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "내 일체화 카드를 라이드 위저드 인피니티로 전환합니다.",
+    "trigger": "자신의 MAIN에서 주문 선언 → 비용 선지불 → 상대 대응 → LIFO 해결",
+    "condition": "라이드 위저드와 일체화 되어야 합니다.",
+    "cost": "주문을 원소유자 묘지로; 무효화·불발 시 반환하지 않음",
+    "target": "자신의 선언 시 일체화 UID·원본 카드 ID·영역 이동 세대 고정",
+    "resolution": "진화 기본 ATK로 교체 + 기존 강화 유지, UID·원소유자·공격 횟수·독립 지속 상태 유지",
+    "duration": "패·덱·묘지 이동 시 최초 원본 카드로 복원; 영역 이동에 따른 기존 수치 초기화 적용",
+    "remaining": "진화 카드의 별도 효과·전역 일체화/이동 유발·복사·소환 대응 통합 미완료; 제외 시 복원 여부는 이번 확정 범위 밖",
+    "implementation": [
+      "src/evolution.mjs",
+      "src/activation-rules.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution: all seven replace base ATK, preserve buffs and identity, and restore originals"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution: counter and source exit or re-entry cannot evolve a replacement"
+      },
+      {
+        "path": "tests/evolution-search-api.test.mjs",
+        "name": "evolution/search HTTP: eleven declarations roll back failures and restore paid responses and private selections"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution/search: three AI levels use all eleven spells and complete private selection"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-24-009",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "내 일체화 카드를 인빈시블 지니어스로 전환합니다.",
+    "trigger": "자신의 MAIN에서 주문 선언 → 비용 선지불 → 상대 대응 → LIFO 해결",
+    "condition": "베스트 지니어스와 일체화 되어야 합니다.",
+    "cost": "주문을 원소유자 묘지로; 무효화·불발 시 반환하지 않음",
+    "target": "자신의 선언 시 일체화 UID·원본 카드 ID·영역 이동 세대 고정",
+    "resolution": "진화 기본 ATK로 교체 + 기존 강화 유지, UID·원소유자·공격 횟수·독립 지속 상태 유지",
+    "duration": "패·덱·묘지 이동 시 최초 원본 카드로 복원; 영역 이동에 따른 기존 수치 초기화 적용",
+    "remaining": "진화 카드의 별도 효과·전역 일체화/이동 유발·복사·소환 대응 통합 미완료; 제외 시 복원 여부는 이번 확정 범위 밖",
+    "implementation": [
+      "src/evolution.mjs",
+      "src/activation-rules.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution: all seven replace base ATK, preserve buffs and identity, and restore originals"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution: counter and source exit or re-entry cannot evolve a replacement"
+      },
+      {
+        "path": "tests/evolution-search-api.test.mjs",
+        "name": "evolution/search HTTP: eleven declarations roll back failures and restore paid responses and private selections"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution/search: three AI levels use all eleven spells and complete private selection"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-26-009",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "내 일체화 카드를 인빈시블 지니어스로 전환합니다.",
+    "trigger": "자신의 MAIN에서 주문 선언 → 비용 선지불 → 상대 대응 → LIFO 해결",
+    "condition": "베스트 지니어스와 일체화 되어야 합니다.",
+    "cost": "주문을 원소유자 묘지로; 무효화·불발 시 반환하지 않음",
+    "target": "자신의 선언 시 일체화 UID·원본 카드 ID·영역 이동 세대 고정",
+    "resolution": "진화 기본 ATK로 교체 + 기존 강화 유지, UID·원소유자·공격 횟수·독립 지속 상태 유지",
+    "duration": "패·덱·묘지 이동 시 최초 원본 카드로 복원; 영역 이동에 따른 기존 수치 초기화 적용",
+    "remaining": "진화 카드의 별도 효과·전역 일체화/이동 유발·복사·소환 대응 통합 미완료; 제외 시 복원 여부는 이번 확정 범위 밖",
+    "implementation": [
+      "src/evolution.mjs",
+      "src/activation-rules.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution: all seven replace base ATK, preserve buffs and identity, and restore originals"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution: counter and source exit or re-entry cannot evolve a replacement"
+      },
+      {
+        "path": "tests/evolution-search-api.test.mjs",
+        "name": "evolution/search HTTP: eleven declarations roll back failures and restore paid responses and private selections"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution/search: three AI levels use all eleven spells and complete private selection"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-30-009",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "내 일체화 카드를 대자연의 여신 유리카로 교체 합니다.",
+    "trigger": "자신의 MAIN에서 주문 선언 → 비용 선지불 → 상대 대응 → LIFO 해결",
+    "condition": "풍요의 여신 아젤리아와 일체화해야 한다, 내 덱에 자연 속성 카드를 2장 버린다.",
+    "cost": "주문을 원소유자 묘지로; 무효화·불발 시 반환하지 않음; 자기 덱 자연 속성 2장 직접 선택 후 묘지로 선지불",
+    "target": "자신의 선언 시 일체화 UID·원본 카드 ID·영역 이동 세대 고정",
+    "resolution": "진화 기본 ATK로 교체 + 기존 강화 유지, UID·원소유자·공격 횟수·독립 지속 상태 유지",
+    "duration": "패·덱·묘지 이동 시 최초 원본 카드로 복원; 영역 이동에 따른 기존 수치 초기화 적용",
+    "remaining": "진화 카드의 별도 효과·전역 일체화/이동 유발·복사·소환 대응 통합 미완료; 제외 시 복원 여부는 이번 확정 범위 밖",
+    "implementation": [
+      "src/evolution.mjs",
+      "src/activation-rules.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs",
+      "public/app.js"
+    ],
+    "tests": [
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution: all seven replace base ATK, preserve buffs and identity, and restore originals"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution: counter and source exit or re-entry cannot evolve a replacement"
+      },
+      {
+        "path": "tests/evolution-search-api.test.mjs",
+        "name": "evolution/search HTTP: eleven declarations roll back failures and restore paid responses and private selections"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution/search: three AI levels use all eleven spells and complete private selection"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-07-004",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "포식자 알리자, 또는 포식의 맹약을 손으로 가져온다.",
+    "trigger": "자신의 MAIN에서 주문 선언 → 비용 선지불 → 상대 대응 → LIFO 해결",
+    "condition": "자신의 패의 포식자의 만찬",
+    "cost": "주문을 원소유자 묘지로; 무효화·불발 시 반환하지 않음; 상대 1장 드로우를 대응 전 지불 (무효화해도 유지)",
+    "target": "현재 자기 덱의 조건 일치 카드 중 1장, 발동자가 대응 종료 뒤 직접 선택",
+    "resolution": "후보를 카드 ID 순으로 발동자에게만 제시; 선택 UID 재검사 후 원소유자 패로, 가져온 카드 공개; 후보 없으면 종료",
+    "duration": "선택 대기를 JSON 저장; 상대 선택/재전송/다른 행동 거부, 종료·항복 시 해제",
+    "remaining": "다른 검색/드로우 카드와 전역 이동·복사/후속 유발 통합 미완료",
+    "implementation": [
+      "src/deck-search.mjs",
+      "src/activation-rules.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs",
+      "public/app.js"
+    ],
+    "tests": [
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "search: all four expose sorted eligible choices only after pass and let the owner choose"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "search: counter keeps the Banquet draw cost, closes choices and never searches"
+      },
+      {
+        "path": "tests/evolution-search-api.test.mjs",
+        "name": "evolution/search HTTP: eleven declarations roll back failures and restore paid responses and private selections"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution/search: three AI levels use all eleven spells and complete private selection"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-20-003",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "\"버닝 데몬즈\"라고 명시된 카드를 덱에서 1장 가져온다.",
+    "trigger": "자신의 MAIN에서 주문 선언 → 비용 선지불 → 상대 대응 → LIFO 해결",
+    "condition": "자신의 체력이 600이하여야 합니다.",
+    "cost": "주문을 원소유자 묘지로; 무효화·불발 시 반환하지 않음",
+    "target": "현재 자기 덱의 조건 일치 카드 중 1장, 발동자가 대응 종료 뒤 직접 선택",
+    "resolution": "후보를 카드 ID 순으로 발동자에게만 제시; 선택 UID 재검사 후 원소유자 패로, 가져온 카드 공개; 후보 없으면 종료",
+    "duration": "선택 대기를 JSON 저장; 상대 선택/재전송/다른 행동 거부, 종료·항복 시 해제",
+    "remaining": "다른 검색/드로우 카드와 전역 이동·복사/후속 유발 통합 미완료",
+    "implementation": [
+      "src/deck-search.mjs",
+      "src/activation-rules.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs",
+      "public/app.js"
+    ],
+    "tests": [
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "search: all four expose sorted eligible choices only after pass and let the owner choose"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "search: counter keeps the Banquet draw cost, closes choices and never searches"
+      },
+      {
+        "path": "tests/evolution-search-api.test.mjs",
+        "name": "evolution/search HTTP: eleven declarations roll back failures and restore paid responses and private selections"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution/search: three AI levels use all eleven spells and complete private selection"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-24-008",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "원하는 몬스터를 손패로 1장 가져온다.",
+    "trigger": "자신의 MAIN에서 주문 선언 → 비용 선지불 → 상대 대응 → LIFO 해결",
+    "condition": "내 필드에 매치가 1장 이하여야합니다.",
+    "cost": "주문을 원소유자 묘지로; 무효화·불발 시 반환하지 않음",
+    "target": "현재 자기 덱의 조건 일치 카드 중 1장, 발동자가 대응 종료 뒤 직접 선택",
+    "resolution": "후보를 카드 ID 순으로 발동자에게만 제시; 선택 UID 재검사 후 원소유자 패로, 가져온 카드 공개; 후보 없으면 종료",
+    "duration": "선택 대기를 JSON 저장; 상대 선택/재전송/다른 행동 거부, 종료·항복 시 해제",
+    "remaining": "다른 검색/드로우 카드와 전역 이동·복사/후속 유발 통합 미완료",
+    "implementation": [
+      "src/deck-search.mjs",
+      "src/activation-rules.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs",
+      "public/app.js"
+    ],
+    "tests": [
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "search: all four expose sorted eligible choices only after pass and let the owner choose"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "search: counter keeps the Banquet draw cost, closes choices and never searches"
+      },
+      {
+        "path": "tests/evolution-search-api.test.mjs",
+        "name": "evolution/search HTTP: eleven declarations roll back failures and restore paid responses and private selections"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution/search: three AI levels use all eleven spells and complete private selection"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-26-008",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "원하는 몬스터를 손패로 1장 가져온다.",
+    "trigger": "자신의 MAIN에서 주문 선언 → 비용 선지불 → 상대 대응 → LIFO 해결",
+    "condition": "내 필드에 매치가 1장 이하여야합니다.",
+    "cost": "주문을 원소유자 묘지로; 무효화·불발 시 반환하지 않음",
+    "target": "현재 자기 덱의 조건 일치 카드 중 1장, 발동자가 대응 종료 뒤 직접 선택",
+    "resolution": "후보를 카드 ID 순으로 발동자에게만 제시; 선택 UID 재검사 후 원소유자 패로, 가져온 카드 공개; 후보 없으면 종료",
+    "duration": "선택 대기를 JSON 저장; 상대 선택/재전송/다른 행동 거부, 종료·항복 시 해제",
+    "remaining": "다른 검색/드로우 카드와 전역 이동·복사/후속 유발 통합 미완료",
+    "implementation": [
+      "src/deck-search.mjs",
+      "src/activation-rules.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs",
+      "public/app.js"
+    ],
+    "tests": [
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "search: all four expose sorted eligible choices only after pass and let the owner choose"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "search: counter keeps the Banquet draw cost, closes choices and never searches"
+      },
+      {
+        "path": "tests/evolution-search-api.test.mjs",
+        "name": "evolution/search HTTP: eleven declarations roll back failures and restore paid responses and private selections"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution/search: three AI levels use all eleven spells and complete private selection"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-30-010",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "일체화할 때 자신의 플레이어 체력을 800 회복한다.",
+    "trigger": "숲속의 맹약 해결로 이 카드와 일체화할 때",
+    "condition": "진화 선언의 아젤리아 UID·영역 세대 유효, 주문이 무효화되지 않음",
+    "cost": "진화 주문에서 자연 2장 선지불; 회복 자체 추가 비용 없음",
+    "target": "자신의 플레이어",
+    "resolution": "자신의 HP를 800 회복; 진화 주문 해결 시 1회만 적용",
+    "duration": "즉시 회복, JSON 복원/재전송으로 중복 회복 없음",
+    "remaining": "효과 2의 사용 주문 복사/다이스·전역 일체화 대응은 미완료",
+    "implementation": [
+      "src/evolution.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution: all seven replace base ATK, preserve buffs and identity, and restore originals"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution: counter and source exit or re-entry cannot evolve a replacement"
+      },
+      {
+        "path": "tests/evolution-search-api.test.mjs",
+        "name": "evolution/search HTTP: eleven declarations roll back failures and restore paid responses and private selections"
+      },
+      {
+        "path": "tests/evolution-search.test.mjs",
+        "name": "evolution/search: three AI levels use all eleven spells and complete private selection"
       }
     ]
   }
