@@ -138,3 +138,15 @@ test('search UI: only the owner selects a deck card and other play controls are 
  t.run('state.game.pendingDeckSearch={who:1,cardId:"COC-24-008"}');
  assert.doesNotMatch(t.run('battlePending(state.game)'),/deckSearchChoice|deckSearchSubmit|검색 카드/);
 });
+
+test('summon UI: only the responder counters and the summoner acknowledges without exposing extra UIDs',async()=>{
+ const t=ui();t.run("state.game.pendingExtraSummon={who:1,awaiting:0,card:{name:'퓨전'},materialCount:2,counters:[{sourceUnitId:'storm',name:'스톰블레이거 드래곤'}]}");
+ assert.match(t.run('battlePending(state.game)'),/data-extra-counter="storm"/);assert.match(t.run('battlePending(state.game)'),/주문\/소환 합계 게임당 1회/);
+ await t.listeners.click({target:{closest:()=>({dataset:{extraCounter:'storm'}})}});
+ assert.deepEqual(t.requests[0].body,{type:'extraResponse',choice:'counter',sourceUnitId:'storm',expectedVersion:7});
+ t.run('state.game.pendingExtraSummon.awaiting=1');assert.doesNotMatch(t.run('battlePending(state.game)'),/data-extra-counter=|id="extraPass"/);
+ t.run("state.game.pendingExtraSummon={who:0,awaiting:0,card:{name:'퓨전'},materialCount:2,counter:{name:'스톰블레이거 드래곤'},counters:[]}");
+ assert.match(t.run('battlePending(state.game)'),/무효화 대응 없음/);
+ await t.listeners.click({target:{closest:()=>({id:'extraPass',dataset:{}})}});
+ assert.deepEqual(t.requests[1].body,{type:'extraResponse',choice:'pass',expectedVersion:7});
+});

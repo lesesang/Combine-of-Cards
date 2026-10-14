@@ -8,13 +8,14 @@
     "condition": "지정 주문이 자신의 패에 있고 효과 1이 미사용이며 주문 사용 금지 상태가 아님",
     "cost": "자신의 패·필드에서 레시피에 맞는 서로 다른 소재; 주문과 소재를 묘지로 이동",
     "target": "자신의 엑스트라 덱에 있는 지정 퓨전 몬스터",
-    "resolution": "소재 소비 후 비는 필드 슬롯에 소환; 효과 1 사용 기록",
+    "resolution": "소재/주문 선지불·효과 1 사용 기록 후 대응 대기, pass 시 필드 소환; 스톰블레이거 무효 시 엑스트라 덱 유지·비용 미반환",
     "duration": "플레이어·카드 ID·효과 번호별 턴당 1회, 효과 2와 독립, JSON 저장",
-    "remaining": "공통 대응 체인·소환 무효 타이밍(#22/R22), 전역 소환 이벤트",
+    "remaining": "다른 소환 대응 카드·전역 소환/묘지 이동 유발, 모든 복사 조합",
     "implementation": [
       "src/extra-summons.mjs",
       "src/effect-usage.mjs",
-      "server.mjs"
+      "server.mjs",
+      "src/summon-counters.mjs"
     ],
     "tests": [
       {
@@ -24,6 +25,14 @@
       {
         "path": "tests/grave-recovery.test.mjs",
         "name": "effect 1 followed by recovery is legal and a normal hand-play cannot silently consume fusion-up"
+      },
+      {
+        "path": "tests/summon-counter.test.mjs",
+        "name": "summon counter: all 21 recipes keep the monster in extra and retain spent costs without summon effects"
+      },
+      {
+        "path": "tests/summon-counter-api.test.mjs",
+        "name": "summon HTTP: all 21 paid declarations and counters restore without leaking private data or refunding costs"
       }
     ]
   },
@@ -215,18 +224,19 @@
     "effectNumber": 1,
     "status": "partial",
     "sourceText": "상대의 주문의 발동 또는 몬스터의 소환을 한 게임당 1회 무효화 합니다.",
-    "trigger": "상대의 등록된 61종 주문 선언 후 spellResponse 대응 창",
+    "trigger": "상대의 등록된 61종 주문 또는 21종 엑스트라 소환 선언 후 대응 창",
     "condition": "자신의 유효한 일체화 스톰블레이거, 현재 대응권자, 같은 UID의 게임당 1회 미사용",
     "cost": "추가 자원 비용 없음; 선언 시 게임당 1회 사용 기록 소비",
-    "target": "상대가 선언한 원래 주문 스택 항목",
-    "resolution": "카운터를 후발 선언하고 원 주문 발동자 pass 후 LIFO 해결; 대상 주문 핸들러 생략, 비용 미반환; 소스 이탈/조종권 변경/무효 시 카운터 불발",
-    "duration": "같은 물리 카드 게임당 1회; 영역 이동·JSON 저장·재시작 보존",
-    "remaining": "몬스터 소환 무효화, 나머지 주문 대응 창, 모든 소스 이동/복사 조합. 원본 v1.3 DOCX/JSON 부재로 런타임 카탈로그 문구 기준",
+    "target": "상대가 선언한 원래 주문/엑스트라 소환 스택 항목",
+    "resolution": "후발 카운터 → 원 선언자 pass → LIFO 해결. 주문/소환 효과 생략, 비용 미반환. 무효된 엑스트라 몬스터는 엑스트라 덱 유지(2026-10-14 사용자 확정). 소환 카운터 소스 이탈/재진입·무효 시 불발",
+    "duration": "주문/소환 절 합계 동일 물리 카드 게임당 1회; 선언 시 소비, 영역 이동/저장/재시작 보존",
+    "remaining": "패 일반 소환·효과에 의한 소환/부활·토큰 소환 대응, 미등록 주문과 모든 복사/연쇄 조합은 미완료. 정본 DOCX/JSON 부재",
     "implementation": [
       "src/spell-counters.mjs",
       "src/effect-runtime.mjs",
       "server.mjs",
-      "public/app.js"
+      "public/app.js",
+      "src/summon-counters.mjs"
     ],
     "tests": [
       {
@@ -260,6 +270,22 @@
       {
         "path": "tests/ability-ui.test.mjs",
         "name": "Storm UI: only current responder sees counters and sends the selected source with version"
+      },
+      {
+        "path": "tests/summon-counter.test.mjs",
+        "name": "summon counter: all 21 recipes keep the monster in extra and retain spent costs without summon effects"
+      },
+      {
+        "path": "tests/summon-counter.test.mjs",
+        "name": "summon counter: spell and summon clauses share the physical once-per-game limit"
+      },
+      {
+        "path": "tests/summon-counter-api.test.mjs",
+        "name": "summon HTTP: all 21 paid declarations and counters restore without leaking private data or refunding costs"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "summon UI: only the responder counters and the summoner acknowledges without exposing extra UIDs"
       }
     ]
   },
@@ -2076,6 +2102,38 @@
       {
         "path": "tests/evolution-search.test.mjs",
         "name": "evolution/search: three AI levels use all eleven spells and complete private selection"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-32-009",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "필드 몬스터를 파괴하고 파괴한 몬스터의 이름이 조건에 적힌 엑스트라 덱의 몬스터를 소환한다. 이 카드는 턴 엔드 후에 다시 패로 돌아온다.",
+    "trigger": "자기 MAIN extraSummon의 웨이크업 레시피; 자기 턴 END",
+    "condition": "패의 주문과 필드의 지정 원소의 마법사, 대응 후 유효 엑스트라 카드/빈 슬롯",
+    "cost": "주문을 묘지로 보내고 지정 필드 소재 파괴를 대응 전에 처리",
+    "target": "COC-32-011~014 중 지정 소재와 일치하는 자기 엑스트라 카드",
+    "resolution": "상대 pass 후 소환, 스톰블레이거 무효 시 엑스트라 카드 유지·비용 반환 없음. 소환 성공 여부와 무관하게 END에 주문이 묘지에 남아 있으면 패로 복귀",
+    "duration": "주문 비용 지불 시 해당 턴 반환 예약; 중복 예약 없음, 다른 영역 이동 시 반환하지 않음(R23)",
+    "remaining": "전역 파괴/소환 유발·다른 카운터·파괴 불가 소재와 모든 복사 조합은 추가 검증 필요",
+    "implementation": [
+      "server.mjs",
+      "src/extra-summons.mjs",
+      "src/summon-counters.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/summon-counter.test.mjs",
+        "name": "summon counter: Wakeup returns from grave at end even when summon is negated, but not from another zone"
+      },
+      {
+        "path": "tests/summon-counter.test.mjs",
+        "name": "summon counter: all 21 recipes keep the monster in extra and retain spent costs without summon effects"
+      },
+      {
+        "path": "tests/summon-counter-api.test.mjs",
+        "name": "summon HTTP: all 21 paid declarations and counters restore without leaking private data or refunding costs"
       }
     ]
   }

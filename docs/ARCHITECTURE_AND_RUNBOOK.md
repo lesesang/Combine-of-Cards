@@ -92,7 +92,7 @@ Windows PowerShell에서도 동일하게 npm 명령 사용. npm run check:covera
 
 **보고서 갱신:** `npm run check:coverage`는 AUTOMATION_COVERAGE.md / automation-audit.json / EFFECT_COVERAGE.md만 재생성한다. 수동 설명은 **AUTOMATION_NOTES.md**, 효과 명세는 **effect-coverage.json**에 쓴다. `npm run check:coverage -- --check`는 파일을 바꾸지 않고 출력 일치·원문/효과 번호·구현 경로·테스트 이름을 검증한다. CI는 이 읽기 전용 검사를 사용한다. 정본 전체 검증이나 완전 자동화 인증을 뜻하지 않는다.
 
-**Codex 현행 문서:** [CODEX_HANDOFF](CODEX_HANDOFF.md) · [CODEX_IMPLEMENTATION_PLAN](CODEX_IMPLEMENTATION_PLAN.md) · [CODEX_RULES_REFERENCE](CODEX_RULES_REFERENCE.md). 최신 158 partial/95 manual/1 basic, 71 주문 핸들러, 61 일반 주문 응답 스택, 55개 효과별 추적 등록. `1.3-ai-beta.10` 서버 버전 문자열은 이 자동화 범위 집계를 나타내지 않는다.
+**Codex 현행 문서:** [CODEX_HANDOFF](CODEX_HANDOFF.md) · [CODEX_IMPLEMENTATION_PLAN](CODEX_IMPLEMENTATION_PLAN.md) · [CODEX_RULES_REFERENCE](CODEX_RULES_REFERENCE.md). 최신 158 partial/95 manual/1 basic, 71 주문 핸들러, 61 일반 주문 응답 스택, 56개 효과별 추적 등록. `1.3-ai-beta.10` 서버 버전 문자열은 이 자동화 범위 집계를 나타내지 않는다.
 
 신규 `src/grave-abilities.mjs`는 순수 비용 검사와 묘지 회수, `src/effect-usage.mjs`는 효과 번호별 턴 제한을 담당한다. actions API의 `graveAbility`는 `sourceUnitId`, `costUnitId`, `expectedVersion`을 받는다. 본인 상태의 `graveAbilities`에 현재 합법적인 조합만 제공하고 상대 비공개 영역은 포함하지 않는다. 규칙/엔진 버전은 beta.10이며, 기존 방에 없던 `effectUsage`는 첫 사용부터 생성된다. 이전 버전에서 수행한 효과 횟수를 소급 복원하지는 않는다.
 
@@ -128,3 +128,7 @@ Windows PowerShell에서도 동일하게 npm 명령 사용. npm run check:covera
 - `play`의 `costDeckIds`: 서로 다른 자기 덱 자연 카드 2장의 UID. 서버가 다시 검사하고 대응 전에 지불.
 - `pendingDeckSearch`: 발동자만 `choices`를 받음. 대응 종료 후 `deckSearch` 행동의 `unitId`로 선택, `expectedVersion` 필수. 상대는 대기 상태만 받으며 선택 이후 가져온 카드는 로그로 공개.
 - 두 대기 단계는 rooms.json 저장/재접속과 HTTP 트랜잭션 롤백을 사용한다. 신규 모듈은 `src/evolution.mjs`, `src/deck-search.mjs`.
+
+## 엑스트라 소환 무효화 API (2026-10-14)
+
+`pendingExtraSummon`은 `awaiting`, `counter`, 현재 대응자에게만 `counters`를 공개한다. `extraResponse`에서 `choice:counter, sourceUnitId` 또는 `choice:pass`를 선택하며 `expectedVersion`을 제출한다. 같은 물리 스톰블레이거의 `spellCounterGameUsed`는 주문/소환 합계 게임당 1회다. 소환/카운터는 공통 JSON LIFO 스택을 사용한다. 구 pass 전용 저장은 응답 시 스택을 보완한다. 공개 상태에는 엑스트라 내부 UID·스택·상대 패를 추가하지 않는다. 새 모듈 `src/summon-counters.mjs`, 명세 `EXTRA_SUMMON_COUNTERS.md`.

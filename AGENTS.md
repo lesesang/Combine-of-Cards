@@ -21,7 +21,7 @@ This file is for a new coding assistant taking over the repository after the 202
 - Preserve the user's custom TCG v1.3: **24 premade playable decks**, **254 card records**, no card mixing across premade decks.
 - Never restore the deleted decks: 합체 기계, 코미컬, 럭키, 카지노이드, 비트스타즈, 파트너 몬스터즈, 코브라, 아홉꼬리.
 - The goal is **fully automatic server-authoritative card effects**, AI duels (choose opponent deck/random; easy, medium, hard), PvP, rules conflict diagnostics and production-ready deployment.
-- **Latest implementation (7-evolution / 4-search batch, 2026-10-14): 158 partially supported / 95 manually unsupported / 1 basic, 71 registered spell handlers, 61 spells in opponent-pass effect stack and only 55 effect-number evidence records. Complete coverage certified: 0.** The older server banner remains beta.10, not an accurate support inventory. Full automation is not achieved.
+- **Latest implementation (21 extra-summon response batch, 2026-10-14): 158 partially supported / 95 manually unsupported / 1 basic, 71 registered spell handlers, 61 spells in opponent-pass effect stack and only 56 effect-number evidence records. Complete coverage certified: 0.** The older server banner remains beta.10, not an accurate support inventory. Full automation is not achieved.
 - Source v1.3 DOCX and comparison JSON were created in a prior conversation but are **not yet committed** to this public repository. See docs/SOURCE_DATA_PROVENANCE.md.
 
 ## Latest user-confirmed rules to preserve (PR #57–#58)
@@ -33,6 +33,8 @@ This file is for a new coding assistant taking over the repository after the 202
 - All these are CONFIRMED rules; missing implementation is NOT a reason to ask for approval again. Explicitly distinguish unsupported effect or missing v1.3 source files from actual unresolved interpretations.
 
 - **2026-10-14 user-confirmed evolution rules:** replace the base ATK and preserve buffs (100 + 50 → 150 + 50 = 200); restore the original physical card when moving to hand/deck/grave. Do not ask again. See docs/DECISIONS_AND_CORRECTIONS.md. Evolution target effects remain partial.
+
+- **2026-10-14 user-confirmed summon ruling:** a negated extra-deck monster remains in the extra deck; paid materials/spells are not refunded. Do not ask again. The user also confirmed that spell/summon Storm negation shares one physical-card game limit (not one use per clause and not a global limit for other cards). General hand/effect/token summons remain unsupported.
 
 ## Latest implementation update (2026-10-13)
 
