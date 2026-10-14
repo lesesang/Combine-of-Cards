@@ -16,8 +16,8 @@ function setup(who=0){
  const use=(body={})=>I.apply(r,who,'ability',{sourceUnitId,costCardId,target:{type:'unit',id:target},...body});
  return {r,take,sourceUnitId,costCardId,target,use};
 }
-test('Crash Voltage discards chosen hand cost and destroys an opposing monster once per own turn',()=>{
- const s=setup();s.use();
+test('Crash Voltage discards chosen hand cost and destroys an opposing monster after the response window',()=>{
+ const s=setup();s.use();assert.ok(s.r.players[1].field.includes(s.target));I.apply(s.r,1,'abilityResponse',{choice:'pass'});
  assert.ok(s.r.players[0].grave.includes(s.costCardId));
  assert.ok(s.r.players[1].grave.includes(s.target));
  assert.ok(s.r.players[0].field.includes(s.sourceUnitId));
@@ -38,7 +38,7 @@ test('Crash Voltage rejects invalid cost/target, negated source and opponent con
  }
 });
 test('direct destruction protection preserves target while the paid cost and usage are consumed',()=>{
- const s=setup();s.r.units[s.target].effectDestructionImmune=true;s.use();
+ const s=setup();s.r.units[s.target].effectDestructionImmune=true;s.use();I.apply(s.r,1,'abilityResponse',{choice:'pass'});
  assert.ok(s.r.players[1].field.includes(s.target));assert.ok(s.r.players[0].grave.includes(s.costCardId));
  assert.throws(()=>s.use(),/이번 턴/);
 });
@@ -56,13 +56,13 @@ test('AI can use Crash Voltage through the same field ability action and avoid p
  const s=setup(1);s.r.aiDifficulty='hard';
  const choice=I.chooseAIFieldAbility(s.r);
  assert.equal(choice.sourceUnitId,s.sourceUnitId);assert.equal(choice.costCardId,s.costCardId);
- I.apply(s.r,1,'ability',choice);assert.ok(s.r.players[0].grave.includes(s.target));
+ I.apply(s.r,1,'ability',choice);assert.ok(s.r.pendingAbility);I.apply(s.r,0,'abilityResponse',{choice:'pass'});assert.ok(s.r.players[0].grave.includes(s.target));
  const protectedGame=setup(1);protectedGame.r.units[protectedGame.target].effectDestructionImmune=true;
  assert.equal(I.chooseAIFieldAbility(protectedGame.r),null);
 });
 test('AI main loop pays the discard, resolves destruction and then declares its normal attack',()=>{
  const s=setup(1);s.r.mode='ai';s.r.aiDifficulty='hard';
- I.runAI(s.r);
+ I.runAI(s.r);assert.ok(s.r.pendingAbility);assert.ok(s.r.players[0].field.includes(s.target));I.apply(s.r,0,'abilityResponse',{choice:'pass'});I.runAI(s.r);
  assert.ok(s.r.players[1].grave.includes(s.costCardId));
  assert.ok(s.r.players[0].grave.includes(s.target));
  assert.equal(s.r.pendingAttack?.attackerId,s.sourceUnitId);

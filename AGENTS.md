@@ -21,7 +21,7 @@ This file is for a new coding assistant taking over the repository after the 202
 - Preserve the user's custom TCG v1.3: **24 premade playable decks**, **254 card records**, no card mixing across premade decks.
 - Never restore the deleted decks: 합체 기계, 코미컬, 럭키, 카지노이드, 비트스타즈, 파트너 몬스터즈, 코브라, 아홉꼬리.
 - The goal is **fully automatic server-authoritative card effects**, AI duels (choose opponent deck/random; easy, medium, hard), PvP, rules conflict diagnostics and production-ready deployment.
-- **Latest implementation (3 field-counter / nested-response batch, 2026-10-14): 161 partially supported / 92 manually unsupported / 1 basic, 71 registered spell handlers, 61 spells in opponent-pass effect stack and only 59 effect-number evidence records. Complete coverage certified: 0.** The older server banner remains beta.10, not an accurate support inventory. Full automation is not achieved.
+- **Latest implementation (7 field-ability response batch, 2026-10-14): 161 partially supported / 92 manually unsupported / 1 basic, 71 registered spell handlers, 61 spells in opponent-pass effect stack and only 65 effect-number evidence records. Complete coverage certified: 0.** The older server banner remains beta.10, not an accurate support inventory. Full automation is not achieved.
 - Source v1.3 DOCX and comparison JSON were created in a prior conversation but are **not yet committed** to this public repository. See docs/SOURCE_DATA_PROVENANCE.md.
 
 ## Latest user-confirmed rules to preserve (PR #57–#58)
@@ -47,6 +47,12 @@ This file is for a new coding assistant taking over the repository after the 202
 - Historical beta.10 baseline: 156 partial / 97 manual / 1 basic; 13 field abilities; Black Metal Fusion Up grave recovery and independent effect limits; Crash Voltage discard/destruction and confirmed dice-result piercing (R28).
 - **R05/R06/R07/R08/R09/R10/R11/R12/R13/R21/R22/R23/R24/R25/R28/R29/R30 were user-approved 2026-10-13**: see docs/RULINGS_CONFIRMED_2026-10-13.md. Never describe these 17 as open. Some confirmed behavior (notably R22 response window and all R05 token paths) remains incompletely implemented.
 - Generated coverage reports and manual notes are now separated. Edit docs/AUTOMATION_NOTES.md for prose and docs/effect-coverage.json for effect records. Run npm run check:coverage then npm run check:coverage -- --check. CI must reject stale reports without silently regenerating them.
+
+- **Confirmed default effect limit:** absent an explicit exception, each physical card UID / individual effect is usable once during its own turn (PRODUCT_VISION_AND_RULES.md). Missing limit text on a card is not permission for unlimited activations. Preserve Crash Voltage once per turn.
+
+- **2026-10-14 latest user clarification:** different physical cards may each activate the same effect independently. Never share usage by effect text, card name, or catalog ID across UIDs. Keep each card’s explicit turn/game/resummon exceptions and independent effect numbers.
+
+- **2026-10-14 explicit shared exception:** Elemental Magicians COC-32-001/002/003/004 share ONE activation per turn for effect 1 only. Their effect 2 is not part of that group. Replacement summon execution remains unsupported; the user confirmed the shared group is per player, not shared across both players. The usage policy is registered; replacement-summon execution is still unsupported.
 
 ## Non-negotiable rules
 

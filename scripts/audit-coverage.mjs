@@ -1,3 +1,4 @@
+import {FIELD_RESPONSE_IDS,FIELD_EFFECT_RULES} from '../src/field-ability-effects.mjs';
 import fs from 'node:fs';
 import zlib from 'node:zlib';
 import path from 'node:path';
@@ -17,7 +18,11 @@ for(const id of responseSpellIds){
  const card=catalog.cards.find(c=>c.id===id);
  if(!card||card.type!=='주문'||!spellHandlerIds.includes(id))throw Error('Invalid response spell registration: '+id);
 }
-const out={sourceRuleVersion:'1.3',automatedSpellHandlerCount:spellHandlerIds.length,responseSpellCount:responseSpellIds.length,responseSpellIds,generatedAt:'repository build time',counts:tally,notes:['partial = only some card behavior; no card has complete formal proof','manual = effects not safely automated by current engine','basic = card has no conditional/effect text, but global mechanics still require validation'],cards:entries};
+for(const id of FIELD_RESPONSE_IDS){
+ const card=catalog.cards.find(c=>c.id===id),rule=FIELD_EFFECT_RULES[id];
+ if(!card||(rule.sourceType==='monster'?!card.type.includes('몬스터'):card.type!=='일체화'))throw Error('Invalid field response source: '+id);
+}
+const out={fieldAbilityResponseCount:FIELD_RESPONSE_IDS.length,fieldAbilityResponseIds:FIELD_RESPONSE_IDS,sourceRuleVersion:'1.3',automatedSpellHandlerCount:spellHandlerIds.length,responseSpellCount:responseSpellIds.length,responseSpellIds,generatedAt:'repository build time',counts:tally,notes:['partial = only some card behavior; no card has complete formal proof','manual = effects not safely automated by current engine','basic = card has no conditional/effect text, but global mechanics still require validation'],cards:entries};
 const outputs={'automation-audit.json':JSON.stringify(out,null,2)+'\n'};
 const lines=[
  '# 카드 자동 판정 적용 범위 — 실제 코드 기준',
@@ -26,6 +31,7 @@ const lines=[
  '',
  `- 카드 ${entries.length}개 · 주문 핸들러 ${spellHandlerIds.length}개`,
  `- 상대 pass/저장 가능한 스택에 연결된 주문 ${responseSpellIds.length}종 (실제 카운터·완전 자동화 인증 아님)`,
+ `- 상대 대응 창에 연결된 필드 발동 ${FIELD_RESPONSE_IDS.length}종 (몬스터${FIELD_RESPONSE_IDS.filter(id=>FIELD_EFFECT_RULES[id].sourceType==='monster').length}·일체화${FIELD_RESPONSE_IDS.filter(id=>FIELD_EFFECT_RULES[id].sourceType==='integration').length}, 다른 필드 효과/유발은 미완료)`,
  `- 부분 지원 ${tally.partial||0}개, 일반 카드만 ${tally.basic||0}개, 수동/미지원 ${tally.manual||0}개`,
  '- 카드의 수동/부분 지원 상태를 전체 자동 지원으로 변경해서는 안 됩니다.',
  '- 소환 소재/복사/장착/상대 턴의 반응형 효과, 선택권/공개, 효과 우선도 등은 추가 엔진과 검증이 필요합니다.',
