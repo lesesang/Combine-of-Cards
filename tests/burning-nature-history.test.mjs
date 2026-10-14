@@ -44,6 +44,7 @@ test('Nature spells cast on the two prior own turns unlock a 200-damage direct a
  r.turnNumber=5;
  const bite=place(0,'COC-30-011','hand');
  I.apply(r,0,'play',{unitId:bite,target:{type:'player',player:1}});
+ I.apply(r,1,'spellResponse',{choice:'pass'});
  assert.equal(r.players[1].hp,800);
  assert.deepEqual(r.players[0].natureSpellTurns,[1,3,5]);
 });

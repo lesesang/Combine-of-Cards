@@ -54,6 +54,7 @@ test('Cartoon arrows applies damage to exactly two valid non-Toon monsters',()=>
  const a=place(1,'COC-03-002','field'),b=place(1,'COC-03-005','field');
  r.units[a].hp=1;r.units[b].hp=1;
  I.apply(r,0,'play',{unitId:spell,targets:[a,b]});
+ I.apply(r,1,'spellResponse',{choice:'pass'});
  assert.ok(r.players[1].grave.includes(a));
  assert.ok(r.players[1].grave.includes(b));
 });
@@ -63,6 +64,7 @@ test('Ultra Cartoon Hand requires Cartoon Land and a free slot, then steals and 
  assert.throws(()=>I.apply(r,0,'play',{unitId:spell,target:{type:'unit',id:target}}),/카툰 랜드/);
  place(0,'COC-05-002','field');
  I.apply(r,0,'play',{unitId:spell,target:{type:'unit',id:target}});
+ I.apply(r,1,'spellResponse',{choice:'pass'});
  assert.ok(r.players[0].field.includes(target));
  assert.equal(r.units[target].treatedAsToon,true);
  I.move(r,target,'grave',1);
@@ -88,6 +90,7 @@ test('Spider surge keeps its spell in hand only when its rolled damage kills a m
  const spell=place(0,'COC-30-004','hand'),target=place(1,'COC-03-002','field');
  r.units[target].hp=1;
  I.apply(r,0,'play',{unitId:spell,target:{type:'unit',id:target}});
+ I.apply(r,1,'spellResponse',{choice:'pass'});
  assert.ok(r.players[0].hand.includes(spell),'spell is reusable after lethal spell damage');
  assert.ok(r.players[1].grave.includes(target));
 });

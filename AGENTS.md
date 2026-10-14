@@ -21,7 +21,7 @@ This file is for a new coding assistant taking over the repository after the 202
 - Preserve the user's custom TCG v1.3: **24 premade playable decks**, **254 card records**, no card mixing across premade decks.
 - Never restore the deleted decks: 합체 기계, 코미컬, 럭키, 카지노이드, 비트스타즈, 파트너 몬스터즈, 코브라, 아홉꼬리.
 - The goal is **fully automatic server-authoritative card effects**, AI duels (choose opponent deck/random; easy, medium, hard), PvP, rules conflict diagnostics and production-ready deployment.
-- **Latest implementation (23-spell response batch, 2026-10-14): 158 partially supported / 95 manually unsupported / 1 basic, 71 registered spell handlers, 39 spells in opponent-pass effect stack and only 31 effect-number evidence records. Complete coverage certified: 0.** The older server banner remains beta.10, not an accurate support inventory. Full automation is not achieved.
+- **Latest implementation (12-spell choice/cost batch, 2026-10-14): 158 partially supported / 95 manually unsupported / 1 basic, 71 registered spell handlers, 51 spells in opponent-pass effect stack and only 43 effect-number evidence records. Complete coverage certified: 0.** The older server banner remains beta.10, not an accurate support inventory. Full automation is not achieved.
 - Source v1.3 DOCX and comparison JSON were created in a prior conversation but are **not yet committed** to this public repository. See docs/SOURCE_DATA_PROVENANCE.md.
 
 ## Latest user-confirmed rules to preserve (PR #57–#58)

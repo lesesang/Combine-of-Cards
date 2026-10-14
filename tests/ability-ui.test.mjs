@@ -99,3 +99,22 @@ test('batch UI: all 23 spell IDs use the chosen target and optimistic version',a
   assert.equal(t.requests[0].body.expectedVersion,7,cardId);
  }
 });
+
+
+test('choice UI: both modes require a choice and submit it with targets and version',async()=>{
+ for(const cardId of ['COC-14-009','COC-23-009'])for(const option of [1,2]){
+  const t=ui();t.run(`state.game.players[0].hand.push({id:'choice',card:{id:'${cardId}',name:'선택 주문'}})`);
+  t.run('openPlay()');t.node('playPick').value='choice';await t.node('playPick').onchange();
+  assert.equal(t.node('playOptionWrap').style.display,'');
+  await t.node('playSubmit').onclick();assert.equal(t.requests.length,0);
+  t.node('playOption').value=String(option);t.node('spellTarget').value='enemy';
+  await t.node('playSubmit').onclick();assert.equal(t.requests[0].body.option,option);
+  assert.deepEqual(t.requests[0].body.target,{type:'unit',id:'enemy'});assert.equal(t.requests[0].body.expectedVersion,7);
+ }
+});
+test('choice UI: two distinct selected monster UIDs are submitted together',async()=>{
+ const t=ui();t.run("state.game.players[0].hand.push({id:'arrows',card:{id:'COC-05-006',name:'카툰 우드 에로우즈'}})");
+ t.run('openPlay()');t.node('playPick').value='arrows';await t.node('playPick').onchange();
+ t.node('spellTarget').value='enemy';t.node('spellTarget2').value='falcon';await t.node('playSubmit').onclick();
+ assert.deepEqual(t.requests[0].body.targets,['enemy','falcon']);assert.equal(t.requests[0].body.expectedVersion,7);
+});

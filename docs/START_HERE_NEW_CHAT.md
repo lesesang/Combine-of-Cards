@@ -1,6 +1,6 @@
 # 새 채팅 인수인계: 컴바인 오브 카드즈 (2026-10-13)
 
-> **Codex 이전용 최신 안내 (2026-10-13, PR #58 이후):** 먼저 **[CODEX_HANDOFF.md](CODEX_HANDOFF.md)**, **[CODEX_RULES_REFERENCE.md](CODEX_RULES_REFERENCE.md)**, **[CODEX_IMPLEMENTATION_PLAN.md](CODEX_IMPLEMENTATION_PLAN.md)**, 루트 **[AGENTS.md](../AGENTS.md)**를 읽는다. 이 문서 중간의 PR #20~#57 당시 상태는 **역사 기록**이며 당시 수치·마검 턴 시작 지불 등은 더 최신 확정 재정으로 대체되었다. 최신 감사 수치: **158 partial / 95 manual / 1 basic**, 주문 핸들러 **71**, 효과별 증거 **31건**, 주문 응답 스택 **39종**. **실제 카드 완전 자동 지원 인증 0장**.
+> **Codex 이전용 최신 안내 (2026-10-13, PR #58 이후):** 먼저 **[CODEX_HANDOFF.md](CODEX_HANDOFF.md)**, **[CODEX_RULES_REFERENCE.md](CODEX_RULES_REFERENCE.md)**, **[CODEX_IMPLEMENTATION_PLAN.md](CODEX_IMPLEMENTATION_PLAN.md)**, 루트 **[AGENTS.md](../AGENTS.md)**를 읽는다. 이 문서 중간의 PR #20~#57 당시 상태는 **역사 기록**이며 당시 수치·마검 턴 시작 지불 등은 더 최신 확정 재정으로 대체되었다. 최신 감사 수치: **158 partial / 95 manual / 1 basic**, 주문 핸들러 **71**, 효과별 증거 **43건**, 주문 응답 스택 **51종**. **실제 카드 완전 자동 지원 인증 0장**.
 
 
 > **가장 먼저 읽을 문서.** 다음 채팅/개발자는 이 파일과 실제 GitHub main 코드, 테스트 결과를 기반으로 개발한다. 지난 채팅의 도구 응답이나 기억보다 **현재 저장소의 코드와 이 문서의 명시적 확정/미확정 구분**을 우선한다.
