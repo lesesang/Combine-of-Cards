@@ -1,3 +1,4 @@
+import {extraResponsePlayer,legalSummonCounters,queueSummonEffect,declareSummonCounter,resolveSummonResponse} from './src/summon-counters.mjs';
 import {evolutionRules,validateEvolution,natureEvolutionCosts,evolutionStillValid,evolveIntegration,restoreEvolutionCard} from './src/evolution.mjs';
 import {beginDeckSearch,deckSearchView,finishDeckSearch} from './src/deck-search.mjs';
 import {isNonToonField} from './src/spell-choice-batch.mjs';
@@ -366,7 +367,12 @@ function maxAttacks(u,turn){const base=u.cardId==='COC-09-003'?2:Math.max(1,u.ex
 function attackAvailable(u,turn){return u.attackCountTurn!==turn||(u.attackCount||0)<maxAttacks(u,turn)}
 function validateAggro(r,who,target){const aggro=r.players[1-who].field.filter(id=>id&&isAggro(r,id));if(aggro.length&&(!target||target.type!=='unit'||!aggro.includes(target.id)))fail(409,'공격 대상 강제(어그로): 해당 몬스터 중에서 선택해야 합니다.')}
 function isSimpleSummonCard(c){return c.type==='몬스터'&&(!c.conditions.length||c.conditions.every(s=>/공격|이 몬스터|효과|드로우|시작|턴/.test(s)))}
+function scheduleWakeupReturn(r,who,spellId){
+ r.effects??=[];
+ if(!r.effects.some(e=>e.type==='returnWakeup'&&e.spellId===spellId&&e.turn===r.turnNumber))r.effects.push({type:'returnWakeup',spellId,player:who,turn:r.turnNumber});
+}
 function performExtraSummon(r,who,body,{defer=false}={}){
+ if(defer&&(r.effectStack?.length||r.pendingTriggerOrder))fail(409,'다른 효과 체인이 해결되기 전에는 소환을 선언할 수 없습니다.');
  const p=r.players[who],extraUnitId=requireStr(body.extraUnitId,100);
  const recipe=validateExtraSummon({room:r,who,extraUnitId,materials:body.materials,spellUnitId:body.spellUnitId,cards});
  if(recipe.spellUnitId&&p.spellForbiddenUntil>0&&p.spellForbiddenUntil>=p.turnsTaken)fail(409,'주문 사용 금지 상태에서는 퓨전 주문을 발동할 수 없습니다.');
@@ -377,15 +383,22 @@ function performExtraSummon(r,who,body,{defer=false}={}){
  if(recipe.spellUnitId){
   if(r.units[recipe.spellUnitId].cardId===FUSION_UP_ID)markEffectUsed(r,who,FUSION_UP_ID,1);
   move(r,recipe.spellUnitId,'grave',who);
+  if(recipe.method==='wakeup')scheduleWakeupReturn(r,who,recipe.spellUnitId);
  }
  for(const id of recipe.materials){if(recipe.method==='wakeup')H.destroy(r,id);else move(r,id,'grave',r.units[id].owner)}
  if(defer){
   r.pendingExtraSummon={who,extraUnitId,recipe,targetId:body.target?.id||null,turnNumber:r.turnNumber};
+  queueSummonEffect(r,r.pendingExtraSummon);
   log(r,'summon',`${p.label}: ${unitName(r,extraUnitId)} 특수 소환 선언 (비용 지불, 상대 대응 대기)`);
   setOutcome(r);
   return recipe;
  }
  return finishExtraSummon(r,{who,extraUnitId,recipe,targetId:body.target?.id||null});
+}
+function negateExtraSummon(r,pending){
+ // User confirmed 2026-10-14: the negated monster stays in the extra deck.
+ log(r,'summon',`${r.players[pending.who].label}: 특수 소환 무효 (엑스트라 카드 유지, 비용 반환 없음)`);
+ setOutcome(r);
 }
 function finishExtraSummon(r,pending){
  const {who,extraUnitId,recipe,targetId}=pending,p=r.players[who];
@@ -397,7 +410,7 @@ function finishExtraSummon(r,pending){
  move(r,extraUnitId,'field',who);
  if(recipe.method==='infinity'||(cards.get(r.units[extraUnitId].cardId)?.type||'').includes('얼라이즈'))attachOverlayMaterials(r,extraUnitId,recipe.materials);
  if(['COC-12-014','COC-26-012','COC-27-013'].includes(r.units[extraUnitId].cardId))r.units[extraUnitId].cannotAttack=true;
- if(recipe.method==='wakeup'){r.effects??=[];r.effects.push({type:'returnWakeup',spellId:recipe.spellUnitId,player:who,turn:r.turnNumber})}
+ if(recipe.method==='wakeup')scheduleWakeupReturn(r,who,recipe.spellUnitId);
  const c=cards.get(r.units[extraUnitId].cardId);
  log(r,'fusion',`${p.label}: ${c.name} 소환 (소재 ${recipe.materials.length}장, ${recipe.method})`);
  if(c.id==='COC-12-012'){
@@ -493,7 +506,7 @@ function publicState(r,viewer){const mapId=id=>id?{...r.units[id],atk:swordActua
  count:r.pendingTriggerOrder.effects.length,
  options:r.pendingTriggerOrder.effects.filter(e=>e.owner===viewer&&r.pendingTriggerOrder.awaiting[0]===viewer)
   .map(e=>({key:e.key,title:e.title||e.effectId,priority:e.priority||0}))
- }:null,pendingDeckSearch:deckSearchView(r,viewer,cards),pendingSpell:r.pendingSpell?{who:r.pendingSpell.who,card:{id:r.pendingSpell.cardId,name:cards.get(r.pendingSpell.cardId)?.name},stage:'response',awaiting:spellResponsePlayer(r),counter:r.pendingSpell.counter?{who:r.pendingSpell.counter.who,name:unitName(r,r.pendingSpell.counter.sourceId)}:null,counters:legalSpellCounters(r,viewer).map(id=>({sourceUnitId:id,name:unitName(r,id)}))}:null,pendingExtraSummon:r.pendingExtraSummon?{who:r.pendingExtraSummon.who,card:{id:r.units[r.pendingExtraSummon.extraUnitId].cardId,name:unitName(r,r.pendingExtraSummon.extraUnitId)},method:r.pendingExtraSummon.recipe.method,materialCount:r.pendingExtraSummon.recipe.materials.length,stage:'response'}:null,pendingManual:r.pendingManual?{...r.pendingManual}:null,persistentEffects:(r.persistentEffects||[]).map(e=>({kind:e.kind,owner:e.owner,counters:e.counters})),logs:r.logs.slice(-80),you:viewer,players:r.players.map((p,i)=>({index:i,label:p.label,deckId:p.deckId,deckName:decks.get(p.deckId)?.name,hp:p.hp,playerAtkBonus:p.playerAtkBonus||0,reloads:p.reloads,deckCount:p.deck.length,handCount:p.hand.length,grave:p.grave.map(mapId),banishedCount:p.banished.length,extraCount:p.extra.length,field:p.field.map(mapId),integration:mapId(p.integration),hand:i===viewer?p.hand.map(mapId):null,extra:i===viewer?p.extra.map(mapId):null}))}}
+ }:null,pendingDeckSearch:deckSearchView(r,viewer,cards),pendingSpell:r.pendingSpell?{who:r.pendingSpell.who,card:{id:r.pendingSpell.cardId,name:cards.get(r.pendingSpell.cardId)?.name},stage:'response',awaiting:spellResponsePlayer(r),counter:r.pendingSpell.counter?{who:r.pendingSpell.counter.who,name:unitName(r,r.pendingSpell.counter.sourceId)}:null,counters:legalSpellCounters(r,viewer).map(id=>({sourceUnitId:id,name:unitName(r,id)}))}:null,pendingExtraSummon:r.pendingExtraSummon?{who:r.pendingExtraSummon.who,card:{id:r.units[r.pendingExtraSummon.extraUnitId].cardId,name:unitName(r,r.pendingExtraSummon.extraUnitId)},method:r.pendingExtraSummon.recipe.method,materialCount:r.pendingExtraSummon.recipe.materials.length,stage:'response',awaiting:extraResponsePlayer(r),counter:r.pendingExtraSummon.counter?{who:r.pendingExtraSummon.counter.who,name:unitName(r,r.pendingExtraSummon.counter.sourceId)}:null,counters:legalSummonCounters(r,viewer).map(id=>({sourceUnitId:id,name:unitName(r,id)}))}:null,pendingManual:r.pendingManual?{...r.pendingManual}:null,persistentEffects:(r.persistentEffects||[]).map(e=>({kind:e.kind,owner:e.owner,counters:e.counters})),logs:r.logs.slice(-80),you:viewer,players:r.players.map((p,i)=>({index:i,label:p.label,deckId:p.deckId,deckName:decks.get(p.deckId)?.name,hp:p.hp,playerAtkBonus:p.playerAtkBonus||0,reloads:p.reloads,deckCount:p.deck.length,handCount:p.hand.length,grave:p.grave.map(mapId),banishedCount:p.banished.length,extraCount:p.extra.length,field:p.field.map(mapId),integration:mapId(p.integration),hand:i===viewer?p.hand.map(mapId):null,extra:i===viewer?p.extra.map(mapId):null}))}}
 function apply(r,who,type,body){const p=r.players[who];let changed=true;
  if(r.pendingDeckSearch&&!['deckSearch','concede'].includes(type))fail(409,'덱 검색 선택을 완료해야 합니다.');
  if(r.pendingExtraSummon&&!['extraResponse','concede'].includes(type))fail(409,'특수 소환 대응 중에는 다른 행동을 할 수 없습니다.');
@@ -572,11 +585,15 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
   break;
  }
  case 'extraResponse':{
-  if(r.status!=='active'||!r.pendingExtraSummon||r.pendingExtraSummon.who===who)fail(403,'상대의 특수 소환에만 대응할 수 있습니다.');
-  if(body.choice!=='pass')fail(409,'소환 무효화 카드의 자동 대응은 아직 지원하지 않습니다. 대응하지 않음을 선택하세요.');
-  const pending=r.pendingExtraSummon;r.pendingExtraSummon=null;
+  if(r.status!=='active'||!r.pendingExtraSummon||extraResponsePlayer(r)!==who)fail(403,'상대의 특수 소환/무효화에 대응하는 현재 대응권자만 행동할 수 있습니다.');
+  if(body.choice==='counter'){
+   declareSummonCounter(r,who,body.sourceUnitId);
+   log(r,'response',`${p.label}: 스톰블레이거 드래곤 소환 무효화 선언 (주문/소환 합계 게임당 1회)`);break;
+  }
+  if(body.choice!=='pass')fail(409,'이 소환 대응은 아직 지원하지 않습니다.');
   log(r,'response',`${p.label}: 특수 소환 대응 없음`);
-  finishExtraSummon(r,pending);
+  if(r.pendingExtraSummon.recipe.method==='wakeup')scheduleWakeupReturn(r,r.pendingExtraSummon.who,r.pendingExtraSummon.recipe.spellUnitId);
+  resolveSummonResponse(r,{zone:zoneOwner,log,summon:finishExtraSummon,negate:negateExtraSummon});
   break;
  }
  case 'attack':{requireTurn(r,who);if(r.phase!=='ATTACK'||r.pendingAttack||r.pendingManual||((p.noAttackUntil||0)>=p.turnsTaken))fail(409,'현재 공격할 수 없습니다.');const attacker=r.units[requireStr(body.attackerId,100)];const z=attacker&&zoneOwner(r,attacker.id);if(!z||z.player!==who||!['field','integration'].includes(z.zone)||attacker.cannotAttack||attacker.cannotAttackUntil===r.turnNumber||attacker.frozen||!attackAvailable(attacker,r.turnNumber))fail(409,'공격 가능한 카드가 아닙니다.');const target=body.target;if(!target||!['player','unit'].includes(target.type))fail(400,'공격 대상을 지정해 주세요.');if(target.type==='player'&&target.player!==undefined&&target.player!==1-who)fail(409,'상대 플레이어만 공격할 수 있습니다.');if(target.type==='unit'){const zz=zoneOwner(r,target.id);if(!zz||zz.player===who||zz.zone!=='field')fail(409,'공격할 수 없는 대상입니다.');}if(target.type==='player'&&(p.noDirectAttackUntil||0)>0&&p.noDirectAttackUntil>=p.turnsTaken)fail(409,'보호막 효과로 이번 턴에는 플레이어 직접 공격이 불가능합니다.');if(attacker.cardId==='COC-05-003'&&!p.field.some(mid=>mid&&unitName(r,mid).includes('카툰 랜드')))fail(409,'카툰 랜드가 없어 공격할 수 없습니다.');
@@ -755,7 +772,7 @@ function runAI(r){if(r.mode!=='ai'||r.status!=='active')return;
    }
    break;
   }
-  if(r.pendingExtraSummon){if(r.pendingExtraSummon.who===0){apply(r,1,'extraResponse',{choice:'pass'});continue}break;}
+  if(r.pendingExtraSummon){if(extraResponsePlayer(r)===1){const sourceUnitId=legalSummonCounters(r,1)[0];apply(r,1,'extraResponse',sourceUnitId?{choice:'counter',sourceUnitId}:{choice:'pass'});continue}break;}
   if(r.pendingAttack){if(r.turn===0&&r.pendingAttack.stage==='response'){apply(r,1,'defend',{});continue}if(r.turn===1&&r.pendingAttack.stage==='retarget'){apply(r,1,'retarget',{target:chooseAITarget(r,r.pendingAttack.attackerId,{forAttack:true})});continue}break;}
   if(r.turn!==1)break;
   try{

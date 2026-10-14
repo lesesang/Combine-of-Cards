@@ -4,15 +4,17 @@ export const SPELL_COUNTER_IDS = Object.freeze(['COC-14-001']);
 export const spellResponsePlayer = room => room.pendingSpell
   ? (room.pendingSpell.awaiting ?? 1-room.pendingSpell.who) : null;
 
-// Only the printed spell clause is connected. Summon negation is not yet
-// implemented; it must share this same physical card's once-per-game usage.
+// Spell and summon negation share the same physical card's game limit.
+export function availableStormCounter(room,who){
+ const id=room.players[who]?.integration,unit=room.units[id];
+ return unit&&SPELL_COUNTER_IDS.includes(unit.cardId)&&!unit.effectsNegated&&!unit.spellCounterGameUsed?[id]:[];
+}
+
 export function legalSpellCounters(room, who) {
   const pending=room.pendingSpell;
   if(room.status!=='active'||!pending||pending.counter||pending.who===who||
       spellResponsePlayer(room)!==who)return [];
-  const id=room.players[who]?.integration, unit=room.units[id];
-  return unit&&SPELL_COUNTER_IDS.includes(unit.cardId)&&!unit.effectsNegated&&
-    !unit.spellCounterGameUsed ? [id] : [];
+  return availableStormCounter(room,who);
 }
 
 export function declareSpellCounter(room, who, sourceId) {
