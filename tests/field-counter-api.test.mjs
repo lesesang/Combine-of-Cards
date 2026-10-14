@@ -2,7 +2,7 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
 const dir=fs.mkdtempSync(path.join(os.tmpdir(),'coc-field-chain-api-'));process.env.DATA_DIR=dir;process.env.NODE_ENV='test';
 const {gameTestInternals:I}=await import('../server.mjs');
-const fixtures=['COC-12-001','COC-12-002','COC-24-005'].map((cid,index)=>{
+const fixtures=['COC-12-001','COC-24-005'].map((cid,index)=>{
  const r={code:'CHAIN'+index,status:'active',version:1,turn:0,turnNumber:5,phase:'MAIN',mode:'pvp',players:[],units:{},logs:[],effects:[]};
  I.createPlayer(r,'12','A','a'.repeat(64));I.createPlayer(r,cid.slice(4,6),'B','b'.repeat(64));r.players.forEach(p=>p.turnsTaken=3);
  const put=(cid,who,to)=>{const id=I.instantiate(r,cid,who);I.move(r,id,to,who);return id;};
@@ -19,6 +19,11 @@ test('field counter HTTP: three nested declarations survive restarts and invalid
  await restart();const before=fs.readFileSync(storage,'utf8');
  const fail=await call('BROKEN',1,{type:'spellResponse',choice:'counter',sourceUnitId:broken.first,expectedVersion:2});assert.equal(fail.status,500);assert.equal(fs.readFileSync(storage,'utf8'),before);
  for(const f of fixtures)assert.equal((await call(f.r.code,0,{type:'play',unitId:f.spell,expectedVersion:1})).status,200);
+ for(const f of fixtures){const prior=fs.readFileSync(storage,'utf8'),state=(await call(f.r.code,1)).state;
+  assert.ok(!state.pendingSpell.counters.some(c=>c.sourceUnitId===f.third));
+  assert.equal((await call(f.r.code,1,{type:'spellResponse',choice:'counter',sourceUnitId:f.third,expectedVersion:2})).status,409);
+  assert.equal(fs.readFileSync(storage,'utf8'),prior);
+ }
  for(const [key,who,version] of [['first',1,2],['second',0,3],['third',1,4]]){
   const saved=new Map();
   for(const f of fixtures){

@@ -77,3 +77,5 @@ npm run check:coverage -- --check
 4. 두 GitHub Actions(**Node tests**, **Verify TCG beta**)가 **PR 최종 SHA에서 성공한 뒤** main에 병합하고 main 결과까지 확인한다.
 
 **바로 복사할 Codex 시작 요청문은 [CODEX_HANDOFF.md 하단](docs/CODEX_HANDOFF.md#7-작업-이력추적인계-유지)에 있다.**
+
+라이징 윈드 걸(COC-12-002)은 최신 사용자 정정에 따라 **상대 몬스터 효과만** 무효화한다. 카드 문구도 수정했으며, 재소환 후 재사용 규칙은 유지한다. 현재 지원 범위는 [필드 무효화 명세](docs/FIELD_COUNTER_CHAINS.md)를 참조한다.
