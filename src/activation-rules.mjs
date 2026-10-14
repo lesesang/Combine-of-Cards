@@ -1,3 +1,4 @@
+import {evolutionRules,validateEvolution,natureEvolutionCosts} from './evolution.mjs';
 /**
  * Audited preflight rules for main-deck cards with explicit v1.3 requirements.
  * No natural-language eval. Pure validation returns a cost plan; the caller
@@ -26,7 +27,7 @@ function context(room, who, unitId, catalog, body) {
  const deckCount=(term)=>player.deck.filter(id=>attribute(id)===term||named(id).includes(term)).length;
  const handCount=(term)=>player.hand.filter(id=>type(id)==='주문'||named(id).includes(term)).length;
  const fieldAnywhere=(term)=>[...ownField,...enemyField].some(id=>named(id).includes(term));
- return {room,who,unitId,body:body||{},player,foe,card,named,type,attribute,ownField,enemyField,ownIntegration,hasField,hasIntegration,fieldCount,deckCount,handCount,fieldAnywhere};
+ return {room,who,unitId,catalog,body:body||{},player,foe,card,named,type,attribute,ownField,enemyField,ownIntegration,hasField,hasIntegration,fieldCount,deckCount,handCount,fieldAnywhere};
 }
 
 register('COC-01-009',c=>require_(Boolean(c.player.integration),'이 주문은 일체화 상태에서만 사용할 수 있습니다.'));
@@ -66,7 +67,11 @@ register('COC-24-007',c=>require_(c.ownField.length===0,'필드가 비어 있어
 register('COC-24-008 COC-26-008',c=>require_(c.ownField.filter(id=>c.named(id).includes('매치')).length<=1,'필드의 매치 몬스터가 1장 이하여야 합니다.'));
 register('COC-26-005',c=>require_(c.hasField('저지먼트 매치'),'필드에 저지먼트 매치가 있어야 합니다.'));
 register('COC-30-008',c=>require_((c.player.natureSpellsUsedGame||0)>=3,'이번 게임에서 자연 속성 주문을 3장 이상 사용해야 합니다.'));
-register('COC-30-009',c=>require_(c.hasIntegration('풍요의 여신 아젤리아'),'풍요의 여신 아젤리아와 일체화해야 합니다.'));
+register('COC-30-009',c=>{
+ const eligible=natureEvolutionCosts(c.room,c.who,c.unitId,c.catalog),ids=c.body.costDeckIds;
+ if(!Array.isArray(ids)||ids.length!==2||new Set(ids).size!==2||!ids.every(id=>eligible.includes(id)))deny('비용으로 버릴 서로 다른 자연 속성 덱 카드 2장을 선택해야 합니다.');
+ return {costs:ids.map(unitId=>({unitId,to:'grave'}))};
+});
 register('COC-31-001',c=>require_(c.enemyField.length>0,'상대 필드에 몬스터가 필요합니다.'));
 register('COC-31-002',c=>require_(c.fieldAnywhere('크로와'),'필드에 크로와가 존재해야 합니다.'));
 register('COC-31-003',c=>require_(c.fieldAnywhere('크로와')&&c.fieldAnywhere('카스테'),'필드에 크로와와 카스테가 필요합니다.'));
@@ -78,6 +83,9 @@ register('COC-32-007',c=>require_(c.fieldAnywhere('윈드'),'원소의 마법사
 register('COC-32-008',c=>require_(c.fieldAnywhere('랜드'),'원소의 마법사 랜드가 필드에 있어야 합니다.'));
 register('COC-32-009',c=>require_(c.ownField.some(id=>c.named(id).includes('원소의 마법사')),'원소의 마법사 몬스터가 필드에 있어야 합니다.'));
 register('COC-32-010',c=>require_((c.player.spellsThisTurn||0)>=1,'이번 턴에 주문을 사용한 기록이 있어야 합니다.'));
+
+register('COC-03-003',c=>{validateEvolution(c.room,c.who,c.card.id,c.catalog);return ok();});
+register('COC-07-004',c=>({costs:[{player:1-c.who,draw:1}]}));
 
 // Paid before the opponent responds. Resolution never charges these again.
 register('COC-05-002 COC-31-007',c=>{
@@ -142,14 +150,16 @@ register('COC-08-008',c=>({costs:c.player.hand.filter(id=>id!==c.unitId).map(id=
 /** Validation has no side effects and can be safely used for AI move planning. */
 export function planActivation({room,who,unitId,cards,body={}}){
  const c=context(room,who,unitId,cards,body);
+ if(evolutionRules[c.card.id])validateEvolution(room,who,c.card.id,cards);
  const predicate=SPEC.get(c.card.id);
  return {...(predicate?predicate(c):ok()),verified:!!predicate,cardId:c.card.id};
 }
 
-export function commitActivationCosts(room,plan,{move,destroy}){
+export function commitActivationCosts(room,plan,{move,destroy,draw}){
  // Validate the entire cost set before moving the first card; one protected
  // material must not let the action partially pay the other materials.
  for(const cost of plan.costs){
+  if(cost.draw){if(!room.players[cost.player]||typeof draw!=='function')deny('드로우 비용을 처리할 수 없습니다.');continue;}
   if(cost.hp!==undefined){
    if(!room.players[cost.player]||(!cost.damage&&room.players[cost.player].hp<=cost.hp))deny('필요한 체력을 지불할 수 없습니다.');
    continue;
@@ -160,6 +170,7 @@ export function commitActivationCosts(room,plan,{move,destroy}){
    deny('파괴할 수 없는 몬스터는 파괴 비용으로 지불할 수 없습니다.');
  }
  for(const cost of plan.costs){
+  if(cost.draw){draw(room,cost.player);continue;}
   if(cost.hp!==undefined){room.players[cost.player].hp-=cost.hp;continue;}
   const unit=room.units[cost.unitId];
   if(cost.to==='destroy'){

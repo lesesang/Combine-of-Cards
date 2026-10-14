@@ -30,7 +30,7 @@ Windows PowerShell에서도 동일하게 npm 명령 사용. npm run check:covera
 | 경로 | 책임 및 주의사항 |
 |---|---|
 | **server.mjs** | HTTP/API, 룸 비밀 토큰·인증, 룸 저장·복원, 턴/페이즈/다이스/드로우/리로드/승패, AI 행동 루프, 카드별 소환·전투 예외, 지속 효과 훅 |
-| **src/activation-rules.mjs** | 카드 발동 전 조건과 비용 검사. 86종 기준이나 전 카드 검증 완료가 아님 |
+| **src/activation-rules.mjs** | 카드 발동 전 조건과 비용 검사. 88종 기준이나 전 카드 검증 완료가 아님 |
 | **src/automated-effects.mjs** | 카드 ID 기반 주문 효과 실행 핸들러 71종(효과 전체 완료 아님) |
 | **src/life-eating-sword.mjs** | COC-21-002 주문의 독립 효과, 자기 ATTACK 시작 HP 30/+ATK 100, 다음 자기 턴 ×2 곱셈 중복, 저장/턴 만료. **장착이 아님** |
 | **src/combat-stats.mjs** | 실제/조건용 취급 공격력 분리. 50/250 같은 카드별 판정 및 ATK 효과별 예외 |
@@ -92,7 +92,7 @@ Windows PowerShell에서도 동일하게 npm 명령 사용. npm run check:covera
 
 **보고서 갱신:** `npm run check:coverage`는 AUTOMATION_COVERAGE.md / automation-audit.json / EFFECT_COVERAGE.md만 재생성한다. 수동 설명은 **AUTOMATION_NOTES.md**, 효과 명세는 **effect-coverage.json**에 쓴다. `npm run check:coverage -- --check`는 파일을 바꾸지 않고 출력 일치·원문/효과 번호·구현 경로·테스트 이름을 검증한다. CI는 이 읽기 전용 검사를 사용한다. 정본 전체 검증이나 완전 자동화 인증을 뜻하지 않는다.
 
-**Codex 현행 문서:** [CODEX_HANDOFF](CODEX_HANDOFF.md) · [CODEX_IMPLEMENTATION_PLAN](CODEX_IMPLEMENTATION_PLAN.md) · [CODEX_RULES_REFERENCE](CODEX_RULES_REFERENCE.md). 최신 158 partial/95 manual/1 basic, 71 주문 핸들러, 51 일반 주문 응답 스택, 43개 효과별 추적 등록. `1.3-ai-beta.10` 서버 버전 문자열은 이 자동화 범위 집계를 나타내지 않는다.
+**Codex 현행 문서:** [CODEX_HANDOFF](CODEX_HANDOFF.md) · [CODEX_IMPLEMENTATION_PLAN](CODEX_IMPLEMENTATION_PLAN.md) · [CODEX_RULES_REFERENCE](CODEX_RULES_REFERENCE.md). 최신 158 partial/95 manual/1 basic, 71 주문 핸들러, 61 일반 주문 응답 스택, 55개 효과별 추적 등록. `1.3-ai-beta.10` 서버 버전 문자열은 이 자동화 범위 집계를 나타내지 않는다.
 
 신규 `src/grave-abilities.mjs`는 순수 비용 검사와 묘지 회수, `src/effect-usage.mjs`는 효과 번호별 턴 제한을 담당한다. actions API의 `graveAbility`는 `sourceUnitId`, `costUnitId`, `expectedVersion`을 받는다. 본인 상태의 `graveAbilities`에 현재 합법적인 조합만 제공하고 상대 비공개 영역은 포함하지 않는다. 규칙/엔진 버전은 beta.10이며, 기존 방에 없던 `effectUsage`는 첫 사용부터 생성된다. 이전 버전에서 수행한 효과 횟수를 소급 복원하지는 않는다.
 
@@ -121,3 +121,10 @@ Windows PowerShell에서도 동일하게 npm 명령 사용. npm run check:covera
 7. 변경 시 docs/IMPLEMENTATION_HISTORY.md, docs/OPEN_RULINGS_REGISTER.md, docs/AUTOMATION_COVERAGE.md를 함께 갱신.
 
 **같이 읽기:** docs/START_HERE_NEW_CHAT.md / docs/ROADMAP_AND_ACCEPTANCE.md / docs/OPEN_RULINGS_REGISTER.md / README.md.
+
+## 진화 비용·덱 선택 API (2026-10-14)
+
+- `GET /api/rooms/:code/evolution-costs?unitId=...`: 자기 MAIN, 사용 가능한 패의 숲속의 맹약/아젤리아, 자연 2장 이상인 경우만 비용 후보 반환. 상대/비참가자·다른 대기 단계 거부. 덱 순서 대신 카드 ID 순.
+- `play`의 `costDeckIds`: 서로 다른 자기 덱 자연 카드 2장의 UID. 서버가 다시 검사하고 대응 전에 지불.
+- `pendingDeckSearch`: 발동자만 `choices`를 받음. 대응 종료 후 `deckSearch` 행동의 `unitId`로 선택, `expectedVersion` 필수. 상대는 대기 상태만 받으며 선택 이후 가져온 카드는 로그로 공개.
+- 두 대기 단계는 rooms.json 저장/재접속과 HTTP 트랜잭션 롤백을 사용한다. 신규 모듈은 `src/evolution.mjs`, `src/deck-search.mjs`.
