@@ -1,12 +1,14 @@
+import {ELEMENTAL_MAGICIAN_IDS} from './effect-usage.mjs';
 import {requireUnusedEffect,markEffectUsed} from './effect-usage.mjs';
 import {FIELD_RESPONSE_IDS,prepareFieldEffect,payFieldEffect,resolveFieldEffect} from './field-ability-effects.mjs';
 /**
  * Explicit, audited main-phase card abilities.
- * Seven effects share the audited preparation/resolution helpers below.
+ * Eleven effects share the audited preparation/resolution helpers below.
  * The server opens their response window; the other six remain legacy handlers.
  * Copy effects and the full 254-card catalog remain incomplete.
  */
 const REGISTERED=[
+ ...ELEMENTAL_MAGICIAN_IDS,
  'COC-03-002','COC-05-004','COC-08-003','COC-10-005',
  'COC-13-001','COC-13-002','COC-13-005','COC-22-010',
  'COC-23-002','COC-24-003','COC-26-003','COC-31-004','COC-12-013'

@@ -15,9 +15,9 @@ function setup(deck='13',opponent='03'){
  const use=(sourceUnitId,options={})=>I.applyFieldAbility(r,0,{sourceUnitId,...options},I.H);
  return {r,take,use};
 }
-test('13 field ability handlers are registered distinctly',()=>{
- assert.equal(FIELD_ABILITY_IDS.length,13);
- assert.equal(new Set(FIELD_ABILITY_IDS).size,13);
+test('17 field ability handlers are registered distinctly',()=>{
+ assert.equal(FIELD_ABILITY_IDS.length,17);
+ assert.equal(new Set(FIELD_ABILITY_IDS).size,17);
 });
 test('shaman talisman searches anywhere exactly once per turn',()=>{
  const {r,take,use}=setup('03');

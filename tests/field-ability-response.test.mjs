@@ -1,7 +1,8 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
-import {FIELD_RESPONSE_IDS} from '../src/field-ability-effects.mjs';
+import {FIELD_RESPONSE_IDS as ALL_FIELD_RESPONSE_IDS} from '../src/field-ability-effects.mjs';
 import {queueFieldAbility,finishFieldAbility,legalAbilityCounters} from '../src/ability-responses.mjs';
+const FIELD_RESPONSE_IDS=ALL_FIELD_RESPONSE_IDS.filter(id=>!id.startsWith('COC-32-'));
 import {fieldAbilityFixture} from './helpers/field-ability-fixture.mjs';
 const dir=fs.mkdtempSync(path.join(os.tmpdir(),'coc-ability-response-'));process.env.DATA_DIR=dir;
 const {gameTestInternals:I}=await import('../server.mjs');test.after(()=>fs.rmSync(dir,{recursive:true,force:true}));

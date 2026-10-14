@@ -1,9 +1,12 @@
+import {ELEMENTAL_MAGICIAN_IDS} from './effect-usage.mjs';
+import {isElemental,prepareElemental,beginElementalChoice} from './elemental-replacement.mjs';
 import {requireUnusedEffect,markEffectUsed} from './effect-usage.mjs';
 import {swordActualAttack} from './life-eating-sword.mjs';
 
 // Audited activated effects only. Monster triggers and the other six legacy
 // handlers are not implicitly enrolled in this response window.
 export const FIELD_EFFECT_RULES=Object.freeze({
+ ...Object.fromEntries(ELEMENTAL_MAGICIAN_IDS.map(id=>[id,{zone:'field',sourceType:'monster',oncePerTurn:true,selfCost:true}])),
  'COC-03-002':{zone:'field',sourceType:'monster',oncePerTurn:true},
  'COC-05-004':{zone:'field',sourceType:'monster',oncePerTurn:true},
  'COC-12-013':{zone:'field',sourceType:'monster',oncePerTurn:true},
@@ -25,6 +28,7 @@ export function prepareFieldEffect(r,who,body,H){
  if(!rule||!z||z.player!==who||z.zone!==rule.zone||u.effectsNegated)invalid(H,'효과가 유효한 자신의 필드 또는 일체화 카드가 필요합니다.');
  if(rule.oncePerTurn)requireUnusedEffect(r,who,sourceId,1);
  const plan={cardId:u.cardId,sourceId,sourceZone:z.zone,sourceRevision:revision(u,z.zone)};
+ if(isElemental(u.cardId)){prepareElemental(r,who,sourceId,H);return plan;}
  if(u.cardId==='COC-03-002'){
   plan.searchCardId=p.integration&&r.units[p.integration]?.cardId==='COC-03-001'?'COC-03-003':'COC-03-001';
   if(!findSearch(r,who,plan.searchCardId))invalid(H,'대상 카드가 자신의 영역에 없습니다.');
@@ -43,6 +47,11 @@ export function prepareFieldEffect(r,who,body,H){
 }
 export function payFieldEffect(r,who,plan,H){
  const p=r.players[who],u=r.units[plan.sourceId];
+ if(isElemental(plan.cardId)){
+  H.destroy(r,plan.sourceId,{cause:'cost',sourceId:plan.sourceId});
+  if(H.zone(r,plan.sourceId)?.zone!=='grave')invalid(H,'자기 파괴 비용 지불에 실패했습니다.');
+  if(r.turn!==who&&r.pendingAttack?.target?.id===plan.sourceId){r.pendingAttack.stage='retarget';H.log(r,'attack','원소 교체로 공격 대상이 사라져 재선택이 필요합니다.');}
+ }
  if(plan.cardId==='COC-12-013'){
   H.move(r,plan.costCardId,'grave',r.units[plan.costCardId].owner);
   H.log(r,'cost',`${p.label}: 크래쉬볼티지 효과 비용으로 ${H.name(r,plan.costCardId)} 1장을 버렸습니다.`);
@@ -55,6 +64,7 @@ export function payFieldEffect(r,who,plan,H){
  if(FIELD_EFFECT_RULES[plan.cardId].oncePerTurn)markEffectUsed(r,who,plan.sourceId,1);
 }
 export function resolveFieldEffect(r,who,plan,H){
+ if(isElemental(plan.cardId))return beginElementalChoice(r,who,plan.sourceId,H);
  const u=r.units[plan.sourceId],z=H.zone(r,plan.sourceId);
  const fizzle=reason=>{H.log(r,'effect',`필드 효과 불발: ${reason} (비용 반환 없음)`);return false;};
  if(!u||u.cardId!==plan.cardId||u.effectsNegated||z?.player!==who||z?.zone!==plan.sourceZone||revision(u,z.zone)!==plan.sourceRevision)return fizzle('소스 이탈/재진입·조종자/상태 변경');
