@@ -62,6 +62,7 @@ test('Superior Claw grants persistent battle-trigger and deals destroyed enemy a
  const enemy=place(1,'COC-03-002','field');
  const enemyAtk=r.units[enemy].atk;
  I.apply(r,0,'play',{unitId:spell,target:{type:'unit',id:fighter}});
+ I.apply(r,1,'spellResponse',{choice:'pass'});
  assert.equal(r.players[0].hp,800);
  assert.equal(r.units[fighter].superiorClaw,true);
  r.units[enemy].hp=1;

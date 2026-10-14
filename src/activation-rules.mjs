@@ -31,7 +31,7 @@ function context(room, who, unitId, catalog, body) {
 
 register('COC-01-009',c=>require_(Boolean(c.player.integration),'이 주문은 일체화 상태에서만 사용할 수 있습니다.'));
 register('COC-05-005',c=>require_(!c.player.roundPlays,'이번 턴에 처음 사용하는 카드여야 합니다.'));
-register('COC-05-007',c=>require_(c.hasField('카툰 랜드'),'카툰 랜드가 필드에 있어야 합니다.'));
+register('COC-05-007',c=>{require_(c.hasField('카툰 랜드'),'카툰 랜드가 필드에 있어야 합니다.');return require_(c.player.field.includes(null),'카드를 가져올 빈 필드 칸이 없습니다.');});
 register('COC-05-010',c=>require_(!c.hasField('카툰 랜드'),'카툰 랜드가 필드에 없어야 합니다.'));
 register('COC-06-001',c=>require_((c.player.metalElementUsedGame||0)>=5,'금속 또는 원소 카드 5장 사용 기록이 필요합니다.'));
 register('COC-06-005',c=>require_((c.player.elementSpellPlaysThisTurn||0)>=2,'이번 턴에 원소 주문을 2장 이상 사용해야 합니다.'));
@@ -78,6 +78,23 @@ register('COC-32-007',c=>require_(c.fieldAnywhere('윈드'),'원소의 마법사
 register('COC-32-008',c=>require_(c.fieldAnywhere('랜드'),'원소의 마법사 랜드가 필드에 있어야 합니다.'));
 register('COC-32-009',c=>require_(c.ownField.some(id=>c.named(id).includes('원소의 마법사')),'원소의 마법사 몬스터가 필드에 있어야 합니다.'));
 register('COC-32-010',c=>require_((c.player.spellsThisTurn||0)>=1,'이번 턴에 주문을 사용한 기록이 있어야 합니다.'));
+
+// Paid before the opponent responds. Resolution never charges these again.
+register('COC-05-002 COC-31-007',c=>{
+ require_(c.player.hp>100,'필요한 체력을 지불할 수 없습니다.');
+ require_(c.player.field.includes(null),'카드를 놓을 빈 필드 칸이 없습니다.');
+ return {costs:[{player:c.who,hp:100}]};
+});
+register('COC-14-002',c=>{
+ require_(c.player.deck.length>0,'비용으로 버릴 덱 맨 위 카드가 필요합니다.');
+ return {costs:[{unitId:c.player.deck[0],to:'grave'}]};
+});
+register('COC-27-010',c=>({costs:[{player:c.who,hp:200,damage:true}]}));
+register('COC-30-011',c=>{
+ const used=new Set(c.player.natureSpellTurns||[]);
+ return require_(used.has(c.room.turnNumber-2)&&used.has(c.room.turnNumber-4),
+  '지난 자신의 두 턴 모두 자연 속성 주문을 사용했어야 합니다.');
+});
 
 // Material / discard costs: preflight every zone and selected unit before any mutation.
 register('COC-31-009',c=>{
@@ -133,12 +150,17 @@ export function commitActivationCosts(room,plan,{move,destroy}){
  // Validate the entire cost set before moving the first card; one protected
  // material must not let the action partially pay the other materials.
  for(const cost of plan.costs){
+  if(cost.hp!==undefined){
+   if(!room.players[cost.player]||(!cost.damage&&room.players[cost.player].hp<=cost.hp))deny('필요한 체력을 지불할 수 없습니다.');
+   continue;
+  }
   const unit=room.units[cost.unitId];
   if(!unit)deny('소재나 비용으로 지정한 카드가 존재하지 않습니다.');
   if(cost.to==='destroy'&&unit.effectDestructionImmune)
    deny('파괴할 수 없는 몬스터는 파괴 비용으로 지불할 수 없습니다.');
  }
  for(const cost of plan.costs){
+  if(cost.hp!==undefined){room.players[cost.player].hp-=cost.hp;continue;}
   const unit=room.units[cost.unitId];
   if(cost.to==='destroy'){
    if(destroy(room,cost.unitId)===false)

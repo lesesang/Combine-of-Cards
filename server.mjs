@@ -1,3 +1,4 @@
+import {isNonToonField} from './src/spell-choice-batch.mjs';
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -179,7 +180,7 @@ function dropFromDeck(r,who,count){
 }
 function findCardInDeck(r,who,name){const p=r.players[who];const id=p.deck.find(id=>cards.get(r.units[id].cardId)?.name.includes(name));if(id){move(r,id,'hand',who);log(r,'search',`${p.label}가 덱에서 ${cards.get(r.units[id].cardId).name}를 공개하고 패로 가져왔습니다.`)}return id}
 function die(n,min=1){const maximum=Math.min(Math.max(1,Math.floor(n)),100_000_000);const minimum=Math.max(1,Math.min(maximum,Math.floor(min)));return crypto.randomInt(minimum,maximum+1)}
-function hurt(r,id,n,attribution={}){damageUnit(r,id,-n,attribution)}
+function hurt(r,id,n,attribution={}){return damageUnit(r,id,-n,attribution)}
 function healUnit(r,id,n){damageUnit(r,id,n)}
 function evolve(r,id,c){const u=r.units[id];const prev=u.cardId;u.cardId=c.id;u.atk+=Math.max(0,Number(c.atk)||0);u.hp=(u.hp??0)+(Number(c.hp)||0);log(r,'evolve',`${cards.get(prev)?.name} → ${c.name}`)}
 function summonToken(r,who,name,atk,hp){
@@ -445,7 +446,16 @@ function finishAutomatedSpell(r){
     return;
    }
    const result=castAutomatedSpell(r,effect.owner,card,effect.payload.body,H,{activationValidated:true});
-   if(result?.retain)throw new Error('queued spell unexpectedly changed its retention zone');
+   if(result?.retain){
+    const z=zoneOwner(r,effect.sourceId);
+    if(z?.zone==='grave'&&z.player===r.units[effect.sourceId].owner){
+     if(result.retain==='hand')move(r,effect.sourceId,'hand',r.units[effect.sourceId].owner);
+     else if(result.retain==='field'&&card.id==='COC-05-002'){
+      move(r,effect.sourceId,'field',effect.owner);
+      Object.assign(r.units[effect.sourceId],{atk:result.atk,hp:result.hp,cannotAttack:true});
+     }else throw new Error('unsupported queued retention zone');
+    }else log(r,'effect','주문 원본이 묘지에서 이동하여 회수/몬스터화 불가');
+   }
    log(r,'effect',`${r.players[effect.owner].label}: ${card.name} 주문 효과 해결`);
   },
   onResult:(result,effect)=>{
@@ -674,17 +684,24 @@ function chooseAISpellCost(r,who,sourceUnitId){
   (Number(cards.get(r.units[a]?.cardId)?.atk)||0)-(Number(cards.get(r.units[b]?.cardId)?.atk)||0)
  )[0]||null;
 }
+function aiChoiceSpellBody(r,who,cardId){
+ if(cardId==='COC-14-009')return {option:r.players[1-who].hp>50&&!r.players[who].field.some(Boolean)?2:1};
+ if(cardId==='COC-23-009')return {option:r.players[1-who].field.some(Boolean)?1:2};
+ if(cardId==='COC-05-006')return {targets:r.players.flatMap(p=>p.field.filter(Boolean)).filter(id=>isNonToonField(r,id,H)).slice(0,2)};
+ return {};
+}
 function chooseAIMove(r){const who=1,p=r.players[who],level=r.aiDifficulty||'medium';
  const candidate=p.hand.filter(id=>{
   if(p.aiRejected?.includes(id))return false;
   const c=cards.get(r.units[id].cardId);
   // Costful spells must supply the same proposed choice during AI planning
   // as during the eventual action, or valid cards disappear from candidates.
-  const body=c.id==='COC-31-009'?{costCardId:chooseAISpellCost(r,who,id)}:{};
+  const body=c.id==='COC-31-009'?{costCardId:chooseAISpellCost(r,who,id)}:aiChoiceSpellBody(r,who,c.id);
   try{planActivation({room:r,who,unitId:id,cards,body})}
   catch(e){if(e.status===409)return false;throw e}
-  const targets=responseTargetChoices(r,who,c.id,H);
+  const targets=responseTargetChoices(r,who,c.id,H,body);
   if(targets&&targets.length===0)return false;
+  if(c.id==='COC-05-006'&&body.targets.length!==2)return false;
   if(c.id==='COC-21-002'&&!p.integration&&!p.field.some(mid=>mid&&r.units[mid].hp>30))return false;
   if(c.type==='주문')return hasAutoSpell(c.id);
   if(c.type==='일체화')return !p.integration&&!c.conditions.length;
@@ -774,24 +791,17 @@ function runAI(r){if(r.mode!=='ai'||r.status!=='active')return;
        t.type='unit';t.id=[...enemyUnits].sort((a,b)=>(r.units[a].hp??1e9)-(r.units[b].hp??1e9))[0];delete t.player;
       }
       let targets=c.id==='COC-06-004'?allUnits.slice(0,2):undefined;
-      if(c.id==='COC-05-006'){
-       const eligible=allUnits.filter(mid=>{
-        const z=zoneOwner(r,mid),name=unitName(r,mid);
-        const land=z&&r.players[z.player].field.some(x=>x&&unitName(r,x).includes('카툰 랜드'));
-        return !land&&!r.units[mid].treatedAsToon&&!name.includes('카툰');
-       });
-       targets=eligible.slice(0,2);
-      }
-      const legalTargets=responseTargetChoices(r,1,c.id,H);
+      const choiceBody=aiChoiceSpellBody(r,1,c.id);
+      const legalTargets=responseTargetChoices(r,1,c.id,H,choiceBody);
       if(legalTargets){
        if(t.type==='player'&&t.player===undefined)t.player=0;
-       if(!responseTargetStillValid(r,1,c.id,{target:t},H)){
+       if(!responseTargetStillValid(r,1,c.id,{...choiceBody,target:t},H)){
         for(const key of Object.keys(t))delete t[key];
         Object.assign(t,legalTargets[0]);
        }
       }
       const before=structuredClone(r);
-      try{apply(r,1,'play',{unitId:id,target:t,targets,costCardId:c.id==='COC-31-009'?chooseAISpellCost(r,1,id):undefined});}
+      try{apply(r,1,'play',{unitId:id,target:t,targets,...choiceBody,costCardId:c.id==='COC-31-009'?chooseAISpellCost(r,1,id):undefined});}
       catch(e){
        for(const key of Object.keys(r))delete r[key];
        Object.assign(r,before);

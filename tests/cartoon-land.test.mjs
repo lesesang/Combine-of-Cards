@@ -28,6 +28,7 @@ test('Cartoon Land automatically destroys Demon Dragon before World Guide restor
  const guide=r.players[0].deck.find(id=>r.units[id]?.cardId==='COC-05-008');
  assert.ok(guide);
  I.apply(r,0,'play',{unitId:land});
+ I.apply(r,1,'spellResponse',{choice:'pass'});
  assert.equal(r.units[land].hp,1);
  assert.equal(r.players[0].hp,900,'Land activation pays 100 HP');
  I.H.destroy(r,land);
@@ -50,6 +51,7 @@ test('without Guide in deck Land stays destroyed while Demon Dragon still dies',
  const demon=place(0,'COC-05-001','field');
  const guide=place(0,'COC-05-008','hand');
  I.apply(r,0,'play',{unitId:land});
+ I.apply(r,1,'spellResponse',{choice:'pass'});
  I.H.destroy(r,land);
  assert.ok(r.players[0].grave.includes(land));
  assert.ok(r.players[0].grave.includes(demon));
@@ -60,6 +62,7 @@ test('Land battle immunity prevents a lethal battle hit but not direct effect de
  const {r,place}=make();
  const land=place(0,'COC-05-002','hand');
  I.apply(r,0,'play',{unitId:land});
+ I.apply(r,1,'spellResponse',{choice:'pass'});
  const attacker=place(1,'COC-03-002','field');
  r.turn=1;r.phase='ATTACK';r.turnNumber=2;r.players[1].turnsTaken=1;
  I.apply(r,1,'attack',{attackerId:attacker,target:{type:'unit',id:land}});

@@ -1,3 +1,4 @@
+import {isNonToonField} from './spell-choice-batch.mjs';
 // Audited, deterministic card-effect handlers. No free-form text execution.
 // A handler must be backed by a particular v1.3 card wording.
 const aliases={};
@@ -29,7 +30,7 @@ const destroyTogether=(ctx,ids)=>{
  if(typeof ctx.H.destroyBatch==='function')return ctx.H.destroyBatch(ctx.r,ids);
  for(const id of [...new Set(ids)])ctx.H.destroy(ctx.r,id);
 };
-const hit=(ctx,target,amount)=>{if(!Number.isFinite(amount))throw Error('잘못된 피해 수치');amount=Math.max(0,Math.floor(amount));if(target.id)ctx.H.hurt(ctx.r,target.id,amount);else{ctx.r.players[target.player].hp-=amount;ctx.H.outcome(ctx.r)}};
+const hit=(ctx,target,amount)=>{if(!Number.isFinite(amount))throw Error('잘못된 피해 수치');amount=Math.max(0,Math.floor(amount));if(target.id)return ctx.H.hurt(ctx.r,target.id,amount);else{ctx.r.players[target.player].hp-=amount;ctx.H.outcome(ctx.r)}};
 const heal=(ctx,target,amount)=>{amount=Math.max(0,Math.floor(amount));if(target.id)ctx.H.healUnit(ctx.r,target.id,amount);else ctx.r.players[target.player].hp+=amount;};
 const charge=(ctx,amount)=>{const p=ctx.r.players[ctx.who];if(p.hp<=amount)ctx.H.fail(409,'필요한 체력을 지불할 수 없습니다.');p.hp-=amount;};
 const enemy=(ctx)=>getTarget(ctx,'enemy');
@@ -69,9 +70,9 @@ register('COC-21-002',ctx=>{
  });
 });
 // spell handlers: return { retain?: 'field', spent?: boolean }.
-register('COC-03-007',ctx=>{const n=ctx.r.players[1-ctx.who].grave.length;hit(ctx,enemy(ctx),Array.from({length:n},()=>ctx.H.roll(100)).reduce((a,b)=>a+b,0));});
-register('COC-03-008',ctx=>{const n=ctx.r.players[ctx.who].grave.length;heal(ctx,own(ctx),Array.from({length:n},()=>ctx.H.roll(100)).reduce((a,b)=>a+b,0));});
-register('COC-05-002',ctx=>{charge(ctx,100);if(!ctx.r.players[ctx.who].field.includes(null))ctx.H.fail(409,'몬스터 슬롯이 없습니다.');return {retain:'field',monsterized:true,hp:1,atk:0}});
+register('COC-03-007',ctx=>{const n=ctx.r.players[1-ctx.who].grave.length;hit(ctx,getTarget(ctx,'any'),Array.from({length:n},()=>ctx.H.roll(100)).reduce((a,b)=>a+b,0));});
+register('COC-03-008',ctx=>{const n=ctx.r.players[ctx.who].grave.length;heal(ctx,getTarget(ctx,'any'),Array.from({length:n},()=>ctx.H.roll(100)).reduce((a,b)=>a+b,0));});
+register('COC-05-002',ctx=>{if(!ctx.activationValidated)charge(ctx,100);if(!ctx.r.players[ctx.who].field.includes(null))ctx.H.fail(409,'몬스터 슬롯이 없습니다.');return {retain:'field',monsterized:true,hp:1,atk:0}});
 register('COC-06-003',ctx=>{const n=Math.max(0,ctx.r.players[ctx.who].roundElementUses||0)+( ['금속','원소'].includes(ctx.c.attribute)?1:0);for(let i=0;i<n;i++){const choices=[...ctx.r.players.flatMap((p,j)=>[{player:j},...p.field.filter(Boolean).map(id=>({player:j,id}))])];hit(ctx,choices[ctx.H.randomInt(choices.length)],50)}});
 register('COC-06-004',ctx=>{const targets=ctx.r.players.flatMap((p,i)=>p.field.filter(Boolean).map(id=>({id,player:i})));if(!targets.length)ctx.H.fail(409,'필드에 몬스터가 없습니다.');if((ctx.r.players[ctx.who].roundElementUses||0)+1>=3){const selected=ctx.body.targets;if(!Array.isArray(selected)||selected.length!==2||new Set(selected).size!==2)ctx.H.fail(409,'파괴할 몬스터 두 장을 각각 선택해야 합니다.');for(const id of selected){if(!targets.some(t=>t.id===id))ctx.H.fail(409,'선택한 몬스터가 필드에 없습니다.')}destroyTogether(ctx,selected)}else{const t=getTarget(ctx,'any');if(!t.id)ctx.H.fail(409,'몬스터 대상이 필요합니다.');hit(ctx,t,100)}});
 register('COC-06-007',ctx=>{if((ctx.r.players[ctx.who].roundPlays||0)+1<5)ctx.H.fail(409,'이번 턴 카드 사용이 5회 이상이어야 합니다.');hit(ctx,getTarget(ctx,'any'),300)});
@@ -104,17 +105,17 @@ register('COC-32-008',ctx=>{requireField(ctx,'랜드',true);destroyTogether(ctx,
 register('COC-06-002',ctx=>{const count=ctx.r.players[ctx.who].roundElementUses||0;const atk=count*50,hp=50+count*50;ctx.H.summonToken(ctx.r,ctx.who,'인조 생물',atk,hp)});
 register('COC-07-004',ctx=>{ctx.H.draw(ctx.r,1-ctx.who);const a=ctx.H.search(ctx.r,ctx.who,'포식자 알리자');if(!a)ctx.H.search(ctx.r,ctx.who,'포식의 맹약')});
 register('COC-07-011',ctx=>{ctx.H.draw(ctx.r,1-ctx.who);ctx.H.mill(ctx.r,1-ctx.who,3);ctx.r.players[ctx.who].hp+=400;const id=ctx.r.players[ctx.who].integration;if(id){ctx.r.units[id].atk+=200;ctx.r.units[id].buffExpiresAt=(ctx.r.players[ctx.who].turnsTaken||0)+1;ctx.r.units[id].temporaryBuff=(ctx.r.units[id].temporaryBuff||0)+200}});
-register('COC-14-002',ctx=>{ctx.H.mill(ctx.r,ctx.who,1);for(let i=0;i<2;i++)ctx.H.summonToken(ctx.r,ctx.who,'스톰 토큰',0,50)});
+register('COC-14-002',ctx=>{if(!ctx.activationValidated)ctx.H.mill(ctx.r,ctx.who,1);for(let i=0;i<2;i++)ctx.H.summonToken(ctx.r,ctx.who,'스톰 토큰',0,50)});
 register('COC-14-009',ctx=>{if(ctx.body.option===2){ctx.H.summonToken(ctx.r,ctx.who,'스톰 토큰',0,50)}else{hit(ctx,{player:1-ctx.who},50);for(const id of [...ctx.r.players[1-ctx.who].field].filter(Boolean))hit(ctx,{id},50)}});
 register('COC-17-004',ctx=>{for(let i=0;i<3;i++)if(!ctx.H.summonToken(ctx.r,ctx.who,'미라 병사',80,100))break});
 register('COC-19-004',ctx=>{const p=ctx.r.players[ctx.who],id=p.deck.find(id=>ctx.H.type(ctx.r,id)==='몬스터');if(id)ctx.H.move(ctx.r,id,'hand',ctx.who)});
 register('COC-19-005',ctx=>{const t=getTarget(ctx,'any');if(!t.id)ctx.H.fail(409,'필드의 몬스터가 필요합니다.');ctx.r.units[t.id].frozen=true;ctx.r.units[t.id].battleInvulnerable=true;ctx.r.units[t.id].damageInvulnerable=true;});
 register('COC-20-003',ctx=>{if(ctx.r.players[ctx.who].hp>600)ctx.H.fail(409,'체력 600 이하일 때만 사용 가능합니다.');ctx.H.search(ctx.r,ctx.who,'버닝 데몬즈')});
-register('COC-23-009',ctx=>{if(!ctx.r.players[ctx.who].integration)ctx.H.fail(409,'일체화가 필요합니다.');const t=enemy(ctx);if(ctx.body.option===1){if(!t.id)ctx.H.fail(409,'파괴할 몬스터가 없습니다.');ctx.H.destroy(ctx.r,t.id)}else hit(ctx,t,200)});
+register('COC-23-009',ctx=>{if(!ctx.activationValidated&&!ctx.r.players[ctx.who].integration)ctx.H.fail(409,'일체화가 필요합니다.');const t=getTarget(ctx,ctx.body.option===1?'enemy':'any');if(ctx.body.option===1){if(!t.id)ctx.H.fail(409,'파괴할 몬스터가 없습니다.');ctx.H.destroy(ctx.r,t.id)}else hit(ctx,t,200)});
 register('COC-24-006',ctx=>{const id=ctx.r.players[ctx.who].integration;if(!id)ctx.H.fail(409,'일체화가 필요합니다.');for(const target of [...ctx.r.players[ctx.who].field].filter(Boolean))ctx.H.destroy(ctx.r,target);ctx.r.units[id].atk+=60});
 register('COC-24-008 COC-26-008',ctx=>{const p=ctx.r.players[ctx.who];if(p.field.filter(id=>id&&ctx.H.name(ctx.r,id).includes('매치')).length>1)ctx.H.fail(409,'필드의 매치는 최대 1장이어야 합니다.');const id=p.deck.find(id=>ctx.H.type(ctx.r,id)==='몬스터');if(id)ctx.H.move(ctx.r,id,'hand',ctx.who)});
 register('COC-31-005',ctx=>{ctx.H.draw(ctx.r,ctx.who);if(ctx.H.roll(2)===1){const p=ctx.r.players[1-ctx.who];if(p.hand.length)ctx.H.move(ctx.r,p.hand[ctx.H.randomInt(p.hand.length)],'grave',1-ctx.who)}});
-register('COC-31-007',ctx=>{charge(ctx,100);const t=enemy(ctx);if(!t.id)ctx.H.fail(409,'탈취할 몬스터가 없습니다.');ctx.H.capture(ctx.r,ctx.who,t.id)});
+register('COC-31-007',ctx=>{if(!ctx.activationValidated)charge(ctx,100);const t=enemy(ctx);if(!t.id)ctx.H.fail(409,'탈취할 몬스터가 없습니다.');ctx.H.capture(ctx.r,ctx.who,t.id)});
 register('COC-31-009',ctx=>{
  // The chosen discard was validated and paid by activation-rules before
  // opening the response window. Resolution must never charge it again.
@@ -146,13 +147,6 @@ function selectedFieldUnit(ctx,{enemyOnly=false}={}){
   ctx.H.fail(409,'유효한 필드 몬스터를 효과 대상으로 선택해야 합니다.');
  return {id,controller:z.player,unit:ctx.r.units[id]};
 }
-function toonOnField(ctx,id){
- const z=ctx.H.zone(ctx.r,id);
- if(!z||z.zone!=='field')return false;
- return Boolean(ctx.r.units[id].treatedAsToon)||
-  ctx.H.name(ctx.r,id).includes('카툰')||
-  ctx.r.players[z.player].field.some(other=>other&&ctx.H.name(ctx.r,other).includes('카툰 랜드'));
-}
 // G tool: normal spell effect. Its monsterized/equipment clauses remain unsupported.
 register('COC-01-004',ctx=>{
  const {id}=selectedFieldUnit(ctx);
@@ -171,12 +165,11 @@ register('COC-05-006',ctx=>{
  if(!Array.isArray(ids)||ids.length!==2||new Set(ids).size!==2)
   ctx.H.fail(409,'카툰이 아닌 필드 몬스터 두 장을 선택해야 합니다.');
  for(const id of ids){
-  const z=typeof id==='string'&&ctx.H.zone(ctx.r,id);
-  if(!z||z.zone!=='field'||toonOnField(ctx,id))
+  if(!ctx.activationValidated&&!isNonToonField(ctx.r,id,ctx.H))
    ctx.H.fail(409,'카툰 몬스터 또는 필드에 없는 카드는 대상으로 지정할 수 없습니다.');
  }
  const rolled=ctx.H.roll(150);
- for(const id of ids)if(ctx.H.zone(ctx.r,id)?.zone==='field')ctx.H.hurt(ctx.r,id,rolled);
+ for(const id of ids)if(isNonToonField(ctx.r,id,ctx.H))ctx.H.hurt(ctx.r,id,rolled);
 });
 register('COC-05-007',ctx=>{
  requireField(ctx,'카툰 랜드');
@@ -202,10 +195,9 @@ register('COC-31-008',ctx=>{
 });
 // Returns to hand only when *this damage* kills the targeted enemy monster.
 register('COC-30-004',ctx=>{
- const t=enemy(ctx),before=t.id?ctx.r.units[t.id]?.hp:null;
- const amount=ctx.H.roll(200);
- hit(ctx,t,amount);
- if(t.id&&before>0&&before<=amount)return {retain:'hand'};
+ const t=enemy(ctx);
+ const destroyed=hit(ctx,t,ctx.H.roll(200));
+ if(t.id&&destroyed)return {retain:'hand'};
 });
 
 
@@ -224,7 +216,7 @@ register('COC-27-010',ctx=>{
     !ctx.H.name(ctx.r,id).includes('슈페리얼 파이터'))
   ctx.H.fail(409,'자신 필드의 슈페리얼 파이터 몬스터를 선택해야 합니다.');
  ctx.r.units[id].superiorClaw=true;
- ctx.r.players[ctx.who].hp-=200;
+ if(!ctx.activationValidated)ctx.r.players[ctx.who].hp-=200;
  ctx.H.outcome(ctx.r);
 });
 
@@ -269,7 +261,7 @@ register('COC-20-004',ctx=>{
 register('COC-30-011',ctx=>{
  const p=ctx.r.players[ctx.who];
  const used=new Set(p.natureSpellTurns||[]);
- if(!used.has(ctx.r.turnNumber-2)||!used.has(ctx.r.turnNumber-4))
+ if(!ctx.activationValidated&&(!used.has(ctx.r.turnNumber-2)||!used.has(ctx.r.turnNumber-4)))
   ctx.H.fail(409,'지난 자신의 두 턴 모두 자연 속성 주문을 사용했어야 합니다.');
  const selected=ctx.body.target;
  if(selected?.type!=='player'||selected.player!==1-ctx.who)
