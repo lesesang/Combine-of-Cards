@@ -166,3 +166,17 @@ test('field response UI: monster-only counter and pass use the current responder
  t.run('state.game.pendingAbility.awaiting=1');assert.doesNotMatch(t.run('battlePending(state.game)'),/data-ability-counter|id="abilityPass"/);
  t.run('state.game.pendingAbility.awaiting=0;state.game.pendingAbility.counters=[]');await t.listeners.click({target:{closest:()=>({id:'abilityPass',dataset:{}})}});assert.deepEqual(t.requests[1].body,{type:'abilityResponse',expectedVersion:7,choice:'pass'});
 });
+
+test('elemental UI: opponent-turn activation private selection and cost-trigger ordering use server choices',async()=>{
+ const t=ui();t.run("state.game.turn=1;state.game.elementalAbilities=['falcon']");
+ assert.match(t.run('elementalControls(state.game)'),/data-elemental-source="falcon"/);
+ await t.listeners.click({target:{closest:()=>({dataset:{elementalSource:'falcon'}})}});
+ assert.deepEqual(t.requests[0].body,{type:'ability',sourceUnitId:'falcon',expectedVersion:7});
+ t.run("state.game.pendingElementalChoice={who:0,choices:[{id:'chosen',zone:'deck',card:{name:'원소의 마법사'}}]}");
+ assert.match(t.run('battlePending(state.game)'),/chosen/);assert.equal(t.run('battleControls(state.game)'),'');
+ t.node('elementalChoice').value='chosen';await t.listeners.click({target:{closest:()=>({id:'elementalSubmit',dataset:{}})}});
+ assert.deepEqual(t.requests[1].body,{type:'elementalChoice',unitId:'chosen',expectedVersion:7});
+ t.run('state.game.pendingElementalChoice={who:1}');assert.doesNotMatch(t.run('battlePending(state.game)'),/chosen|elementalSubmit/);
+ t.run("state.game.pendingElementalChoice=null;state.game.pendingAbility={stage:'cost-triggers'};state.game.pendingTriggerOrder={awaiting:0,options:[{key:'a',title:'회복',priority:0}]}");
+ assert.match(t.run('battlePending(state.game)'),/triggerOrderSubmit/);assert.doesNotMatch(t.run('battlePending(state.game)'),/abilityPass/);
+});

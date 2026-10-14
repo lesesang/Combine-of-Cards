@@ -21,7 +21,7 @@ This file is for a new coding assistant taking over the repository after the 202
 - Preserve the user's custom TCG v1.3: **24 premade playable decks**, **254 card records**, no card mixing across premade decks.
 - Never restore the deleted decks: 합체 기계, 코미컬, 럭키, 카지노이드, 비트스타즈, 파트너 몬스터즈, 코브라, 아홉꼬리.
 - The goal is **fully automatic server-authoritative card effects**, AI duels (choose opponent deck/random; easy, medium, hard), PvP, rules conflict diagnostics and production-ready deployment.
-- **Latest implementation (7 field-ability response batch, 2026-10-14): 161 partially supported / 92 manually unsupported / 1 basic, 71 registered spell handlers, 61 spells in opponent-pass effect stack and only 65 effect-number evidence records. Complete coverage certified: 0.** The older server banner remains beta.10, not an accurate support inventory. Full automation is not achieved.
+- **Latest implementation (four elemental replacements, 2026-10-15): 163 partially supported / 90 manually unsupported / 1 basic, 71 registered spell handlers, 61 spells in opponent-pass effect stack and only 69 effect-number evidence records. Complete coverage certified: 0.** The older server banner remains beta.10, not an accurate support inventory. Full automation is not achieved.
 - Source v1.3 DOCX and comparison JSON were created in a prior conversation but are **not yet committed** to this public repository. See docs/SOURCE_DATA_PROVENANCE.md.
 
 ## Latest user-confirmed rules to preserve (PR #57–#58)
@@ -52,7 +52,7 @@ This file is for a new coding assistant taking over the repository after the 202
 
 - **2026-10-14 latest user clarification:** different physical cards may each activate the same effect independently. Never share usage by effect text, card name, or catalog ID across UIDs. Keep each card’s explicit turn/game/resummon exceptions and independent effect numbers.
 
-- **2026-10-14 explicit shared exception:** Elemental Magicians COC-32-001/002/003/004 share ONE activation per turn for effect 1 only. Their effect 2 is not part of that group. Replacement summon execution remains unsupported; the user confirmed the shared group is per player, not shared across both players. The usage policy is registered; replacement-summon execution is still unsupported.
+- **2026-10-14 explicit shared exception:** Elemental Magicians COC-32-001/002/003/004 share ONE activation per turn for effect 1 only. Their effect 2 is not part of that group. Replacement summon execution is partially implemented; the user confirmed the shared group is per player, not shared across both players. See docs/ELEMENTAL_REPLACEMENT_SUMMONS.md for supported windows and remaining chain insertion work.
 
 ## Non-negotiable rules
 
@@ -87,3 +87,7 @@ This file is for a new coding assistant taking over the repository after the 202
 - The user's original v1.3 DOCX/JSON master documents have NOT yet been committed; do not fabricate source files, effect words, card IDs, dates or completed card automation. Current live catalog is `public/data/catalog.json.gz.b64`.
 - For a code PR, update effect-level evidence and current summaries, use branch tests + both GitHub CI workflows at final head SHA, then squash-merge, verify post-merge main CI, and comment on the corresponding issue.
 - Older PR comments and old counts (155/98 and 156/97) are HISTORICAL; use the latest generated audit for current figures. Remove contradictory *current* claims in user-facing docs rather than merely appending conflicting statements.
+
+## 2026-10-15 user-delegated card and ruling refinement
+
+The user authorized autonomous fixes for ambiguous rulings and overpowered effects, while preserving the whole deck’s flow and creative intent. Follow docs/CARD_REFINEMENT_POLICY.md. Do not re-request approval for each ruling. Preserve established rulings as the baseline; justify any necessary revision with before/after text, deck-wide reasoning and regression evidence. Runtime card text may be patched under this authorization, with history in docs/card-patches.json; never pretend it is the missing canonical source. Current four elemental replacement summons negate back to their original hand/deck/grave zone (user-confirmed); already-paid costs and shared usage stay spent.
