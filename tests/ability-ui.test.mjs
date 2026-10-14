@@ -150,3 +150,10 @@ test('summon UI: only the responder counters and the summoner acknowledges witho
  await t.listeners.click({target:{closest:()=>({id:'extraPass',dataset:{}})}});
  assert.deepEqual(t.requests[1].body,{type:'extraResponse',choice:'pass',expectedVersion:7});
 });
+
+test('field counter UI: uses the card-specific reset label and submits Wind Girl against a counter',async()=>{
+ const t=ui();t.run("state.game.pendingSpell={who:0,awaiting:0,card:{name:'회복'},counter:{name:'블래스트 보이'},counters:[{sourceUnitId:'wind',name:'라이징 윈드 걸',limitText:'재소환 전 1회'}]}");
+ const html=t.run('battlePending(state.game)');assert.match(html,/재소환 전 1회/);assert.doesNotMatch(html,/게임당 1회 사용|다른 대응 카드는 미지원/);
+ await t.listeners.click({target:{closest:()=>({dataset:{spellCounter:'wind'}})}});
+ assert.deepEqual(t.requests[0].body,{type:'spellResponse',choice:'counter',sourceUnitId:'wind',expectedVersion:7});
+});
