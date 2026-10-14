@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
-import {effectUsedThisTurn,migrateLegacyEffectUsage} from '../src/effect-usage.mjs';
+import {effectUsedThisTurn,markEffectUsed,requireUnusedEffect,migrateLegacyEffectUsage,ELEMENTAL_MAGICIAN_IDS} from '../src/effect-usage.mjs';
 import {fieldAbilityFixture} from './helpers/field-ability-fixture.mjs';
 import {extraCounterFixture} from './helpers/extra-counter-fixture.mjs';
 const dir=fs.mkdtempSync(path.join(os.tmpdir(),'coc-physical-use-'));process.env.DATA_DIR=dir;
@@ -41,4 +41,17 @@ test('physical effect usage: legacy single-source records migrate once and ambig
  const g=fieldAbilityFixture(I,'COC-13-005'),second=g.add('COC-13-005',0,'field');g.r.players[0].abilityUsed={'COC-13-005':5};migrateLegacyEffectUsage(g.r);
  assert.equal(effectUsedThisTurn(g.r,0,g.source,1),false);assert.equal(effectUsedThisTurn(g.r,0,second,1),false);assert.equal(g.r.legacyEffectUsageUnresolved.length,1);const before=structuredClone(g.r);migrateLegacyEffectUsage(g.r);assert.deepEqual(g.r,before);
  const h=fieldAbilityFixture(I,'COC-13-005');h.add('COC-13-005',0,'field');h.r.players[0].abilityUsed={'COC-13-005':5};h.r.pendingAbility={who:0,cardId:'COC-13-005',sourceId:h.source};migrateLegacyEffectUsage(h.r);assert.ok(effectUsedThisTurn(h.r,0,h.source,1));
+});
+
+test('physical effect usage: Elemental Magician first effects share one use per player per turn only',()=>{
+ for(const first of ELEMENTAL_MAGICIAN_IDS){
+  const f=fieldAbilityFixture(I,'COC-12-013'),ids=ELEMENTAL_MAGICIAN_IDS.map(cid=>f.add(cid,0,'hand')),others=ELEMENTAL_MAGICIAN_IDS.map(cid=>f.add(cid,1,'hand'));
+  const source=ids[ELEMENTAL_MAGICIAN_IDS.indexOf(first)];markEffectUsed(f.r,0,source,1);
+  for(const id of ids){assert.throws(()=>requireUnusedEffect(f.r,0,id,1),/이번 턴/);assert.equal(effectUsedThisTurn(f.r,0,id,2),false);}
+  for(const id of others)assert.equal(effectUsedThisTurn(f.r,1,id,1),false);
+  markEffectUsed(f.r,1,others[0],1);assert.ok(others.every(id=>effectUsedThisTurn(f.r,1,id,1)));
+  const extraCopy=f.add(first,0,'hand');assert.ok(effectUsedThisTurn(f.r,0,extraCopy,1));
+  const restored=JSON.parse(JSON.stringify(f.r));assert.ok(effectUsedThisTurn(restored,0,extraCopy,1));restored.turnNumber++;assert.ok(ids.every(id=>!effectUsedThisTurn(restored,0,id,1)));assert.ok(others.every(id=>!effectUsedThisTurn(restored,1,id,1)));
+  assert.equal(effectUsedThisTurn(f.r,0,f.source,1),false); // unrelated effects stay independent
+ }
 });
