@@ -38,6 +38,8 @@ This file is for a new coding assistant taking over the repository after the 202
 
 - **2026-10-14 confirmed field counter reset:** COC-12-001/12-002/24-005 may reuse their counter after resummoning. Control transfer alone is not resummoning. Keep Storm COC-14-001 once per physical card per game. Do not ask again.
 
+- **2026-10-14 latest user correction: COC-12-002 Wind Girl negates only opposing MONSTER effects.** It cannot negate spells, Storm integration effects, or raw summons. The live catalog text is now “1회 상대 몬스터의 효과를 무효로 합니다.”. Resummon reset is unchanged. PR #68 broader scope is superseded; do not ask again.
+
 ## Latest implementation update (2026-10-13)
 
 - **Latest COC-21-002 confirmation (PR #58):** Life-Eating Sword is a spell to grave, not equipment. Every granted instance pays 30 HP / gains +100 ATK at bearer\'s own ATTACK phase start; HP <=30 prevents payment, destroying the unit or losing as targeted player. Monster kills by a bearer grant ×2 for its **next own full turn**, copies stack multiplicatively (×4, ×8, ×16). Voluntary unequipping remains prohibited. Track unimplemented causes separately.

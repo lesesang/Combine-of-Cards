@@ -2,9 +2,9 @@ import {declareEffect} from './effect-runtime.mjs';
 
 export const COUNTER_RULES=Object.freeze({
  'COC-14-001':{zone:'integration',kinds:['spell','summon']},
- 'COC-12-001':{zone:'field',kinds:['spell']},
- 'COC-12-002':{zone:'field',kinds:['spell','counter']},
- 'COC-24-005':{zone:'field',kinds:['spell']}
+ 'COC-12-001':{zone:'field',sourceType:'monster',kinds:['spell']},
+ 'COC-12-002':{zone:'field',sourceType:'monster',kinds:['monster-effect']},
+ 'COC-24-005':{zone:'field',sourceType:'monster',kinds:['spell']}
 });
 export const COUNTER_IDS=Object.freeze(Object.keys(COUNTER_RULES));
 export const counterEffectIds=new Set(['storm-spell-counter','storm-summon-counter','card-counter']);
@@ -13,7 +13,14 @@ export function currentCounterTarget(room,pending,kind){
  if(kind==='spell')return room.effectStack?.find(e=>e.effectId==='auto-spell-resolution'&&e.sourceId===pending.sourceId&&e.owner===pending.who);
  return room.effectStack?.find(e=>e.sequence===pending.sequence&&e.effectId==='extra-summon-resolution')||{owner:pending.who,effectId:'extra-summon-resolution'};
 }
-function targetKind(effect){return effect?.effectId==='auto-spell-resolution'?'spell':effect?.effectId==='extra-summon-resolution'?'summon':counterEffectIds.has(effect?.effectId)?'counter':null;}
+function targetKind(effect){
+ if(effect?.effectId==='auto-spell-resolution')return 'spell';
+ if(effect?.effectId==='extra-summon-resolution')return 'summon';
+ // Classify the declared source snapshot, not its current zone or a generic counter ID.
+ // Only registered monster effects are supported; other monster triggers need integration.
+ if(effect?.effectId==='card-counter'&&COUNTER_RULES[effect.payload?.cardId]?.sourceType==='monster')return 'monster-effect';
+ return counterEffectIds.has(effect?.effectId)?'counter':null;
+}
 export function availableCounters(room,who,pending,kind){
  if(room.status!=='active'||!pending||(pending.awaiting??1-pending.who)!==who)return [];
  const target=currentCounterTarget(room,pending,kind),type=targetKind(target);
@@ -51,7 +58,13 @@ export function resolveCardCounter(room,pending,effect,H){
   H.log(room,'effect','무효화 카드 소스 이탈/상태 변경으로 불발');return;
  }
  const target=room.effectStack.find(e=>e.sequence===effect.payload.targetSequence);
- if(!target||target.owner===effect.owner||!rule.kinds.includes(targetKind(target)))throw new Error('invalid card counter target');
+ if(!target||target.owner===effect.owner)throw new Error('invalid card counter target');
+ if(!rule.kinds.includes(targetKind(target))){
+  // Pre-correction saves may contain Wind Girl responses to spells or Storm.
+  // Resolve those as a fizzle, retaining the already spent use and root effect.
+  if(cardId==='COC-12-002'){H.log(room,'effect','라이징 윈드 걸: 상대 몬스터 효과가 아니므로 불발');return;}
+  throw new Error('invalid card counter target');
+ }
  target.negatedBy=effect.sequence;
  H.log(room,'effect',`${H.name(room,effect.sourceId)}: 상대 ${targetKind(target)==='summon'?'소환':'효과'} 무효화`);
 }
