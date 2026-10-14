@@ -215,7 +215,7 @@
     "effectNumber": 1,
     "status": "partial",
     "sourceText": "상대의 주문의 발동 또는 몬스터의 소환을 한 게임당 1회 무효화 합니다.",
-    "trigger": "상대의 등록된 16종 주문 선언 후 spellResponse 대응 창",
+    "trigger": "상대의 등록된 39종 주문 선언 후 spellResponse 대응 창",
     "condition": "자신의 유효한 일체화 스톰블레이거, 현재 대응권자, 같은 UID의 게임당 1회 미사용",
     "cost": "추가 자원 비용 없음; 선언 시 게임당 1회 사용 기록 소비",
     "target": "상대가 선언한 원래 주문 스택 항목",
@@ -310,6 +310,857 @@
       {
         "path": "tests/ability-ui.test.mjs",
         "name": "BLOCK UI: requires a selected other hand card and submits its UID with the version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-01-004",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "필드에 몬스터 하나에게 100피해를 준다. 만약 이 카드가 몬스터 취급으로 필드에 소환되었을시 다음의 효과를 가진다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "몬스터 취급으로 필드에 소환된 동안 공격할 수 없습니다.; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "선택 필드 몬스터에 피해 100; 몬스터화/일체화 강화 조항은 별도 미완료",
+    "duration": "해당 해결 사건 1회",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-01-005",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "필드의 원하는 카드1장을 덱으로 되돌린다 그 카드의 주인이 1장 드로우한다. 이 카드가 몬스터 취급으로 필드의 소환되었을경우 다음의 효과와 스텟을 가집니다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "몬스터 취급으로 필드에 소환된 동안 공격할 수 없습니다.; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "선택 필드 몬스터를 원소유자 덱에 무작위 삽입한 뒤 그 소유자가 1장 드로우",
+    "duration": "해당 해결 사건 1회",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-01-009",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "다음 턴 상대는 직접공격과 사용자를 주문의 대상으로 지정할 수 없습니다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "일체화하지 않으면 사용할 수 없습니다.; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "다음 상대 턴까지 상대 직접 공격 금지 및 사용자에 대한 주문 대상 지정 보호",
+    "duration": "다음 상대 턴까지; 기존 turnsTaken 만료 기준",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-06-007",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "원하는 대상에게 300피해를 준다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "이번 턴에 카드를 5장 사용하여야 합니다.; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "선언한 몬스터 또는 플레이어에게 피해 300; 자기/아군도 선택 가능",
+    "duration": "해당 해결 사건 1회",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-08-006",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "상대 몬스터를 하나 파괴한다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "내 필드의 요괴 속성 몬스터가 2장 이어야 합니다.; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "선언한 상대 필드 몬스터 직접 파괴",
+    "duration": "해당 해결 사건 1회",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-14-003",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "필드의 몬스터 1장을 제거합니다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "일체화 상태여야 합니다.; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "선언한 양쪽 필드 중 몬스터 하나를 원소유자 제외 영역으로 이동",
+    "duration": "해당 해결 사건 1회",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-14-006",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "다음 턴에 상대는 공격할 수 없습니다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "상대의 필드에 공격력 350이상의 카드가 있을 때 발동할 수 있다.; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "다음 상대 턴까지 공격 금지",
+    "duration": "다음 상대 턴까지",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-17-005",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "적 하나에게 1d400의 피해를 준다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "호루스의 현신–파라오와 일체화 상태여야 한다.; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "선언한 적에게 1d400 피해",
+    "duration": "해당 해결 사건 1회",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-17-006",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "적 전체에게 1d200의 피해를 준다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "호루스의 현신–파라오와 일체화 상태여야 한다.; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "상대 플레이어와 상대 필드 몬스터에 공유 1d200 피해",
+    "duration": "해당 해결 사건 1회",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-19-005",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "필드의 몬스터 1장을 굳힌다. 그 몬스터는 피해를 받지 않고 공격할 수 없다. 이 효과는 해당 몬스터가 파괴될 때까지 지속된다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "별도 인쇄 조건 없음; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "선언한 몬스터 공격 금지·전투 및 효과 피해 면역; 회복과 직접 파괴는 허용",
+    "duration": "현재 엔진의 대상 필드 이탈까지; 영역 이탈/재진입의 전체 조합은 미검증",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-20-004",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "이 카드는 버닝 데몬즈로 취급한다 다이스1d5를 굴려 나온수치×100만큼의 피해를 받고 그 수치만큼 버닝 데몬즈 몬스터의 공격력을 올린다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "별도 인쇄 조건 없음; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "1d5×100 자기 피해와 같은 수치만큼 선택한 자기 버닝데몬즈 공격력 증가; 발동 비용이 아닌 해결 효과",
+    "duration": "공격력 강화는 대상 필드 이탈까지; 자기 피해는 해결 즉시",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-20-011",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "필드에 \"버닝데몬즈\"몬스터를 하나 지정한다. 그 몬스터에게 \"이 카드는 주문,효과로 파괴되지 않는다.\"를 부여한다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "필드에 버닝데몬즈가 있어야 한다.; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "양쪽 필드 중 선택한 버닝데몬즈에 직접 효과 파괴 면역 부여; 치명 피해 파괴는 별도",
+    "duration": "대상 필드 이탈까지",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-27-006",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "원하는 대상에게 100피해를 준다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "별도 인쇄 조건 없음; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "선언한 몬스터 또는 플레이어에게 피해 100; 자기/아군도 선택 가능",
+    "duration": "해당 해결 사건 1회",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-30-001",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "공격력이 100 이하인 적 몬스터를 모두 파괴한다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "별도 인쇄 조건 없음; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "현재 상대 필드의 공격력 100 이하 몬스터를 동시 파괴; 첫 파괴 회복은 파괴 직전 최대 HP 참조",
+    "duration": "해당 해결 사건 1회",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-30-002",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "지난 내 턴에 파괴된 적 몬스터의 개수만큼 100 피해를 준다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "별도 인쇄 조건 없음; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "지난 자기 턴에 파괴된 적 몬스터 기록 수×100을 선언 대상에게 피해",
+    "duration": "해당 해결 사건 1회",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-30-006",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "적 몬스터 하나의 공격다이스를 10으로 낮춥니다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "별도 인쇄 조건 없음; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "선언한 상대 몬스터의 공격 다이스 상한을 10으로 설정",
+    "duration": "대상 필드 이탈까지",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-31-006",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "필드의 몬스터중 속성이 마술사 혹은마법사가 아닐 경우, 공격력을 코인토스 3번(3d2)에서 앞면(1)이 나온 수 × 50 만큼 공격력을 내린다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "별도 인쇄 조건 없음; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "코인 3회 앞면 수×50만큼 선택 비마술사/비마법사 공격력 감소, 기존 0 도달 파괴 처리 유지",
+    "duration": "감소 수치는 대상 필드 이탈까지",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-31-008",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "코인토스(1d2)에서 앞면(1)이 나온다면 필드의 모든 몬스터를 파괴한다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "별도 인쇄 조건 없음; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "코인 앞면이면 양쪽 필드 몬스터 동시 파괴; 일체화 제외",
+    "duration": "해당 해결 사건 1회",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-31-010",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "코인토스 5번(5d2)에서 앞면(1)이라면 나의 필드의 몬스터 전체 공격력을 앞면(1) 수 ×100를 올리고, 뒷면(2)이라면 상대의 필드 몬스터 전체 HP 뒷면(2)수×150을 내린다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "최광(最光)의 대마법사 – 슈와 일체화한다.; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "코인 5회 앞면 수×100을 자기 필드 전체 공격력에 더하고 뒷면 수×150을 상대 필드 전체에 피해",
+    "duration": "강화는 대상 필드 이탈까지, 피해는 즉시",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-32-005",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "상대 체력에 피해 1d200을 입힌다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "필드에 '원소의 마법사 – 플레임'이 존재.; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "상대 플레이어에게 1d200 피해",
+    "duration": "해당 해결 사건 1회",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-32-006",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "아군의 체력을 100 회복한다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "필드에 '원소의 마법사 – 워터'가 존재.; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "자기 플레이어 HP 100 회복",
+    "duration": "해당 해결 사건 1회",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-32-007",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "주문 발동 후 상대 턴에서 상대는 주문 카드를 발동 할 수 없다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "필드에 '원소의 마법사 – 윈드'가 존재.; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "다음 상대 턴까지 상대 주문 발동 금지",
+    "duration": "다음 상대 턴까지",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-32-008",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "상대 필드 몬스터를 전부 파괴한다.",
+    "trigger": "자신 MAIN 선언·조건/대상 검증 → 상대 pass/스톰블레이거 카운터 → LIFO 해결",
+    "condition": "필드에 '원소의 마법사 – 랜드'가 존재.; 선언 대상은 공통 서버 검증, 사용 금지 상태 거절",
+    "cost": "주문은 선언 시 묘지, 무효/대상 소실 시 미반환; 추가 발동 비용 없음",
+    "target": "선언한 UID/플레이어를 고정하거나 카드의 전체 필드 효과 적용. 상세 범위는 SPELL_RESPONSE_BATCH.md",
+    "resolution": "현재 상대 필드 몬스터 전부 동시 파괴",
+    "duration": "해당 해결 사건 1회",
+    "remaining": "카드의 다른 조항/복사/영역 이탈 후 재진입/전역 유발·모든 동시 승패 조합, v1.3 원본 대조. partial이며 완전 인증 아님",
+    "implementation": [
+      "src/spell-response-targets.mjs",
+      "src/spell-response-registry.mjs",
+      "src/automated-effects.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: per-card success, counter and target cases"
+      },
+      {
+        "path": "tests/spell-response-batch.test.mjs",
+        "name": "batch: all 23 spells are actually selected and cast by every AI level"
+      },
+      {
+        "path": "tests/spell-batch-api.test.mjs",
+        "name": "batch HTTP: all 23 declarations survive restart and resolve once without leaking private hands"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "batch UI: all 23 spell IDs use the chosen target and optimistic version"
       }
     ]
   }

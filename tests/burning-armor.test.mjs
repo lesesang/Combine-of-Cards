@@ -26,6 +26,7 @@ test('Burning Armor blocks direct effect destruction, but 0 HP still destroys mo
  const {r,place}=make();
  const target=place(0,'COC-20-001','field'),spell=place(0,'COC-20-011','hand');
  I.apply(r,0,'play',{unitId:spell,target:{type:'unit',id:target}});
+ I.apply(r,1,'spellResponse',{choice:'pass'});
  assert.equal(r.units[target].effectDestructionImmune,true);
  I.H.destroy(r,target);
  assert.ok(r.players[0].field.includes(target),'direct effect destruction is prevented');
@@ -39,6 +40,7 @@ test('simultaneous batch excludes protected monsters from pre-destruction HP max
  const protectedMonster=place(0,'COC-20-001','field'),spell=place(0,'COC-20-011','hand');
  const victim=place(1,'COC-03-002','field');
  I.apply(r,0,'play',{unitId:spell,target:{type:'unit',id:protectedMonster}});
+ I.apply(r,1,'spellResponse',{choice:'pass'});
  r.units[protectedMonster].hp=500;r.units[victim].hp=80;
  r.players[0].hp=400;r.effects.push({type:'firstDestroyHeal',player:0,turn:1});
  I.H.destroyBatch(r,[protectedMonster,victim]);

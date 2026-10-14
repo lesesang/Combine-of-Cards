@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { castAutomatedSpell, hasAutoSpell, spellHandlerIds, validateLifeEatingSwordTarget } from './src/automated-effects.mjs';
 import {automationStatus} from './src/automation-status.mjs';
 import {responseSpellIds} from './src/spell-response-registry.mjs';
+import {prepareResponseTargets,responseTargetStillValid,responseTargetChoices} from './src/spell-response-targets.mjs';
 import {legalSpellCounters,declareSpellCounter,spellResponsePlayer} from './src/spell-counters.mjs';
 import {planActivation,commitActivationCosts} from './src/activation-rules.mjs';
 import {validateExtraSummon, EXTRA_RECIPES} from './src/extra-summons.mjs';
@@ -154,7 +155,7 @@ const previousZone=options.tokenAction&&u.created?zoneOwner(r,id):null;if(to==='
  // leaves the battlefield; the spell itself remains in its owner's grave.
  if(!['field','integration'].includes(to)&&r.effects?.length)
   r.effects=r.effects.filter(e=>e.type!=='lifeEatingSword'||e.target?.kind!=='unit'||e.target.id!==id);
- const p=r.players[owner??u.owner];if(!['field','integration'].includes(to)){u.frozen=false;u.battleInvulnerable=false;u.effectsNegated=false;u.diceMax=undefined;u.diceMin=undefined;u.cannotAttack=false;u.attackTurn=-1;u.attackCount=0;u.attackCountTurn=-1;const original=cards.get(u.cardId);if(original){u.atk=Number.isFinite(+original.atk)?Math.max(0,Math.floor(+original.atk)):0;u.hp=Number.isFinite(+original.hp)?Math.floor(+original.hp):null;u.baseAtk=u.atk;}delete u.temporaryBuff;delete u.buffExpiresAt;delete u.treatedAsToon;delete u.superiorClaw;delete u.effectDestructionImmune;delete u.playerAttackBonusApplied;}if(u.created&&to!=='field'&&to!=='integration'){delete r.units[id];if(previousZone?.zone==='field'&&['사용','릴리스'].includes(options.tokenAction))onTokenActivity(r,options.tokenAction,previousZone.player,{zone:zoneOwner,move,instantiate,log});return}if(to==='field'){const slot=p.field.findIndex(x=>x===null);if(slot<0)fail(409,'필드 세 칸이 모두 차 있습니다.');p.field[slot]=id;u.owner=u.owner??owner;u.attackTurn=-1;}else if(to==='integration'){if(p.integration)fail(409,'이미 일체화 중입니다.');p.integration=id;const bonus=Math.max(0,(p.playerAtkBonus||0)-(u.playerAttackBonusApplied||0));if(bonus){u.atk+=bonus;u.playerAttackBonusApplied=(u.playerAttackBonusApplied||0)+bonus;}}else if(to==='banished')p.banished.push(id);else if(to==='deck'){p.deck.splice(crypto.randomInt(p.deck.length+1),0,id);}else if(to==='hand')p.hand.push(id);else if(to==='grave'){p.grave.push(id);u.atk=Math.max(0,Number(cards.get(u.cardId)?.atk)||0);u.hp=Number.isFinite(+cards.get(u.cardId)?.hp)?+cards.get(u.cardId).hp:null;u.attackTurn=-1;}else fail(400,'이동 위치가 유효하지 않습니다.');
+ const p=r.players[owner??u.owner];if(!['field','integration'].includes(to)){u.frozen=false;u.battleInvulnerable=false;u.effectsNegated=false;u.diceMax=undefined;u.diceMin=undefined;u.cannotAttack=false;u.attackTurn=-1;u.attackCount=0;u.attackCountTurn=-1;const original=cards.get(u.cardId);if(original){u.atk=Number.isFinite(+original.atk)?Math.max(0,Math.floor(+original.atk)):0;u.hp=Number.isFinite(+original.hp)?Math.floor(+original.hp):null;u.baseAtk=u.atk;}delete u.temporaryBuff;delete u.buffExpiresAt;delete u.treatedAsToon;delete u.superiorClaw;delete u.effectDestructionImmune;delete u.damageInvulnerable;delete u.playerAttackBonusApplied;}if(u.created&&to!=='field'&&to!=='integration'){delete r.units[id];if(previousZone?.zone==='field'&&['사용','릴리스'].includes(options.tokenAction))onTokenActivity(r,options.tokenAction,previousZone.player,{zone:zoneOwner,move,instantiate,log});return}if(to==='field'){const slot=p.field.findIndex(x=>x===null);if(slot<0)fail(409,'필드 세 칸이 모두 차 있습니다.');p.field[slot]=id;u.owner=u.owner??owner;u.attackTurn=-1;}else if(to==='integration'){if(p.integration)fail(409,'이미 일체화 중입니다.');p.integration=id;const bonus=Math.max(0,(p.playerAtkBonus||0)-(u.playerAttackBonusApplied||0));if(bonus){u.atk+=bonus;u.playerAttackBonusApplied=(u.playerAttackBonusApplied||0)+bonus;}}else if(to==='banished')p.banished.push(id);else if(to==='deck'){p.deck.splice(crypto.randomInt(p.deck.length+1),0,id);}else if(to==='hand')p.hand.push(id);else if(to==='grave'){p.grave.push(id);u.atk=Math.max(0,Number(cards.get(u.cardId)?.atk)||0);u.hp=Number.isFinite(+cards.get(u.cardId)?.hp)?+cards.get(u.cardId).hp:null;u.attackTurn=-1;}else fail(400,'이동 위치가 유효하지 않습니다.');
  if(equipped.length){
   delete u.attachments;
   for(const equippedId of equipped){
@@ -172,7 +173,7 @@ const previousZone=options.tokenAction&&u.created?zoneOwner(r,id):null;if(to==='
  }
 }
 function zoneOwner(r,id){if(r.units[id]?.attachmentHostId){const hostId=r.units[id].attachmentHostId,z=zoneOwner(r,hostId);return z?{player:z.player,zone:'attachment',hostId}:null;}if(r.units[id]?.overlayHostId){const hostId=r.units[id].overlayHostId,z=zoneOwner(r,hostId);return z?{player:z.player,zone:'overlay',hostId}:null;}for(let i=0;i<r.players.length;i++){const p=r.players[i];for(const z of ['deck','hand','grave','extra','banished'])if(p[z].includes(id))return {player:i,zone:z};if(p.field.includes(id))return {player:i,zone:'field'};if(p.integration===id)return {player:i,zone:'integration'};}return null}
-function damageUnit(r,id,value,{battle=false,sourceId=null,sourcePlayer=null}={}){const u=r.units[id];if(!u||u.hp===null)fail(409,'체력이 없는 카드입니다.');if(value<0&&u.cardId==='COC-09-002')value=Math.max(-1,value);u.preDamageHp=u.hp;u.hp+=value;if(u.hp<=0){if(battle&&(u.cardId==='COC-26-011'||u.cardId==='COC-05-002')){u.hp=1;return false}H.destroy(r,id,{cause:'lethal',sourceId,sourcePlayer});return true}return false}
+function damageUnit(r,id,value,{battle=false,sourceId=null,sourcePlayer=null}={}){const u=r.units[id];if(!u||u.hp===null)fail(409,'체력이 없는 카드입니다.');if(value<0&&u.damageInvulnerable){log(r,'effect',`${unitName(r,id)}: 피해 면역으로 피해를 받지 않음`);return false;}if(value<0&&u.cardId==='COC-09-002')value=Math.max(-1,value);u.preDamageHp=u.hp;u.hp+=value;if(u.hp<=0){if(battle&&(u.cardId==='COC-26-011'||u.cardId==='COC-05-002')){u.hp=1;return false}H.destroy(r,id,{cause:'lethal',sourceId,sourcePlayer});return true}return false}
 function dropFromDeck(r,who,count){
  const p=r.players[who];for(let i=0;i<count&&p.deck.length;i++){const id=p.deck.shift();p.grave.push(id);log(r,'mill',`${p.label}가 덱 맨 위의 카드 1장을 묘지로 보냈습니다.`)}
 }
@@ -439,7 +440,11 @@ function finishAutomatedSpell(r){
     throw new Error('unexpected spell effect in response stack');
    const card=cards.get(effect.payload.cardId);
    if(!card||!REACTIVE_SPELL_IDS.has(card.id))throw new Error('unregistered queued spell effect');
-   const result=castAutomatedSpell(r,effect.owner,card,effect.payload.body,H);
+   if(!responseTargetStillValid(r,effect.owner,card.id,effect.payload.body,H)){
+    log(r,'effect',`${card.name}: 선언한 대상 소실/대상 조건 변경으로 불발 (비용 반환 없음)`);
+    return;
+   }
+   const result=castAutomatedSpell(r,effect.owner,card,effect.payload.body,H,{activationValidated:true});
    if(result?.retain)throw new Error('queued spell unexpectedly changed its retention zone');
    log(r,'effect',`${r.players[effect.owner].label}: ${card.name} 주문 효과 해결`);
   },
@@ -504,6 +509,7 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
   fail(409,'이 주문의 특수 효과는 아직 자동 판정을 지원하지 않습니다. 다른 카드를 사용해 주세요.');
  if(c.type==='일체화'&&p.integration)fail(409,'이미 일체화했습니다.');
  if(c.id==='COC-21-002')validateLifeEatingSwordTarget(r,body,H,who);
+ if(REACTIVE_SPELL_IDS.has(c.id))body=prepareResponseTargets(r,who,c.id,body,H);
  const activation=planActivation({room:r,who,unitId:id,cards,body});
  if(c.type==='몬스터'&&!p.field.includes(null)&&
     !activation.costs.some(cost=>p.field.includes(cost.unitId)))
@@ -677,6 +683,8 @@ function chooseAIMove(r){const who=1,p=r.players[who],level=r.aiDifficulty||'med
   const body=c.id==='COC-31-009'?{costCardId:chooseAISpellCost(r,who,id)}:{};
   try{planActivation({room:r,who,unitId:id,cards,body})}
   catch(e){if(e.status===409)return false;throw e}
+  const targets=responseTargetChoices(r,who,c.id,H);
+  if(targets&&targets.length===0)return false;
   if(c.id==='COC-21-002'&&!p.integration&&!p.field.some(mid=>mid&&r.units[mid].hp>30))return false;
   if(c.type==='주문')return hasAutoSpell(c.id);
   if(c.type==='일체화')return !p.integration&&!c.conditions.length;
@@ -773,6 +781,14 @@ function runAI(r){if(r.mode!=='ai'||r.status!=='active')return;
         return !land&&!r.units[mid].treatedAsToon&&!name.includes('카툰');
        });
        targets=eligible.slice(0,2);
+      }
+      const legalTargets=responseTargetChoices(r,1,c.id,H);
+      if(legalTargets){
+       if(t.type==='player'&&t.player===undefined)t.player=0;
+       if(!responseTargetStillValid(r,1,c.id,{target:t},H)){
+        for(const key of Object.keys(t))delete t[key];
+        Object.assign(t,legalTargets[0]);
+       }
       }
       const before=structuredClone(r);
       try{apply(r,1,'play',{unitId:id,target:t,targets,costCardId:c.id==='COC-31-009'?chooseAISpellCost(r,1,id):undefined});}

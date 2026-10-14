@@ -29,6 +29,7 @@ test('G cutting tool damages one field monster by exactly 100',()=>{
  const spell=place(0,'COC-01-004','hand'),target=place(1,'COC-03-002','field');
  r.units[target].hp=101;
  I.apply(r,0,'play',{unitId:spell,target:{type:'unit',id:target}});
+ I.apply(r,1,'spellResponse',{choice:'pass'});
  assert.equal(r.units[target].hp,1);
  assert.ok(r.players[0].grave.includes(spell));
 });
@@ -36,6 +37,7 @@ test('G dimension wrench returns a field monster to its original owner before th
  const {r,place}=room();
  const spell=place(0,'COC-01-005','hand'),target=place(1,'COC-03-002','field');
  I.apply(r,0,'play',{unitId:spell,target:{type:'unit',id:target}});
+ I.apply(r,1,'spellResponse',{choice:'pass'});
  assert.equal(r.players[1].field.includes(target),false);
  assert.ok(r.players[1].hand.includes(target)||r.players[1].deck.includes(target),'the returned card is randomly inserted, so it is not guaranteed to be the next draw');
 });
