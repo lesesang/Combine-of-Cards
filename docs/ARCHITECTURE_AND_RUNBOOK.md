@@ -92,7 +92,7 @@ Windows PowerShell에서도 동일하게 npm 명령 사용. npm run check:covera
 
 **보고서 갱신:** `npm run check:coverage`는 AUTOMATION_COVERAGE.md / automation-audit.json / EFFECT_COVERAGE.md만 재생성한다. 수동 설명은 **AUTOMATION_NOTES.md**, 효과 명세는 **effect-coverage.json**에 쓴다. `npm run check:coverage -- --check`는 파일을 바꾸지 않고 출력 일치·원문/효과 번호·구현 경로·테스트 이름을 검증한다. CI는 이 읽기 전용 검사를 사용한다. 정본 전체 검증이나 완전 자동화 인증을 뜻하지 않는다.
 
-**Codex 현행 문서:** [CODEX_HANDOFF](CODEX_HANDOFF.md) · [CODEX_IMPLEMENTATION_PLAN](CODEX_IMPLEMENTATION_PLAN.md) · [CODEX_RULES_REFERENCE](CODEX_RULES_REFERENCE.md). 최신 158 partial/95 manual/1 basic, 71 주문 핸들러, 61 일반 주문 응답 스택, 56개 효과별 추적 등록. `1.3-ai-beta.10` 서버 버전 문자열은 이 자동화 범위 집계를 나타내지 않는다.
+**Codex 현행 문서:** [CODEX_HANDOFF](CODEX_HANDOFF.md) · [CODEX_IMPLEMENTATION_PLAN](CODEX_IMPLEMENTATION_PLAN.md) · [CODEX_RULES_REFERENCE](CODEX_RULES_REFERENCE.md). 최신 161 partial/92 manual/1 basic, 71 주문 핸들러, 61 일반 주문 응답 스택, 59개 효과별 추적 등록. `1.3-ai-beta.10` 서버 버전 문자열은 이 자동화 범위 집계를 나타내지 않는다.
 
 신규 `src/grave-abilities.mjs`는 순수 비용 검사와 묘지 회수, `src/effect-usage.mjs`는 효과 번호별 턴 제한을 담당한다. actions API의 `graveAbility`는 `sourceUnitId`, `costUnitId`, `expectedVersion`을 받는다. 본인 상태의 `graveAbilities`에 현재 합법적인 조합만 제공하고 상대 비공개 영역은 포함하지 않는다. 규칙/엔진 버전은 beta.10이며, 기존 방에 없던 `effectUsage`는 첫 사용부터 생성된다. 이전 버전에서 수행한 효과 횟수를 소급 복원하지는 않는다.
 
@@ -132,3 +132,7 @@ Windows PowerShell에서도 동일하게 npm 명령 사용. npm run check:covera
 ## 엑스트라 소환 무효화 API (2026-10-14)
 
 `pendingExtraSummon`은 `awaiting`, `counter`, 현재 대응자에게만 `counters`를 공개한다. `extraResponse`에서 `choice:counter, sourceUnitId` 또는 `choice:pass`를 선택하며 `expectedVersion`을 제출한다. 같은 물리 스톰블레이거의 `spellCounterGameUsed`는 주문/소환 합계 게임당 1회다. 소환/카운터는 공통 JSON LIFO 스택을 사용한다. 구 pass 전용 저장은 응답 시 스택을 보완한다. 공개 상태에는 엑스트라 내부 UID·스택·상대 패를 추가하지 않는다. 새 모듈 `src/summon-counters.mjs`, 명세 `EXTRA_SUMMON_COUNTERS.md`.
+
+## 필드 무효화·다중 대응 (2026-10-14)
+
+`src/counter-effects.mjs`가 카드별 소스 영역·대상 종류·사용 상태와 LIFO 카운터 등록/해결을 공유한다. `pendingSpell`/`pendingExtraSummon`의 `counter`는 마지막 선언이며 내부 `countersDeclared`는 저장용 목록이다. 공개 `counters`에는 현재 합법 후보의 UID/이름/`limitText`만 제공한다. 필드 카드 `counterUsedThisStay`는 필드 밖에서 재진입 시 초기화하지만 필드 간 조종권 이동에는 유지한다. `fieldRevision`/기존 `integrationRevision`은 선언 후 이탈·재진입을 식별한다. API는 기존 `spellResponse`/`extraResponse`를 재사용하며 대상은 서버가 마지막 상대 효과로 고정한다. 클라이언트가 임의 스택 대상을 정하지 못한다.

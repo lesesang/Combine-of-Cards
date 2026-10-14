@@ -67,8 +67,8 @@
   ],
   "generatedAt": "repository build time",
   "counts": {
-    "partial": 158,
-    "manual": 95,
+    "partial": 161,
+    "manual": 92,
     "basic": 1
   },
   "notes": [
@@ -1220,7 +1220,7 @@
       "name": "F=HERO 블래스트 보이",
       "type": "몬스터",
       "zone": "main",
-      "status": "manual",
+      "status": "partial",
       "conditions": [],
       "effects": [
         "1회 상대 주문을 무효로 합니다."
@@ -1232,7 +1232,7 @@
       "name": "F=HERO 라이징 윈드 걸",
       "type": "몬스터",
       "zone": "main",
-      "status": "manual",
+      "status": "partial",
       "conditions": [],
       "effects": [
         "1회 상대 효과를 무효로 합니다."
@@ -2563,7 +2563,7 @@
       "name": "디텍티브 매치",
       "type": "몬스터",
       "zone": "main",
-      "status": "manual",
+      "status": "partial",
       "conditions": [
         "베스트 지니어스와 일체화되어야 합니다."
       ],

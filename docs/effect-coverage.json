@@ -228,7 +228,7 @@
     "condition": "자신의 유효한 일체화 스톰블레이거, 현재 대응권자, 같은 UID의 게임당 1회 미사용",
     "cost": "추가 자원 비용 없음; 선언 시 게임당 1회 사용 기록 소비",
     "target": "상대가 선언한 원래 주문/엑스트라 소환 스택 항목",
-    "resolution": "후발 카운터 → 원 선언자 pass → LIFO 해결. 주문/소환 효과 생략, 비용 미반환. 무효된 엑스트라 몬스터는 엑스트라 덱 유지(2026-10-14 사용자 확정). 소환 카운터 소스 이탈/재진입·무효 시 불발",
+    "resolution": "후발 카운터 → 원 선언자 pass → LIFO 해결. 주문/소환 효과 생략, 비용 미반환. 무효된 엑스트라 몬스터는 엑스트라 덱 유지(2026-10-14 사용자 확정). 소환 카운터 소스 이탈/재진입·무효 시 불발; 라이징 윈드 걸의 후발 무효화에 의해 취소될 수 있으나 소비한 게임당 횟수는 유지",
     "duration": "주문/소환 절 합계 동일 물리 카드 게임당 1회; 선언 시 소비, 영역 이동/저장/재시작 보존",
     "remaining": "패 일반 소환·효과에 의한 소환/부활·토큰 소환 대응, 미등록 주문과 모든 복사/연쇄 조합은 미완료. 정본 DOCX/JSON 부재",
     "implementation": [
@@ -236,7 +236,8 @@
       "src/effect-runtime.mjs",
       "server.mjs",
       "public/app.js",
-      "src/summon-counters.mjs"
+      "src/summon-counters.mjs",
+      "src/counter-effects.mjs"
     ],
     "tests": [
       {
@@ -286,6 +287,10 @@
       {
         "path": "tests/ability-ui.test.mjs",
         "name": "summon UI: only the responder counters and the summoner acknowledges without exposing extra UIDs"
+      },
+      {
+        "path": "tests/field-counter-chain.test.mjs",
+        "name": "field counters: latest opposing effect alone is legal and two or three counters resolve LIFO"
       }
     ]
   },
@@ -2134,6 +2139,144 @@
       {
         "path": "tests/summon-counter-api.test.mjs",
         "name": "summon HTTP: all 21 paid declarations and counters restore without leaking private data or refunding costs"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-12-001",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "1회 상대 주문을 무효로 합니다.",
+    "trigger": "등록된 주문 대응 창; 라이징 윈드 걸은 주문/엑스트라 창의 마지막 상대 무효화 효과에도 대응",
+    "condition": "자신이 현재 대응권자, 유효한 자기 필드 소스, 현재 필드 체류 중 미사용",
+    "cost": "추가 자원 비용 없음; 선언 시 해당 필드 체류의 사용 횟수 소비",
+    "target": "마지막 상대 주문 (효과 카운터/생 소환은 대상 아님)",
+    "resolution": "후발 무효화 선언·대응권 교대·pass 후 LIFO. 무효된 효과만 생략, 앞서 지불한 비용/횟수 미반환. 소스 이탈/재진입·무효·조종자 변경 시 불발",
+    "duration": "2026-10-14 사용자 확정: 재소환하면 재사용 가능. 필드 간 조종권 이동만으로 초기화하지 않으며 JSON 저장/재접속은 사용 상태 유지",
+    "remaining": "범용 필드/묘지/소환 유발 대응은 미통합. 라이징 윈드 걸이 모든 종류의 상대 효과에 대응하는 완전 엔진은 아직 아님. 퓨전 주문 별도 발동 창·모든 복사 조합도 미완료",
+    "implementation": [
+      "src/counter-effects.mjs",
+      "src/spell-counters.mjs",
+      "src/summon-counters.mjs",
+      "server.mjs",
+      "public/app.js"
+    ],
+    "tests": [
+      {
+        "path": "tests/field-counter-chain.test.mjs",
+        "name": "field counters: all three negate all 61 registered spells without consuming their own physical card"
+      },
+      {
+        "path": "tests/field-counter-chain.test.mjs",
+        "name": "field counters: latest opposing effect alone is legal and two or three counters resolve LIFO"
+      },
+      {
+        "path": "tests/field-counter-chain.test.mjs",
+        "name": "field counters: returning and resummoning resets only the field limit and invalidates the old declaration"
+      },
+      {
+        "path": "tests/field-counter-chain.test.mjs",
+        "name": "field counters: AI uses each legal field counter and answers a counter with Wind Girl"
+      },
+      {
+        "path": "tests/field-counter-api.test.mjs",
+        "name": "field counter HTTP: three nested declarations survive restarts and invalid requests preserve usage and disk"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "field counter UI: uses the card-specific reset label and submits Wind Girl against a counter"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-12-002",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "1회 상대 효과를 무효로 합니다.",
+    "trigger": "등록된 주문 대응 창; 라이징 윈드 걸은 주문/엑스트라 창의 마지막 상대 무효화 효과에도 대응",
+    "condition": "자신이 현재 대응권자, 유효한 자기 필드 소스, 현재 필드 체류 중 미사용",
+    "cost": "추가 자원 비용 없음; 선언 시 해당 필드 체류의 사용 횟수 소비",
+    "target": "마지막 상대 주문 또는 무효화 효과",
+    "resolution": "후발 무효화 선언·대응권 교대·pass 후 LIFO. 무효된 효과만 생략, 앞서 지불한 비용/횟수 미반환. 소스 이탈/재진입·무효·조종자 변경 시 불발",
+    "duration": "2026-10-14 사용자 확정: 재소환하면 재사용 가능. 필드 간 조종권 이동만으로 초기화하지 않으며 JSON 저장/재접속은 사용 상태 유지",
+    "remaining": "범용 필드/묘지/소환 유발 대응은 미통합. 라이징 윈드 걸이 모든 종류의 상대 효과에 대응하는 완전 엔진은 아직 아님. 퓨전 주문 별도 발동 창·모든 복사 조합도 미완료",
+    "implementation": [
+      "src/counter-effects.mjs",
+      "src/spell-counters.mjs",
+      "src/summon-counters.mjs",
+      "server.mjs",
+      "public/app.js"
+    ],
+    "tests": [
+      {
+        "path": "tests/field-counter-chain.test.mjs",
+        "name": "field counters: all three negate all 61 registered spells without consuming their own physical card"
+      },
+      {
+        "path": "tests/field-counter-chain.test.mjs",
+        "name": "field counters: latest opposing effect alone is legal and two or three counters resolve LIFO"
+      },
+      {
+        "path": "tests/field-counter-chain.test.mjs",
+        "name": "field counters: returning and resummoning resets only the field limit and invalidates the old declaration"
+      },
+      {
+        "path": "tests/field-counter-chain.test.mjs",
+        "name": "field counters: AI uses each legal field counter and answers a counter with Wind Girl"
+      },
+      {
+        "path": "tests/field-counter-api.test.mjs",
+        "name": "field counter HTTP: three nested declarations survive restarts and invalid requests preserve usage and disk"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "field counter UI: uses the card-specific reset label and submits Wind Girl against a counter"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-24-005",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "단1회, 상대의 주문사용을 무효화합니다.",
+    "trigger": "등록된 주문 대응 창; 라이징 윈드 걸은 주문/엑스트라 창의 마지막 상대 무효화 효과에도 대응",
+    "condition": "자신이 현재 대응권자, 유효한 자기 필드 소스, 현재 필드 체류 중 미사용",
+    "cost": "추가 자원 비용 없음; 선언 시 해당 필드 체류의 사용 횟수 소비",
+    "target": "마지막 상대 주문 (효과 카운터/생 소환은 대상 아님)",
+    "resolution": "후발 무효화 선언·대응권 교대·pass 후 LIFO. 무효된 효과만 생략, 앞서 지불한 비용/횟수 미반환. 소스 이탈/재진입·무효·조종자 변경 시 불발",
+    "duration": "2026-10-14 사용자 확정: 재소환하면 재사용 가능. 필드 간 조종권 이동만으로 초기화하지 않으며 JSON 저장/재접속은 사용 상태 유지",
+    "remaining": "범용 필드/묘지/소환 유발 대응은 미통합. 라이징 윈드 걸이 모든 종류의 상대 효과에 대응하는 완전 엔진은 아직 아님. 퓨전 주문 별도 발동 창·모든 복사 조합도 미완료",
+    "implementation": [
+      "src/counter-effects.mjs",
+      "src/spell-counters.mjs",
+      "src/summon-counters.mjs",
+      "server.mjs",
+      "public/app.js"
+    ],
+    "tests": [
+      {
+        "path": "tests/field-counter-chain.test.mjs",
+        "name": "field counters: all three negate all 61 registered spells without consuming their own physical card"
+      },
+      {
+        "path": "tests/field-counter-chain.test.mjs",
+        "name": "field counters: latest opposing effect alone is legal and two or three counters resolve LIFO"
+      },
+      {
+        "path": "tests/field-counter-chain.test.mjs",
+        "name": "field counters: returning and resummoning resets only the field limit and invalidates the old declaration"
+      },
+      {
+        "path": "tests/field-counter-chain.test.mjs",
+        "name": "field counters: AI uses each legal field counter and answers a counter with Wind Girl"
+      },
+      {
+        "path": "tests/field-counter-api.test.mjs",
+        "name": "field counter HTTP: three nested declarations survive restarts and invalid requests preserve usage and disk"
+      },
+      {
+        "path": "tests/ability-ui.test.mjs",
+        "name": "field counter UI: uses the card-specific reset label and submits Wind Girl against a counter"
       }
     ]
   }

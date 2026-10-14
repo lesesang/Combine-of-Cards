@@ -1,3 +1,4 @@
+import {resolveCardCounter,counterEffectIds,resetFieldCounterOnSummon,counterLimitLabel} from './src/counter-effects.mjs';
 import {extraResponsePlayer,legalSummonCounters,queueSummonEffect,declareSummonCounter,resolveSummonResponse} from './src/summon-counters.mjs';
 import {evolutionRules,validateEvolution,natureEvolutionCosts,evolutionStillValid,evolveIntegration,restoreEvolutionCard} from './src/evolution.mjs';
 import {beginDeckSearch,deckSearchView,finishDeckSearch} from './src/deck-search.mjs';
@@ -154,7 +155,7 @@ function move(r,id,to,owner,options={}){const u=r.units[id];if(!u)fail(400,'카�
  const attached=Array.isArray(u.overlayMaterials)&&!['field','integration'].includes(to)?[...u.overlayMaterials]:[];
  const equipped=Array.isArray(u.attachments)&&!['field','integration'].includes(to)?[...u.attachments]:[];
  if(!['field','integration'].includes(to))validateLeavingLinks(r,id);
-const previousZone=options.tokenAction&&u.created?zoneOwner(r,id):null;if(to==='field'&&!r.players[owner??u.owner].field.includes(null))fail(409,'필드 세 칸이 모두 차 있습니다.');if(to==='integration'&&r.players[owner??u.owner].integration)fail(409,'이미 일체화 중입니다.');if(to==='integration'||zoneOwner(r,id)?.zone==='integration')u.integrationRevision=(u.integrationRevision||0)+1;unlinkPhysical(r,id);
+const previousZone=options.tokenAction&&u.created?zoneOwner(r,id):null;if(to==='field'&&!r.players[owner??u.owner].field.includes(null))fail(409,'필드 세 칸이 모두 차 있습니다.');if(to==='integration'&&r.players[owner??u.owner].integration)fail(409,'이미 일체화 중입니다.');resetFieldCounterOnSummon(u,zoneOwner(r,id),to);if(to==='field'||zoneOwner(r,id)?.zone==='field')u.fieldRevision=(u.fieldRevision||0)+1;if(to==='integration'||zoneOwner(r,id)?.zone==='integration')u.integrationRevision=(u.integrationRevision||0)+1;unlinkPhysical(r,id);
  restoreEvolutionCard(u,to);
  // Enchantments granted to a specific monster cease when its physical UID
  // leaves the battlefield; the spell itself remains in its owner's grave.
@@ -439,18 +440,7 @@ function finishAutomatedSpell(r){
  const outcomes=resolveEffectStack(r,{
   getZone:id=>zoneOwner(r,id),
   execute:effect=>{
-   if(effect.effectId==='storm-spell-counter'){
-    if(effect.sequence!==pending.counter?.sequence||effect.sourceId!==pending.counter.sourceId||
-       effect.owner!==pending.counter.who)throw new Error('unexpected spell counter');
-    const source=r.units[effect.sourceId];
-    const target=r.effectStack.find(e=>e.sequence===effect.payload.targetSequence&&
-     e.effectId==='auto-spell-resolution'&&e.owner===pending.who&&e.sourceId===pending.sourceId);
-    if(!target)throw new Error('counter target is missing from spell stack');
-    if(source.effectsNegated||r.players[effect.owner].integration!==effect.sourceId){log(r,'effect','스톰블레이거 드래곤: 소스 효과 무효로 주문 무효화 불발');return;}
-    target.negatedBy=effect.sequence;
-    log(r,'effect','스톰블레이거 드래곤: 상대 주문 발동 무효화');
-    return;
-   }
+   if(counterEffectIds.has(effect.effectId)){resolveCardCounter(r,pending,effect,{log,name:unitName});return;}
    if(effect.effectId!=='auto-spell-resolution'||effect.owner!==pending.who||
       effect.sourceId!==pending.sourceId||effect.payload.cardId!==pending.cardId)
     throw new Error('unexpected spell effect in response stack');
@@ -476,7 +466,7 @@ function finishAutomatedSpell(r){
    log(r,'effect',`${r.players[effect.owner].label}: ${card.name} 주문 효과 해결`);
   },
   onResult:(result,effect)=>{
-   if(result.status==='negated-by-effect')log(r,'effect',`${cards.get(effect.payload.cardId)?.name}: 무효화되어 해결하지 않음 (비용 반환 없음)`);
+   if(result.status==='negated-by-effect')log(r,'effect',`${cards.get(effect.payload.cardId)?.name||unitName(r,effect.sourceId)||'효과'}: 무효화되어 해결하지 않음 (비용 반환 없음)`);
    if(result.status==='negated-source-moved')log(r,'effect','대응 효과 소스 이탈/조종권 변경으로 무효');
   }
  });
@@ -506,7 +496,7 @@ function publicState(r,viewer){const mapId=id=>id?{...r.units[id],atk:swordActua
  count:r.pendingTriggerOrder.effects.length,
  options:r.pendingTriggerOrder.effects.filter(e=>e.owner===viewer&&r.pendingTriggerOrder.awaiting[0]===viewer)
   .map(e=>({key:e.key,title:e.title||e.effectId,priority:e.priority||0}))
- }:null,pendingDeckSearch:deckSearchView(r,viewer,cards),pendingSpell:r.pendingSpell?{who:r.pendingSpell.who,card:{id:r.pendingSpell.cardId,name:cards.get(r.pendingSpell.cardId)?.name},stage:'response',awaiting:spellResponsePlayer(r),counter:r.pendingSpell.counter?{who:r.pendingSpell.counter.who,name:unitName(r,r.pendingSpell.counter.sourceId)}:null,counters:legalSpellCounters(r,viewer).map(id=>({sourceUnitId:id,name:unitName(r,id)}))}:null,pendingExtraSummon:r.pendingExtraSummon?{who:r.pendingExtraSummon.who,card:{id:r.units[r.pendingExtraSummon.extraUnitId].cardId,name:unitName(r,r.pendingExtraSummon.extraUnitId)},method:r.pendingExtraSummon.recipe.method,materialCount:r.pendingExtraSummon.recipe.materials.length,stage:'response',awaiting:extraResponsePlayer(r),counter:r.pendingExtraSummon.counter?{who:r.pendingExtraSummon.counter.who,name:unitName(r,r.pendingExtraSummon.counter.sourceId)}:null,counters:legalSummonCounters(r,viewer).map(id=>({sourceUnitId:id,name:unitName(r,id)}))}:null,pendingManual:r.pendingManual?{...r.pendingManual}:null,persistentEffects:(r.persistentEffects||[]).map(e=>({kind:e.kind,owner:e.owner,counters:e.counters})),logs:r.logs.slice(-80),you:viewer,players:r.players.map((p,i)=>({index:i,label:p.label,deckId:p.deckId,deckName:decks.get(p.deckId)?.name,hp:p.hp,playerAtkBonus:p.playerAtkBonus||0,reloads:p.reloads,deckCount:p.deck.length,handCount:p.hand.length,grave:p.grave.map(mapId),banishedCount:p.banished.length,extraCount:p.extra.length,field:p.field.map(mapId),integration:mapId(p.integration),hand:i===viewer?p.hand.map(mapId):null,extra:i===viewer?p.extra.map(mapId):null}))}}
+ }:null,pendingDeckSearch:deckSearchView(r,viewer,cards),pendingSpell:r.pendingSpell?{who:r.pendingSpell.who,card:{id:r.pendingSpell.cardId,name:cards.get(r.pendingSpell.cardId)?.name},stage:'response',awaiting:spellResponsePlayer(r),counter:r.pendingSpell.counter?{who:r.pendingSpell.counter.who,name:unitName(r,r.pendingSpell.counter.sourceId)}:null,counters:legalSpellCounters(r,viewer).map(id=>({sourceUnitId:id,name:unitName(r,id),limitText:counterLimitLabel(r.units[id].cardId)}))}:null,pendingExtraSummon:r.pendingExtraSummon?{who:r.pendingExtraSummon.who,card:{id:r.units[r.pendingExtraSummon.extraUnitId].cardId,name:unitName(r,r.pendingExtraSummon.extraUnitId)},method:r.pendingExtraSummon.recipe.method,materialCount:r.pendingExtraSummon.recipe.materials.length,stage:'response',awaiting:extraResponsePlayer(r),counter:r.pendingExtraSummon.counter?{who:r.pendingExtraSummon.counter.who,name:unitName(r,r.pendingExtraSummon.counter.sourceId)}:null,counters:legalSummonCounters(r,viewer).map(id=>({sourceUnitId:id,name:unitName(r,id),limitText:counterLimitLabel(r.units[id].cardId)}))}:null,pendingManual:r.pendingManual?{...r.pendingManual}:null,persistentEffects:(r.persistentEffects||[]).map(e=>({kind:e.kind,owner:e.owner,counters:e.counters})),logs:r.logs.slice(-80),you:viewer,players:r.players.map((p,i)=>({index:i,label:p.label,deckId:p.deckId,deckName:decks.get(p.deckId)?.name,hp:p.hp,playerAtkBonus:p.playerAtkBonus||0,reloads:p.reloads,deckCount:p.deck.length,handCount:p.hand.length,grave:p.grave.map(mapId),banishedCount:p.banished.length,extraCount:p.extra.length,field:p.field.map(mapId),integration:mapId(p.integration),hand:i===viewer?p.hand.map(mapId):null,extra:i===viewer?p.extra.map(mapId):null}))}}
 function apply(r,who,type,body){const p=r.players[who];let changed=true;
  if(r.pendingDeckSearch&&!['deckSearch','concede'].includes(type))fail(409,'덱 검색 선택을 완료해야 합니다.');
  if(r.pendingExtraSummon&&!['extraResponse','concede'].includes(type))fail(409,'특수 소환 대응 중에는 다른 행동을 할 수 없습니다.');
@@ -576,7 +566,7 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
   if(r.status!=='active'||!r.pendingSpell||spellResponsePlayer(r)!==who)fail(403,'상대가 선언한 효과의 현재 대응권자만 행동할 수 있습니다.');
   if(body.choice==='counter'){
    declareSpellCounter(r,who,body.sourceUnitId);
-   log(r,'response',`${p.label}: 스톰블레이거 드래곤 주문 무효화 선언 (게임당 1회 사용)`);
+   log(r,'response',`${p.label}: ${unitName(r,body.sourceUnitId)} 무효화 선언`);
    break;
   }
   if(body.choice!=='pass')fail(409,'자동화되지 않은 주문 무효화 응답은 사용할 수 없습니다.');
@@ -588,12 +578,12 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
   if(r.status!=='active'||!r.pendingExtraSummon||extraResponsePlayer(r)!==who)fail(403,'상대의 특수 소환/무효화에 대응하는 현재 대응권자만 행동할 수 있습니다.');
   if(body.choice==='counter'){
    declareSummonCounter(r,who,body.sourceUnitId);
-   log(r,'response',`${p.label}: 스톰블레이거 드래곤 소환 무효화 선언 (주문/소환 합계 게임당 1회)`);break;
+   log(r,'response',`${p.label}: ${unitName(r,body.sourceUnitId)} 무효화 선언`);break;
   }
   if(body.choice!=='pass')fail(409,'이 소환 대응은 아직 지원하지 않습니다.');
   log(r,'response',`${p.label}: 특수 소환 대응 없음`);
   if(r.pendingExtraSummon.recipe.method==='wakeup')scheduleWakeupReturn(r,r.pendingExtraSummon.who,r.pendingExtraSummon.recipe.spellUnitId);
-  resolveSummonResponse(r,{zone:zoneOwner,log,summon:finishExtraSummon,negate:negateExtraSummon});
+  resolveSummonResponse(r,{zone:zoneOwner,log,name:unitName,summon:finishExtraSummon,negate:negateExtraSummon});
   break;
  }
  case 'attack':{requireTurn(r,who);if(r.phase!=='ATTACK'||r.pendingAttack||r.pendingManual||((p.noAttackUntil||0)>=p.turnsTaken))fail(409,'현재 공격할 수 없습니다.');const attacker=r.units[requireStr(body.attackerId,100)];const z=attacker&&zoneOwner(r,attacker.id);if(!z||z.player!==who||!['field','integration'].includes(z.zone)||attacker.cannotAttack||attacker.cannotAttackUntil===r.turnNumber||attacker.frozen||!attackAvailable(attacker,r.turnNumber))fail(409,'공격 가능한 카드가 아닙니다.');const target=body.target;if(!target||!['player','unit'].includes(target.type))fail(400,'공격 대상을 지정해 주세요.');if(target.type==='player'&&target.player!==undefined&&target.player!==1-who)fail(409,'상대 플레이어만 공격할 수 있습니다.');if(target.type==='unit'){const zz=zoneOwner(r,target.id);if(!zz||zz.player===who||zz.zone!=='field')fail(409,'공격할 수 없는 대상입니다.');}if(target.type==='player'&&(p.noDirectAttackUntil||0)>0&&p.noDirectAttackUntil>=p.turnsTaken)fail(409,'보호막 효과로 이번 턴에는 플레이어 직접 공격이 불가능합니다.');if(attacker.cardId==='COC-05-003'&&!p.field.some(mid=>mid&&unitName(r,mid).includes('카툰 랜드')))fail(409,'카툰 랜드가 없어 공격할 수 없습니다.');
