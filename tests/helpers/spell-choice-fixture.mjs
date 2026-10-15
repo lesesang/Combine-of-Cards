@@ -31,7 +31,7 @@ export function assertChoiceResult(f,cardId){
  case 'COC-27-010':assert.equal(p[caster].hp,800);assert.equal(r.units[f.fighter].superiorClaw,true);break;
  case 'COC-30-004':assert.ok(p[other].grave.includes(target));assert.ok(p[caster].hand.includes(spell));break;
  case 'COC-30-011':assert.equal(p[other].hp,800);break;
- case 'COC-31-007':assert.ok(p[caster].field.includes(target));assert.equal(r.units[target].owner,other);assert.equal(p[caster].hp,900);break;
+ case 'COC-31-007':assert.ok(p[caster].field.includes(target));assert.equal(r.units[target].owner,other);assert.equal(p[caster].hp,800);break;
  default:assert.fail(cardId);
  }
 }

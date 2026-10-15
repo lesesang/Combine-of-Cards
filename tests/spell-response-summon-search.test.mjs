@@ -64,10 +64,10 @@ test('R01: Self-Devour draw/mill, own heal and integration buff resolve in one s
  assert.equal(r.units[integration].atk,baseAtk);
  assert.equal(r.players[1].deck.length,before);
  pass(r);
- assert.equal(r.players[0].hp,720);
- assert.equal(r.units[integration].atk,baseAtk+200);
- assert.equal(r.units[integration].temporaryBuff,200);
- assert.equal(r.units[integration].buffExpiresAt,3);
+ assert.equal(r.players[0].hp,620);
+ assert.equal(r.units[integration].atk,baseAtk+150);
+ assert.equal(r.effects.find(e=>e.type==='selfDevourBuff').amount,150);
+ I.processEndOfTurn(r);assert.equal(r.units[integration].atk,baseAtk);
  assert.equal(r.players[1].hand.length,1);
  assert.equal(r.players[1].grave.length,3);
 });
@@ -80,7 +80,7 @@ test('R01: Pharaoh summons exactly up to three mummy tokens after opponent pass'
  const spawned=r.players[0].field.filter(Boolean);
  assert.equal(spawned.length,3);
  assert.ok(spawned.every(id=>r.units[id]?.created&&r.units[id]?.tokenCard?.name==='미라 병사'));
- assert.ok(spawned.every(id=>r.units[id].atk===80&&r.units[id].hp===100));
+ assert.ok(spawned.every(id=>r.units[id].atk===60&&r.units[id].hp===80));
 });
 
 test('R01: coin-card spell draws after pass and random opponent discard only on heads',()=>{

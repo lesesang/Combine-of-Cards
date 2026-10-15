@@ -12,13 +12,15 @@ function make(a,b){
  const position=(who,id,to)=>{const unit=r.players[who].deck.find(i=>r.units[i].cardId===id);assert.ok(unit,id);I.move(r,unit,to,who);return unit};
  return {r,position};
 }
-test('envy validates a 250-stat sacrifice then destroys selected enemy',()=>{
+test('envy validates a 200-stat sacrifice then destroys selected enemy',()=>{
  const {r,position}=make('21','03');const spell=position(0,'COC-21-004','hand');
  const ally=I.instantiate(r,'COC-21-009',0);I.move(r,ally,'field',0); /* Created-card instance: not in main deck. */ r.units[ally].hp=210;
  const enemy=position(1,'COC-03-002','field');
  I.apply(r,0,'play',{unitId:spell,costUnitIds:[ally],target:{type:'unit',id:enemy}});
  assert.ok(r.players[0].grave.includes(spell),'spent spell');
  assert.ok(r.players[0].grave.includes(ally),'sacrificed ally');
+ assert.ok(r.players[1].field.includes(enemy),'waits for response');
+ I.apply(r,1,'spellResponse',{choice:'pass'});
  assert.ok(r.players[1].grave.includes(enemy),'destroyed enemy');
 });
 test('Storm Knight exiles two chosen allies, halves an enemy attack, and stays fielded',()=>{
@@ -35,7 +37,7 @@ test('Storm Knight exiles two chosen allies, halves an enemy attack, and stays f
 test('an invalid sacrifice cannot consume the source spell or target',()=>{
  const {r,position}=make('21','03');const spell=position(0,'COC-21-004','hand');
  const ally=I.instantiate(r,'COC-21-009',0);I.move(r,ally,'field',0); /* Created-card instance: not in main deck. */ const enemy=position(1,'COC-03-002','field');
- assert.throws(()=>I.apply(r,0,'play',{unitId:spell,costUnitIds:[ally],target:{type:'unit',id:enemy}}),/250/);
+ assert.throws(()=>I.apply(r,0,'play',{unitId:spell,costUnitIds:[ally],target:{type:'unit',id:enemy}}),/200/);
  assert.ok(r.players[0].hand.includes(spell));
  assert.ok(r.players[0].field.includes(ally));
  assert.ok(r.players[1].field.includes(enemy));

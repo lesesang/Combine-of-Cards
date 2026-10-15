@@ -15,7 +15,7 @@ test('evolution: all seven replace base ATK, preserve buffs and identity, and re
    assert.equal(u.id,before.id);assert.equal(u.owner,before.owner);assert.equal(u.cardId,evolutionRules[cid].target);
    assert.equal(u.atk,expected+50);assert.equal(u.baseAtk,expected);assert.equal(u.hp,null);
    assert.equal(u.attackCount,1);assert.equal(u.attackCountTurn,f.r.turnNumber);
-   if(cid==='COC-30-009'){assert.equal(f.r.players[0].hp,1800);assert.ok(f.body.costDeckIds.every(id=>f.r.players[0].grave.includes(id)));}
+   if(cid==='COC-30-009'){assert.equal(f.r.players[0].hp,1600);assert.ok(f.body.costDeckIds.every(id=>f.r.players[0].grave.includes(id)));}
    I.move(f.r,f.source,destination,0);assert.equal(u.cardId,f.oldCard);assert.equal(u.evolutionOriginalCardId,undefined);
    assert.equal(u.atk,Math.max(0,Number(I.cards.get(f.oldCard).atk)||0));assert.equal(u.hp,null);
   }

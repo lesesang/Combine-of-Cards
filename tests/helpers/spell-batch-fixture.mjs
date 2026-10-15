@@ -52,7 +52,7 @@ export function assertBatchResult(f,cardId){
  case 'COC-30-006':assert.equal(u.diceMax,10);break;
  case 'COC-31-006':assert.ok(p[other].grave.includes(target));break;
  case 'COC-31-008':assert.ok(p[other].grave.includes(target));assert.ok(p[caster].grave.includes(ally));break;
- case 'COC-31-010':assert.equal(r.units[ally].atk,550);assert.equal(u.hp,1000);break;
+ case 'COC-31-010':assert.equal(r.units[ally].atk,450);assert.equal(u.hp,1000);break;
  case 'COC-32-005':assert.equal(p[other].hp,999);break;
  case 'COC-32-006':assert.equal(p[caster].hp,1100);break;
  case 'COC-32-007':assert.equal(p[other].spellForbiddenUntil,4);break;

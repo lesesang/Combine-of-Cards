@@ -31,7 +31,7 @@ Windows PowerShell에서도 동일하게 npm 명령 사용. npm run check:covera
 |---|---|
 | **server.mjs** | HTTP/API, 룸 비밀 토큰·인증, 룸 저장·복원, 턴/페이즈/다이스/드로우/리로드/승패, AI 행동 루프, 카드별 소환·전투 예외, 지속 효과 훅 |
 | **src/activation-rules.mjs** | 카드 발동 전 조건과 비용 검사. 88종 기준이나 전 카드 검증 완료가 아님 |
-| **src/automated-effects.mjs** | 카드 ID 기반 주문 효과 실행 핸들러 71종(효과 전체 완료 아님) |
+| **src/automated-effects.mjs** | 카드 ID 기반 주문 효과 실행 핸들러 72종(효과 전체 완료 아님) |
 | **src/life-eating-sword.mjs** | COC-21-002 주문의 독립 효과, 자기 ATTACK 시작 HP 30/+ATK 100, 다음 자기 턴 ×2 곱셈 중복, 저장/턴 만료. **장착이 아님** |
 | **src/combat-stats.mjs** | 실제/조건용 취급 공격력 분리. 50/250 같은 카드별 판정 및 ATK 효과별 예외 |
 | **src/field-abilities.mjs** | 메인 페이즈 일부 카드의 필드 발동 13종·AI 행동 |
@@ -92,7 +92,7 @@ Windows PowerShell에서도 동일하게 npm 명령 사용. npm run check:covera
 
 **보고서 갱신:** `npm run check:coverage`는 AUTOMATION_COVERAGE.md / automation-audit.json / EFFECT_COVERAGE.md만 재생성한다. 수동 설명은 **AUTOMATION_NOTES.md**, 효과 명세는 **effect-coverage.json**에 쓴다. `npm run check:coverage -- --check`는 파일을 바꾸지 않고 출력 일치·원문/효과 번호·구현 경로·테스트 이름을 검증한다. CI는 이 읽기 전용 검사를 사용한다. 정본 전체 검증이나 완전 자동화 인증을 뜻하지 않는다.
 
-**Codex 현행 문서:** [CODEX_HANDOFF](CODEX_HANDOFF.md) · [CODEX_IMPLEMENTATION_PLAN](CODEX_IMPLEMENTATION_PLAN.md) · [CODEX_RULES_REFERENCE](CODEX_RULES_REFERENCE.md). 최신 163 partial/90 manual/1 basic, 71 주문 핸들러, 61 일반 주문 응답 스택, 69개 효과별 추적 등록. `1.3-ai-beta.10` 서버 버전 문자열은 이 자동화 범위 집계를 나타내지 않는다.
+**Codex 현행 문서:** [CODEX_HANDOFF](CODEX_HANDOFF.md) · [CODEX_IMPLEMENTATION_PLAN](CODEX_IMPLEMENTATION_PLAN.md) · [CODEX_RULES_REFERENCE](CODEX_RULES_REFERENCE.md). 최신 163 partial/90 manual/1 basic, 72 주문 핸들러, 64 일반 주문 응답 스택, 77개 효과별 추적 등록. `1.3-ai-beta.11` 서버 버전 문자열은 이 자동화 범위 집계를 나타내지 않는다.
 
 신규 `src/grave-abilities.mjs`는 순수 비용 검사와 묘지 회수, `src/effect-usage.mjs`는 효과 번호별 턴 제한을 담당한다. actions API의 `graveAbility`는 `sourceUnitId`, `costUnitId`, `expectedVersion`을 받는다. 본인 상태의 `graveAbilities`에 현재 합법적인 조합만 제공하고 상대 비공개 영역은 포함하지 않는다. 규칙/엔진 버전은 beta.10이며, 기존 방에 없던 `effectUsage`는 첫 사용부터 생성된다. 이전 버전에서 수행한 효과 횟수를 소급 복원하지는 않는다.
 
@@ -150,3 +150,11 @@ Windows PowerShell에서도 동일하게 npm 명령 사용. npm run check:covera
 원소의 마법사4종의 1번 교체 소환을 자기 파괴 비용→몬스터 효과 대응→패·덱·묘지 비공개 선택→소환 대응에 연결했다. 플레이어별 공유1회와 효과2 독립을 유지하며, 사용자가 소환 무효 시 원래 영역 유지를 확정했다. PvP·AI3난이도·R21 재선택·동시 파괴 회복·JSON/HTTP 복구를 검증한다. **163 partial /90 manual /1 basic, 효과 증거69건(66장), 완전 인증0**. 필드 발동17종 중 대응11종이며 일반 체인에 원소 교체를 후발 삽입하는 경로와 2번/드래곤 전체 효과는 미완료다. [상세 명세](ELEMENTAL_REPLACEMENT_SUMMONS.md).
 
 새 규칙 결정/문구 패치는 [위임 정책](CARD_REFINEMENT_POLICY.md)과 [전후 이력](card-patches.json)에 기록한다. 전수 자동화·576대전·운영 배포는 계속 미완료다. 다음은 원소2번/드래곤·남은 필드6종·범용 후발 체인이다.
+
+## 2026-10-15 전체 카드 밸런스 B1 / D1 운영 목표
+
+254장·24덱 설계 검토: **80장 개정·174장 유지**. F=HERO는 전투 효율 너프, 용/드래곤·저주/악마는 초동·회복·비용 버프를 우선했다. 기존17재정·마검·장착 해제 금지·간드레이 자기 제외·진화·개별 횟수·원소 공유1회는 유지한다. 개발자 재정 개정과 사용자 확정은 구분한다. [전수 검토와 변경 사유](BALANCE_PATCH_B1.md), [변경 전후](card-patches.json).
+
+현재 **163 partial /90 manual /1 basic, 주문 핸들러72, 대응 주문64, 효과 증거77건(73장), 완전 인증0**. 용의 둥지 자동화와 질투/욕망 대응, 새 수치와 도발/흡혈/효과 무효·만료 오류를 수정했다. 미구현 원소2번/드래곤·재단·소환 제외는 여전히 미완료다. 254장 검토는 전 효과 자동화 또는 실전 승률 균형 인증이 아니다.
+
+다음은 미구현 개정 효과의 상태/반응 명세→공통 체인 연결→24×24 대전과 난이도 평가다. 운영 DB는 사용자 개인 **Cloudflare D1**을 목표로 한다. [D1 저장소 분리·동시성·이전 계획](CLOUDFLARE_D1_PLAN.md). D1 연결과 운영 배포는 아직 하지 않았다.

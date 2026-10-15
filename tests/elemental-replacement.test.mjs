@@ -84,9 +84,9 @@ test('elemental replacements: all AI difficulties choose forms and defend via th
 });
 
 test('elemental patch: all four preserve deck identity printed stats conditions and their second effect',async()=>{
- const fs=await import('node:fs');const patches=JSON.parse(fs.readFileSync(new URL('../docs/card-patches.json',import.meta.url),'utf8'));
+ const fs=await import('node:fs');const allPatches=JSON.parse(fs.readFileSync(new URL('../docs/card-patches.json',import.meta.url),'utf8'));const patches=allPatches.filter(p=>p.patchId==='ELEMENTAL-2026-10-15');
  assert.deepEqual(patches.map(p=>p.cardId),ELEMENTAL_MAGICIAN_IDS);
- for(const p of patches){const current=I.cards.get(p.cardId);assert.deepEqual(current,{...p.before,effects:[p.afterEffect1,p.before.effects[1]]});assert.match(current.effects[0],/플레이어별/);}
+ for(const p of patches){const current=I.cards.get(p.cardId),later=allPatches.find(x=>x.patchId==='BALANCE-B1'&&x.cardId===p.cardId);assert.deepEqual(later?.before||current,{...p.before,effects:[p.afterEffect1,p.before.effects[1]]});assert.equal(current.effects[0],p.afterEffect1);assert.match(current.effects[0],/플레이어별/);}
  assert.equal(I.catalog.decks.length,24);assert.equal(I.catalog.cards.length,254);
 });
 

@@ -23,7 +23,7 @@ test('choice batch: counter preserves paid HP and deck costs without applying ef
   f.r=JSON.parse(JSON.stringify(f.r));I.apply(f.r,0,'spellResponse',{choice:'pass'});
   assert.deepEqual(f.r.players,snapshot.players);
   delete f.r.units[f.counter];delete snapshot.units[f.counter];assert.deepEqual(f.r.units,snapshot.units);
-  assert.equal(f.r.players[0].hp,['COC-05-002','COC-31-007'].includes(cardId)?900:cardId==='COC-27-010'?800:1000);
+  assert.equal(f.r.players[0].hp,cardId==='COC-05-002'?900:['COC-31-007','COC-27-010'].includes(cardId)?800:1000);
   if(cardId==='COC-14-002')assert.ok(f.r.players[0].grave.includes(f.costTop));
  });
 });
@@ -87,7 +87,7 @@ test('choice batch: Spider returns only after actual lethal damage and never dup
 
 test('choice batch: HP payment boundaries and lethal activation damage do not create free effects',()=>{
  for(const cardId of ['COC-05-002','COC-31-007']){
-  const f=choiceFixture(I,cardId);f.r.players[0].hp=101;I.apply(f.r,0,'play',f.body);
+  const f=choiceFixture(I,cardId);f.r.players[0].hp=cardId==='COC-31-007'?201:101;I.apply(f.r,0,'play',f.body);
   assert.equal(f.r.players[0].hp,1);pass(f);assert.equal(f.r.players[0].hp,1);
  }
  const f=choiceFixture(I,'COC-27-010');f.r.players[0].hp=200;I.apply(f.r,0,'play',f.body);

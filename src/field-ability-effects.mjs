@@ -1,3 +1,4 @@
+import {balanceValues as B} from './balance-values.mjs';
 import {ELEMENTAL_MAGICIAN_IDS} from './effect-usage.mjs';
 import {isElemental,prepareElemental,beginElementalChoice} from './elemental-replacement.mjs';
 import {requireUnusedEffect,markEffectUsed} from './effect-usage.mjs';
@@ -80,7 +81,7 @@ export function resolveFieldEffect(r,who,plan,H){
  case 'COC-13-001':case 'COC-13-002':case 'COC-13-005':{
   if(c==='COC-13-002'){const result=H.roll(2);H.log(r,'dice',`사랑 도둑: 1d2 = ${result}`);if(result!==1)break;}
   const attack=swordActualAttack(r,t,{getZone:(room,id)=>H.zone(room,id)});
-  H.capture(r,who,t);if(c==='COC-13-005'){r.players[1-who].hp-=attack;H.outcome(r);}break;
+  H.capture(r,who,t);if(c==='COC-13-005'){r.players[1-who].hp-=Math.floor(attack/B.thiefDamageDivisor);H.outcome(r);}break;
  }
  case 'COC-22-010':{
   const target=r.units[t];if(target.bonusAttackTurn!==r.turnNumber){target.bonusAttackTurn=r.turnNumber;target.bonusAttackCount=0;}target.bonusAttackCount++;break;

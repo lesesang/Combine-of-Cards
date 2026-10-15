@@ -10,13 +10,15 @@ export const batchResponseTargets=Object.freeze({
  'COC-31-008':null,'COC-31-010':null,
  'COC-32-005':null,'COC-32-006':null,'COC-32-007':null,'COC-32-008':null
 });
+export const balanceResponseTargets=Object.freeze({'COC-11-011':null,'COC-21-004':'enemy-field','COC-21-005':'own-field'});
+export const balanceResponseSpellIds=Object.freeze(Object.keys(balanceResponseTargets));
 export const batchResponseSpellIds=Object.freeze(Object.keys(batchResponseTargets));
 
 // Pure preflight: freeze the existing default target at declaration so a
 // later missing target can never silently redirect the spell to another unit.
 export function prepareResponseTargets(room,who,cardId,body,H){
  body=prepareChoiceDeclaration(room,who,cardId,body,H);
- let kind=batchResponseTargets[cardId]??choiceResponseTargets[cardId];
+ let kind=batchResponseTargets[cardId]??choiceResponseTargets[cardId]??balanceResponseTargets[cardId];
  if(kind==='two-non-toon')return body;
  if(kind==='option')kind=body.option===1?'enemy-field':'any';
  if(!kind)return body;
@@ -38,9 +40,9 @@ export function prepareResponseTargets(room,who,cardId,body,H){
   H.fail(409,'유효한 필드 몬스터 대상을 선택해야 합니다.');
  if(kind.startsWith('enemy')&&z.player!==1-who)
   H.fail(409,'상대 필드 몬스터를 선택해야 합니다.');
- if((kind==='own-burning'&&z.player!==who)||
+ if((['own-burning','own-field'].includes(kind)&&z.player!==who)||
     (kind.endsWith('burning')&&!/버닝\s*데몬즈?/.test(H.name(room,id))))
-  H.fail(409,'자신 필드의 버닝데몬즈 몬스터를 선택해야 합니다.');
+  H.fail(409,kind==='own-field'?'자신 필드 몬스터를 선택해야 합니다.':'자신 필드의 버닝데몬즈 몬스터를 선택해야 합니다.');
  if(kind==='own-superior'&&(z.player!==who||!H.name(room,id).includes('슈페리얼 파이터')))
   H.fail(409,'자신 필드의 슈페리얼 파이터 몬스터를 선택해야 합니다.');
  if(kind==='non-mage'&&/마술사|마법사/.test(H.attribute(room,id)))
@@ -58,7 +60,7 @@ export function responseTargetStillValid(room,who,cardId,body,H){
 // Enumerate public battlefield choices only; never inspect either deck/hand.
 // The same validator is used by action preflight and AI candidate selection.
 export function responseTargetChoices(room,who,cardId,H,body={}){
- const kind=batchResponseTargets[cardId]??choiceResponseTargets[cardId];
+ const kind=batchResponseTargets[cardId]??choiceResponseTargets[cardId]??balanceResponseTargets[cardId];
  if(!kind||kind==='two-non-toon')return null;
  const candidates=[...room.players.flatMap(p=>p.field.filter(Boolean).map(id=>({type:'unit',id}))),
   {type:'player',player:1-who},{type:'player',player:who}];

@@ -16,7 +16,7 @@ function assertResolved(f){
  case 'COC-03-002':assert.ok(p.hand.includes(f.search));break;
  case 'COC-05-004':assert.ok(q.deck.includes(f.target));break;
  case 'COC-12-013':assert.ok(q.grave.includes(f.target));break;
- case 'COC-13-001':case 'COC-13-005':assert.ok(p.field.includes(f.target));assert.equal(f.r.units[f.target].owner,1-f.who);if(f.cardId==='COC-13-005')assert.equal(q.hp,950);break;
+ case 'COC-13-001':case 'COC-13-005':assert.ok(p.field.includes(f.target));assert.equal(f.r.units[f.target].owner,1-f.who);if(f.cardId==='COC-13-005')assert.equal(q.hp,975);break;
  case 'COC-13-002':assert.ok([...p.field,...q.field].includes(f.target));assert.ok(f.r.logs.some(l=>/1d2 = [12]/.test(l.text)));break;
  case 'COC-22-010':assert.equal(f.r.units[f.target].bonusAttackCount,1);break;
  }
@@ -76,6 +76,6 @@ test('field response batch: AI uses monster-only counters at all levels and wait
  for(const cid of FIELD_RESPONSE_IDS){const f=fieldAbilityFixture(I,cid,1);f.r.mode='ai';f.r.aiDifficulty='hard';I.runAI(f.r);assert.equal(f.r.pendingAbility.cardId,cid);assertUnresolved(f);}
 });
 test('field response batch: Thief M uses actual multiplied ATK and Crash retains destruction triggers',()=>{
- const f=fieldAbilityFixture(I,'COC-13-005');f.r.effects.push({type:'lifeEatingSword',target:{kind:'unit',id:f.target},activeDoubleTurn:5,activeDoubleCount:2});start(f);pass(f);assert.equal(f.r.players[1].hp,800);
+ const f=fieldAbilityFixture(I,'COC-13-005');f.r.effects.push({type:'lifeEatingSword',target:{kind:'unit',id:f.target},activeDoubleTurn:5,activeDoubleCount:2});start(f);pass(f);assert.equal(f.r.players[1].hp,900);
  const c=fieldAbilityFixture(I,'COC-12-013');c.r.effects.push({type:'firstDestroyHeal',turn:5,player:0});c.r.players[0].hp=100;start(c);pass(c);assert.equal(c.r.players[0].hp,180);assert.equal(c.r.pendingAbility,null);assert.deepEqual(c.r.effectStack,[]);
 });

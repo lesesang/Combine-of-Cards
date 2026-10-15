@@ -32,8 +32,8 @@ test('token triggers Fafnir before independent Gold; converted token leaves no f
  assert.ok(token,'original token creation succeeded');
  const fafnir=r.players[0].field.find(id=>r.units[id]?.cardId==='COC-11-007');
  assert.ok(fafnir,'Fafnir auto summons from the deck');
- assert.equal(r.units[fafnir].atk,10,'one treasure adds 10 attack');
- assert.equal(r.units[fafnir].hp,11,'one treasure adds 10 health');
+ assert.equal(r.units[fafnir].atk,30,'one treasure adds 10 attack');
+ assert.equal(r.units[fafnir].hp,50,'one treasure adds 10 health');
  assert.equal(r.units[token],undefined,'token is converted to treasure, not destroyed');
  assert.equal(r.players[1].field.filter(Boolean).length,0);
  const gold=r.persistentEffects.find(e=>e.kind==='dragon-gold');
@@ -61,8 +61,8 @@ test('each own attack phase adds five treasures and buffs Fafnir by 50/50',()=>{
  I.apply(r,0,'phase',{});
  assert.equal(r.phase,'ATTACK');
  assert.equal(r.persistentEffects[0].counters,6);
- assert.equal(r.units[fafnir].atk,60);
- assert.equal(r.units[fafnir].hp,61);
+ assert.equal(r.units[fafnir].atk,80);
+ assert.equal(r.units[fafnir].hp,100);
 });
 test('Ring resolves before Gold deletion and grants player health and persistent attack',()=>{
  const r=make();
@@ -82,7 +82,7 @@ test('Ring resolves before Gold deletion and grants player health and persistent
  assert.equal(r.effectStack.length,0);
  const dragonId=idFor(r,0,'COC-11-001','deck');
  I.move(r,dragonId,'integration',0);
- assert.equal(r.units[dragonId].atk,110,'player attack bonus carries into future integration');
+ assert.equal(r.units[dragonId].atk,130,'player attack bonus carries into future integration');
 });
 test('both Dragon players see a token event but only its controller gains treasure',()=>{
  const r=make('11','11');

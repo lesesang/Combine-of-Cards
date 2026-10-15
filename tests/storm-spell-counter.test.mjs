@@ -74,7 +74,7 @@ test('Storm counter: moved or negated source fails while usage remains spent',()
   if(change==='control')I.move(r,source,'integration',0);
   if(change==='negated')r.units[source].effectsNegated=true;
   pass(r);
-  assert.equal(r.players[0].hp,500,change);
+  assert.equal(r.players[0].hp,440,change);
   assert.equal(r.units[source].spellCounterGameUsed,true);
   assert.equal(r.effectStack.length,0);
  }
@@ -89,7 +89,7 @@ test('Storm counter: JSON restoration and re-entry cannot reset once-per-game us
  assert.deepEqual(legalSpellCounters(r,1),[]);
  const before=structuredClone(r);assert.throws(()=>counter(r,source),/사용 가능한/);
  assert.deepEqual(r,before);
- pass(r,1);assert.equal(r.players[0].hp,500);
+ pass(r,1);assert.equal(r.players[0].hp,440);
 });
 
 test('Storm counter: all AI levels use legal responses and acknowledge human counters',()=>{
@@ -110,7 +110,7 @@ test('Storm counter: all AI levels use legal responses and acknowledge human cou
 test('Storm counter: pass remains legal and old saved windows retain their responder',()=>{
  const {r,source}=fixture();
  assert.equal(r.pendingSpell.awaiting,undefined);
- pass(r,1);assert.equal(r.players[0].hp,500);
+ pass(r,1);assert.equal(r.players[0].hp,440);
  assert.equal(r.units[source].spellCounterGameUsed,undefined);
 });
 
