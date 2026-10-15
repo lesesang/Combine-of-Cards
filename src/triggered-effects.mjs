@@ -5,6 +5,13 @@ import {swordActualAttack} from './life-eating-sword.mjs';
 // Draft automation: the user requested implementation batches before testing.
 // These are automatic monster triggers, not selectable MAIN field abilities.
 export const TRIGGER_RULES=Object.freeze({
+ 'COC-08-001':{effectNumber:1,event:'summoned',target:'return-field'},
+ 'COC-08-008':{effectNumber:1,event:'summoned',target:'capture-enemy'},
+ 'COC-23-005':{effectNumber:1,event:'summoned',target:'banish-enemy'},
+ 'COC-23-008':{effectNumber:1,event:'summoned'},
+ 'COC-24-004':{effectNumber:1,event:'summoned',target:'banish-enemy'},
+ 'COC-26-005':{effectNumber:1,event:'summoned'},
+ 'COC-26-004':{effectNumber:1,event:'destroyed'},
  'COC-32-001':{effectNumber:2,event:'battle-completed'},
  'COC-32-002':{effectNumber:2,event:'attack-target'},
  'COC-32-004':{effectNumber:2,event:'second-turn-start'},
@@ -16,6 +23,50 @@ function trigger(r,who,id,extra={}){
  return {key:`trigger-${r.turnNumber}-${id}`,effectId:'monster-trigger-resolution',owner:who,sourceId:id,sourceZone:'field',priority:0,
   title:`${u.cardId} · 효과 ${TRIGGER_RULES[u.cardId].effectNumber}`,
   payload:{cardId:u.cardId,sourceRevision:u.fieldRevision||0,...extra}};
+}
+export function recordSummonTrigger(r,who,id,H){
+ const u=r.units[id],rule=u&&TRIGGER_RULES[u.cardId];
+ if(rule?.event!=='summoned')return false;
+ if(!u.effectsNegated&&!effectUsedThisTurn(r,who,id,rule.effectNumber)){
+  const pending=r.deferredMonsterTriggers??=[];
+  if(!pending.some(e=>e.sourceId===id&&e.payload.eventTurn===r.turnNumber))pending.push(trigger(r,who,id,{eventTurn:r.turnNumber}));
+ }
+ return true;
+}
+export function recordDestroyedTrigger(r,id,{sourceId,sourcePlayer},H){
+ const u=r.units[id],z=H.zone(r,id);
+ if(u?.cardId!=='COC-26-004'||u.effectsNegated||z?.zone!=='field'||effectUsedThisTurn(r,z.player,id,1))return;
+ const killer=sourceId&&r.units[sourceId],kz=killer&&H.zone(r,sourceId);
+ let target;
+ if(kz?.zone==='field'&&Number.isFinite(killer.hp))target={id:sourceId,controller:kz.player,revision:killer.fieldRevision||0};
+ else if(kz?.zone==='integration')target={player:kz.player};
+ else if(sourcePlayer===0||sourcePlayer===1)target={player:sourcePlayer};
+ if(!target||(r.deferredMonsterTriggers||[]).some(e=>e.sourceId===id&&e.payload.eventTurn===r.turnNumber))return;
+ const effect=trigger(r,z.player,id,{eventTurn:r.turnNumber,target,amount:swordActualAttack(r,id,{getZone:(room,uid)=>H.zone(room,uid)})});
+ effect.exception='destroy-trigger';
+ (r.deferredMonsterTriggers??=[]).push(effect);
+}
+function triggerTargetChoices(r,p,H){
+ const kind=TRIGGER_RULES[p.cardId]?.target;
+ if(kind==='capture-enemy'&&!r.players[p.who].field.includes(null))return [];
+ return r.players.flatMap((pp,who)=>kind==='return-field'||who!==p.who?pp.field.filter(Boolean):[]);
+}
+export function triggerTargetView(r,viewer,H){
+ const p=r.pendingTriggerTargetChoice;if(!p)return null;
+ return {who:p.who,name:H.cards.get(p.cardId)?.name,...(viewer===p.who?{choices:triggerTargetChoices(r,p,H).map(id=>({id,card:H.cards.get(r.units[id].cardId)||r.units[id].tokenCard}))}:{})};
+}
+export function chooseTriggerTarget(r,who,id,H){
+ const p=r.pendingTriggerTargetChoice;
+ if(r.status!=='active'||!p||p.who!==who)H.fail(409,'소환 효과의 대상 선택권자가 아닙니다.');
+ const choices=triggerTargetChoices(r,p,H);
+ if(!choices.length){r.pendingTriggerTargetChoice=null;return;}
+ if(!choices.includes(id))H.fail(409,'현재 선택 가능한 필드 몬스터를 지정하세요.');
+ const u=r.units[p.sourceId],z=H.zone(r,p.sourceId);
+ r.pendingTriggerTargetChoice=null;
+ if(!u||u.cardId!==p.cardId||u.effectsNegated||z?.zone!=='field'||z.player!==who||(u.fieldRevision||0)!==p.sourceRevision){H.log(r,'effect','소환 효과의 소스 상태 변경으로 불발');return;}
+ const kind=TRIGGER_RULES[p.cardId].target;
+ H.move(r,id,kind==='return-field'?'hand':kind==='capture-enemy'?'field':'banished',kind==='capture-enemy'?who:r.units[id].owner);
+ H.log(r,'effect',`${H.cards.get(p.cardId).name}: 선택한 몬스터 ${kind==='return-field'?'패 복귀':kind==='capture-enemy'?'조종권 획득':'제외'}`);
 }
 function deferAttackBonus(r,id,H,extra){
  const u=r.units[id],z=H.zone(r,id);
@@ -39,8 +90,8 @@ export function drainDeferredMonsterTriggers(r,H){
  if(r.status!=='active'){r.deferredMonsterTriggers=[];return;}
  // Destruction can occur within a spell, paid cost, summon, or heal group.
  // Collect there, declare only after that complete chain and its choices.
- if(r.pendingMonsterTriggers||r.pendingAbility||r.pendingSpell||r.pendingExtraSummon||r.pendingTriggerOrder||r.pendingInfinityChoice||r.pendingElementalChoice||r.pendingRecruitChoice||r.pendingDeckSearch||r.effectStack?.length)return;
- const effects=(r.deferredMonsterTriggers||[]).filter(e=>r.units[e.sourceId]?.cardId===e.payload.cardId&&e.payload.eventTurn===r.turnNumber&&!effectUsedThisTurn(r,e.owner,e.sourceId,2));
+ if(r.pendingMonsterTriggers||r.pendingAbility||r.pendingSpell||r.pendingExtraSummon||r.pendingTriggerOrder||r.pendingTriggerTargetChoice||r.pendingInfinityChoice||r.pendingElementalChoice||r.pendingRecruitChoice||r.pendingDeckSearch||r.effectStack?.length)return;
+ const effects=(r.deferredMonsterTriggers||[]).filter(e=>r.units[e.sourceId]?.cardId===e.payload.cardId&&e.payload.eventTurn===r.turnNumber&&!effectUsedThisTurn(r,e.owner,e.sourceId,TRIGGER_RULES[e.payload.cardId].effectNumber));
  if(effects.length)queueMonsterTriggers(r,effects,H);
  r.deferredMonsterTriggers=[];
 }
@@ -75,7 +126,7 @@ export function queueMonsterTriggers(r,effects,H){
 }
 export function resumeMonsterTriggers(r,H){
  const pending=r.pendingMonsterTriggers;
- if(!pending||r.pendingTriggerOrder||r.pendingAbility||r.pendingInfinityChoice)return;
+ if(!pending||r.pendingTriggerOrder||r.pendingAbility||r.pendingInfinityChoice||r.pendingTriggerTargetChoice)return;
  if(r.status!=='active'){r.pendingMonsterTriggers=null;return;}
  if(pending.stage==='ordering'){
   if(!r.effectStack?.length||r.effectStack.some(e=>e.effectId!=='monster-trigger-resolution'))throw new Error('invalid ordered monster trigger stack');
@@ -92,7 +143,30 @@ export function resumeMonsterTriggers(r,H){
 }
 export function resolveMonsterTrigger(r,e,H){
  const u=r.units[e.sourceId],z=H.zone(r,e.sourceId),p=e.payload;
+ if(p.cardId==='COC-26-004'){
+  // This declared destruction trigger deliberately survives its own death.
+  const t=p.target;
+  if(t.id){const target=r.units[t.id],tz=H.zone(r,t.id);if(target&&tz?.zone==='field'&&tz.player===t.controller&&(target.fieldRevision||0)===t.revision)H.hurt(r,t.id,p.amount,{sourceId:e.sourceId});}
+  else r.players[t.player].hp-=p.amount;
+  H.log(r,'effect',`저지먼트 매치: 파괴 직전 공격력 ${p.amount} 반사 피해`);H.outcome(r);return;
+ }
  if(!u||u.cardId!==p.cardId||u.effectsNegated||z?.zone!=='field'||z.player!==e.owner||(u.fieldRevision||0)!==p.sourceRevision){H.log(r,'effect','유발 소스 이탈/재진입·조종권/무효 상태로 불발');return;}
+ if(TRIGGER_RULES[p.cardId].target){
+  const choice={who:e.owner,sourceId:e.sourceId,cardId:p.cardId,sourceRevision:p.sourceRevision};
+  if(triggerTargetChoices(r,choice,H).length)r.pendingTriggerTargetChoice=choice;
+  else H.log(r,'effect','소환 효과: 유효한 대상 또는 빈 필드 소실');
+  return;
+ }
+ if(p.cardId==='COC-23-008'){
+  u.atk+=55;
+  const integration=r.players[e.owner].integration;if(integration)r.units[integration].atk+=55;
+  r.players[e.owner].rideMachineLock=true;
+  H.log(r,'effect','어나더: 자신과 일체화 공격력 +55, 이 게임의 다른 라이드머신 사용 금지');
+  return;
+ }
+ if(p.cardId==='COC-26-005'){
+  H.search(r,e.owner,'퓨전업');return;
+ }
  if(p.cardId==='COC-32-001'||p.cardId==='COC-32-011'){
   if(r.turn!==e.owner||p.eventTurn!==r.turnNumber)return;
   if(u.bonusAttackTurn!==r.turnNumber){u.bonusAttackTurn=r.turnNumber;u.bonusAttackCount=0;}

@@ -4,6 +4,7 @@ import {choiceResponseSpellIds} from './spell-choice-batch.mjs';
 // This is not a list of fully automated cards or reactive counterspells.
 import {batchResponseSpellIds,balanceResponseSpellIds} from './spell-response-targets.mjs';
 export const responseSpellIds = Object.freeze([
+  'COC-08-009','COC-20-010','COC-23-010','COC-24-007',
   'COC-07-003','COC-13-007','COC-17-003',
   'COC-07-010','COC-08-007','COC-10-009','COC-19-004',
   'COC-20-005','COC-30-005',

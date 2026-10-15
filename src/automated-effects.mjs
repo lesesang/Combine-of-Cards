@@ -1,10 +1,15 @@
 import {balanceValues as B} from './balance-values.mjs';
 import {evolutionSpellIds} from './evolution.mjs';
 import {isNonToonField} from './spell-choice-batch.mjs';
+import {beginSummonBatch} from './effect-summon-batches.mjs';
 // Audited, deterministic card-effect handlers. No free-form text execution.
 // A handler must be backed by a particular v1.3 card wording.
 const aliases={};
 const register=(ids,handler)=>{for(const id of ids.split(' '))aliases[id]=handler;};
+register('COC-20-010 COC-23-010 COC-24-007',ctx=>{beginSummonBatch(ctx.r,ctx.who,ctx.c.id,ctx.H);});
+register('COC-08-009',ctx=>{
+ for(const id of ctx.r.players[ctx.who].field.filter(Boolean))if(ctx.H.attribute(ctx.r,id)==='요괴')ctx.r.units[id].atk+=50;
+});
 function checkSpellPlayerTarget(ctx,player){
  if(player===ctx.who)return;
  const protectedUntil=ctx.r.players[player]?.spellProtectionUntilOpponentTurn||0;

@@ -1,3 +1,4 @@
+import {actualAttack} from './combat-stats.mjs';
 /**
  * COC-21-002: Life-Eating Sword is a graveyard spell granting a serializable
  * independent effect, never a physical attachment.
@@ -87,8 +88,7 @@ export function swordMultiplierCount(room,unitId,{getZone}={}){
  return sum;
 }
 export function swordActualAttack(room,unitId,{getZone}={}){
- const raw=Number(room.units[unitId]?.atk);
- const base=Number.isFinite(raw)?Math.max(0,Math.floor(raw)):0;
+ const base=actualAttack(room.units[unitId],{room,getZone});
  const count=swordMultiplierCount(room,unitId,{getZone});
  if(!count)return base;
  const boosted=base*2**Math.min(52,count);

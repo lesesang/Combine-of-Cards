@@ -19,7 +19,7 @@ export function prepareElemental(r,who,sourceId,H){
  }
 }
 export function legalElementalAbilities(r,who,H){
- if(r.status!=='active'||r.pendingManual||r.pendingAbility||r.pendingElementalChoice||r.pendingRecruitChoice||r.pendingInfinityChoice||r.pendingMonsterTriggers||r.pendingTriggerOrder||r.pendingSpell||r.pendingDeckSearch||r.pendingExtraSummon||r.effectStack?.length)return [];
+ if(r.status!=='active'||r.pendingManual||r.pendingAbility||r.pendingElementalChoice||r.pendingRecruitChoice||r.pendingInfinityChoice||r.pendingTriggerTargetChoice||r.pendingSummonBatch||r.pendingMonsterTriggers||r.pendingTriggerOrder||r.pendingSpell||r.pendingDeckSearch||r.pendingExtraSummon||r.effectStack?.length)return [];
  if(r.turn===who&&(r.phase!=='MAIN'||r.pendingAttack))return [];
  if(r.pendingAttack&&r.pendingAttack.stage!=='response')return [];
  return r.players[who].field.filter(id=>id&&isElemental(r.units[id].cardId)&&!r.units[id].effectsNegated&&!effectUsedThisTurn(r,who,id,1)).filter(id=>{

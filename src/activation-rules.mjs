@@ -1,5 +1,7 @@
 import {balanceValues as B} from './balance-values.mjs';
 import {allWanderersDied,enemyFieldEmptyThreeTurns} from './integration-history.mjs';
+import {cardUseForbidden} from './card-game-history.mjs';
+import {batchSummonCount} from './effect-summon-batches.mjs';
 import {hasElementalForm} from './elemental-dragons.mjs';
 import {evolutionRules,validateEvolution,natureEvolutionCosts} from './evolution.mjs';
 /**
@@ -44,6 +46,10 @@ register('COC-08-001',c=>require_(c.deckCount('요괴')>=2,'덱에 요괴 속성
 register('COC-08-003',c=>require_(c.fieldCount('요괴')>=1,'필드에 요괴 몬스터가 필요합니다.'));
 register('COC-08-004',c=>require_(c.fieldCount('요괴')>=3,'필드에 요괴 몬스터 3장이 필요합니다.'));
 register('COC-08-006',c=>require_(c.fieldCount('요괴')===2,'필드에 요괴 몬스터가 정확히 2장 있어야 합니다.'));
+register('COC-08-009',c=>{
+ require_(c.fieldCount('요괴')>0,'강화할 자신의 요괴 몬스터가 필요합니다.');
+ return {costs:[{scheduleFieldDestruction:c.ownField.map(id=>({id,revision:c.room.units[id].fieldRevision||0})),player:c.who}]};
+});
 register('COC-08-010',c=>require_(c.hasIntegration('츠쿠모가미 야시키'),'츠쿠모가미 야시키와 일체화 중이어야 합니다.'));
 register('COC-09-001',c=>require_(c.deckCount('무기')>=3,'덱에 무기 속성 카드 3장이 필요합니다.'));
 register('COC-09-005 COC-09-006 COC-09-007',c=>require_(Boolean(c.player.integration),'일체화 상태여야 합니다.'));
@@ -60,14 +66,22 @@ register('COC-17-005 COC-17-006',c=>require_(c.hasIntegration('호루스의 현�
 register('COC-20-003',c=>require_(c.player.hp<=600,'체력이 600 이하여야 합니다.'));
 register('COC-20-006',c=>require_(c.player.hp<=700,'체력이 700 이하여야 합니다.'));
 register('COC-20-007',c=>require_(c.player.hp<=500&&c.hasIntegration('버닝 데몬즈'),'버닝데몬즈 일체화와 체력 500 이하가 필요합니다.'));
+register('COC-20-010',c=>{
+ require_(batchSummonCount(c.room,c.who,c.card.id,{cards:c.catalog})>0,'필드를 떠난 자신의 버닝데몬즈와 빈 필드가 필요합니다.');
+ const hp=Math.ceil(c.player.hp/2);require_(c.player.hp>hp,'체력 절반을 지불한 뒤 생존해야 합니다.');
+ return {costs:[{player:c.who,hp}]};
+});
 register('COC-20-011',c=>require_(c.fieldAnywhere('버닝데몬즈')||c.fieldAnywhere('버닝 데몬즈'),'버닝데몬즈가 필드에 있어야 합니다.'));
 register('COC-23-002 COC-23-003 COC-23-005 COC-23-008',c=>require_(c.hasIntegration('라이드 위저드'),'라이드 위저드와 일체화해야 합니다.'));
 register('COC-23-004',c=>require_(c.deckCount('라이드 위저드')>=1,'덱에 라이드 위저드가 있어야 합니다.'));
 register('COC-23-006 COC-23-009',c=>require_(c.hasIntegration('라이드 위저드'),'라이드 위저드와 일체화해야 합니다.'));
-register('COC-23-010',c=>require_(c.player.hand.length===1&&c.ownField.length===0&&c.player.deck.length<=3,'이 카드 외 손패가 없고, 필드가 비어 있으며 덱이 3장 이하여야 합니다.'));
+register('COC-23-010',c=>{
+ require_(c.player.hand.length===1&&c.ownField.length===0&&c.player.deck.length<=3,'이 카드 외 손패가 없고, 필드가 비어 있으며 덱이 3장 이하여야 합니다.');
+ return require_(batchSummonCount(c.room,c.who,c.card.id,{cards:c.catalog})>0,'사용 가능한 라이드머신 소환 후보가 필요합니다.');
+});
 register('COC-24-003 COC-24-004 COC-24-005 COC-24-006 COC-24-009 COC-26-003 COC-26-004 COC-26-009',c=>require_(c.hasIntegration('베스트 지니어스'),'베스트 지니어스와 일체화해야 합니다.'));
 register('COC-24-002 COC-26-002',c=>require_(c.deckCount('베스트 지니어스')>=1,'덱에 베스트 지니어스가 있어야 합니다.'));
-register('COC-24-007',c=>require_(c.ownField.length===0,'필드가 비어 있어야 합니다.'));
+register('COC-24-007',c=>{require_(c.ownField.length===0,'필드가 비어 있어야 합니다.');return require_(batchSummonCount(c.room,c.who,c.card.id,{cards:c.catalog})>0,'묘지에 실제 파괴된 자기 몬스터가 필요합니다.');});
 register('COC-24-008 COC-26-008',c=>require_(c.ownField.filter(id=>c.named(id).includes('매치')).length<=1,'필드의 매치 몬스터가 1장 이하여야 합니다.'));
 register('COC-26-005',c=>require_(c.hasField('저지먼트 매치'),'필드에 저지먼트 매치가 있어야 합니다.'));
 register('COC-30-008',c=>require_((c.player.natureSpellsUsedGame||0)>=3,'이번 게임에서 자연 속성 주문을 3장 이상 사용해야 합니다.'));
@@ -153,6 +167,7 @@ register('COC-08-008',c=>({costs:c.player.hand.filter(id=>id!==c.unitId).map(id=
 /** Validation has no side effects and can be safely used for AI move planning. */
 export function planActivation({room,who,unitId,cards,body={}}){
  const c=context(room,who,unitId,cards,body);
+ if(cardUseForbidden(room,who,c.card))deny('라이드머신 어나더의 게임 중 사용 금지로 다른 라이드머신을 사용할 수 없습니다.');
  if(evolutionRules[c.card.id])validateEvolution(room,who,c.card.id,cards);
  const predicate=SPEC.get(c.card.id);
  return {...(predicate?predicate(c):ok()),verified:!!predicate,cardId:c.card.id};
@@ -162,6 +177,10 @@ export function commitActivationCosts(room,plan,{move,destroy,draw}){
  // Validate the entire cost set before moving the first card; one protected
  // material must not let the action partially pay the other materials.
  for(const cost of plan.costs){
+  if(cost.scheduleFieldDestruction){
+   if(cost.scheduleFieldDestruction.some(c=>!room.players[cost.player].field.includes(c.id)||(room.units[c.id]?.fieldRevision||0)!==c.revision))deny('지연 파괴를 약정할 자신의 필드가 변경되었습니다.');
+   continue;
+  }
   if(cost.draw){if(!room.players[cost.player]||typeof draw!=='function')deny('드로우 비용을 처리할 수 없습니다.');continue;}
   if(cost.hp!==undefined){
    if(!room.players[cost.player]||(!cost.damage&&room.players[cost.player].hp<=cost.hp))deny('필요한 체력을 지불할 수 없습니다.');
@@ -173,6 +192,9 @@ export function commitActivationCosts(room,plan,{move,destroy,draw}){
    deny('파괴할 수 없는 몬스터는 파괴 비용으로 지불할 수 없습니다.');
  }
  for(const cost of plan.costs){
+  if(cost.scheduleFieldDestruction){
+   room.effects??=[];room.effects.push({type:'next-enemy-turn-destroy',player:cost.player,appliedAtTurn:room.turnNumber,targets:structuredClone(cost.scheduleFieldDestruction)});continue;
+  }
   if(cost.draw){draw(room,cost.player);continue;}
   if(cost.hp!==undefined){room.players[cost.player].hp-=cost.hp;continue;}
   const unit=room.units[cost.unitId];

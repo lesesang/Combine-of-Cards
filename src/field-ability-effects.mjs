@@ -5,9 +5,13 @@ import {isElemental,prepareElemental,beginElementalChoice} from './elemental-rep
 import {requireUnusedEffect,markEffectUsed} from './effect-usage.mjs';
 import {swordActualAttack} from './life-eating-sword.mjs';
 import {terraReady} from './elemental-dragons.mjs';
+import {batchSummonCount,beginSummonBatch} from './effect-summon-batches.mjs';
 
 // Audited activated effects only; unrelated summon/death triggers remain partial.
 export const FIELD_EFFECT_RULES=Object.freeze({
+ 'COC-08-011':{zone:'integration',sourceType:'integration',oncePerTurn:true},
+ 'COC-20-008':{zone:'integration',sourceType:'integration',oncePerTurn:true},
+ 'COC-26-001':{zone:'integration',sourceType:'integration',oncePerTurn:true},
  ...Object.fromEntries(ELEMENTAL_MAGICIAN_IDS.map(id=>[id,{zone:'field',sourceType:'monster',oncePerTurn:true,selfCost:true}])),
  'COC-32-012':{zone:'field',sourceType:'monster',oncePerTurn:true,effectNumber:2},
  'COC-32-014':{zone:'field',sourceType:'monster',oncePerTurn:true,effectNumber:2},
@@ -40,6 +44,19 @@ export function prepareFieldEffect(r,who,body,H){
  if(rule.oncePerTurn)requireUnusedEffect(r,who,sourceId,fieldEffectNumber(u.cardId));
  const plan={cardId:u.cardId,sourceId,sourceZone:z.zone,sourceRevision:revision(u,z.zone)};
  if(isElemental(u.cardId)){prepareElemental(r,who,sourceId,H);return plan;}
+ if(u.cardId==='COC-08-011'){
+  if(!batchSummonCount(r,who,u.cardId,H))invalid(H,'부활 가능한 파괴된 츠쿠모가미와 빈 필드가 필요합니다.');
+  return plan;
+ }
+ if(u.cardId==='COC-20-008'){
+  if(!Number.isInteger(body.discardCount)||body.discardCount<1||body.discardCount>Math.min(4,p.deck.length))invalid(H,'덱에서 버릴 카드 수를 1~4장 중 선택하세요.');
+  plan.discardCount=body.discardCount;return plan;
+ }
+ if(u.cardId==='COC-26-001'){
+  if(p.hp<=100)invalid(H,'체력100을 지불한 뒤 생존해야 합니다.');
+  if(!r.players.some(pp=>pp.field.some(id=>id&&H.name(r,id).includes('매치'))))invalid(H,'필드에 매치 몬스터가 필요합니다.');
+  return plan;
+ }
  if(u.cardId==='COC-32-014'){
   if(!terraReady(u)||!Number.isFinite(u.hp)||u.hp<=0)invalid(H,'소환 뒤 자신의 턴 시작을 두 번 맞은 체력이 있는 테라가 필요합니다.');
   return plan;
@@ -83,6 +100,7 @@ export function prepareFieldEffect(r,who,body,H){
 }
 export function payFieldEffect(r,who,plan,H){
  const p=r.players[who],u=r.units[plan.sourceId];
+ if(plan.cardId==='COC-26-001')p.hp-=100;
  if(isElemental(plan.cardId)){
   H.destroy(r,plan.sourceId,{cause:'cost',sourceId:plan.sourceId});
   if(H.zone(r,plan.sourceId)?.zone!=='grave')invalid(H,'자기 파괴 비용 지불에 실패했습니다.');
@@ -114,6 +132,15 @@ export function resolveFieldEffect(r,who,plan,H){
  const p=r.players[who],c=plan.cardId,t=plan.targetId;
  if(captureIds.has(c)&&!p.field.includes(null))return fizzle('필드 빈 자리 소실');
  switch(c){
+ case 'COC-08-011':return beginSummonBatch(r,who,c,H);
+ case 'COC-20-008':{
+  const count=Math.min(plan.discardCount,p.deck.length);
+  for(let i=0;i<count;i++)H.move(r,p.deck[0],'grave',who);
+  u.atk+=count*50;H.log(r,'effect',`워리어 드라고닉: 덱 위 ${count}장 묘지 이동, 공격력 +${count*50}`);break;
+ }
+ case 'COC-26-001':
+  for(const pp of r.players)for(const id of pp.field.filter(Boolean))if(H.name(r,id).includes('매치'))r.units[id].atk+=50;
+  break;
  case 'COC-32-012':
   if(!(r.units[t].hp>swordActualAttack(r,plan.sourceId,{getZone:(room,id)=>H.zone(room,id)})))return fizzle('대상 체력이 현재 실제 공격력 이하');
   H.destroy(r,t,{sourceId:plan.sourceId});break;
