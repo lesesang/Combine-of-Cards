@@ -21,7 +21,7 @@ This file is for a new coding assistant taking over the repository after the 202
 - Preserve the user's custom TCG v1.3: **24 premade playable decks**, **254 card records**, no card mixing across premade decks.
 - Never restore the deleted decks: 합체 기계, 코미컬, 럭키, 카지노이드, 비트스타즈, 파트너 몬스터즈, 코브라, 아홉꼬리.
 - The goal is **fully automatic server-authoritative card effects**, AI duels (choose opponent deck/random; easy, medium, hard), PvP, rules conflict diagnostics and production-ready deployment.
-- **Latest implementation (whole-roster balance B1, 2026-10-15): 163 partially supported / 90 manually unsupported / 1 basic, 72 registered spell handlers, 64 spells in opponent-pass effect stack and only 77 effect-number evidence records. Complete coverage certified: 0.** The server banner is beta.11, not an accurate support inventory. Full automation is not achieved.
+- **Latest implementation (all registered field responses, 2026-10-15): 163 partially supported / 90 manually unsupported / 1 basic, 72 registered spell handlers, 64 spells in opponent-pass effect stack and only 83 effect-number evidence records. Complete coverage certified: 0.** The server banner is beta.12, not an accurate support inventory. Full automation is not achieved.
 - Source v1.3 DOCX and comparison JSON were created in a prior conversation but are **not yet committed** to this public repository. See docs/SOURCE_DATA_PROVENANCE.md.
 
 ## Latest user-confirmed rules to preserve (PR #57–#58)
@@ -99,3 +99,9 @@ The user authorized autonomous fixes for ambiguous rulings and overpowered effec
 현재 **163 partial /90 manual /1 basic, 주문 핸들러72, 대응 주문64, 효과 증거77건(73장), 완전 인증0**. 용의 둥지 자동화와 질투/욕망 대응, 새 수치와 도발/흡혈/효과 무효·만료 오류를 수정했다. 미구현 원소2번/드래곤·재단·소환 제외는 여전히 미완료다. 254장 검토는 전 효과 자동화 또는 실전 승률 균형 인증이 아니다.
 
 다음은 미구현 개정 효과의 상태/반응 명세→공통 체인 연결→24×24 대전과 난이도 평가다. 운영 DB는 사용자 개인 **Cloudflare D1**을 목표로 한다. [D1 저장소 분리·동시성·이전 계획](docs/CLOUDFLARE_D1_PLAN.md). D1 연결과 운영 배포는 아직 하지 않았다.
+
+## 2026-10-15 필드 효과6종 대응 / 슈 선택 소환
+
+기존 즉시 실행6종을 공통 대응으로 옮겨 **등록 필드 발동17종 모두 대응 연결(몬스터13·일체화4)**. 쿠로쿠로비 반환·프람덴베르카 제물과 게임3회·라이드 플레임 게임1회·매치2종 현재HP 설정·슈 비공개 선택/소환 대응을 PvP/AI/복구에 연결했다. 원문/B1 수치와 기존 확정 재정은 유지한다. [명세·재정 해석·검증·미완료](docs/REMAINING_FIELD_RESPONSES.md).
+
+현재 **163 partial /90 manual /1 basic, 주문 핸들러72·대응64, 효과 증거83건(79장), 완전 인증0**. 신규 카드 완성 인증이 아니라 기존 부분 효과의 비용·무효화·소환 처리 보완이다. 일반 체인 삽입/전체 유발·일체화 진입 이력·B1 미구현 조항은 남는다. 다음은 원소 반격/지연과 소환·파괴·묘지 사건 묶음이다. 개인 Cloudflare D1 저장소 분리/이전은 별도 계획을 유지하며 아직 연결/배포하지 않았다.
