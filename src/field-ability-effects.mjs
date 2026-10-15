@@ -4,10 +4,13 @@ import {ELEMENTAL_MAGICIAN_IDS} from './effect-usage.mjs';
 import {isElemental,prepareElemental,beginElementalChoice} from './elemental-replacement.mjs';
 import {requireUnusedEffect,markEffectUsed} from './effect-usage.mjs';
 import {swordActualAttack} from './life-eating-sword.mjs';
+import {terraReady} from './elemental-dragons.mjs';
 
 // Audited activated effects only; unrelated summon/death triggers remain partial.
 export const FIELD_EFFECT_RULES=Object.freeze({
  ...Object.fromEntries(ELEMENTAL_MAGICIAN_IDS.map(id=>[id,{zone:'field',sourceType:'monster',oncePerTurn:true,selfCost:true}])),
+ 'COC-32-012':{zone:'field',sourceType:'monster',oncePerTurn:true,effectNumber:2},
+ 'COC-32-014':{zone:'field',sourceType:'monster',oncePerTurn:true,effectNumber:2},
  'COC-08-003':{zone:'field',sourceType:'monster',oncePerTurn:true},
  'COC-10-005':{zone:'integration',sourceType:'integration',oncePerTurn:true,costTriggers:true},
  'COC-23-002':{zone:'field',sourceType:'monster',oncePerTurn:true},
@@ -23,6 +26,7 @@ export const FIELD_EFFECT_RULES=Object.freeze({
  'COC-22-010':{zone:'integration',sourceType:'integration',oncePerTurn:true}
 });
 export const FIELD_RESPONSE_IDS=Object.freeze(Object.keys(FIELD_EFFECT_RULES));
+export const fieldEffectNumber=id=>FIELD_EFFECT_RULES[id]?.effectNumber||1;
 const captureIds=new Set(['COC-13-001','COC-13-002','COC-13-005']);
 const revision=(unit,zone)=>zone==='field'?(unit.fieldRevision||0):(unit.integrationRevision||0);
 const invalid=(H,message)=>H.fail(409,message);
@@ -33,9 +37,13 @@ function findSearch(r,who,cardId){
 export function prepareFieldEffect(r,who,body,H){
  const sourceId=body.sourceUnitId,u=r.units[sourceId],z=H.zone(r,sourceId),rule=u&&FIELD_EFFECT_RULES[u.cardId],p=r.players[who];
  if(!rule||!z||z.player!==who||z.zone!==rule.zone||u.effectsNegated)invalid(H,'효과가 유효한 자신의 필드 또는 일체화 카드가 필요합니다.');
- if(rule.oncePerTurn)requireUnusedEffect(r,who,sourceId,1);
+ if(rule.oncePerTurn)requireUnusedEffect(r,who,sourceId,fieldEffectNumber(u.cardId));
  const plan={cardId:u.cardId,sourceId,sourceZone:z.zone,sourceRevision:revision(u,z.zone)};
  if(isElemental(u.cardId)){prepareElemental(r,who,sourceId,H);return plan;}
+ if(u.cardId==='COC-32-014'){
+  if(!terraReady(u)||!Number.isFinite(u.hp)||u.hp<=0)invalid(H,'소환 뒤 자신의 턴 시작을 두 번 맞은 체력이 있는 테라가 필요합니다.');
+  return plan;
+ }
  if(u.cardId==='COC-08-003'){
   if(!p.hand.includes(body.costCardId))invalid(H,'패에서 덱으로 되돌릴 카드를 골라야 합니다.');
   plan.costCardId=body.costCardId;return plan;
@@ -64,6 +72,7 @@ export function prepareFieldEffect(r,who,body,H){
   Object.assign(plan,{targetId,targetController:tz.player,targetRevision:r.units[targetId].fieldRevision||0});
  }
  if(['COC-24-003','COC-26-003'].includes(u.cardId)&&!Number.isFinite(r.units[plan.targetId].hp))invalid(H,'대상에게 현재 체력이 필요합니다.');
+ if(u.cardId==='COC-32-012'&&!(r.units[plan.targetId].hp>swordActualAttack(r,sourceId,{getZone:(room,id)=>H.zone(room,id)})))invalid(H,'자신의 현재 실제 공격력보다 현재 체력이 높은 상대 몬스터를 선택하세요.');
  if(captureIds.has(u.cardId)&&!p.field.includes(null))invalid(H,'내 필드에 빈 자리가 필요합니다.');
  if(u.cardId==='COC-12-013'){
   if(!p.hand.includes(body.costCardId))invalid(H,'버릴 자신의 패 1장을 선택해야 합니다.');
@@ -94,7 +103,7 @@ export function payFieldEffect(r,who,plan,H){
   u.attackCount=(u.attackCount||0)+1;
   H.log(r,'cost',`${p.label}: 블랙 메탈 카이저 공격 기회 1회 지불`);
  }
- if(FIELD_EFFECT_RULES[plan.cardId].oncePerTurn)markEffectUsed(r,who,plan.sourceId,1);
+ if(FIELD_EFFECT_RULES[plan.cardId].oncePerTurn)markEffectUsed(r,who,plan.sourceId,fieldEffectNumber(plan.cardId));
 }
 export function resolveFieldEffect(r,who,plan,H){
  if(isElemental(plan.cardId))return beginElementalChoice(r,who,plan.sourceId,H);
@@ -105,6 +114,12 @@ export function resolveFieldEffect(r,who,plan,H){
  const p=r.players[who],c=plan.cardId,t=plan.targetId;
  if(captureIds.has(c)&&!p.field.includes(null))return fizzle('필드 빈 자리 소실');
  switch(c){
+ case 'COC-32-012':
+  if(!(r.units[t].hp>swordActualAttack(r,plan.sourceId,{getZone:(room,id)=>H.zone(room,id)})))return fizzle('대상 체력이 현재 실제 공격력 이하');
+  H.destroy(r,t,{sourceId:plan.sourceId});break;
+ case 'COC-32-014':
+  if(!terraReady(u)||!Number.isFinite(u.hp)||u.hp<=0)return fizzle('체류 조건 또는 현재 체력 소실');
+  r.players[1-who].hp-=Math.floor(u.hp/2);H.outcome(r);break;
  case 'COC-08-003':H.draw(r,who);break;
  case 'COC-10-005':H.destroy(r,t,{sourceId:plan.sourceId});break;
  case 'COC-23-002':{

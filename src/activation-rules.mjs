@@ -1,4 +1,5 @@
 import {balanceValues as B} from './balance-values.mjs';
+import {hasElementalForm} from './elemental-dragons.mjs';
 import {evolutionRules,validateEvolution,natureEvolutionCosts} from './evolution.mjs';
 /**
  * Audited preflight rules for main-deck cards with explicit v1.3 requirements.
@@ -78,11 +79,8 @@ register('COC-31-002',c=>require_(c.fieldAnywhere('크로와'),'필드에 크로
 register('COC-31-003',c=>require_(c.fieldAnywhere('크로와')&&c.fieldAnywhere('카스테'),'필드에 크로와와 카스테가 필요합니다.'));
 register('COC-31-010',c=>require_(c.hasIntegration('슈'),'최광의 대마법사 슈와 일체화해야 합니다.'));
 register('COC-32-001 COC-32-002 COC-32-003 COC-32-004',c=>require_(c.player.hand.some(id=>id!==c.unitId&&c.type(id)==='주문'),'패에 주문 카드가 있어야 합니다.'));
-register('COC-32-005',c=>require_(c.fieldAnywhere('플레임'),'원소의 마법사 플레임이 필드에 있어야 합니다.'));
-register('COC-32-006',c=>require_(c.fieldAnywhere('워터'),'원소의 마법사 워터가 필드에 있어야 합니다.'));
-register('COC-32-007',c=>require_(c.fieldAnywhere('윈드'),'원소의 마법사 윈드가 필드에 있어야 합니다.'));
-register('COC-32-008',c=>require_(c.fieldAnywhere('랜드'),'원소의 마법사 랜드가 필드에 있어야 합니다.'));
-register('COC-32-009',c=>require_(c.ownField.some(id=>c.named(id).includes('원소의 마법사')),'원소의 마법사 몬스터가 필드에 있어야 합니다.'));
+for(const [spell,form] of [['COC-32-005','COC-32-001'],['COC-32-006','COC-32-002'],['COC-32-007','COC-32-003'],['COC-32-008','COC-32-004']])register(spell,c=>require_(hasElementalForm(c.room,[...c.ownField,...c.enemyField],form),`${c.catalog.get(form).name} 또는 규칙상 같은 이름인 드래곤이 필드에 있어야 합니다.`));
+register('COC-32-009',c=>require_(['COC-32-001','COC-32-002','COC-32-003','COC-32-004'].some(form=>hasElementalForm(c.room,c.ownField,form)),'원소의 마법사 몬스터가 필드에 있어야 합니다.'));
 register('COC-32-010',c=>require_((c.player.spellsThisTurn||0)>=1,'이번 턴에 주문을 사용한 기록이 있어야 합니다.'));
 
 register('COC-03-003',c=>{validateEvolution(c.room,c.who,c.card.id,c.catalog);return ok();});
