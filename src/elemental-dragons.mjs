@@ -1,4 +1,3 @@
-import {effectUsedThisTurn,markEffectUsed} from './effect-usage.mjs';
 // Rule names are identities, not copied abilities, types, or printed data.
 export const ELEMENTAL_DRAGON_FORMS=Object.freeze({
  'COC-32-011':'COC-32-001',
@@ -30,13 +29,3 @@ export function beginDragonTurn(room,who){
 }
 export const terraReady=unit=>(unit?.dragonResidence?.ownTurnStarts||0)>=2;
 
-export function grantElementalBattleAttack(room,sourceId,{destroyed,sourceAttack,targetAttack},H){
- const u=room.units[sourceId],z=H.zone(room,sourceId);
- if(!u||u.effectsNegated||z?.zone!=='field'||z.player!==room.turn||effectUsedThisTurn(room,room.turn,sourceId,2))return false;
- if(!(u.cardId==='COC-32-001'&&sourceAttack>targetAttack)&&!(u.cardId==='COC-32-011'&&destroyed))return false;
- markEffectUsed(room,room.turn,sourceId,2);
- if(u.bonusAttackTurn!==room.turnNumber){u.bonusAttackTurn=room.turnNumber;u.bonusAttackCount=0;}
- u.bonusAttackCount++;
- H.log(room,'effect',`${H.name(room,sourceId)}: 이 턴 추가 공격 기회 1회 획득`);
- return true;
-}

@@ -1,4 +1,5 @@
 import {balanceValues as B} from './balance-values.mjs';
+import {allWanderersDied,enemyFieldEmptyThreeTurns} from './integration-history.mjs';
 import {hasElementalForm} from './elemental-dragons.mjs';
 import {evolutionRules,validateEvolution,natureEvolutionCosts} from './evolution.mjs';
 /**
@@ -46,6 +47,7 @@ register('COC-08-006',c=>require_(c.fieldCount('요괴')===2,'필드에 요괴 �
 register('COC-08-010',c=>require_(c.hasIntegration('츠쿠모가미 야시키'),'츠쿠모가미 야시키와 일체화 중이어야 합니다.'));
 register('COC-09-001',c=>require_(c.deckCount('무기')>=3,'덱에 무기 속성 카드 3장이 필요합니다.'));
 register('COC-09-005 COC-09-006 COC-09-007',c=>require_(Boolean(c.player.integration),'일체화 상태여야 합니다.'));
+register('COC-10-005',c=>require_(allWanderersDied(c.room,c.who),'자신 소유의 디트리히·프란츠·율리우스가 각각 필드에서 파괴된 기록이 필요합니다.'));
 register('COC-11-010',c=>require_(c.hasIntegration('해풍을 다스리는 용왕'),'해풍을 다스리는 용왕 일체화 상태가 필요합니다.'));
 register('COC-12-004',c=>require_(c.player.hand.length<=1,'손패가 1장 이하여야 합니다.'));
 register('COC-12-009',c=>require_(c.deckCount('영웅')>=6,'덱에 영웅 속성 카드 6장 이상이 필요합니다.'));
@@ -77,6 +79,7 @@ register('COC-30-009',c=>{
 register('COC-31-001',c=>require_(c.enemyField.length>0,'상대 필드에 몬스터가 필요합니다.'));
 register('COC-31-002',c=>require_(c.fieldAnywhere('크로와'),'필드에 크로와가 존재해야 합니다.'));
 register('COC-31-003',c=>require_(c.fieldAnywhere('크로와')&&c.fieldAnywhere('카스테'),'필드에 크로와와 카스테가 필요합니다.'));
+register('COC-31-004',c=>require_(enemyFieldEmptyThreeTurns(c.room,c.who,c.catalog),'상대 필드에 몬스터가 없는 상태로 연속 3턴이 완전히 지나야 합니다.'));
 register('COC-31-010',c=>require_(c.hasIntegration('슈'),'최광의 대마법사 슈와 일체화해야 합니다.'));
 register('COC-32-001 COC-32-002 COC-32-003 COC-32-004',c=>require_(c.player.hand.some(id=>id!==c.unitId&&c.type(id)==='주문'),'패에 주문 카드가 있어야 합니다.'));
 for(const [spell,form] of [['COC-32-005','COC-32-001'],['COC-32-006','COC-32-002'],['COC-32-007','COC-32-003'],['COC-32-008','COC-32-004']])register(spell,c=>require_(hasElementalForm(c.room,[...c.ownField,...c.enemyField],form),`${c.catalog.get(form).name} 또는 규칙상 같은 이름인 드래곤이 필드에 있어야 합니다.`));

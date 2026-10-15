@@ -5,8 +5,10 @@ import {swordActualAttack} from './life-eating-sword.mjs';
 // Draft automation: the user requested implementation batches before testing.
 // These are automatic monster triggers, not selectable MAIN field abilities.
 export const TRIGGER_RULES=Object.freeze({
+ 'COC-32-001':{effectNumber:2,event:'battle-completed'},
  'COC-32-002':{effectNumber:2,event:'attack-target'},
  'COC-32-004':{effectNumber:2,event:'second-turn-start'},
+ 'COC-32-011':{effectNumber:2,event:'enemy-monster-destroyed'},
  'COC-32-015':{effectNumber:1,event:'attack-declared'}
 });
 function trigger(r,who,id,extra={}){
@@ -15,12 +17,39 @@ function trigger(r,who,id,extra={}){
   title:`${u.cardId} · 효과 ${TRIGGER_RULES[u.cardId].effectNumber}`,
   payload:{cardId:u.cardId,sourceRevision:u.fieldRevision||0,...extra}};
 }
+function deferAttackBonus(r,id,H,extra){
+ const u=r.units[id],z=H.zone(r,id);
+ if(r.status!=='active'||!u||u.effectsNegated||z?.zone!=='field'||z.player!==r.turn||effectUsedThisTurn(r,z.player,id,2))return;
+ const pending=r.deferredMonsterTriggers??=[];
+ // Batch destruction is one opportunity, not one bonus for every victim.
+ // Reserve by physical UID/effect/turn, independently of elemental effect 1.
+ if(pending.some(e=>e.sourceId===id&&e.payload.eventTurn===r.turnNumber))return;
+ pending.push(trigger(r,z.player,id,{eventTurn:r.turnNumber,...extra}));
+}
+export function recordElementalBattle(r,sourceId,{sourceAttack,targetAttack},H){
+ if(r.units[sourceId]?.cardId==='COC-32-001'&&sourceAttack>targetAttack)
+  deferAttackBonus(r,sourceId,H,{event:'battle-completed',sourceAttack,targetAttack});
+}
+export function recordMonsterDestruction(r,{sourceId,victimId,victimController,victimType,cause},H){
+ const z=sourceId&&H.zone(r,sourceId);
+ if(r.units[sourceId]?.cardId!=='COC-32-011'||cause==='cost'||sourceId===victimId||z?.player===victimController||!victimType?.includes('몬스터'))return;
+ deferAttackBonus(r,sourceId,H,{event:'enemy-monster-destroyed',victimId});
+}
+export function drainDeferredMonsterTriggers(r,H){
+ if(r.status!=='active'){r.deferredMonsterTriggers=[];return;}
+ // Destruction can occur within a spell, paid cost, summon, or heal group.
+ // Collect there, declare only after that complete chain and its choices.
+ if(r.pendingMonsterTriggers||r.pendingAbility||r.pendingSpell||r.pendingExtraSummon||r.pendingTriggerOrder||r.pendingInfinityChoice||r.pendingElementalChoice||r.pendingRecruitChoice||r.pendingDeckSearch||r.effectStack?.length)return;
+ const effects=(r.deferredMonsterTriggers||[]).filter(e=>r.units[e.sourceId]?.cardId===e.payload.cardId&&e.payload.eventTurn===r.turnNumber&&!effectUsedThisTurn(r,e.owner,e.sourceId,2));
+ if(effects.length)queueMonsterTriggers(r,effects,H);
+ r.deferredMonsterTriggers=[];
+}
 export function attackDeclarationTriggers(r,attackerId,target,H,{retarget=false}={}){
  const source=r.units[attackerId],who=r.turn,group=[];
  if(!source)return group;
  if(!retarget&&source.cardId==='COC-32-015'&&!source.effectsNegated&&!effectUsedThisTurn(r,who,attackerId,1))group.push(trigger(r,who,attackerId));
  const defender=target.type==='unit'&&r.units[target.id];
- if(defender?.cardId==='COC-32-002'&&!defender.effectsNegated&&(H.type(r,attackerId)||'').includes('몬스터')&&!effectUsedThisTurn(r,1-who,target.id,2)){
+ if(defender?.cardId==='COC-32-002'&&!defender.effectsNegated&&((H.type(r,attackerId)||source.tokenCard?.type||'').includes('몬스터')||Number.isFinite(source.hp))&&!effectUsedThisTurn(r,1-who,target.id,2)){
   group.push(trigger(r,1-who,target.id,{attackerId,attackerController:who,attackerRevision:source.fieldRevision||0}));
  }
  return group;
@@ -64,7 +93,12 @@ export function resumeMonsterTriggers(r,H){
 export function resolveMonsterTrigger(r,e,H){
  const u=r.units[e.sourceId],z=H.zone(r,e.sourceId),p=e.payload;
  if(!u||u.cardId!==p.cardId||u.effectsNegated||z?.zone!=='field'||z.player!==e.owner||(u.fieldRevision||0)!==p.sourceRevision){H.log(r,'effect','유발 소스 이탈/재진입·조종권/무효 상태로 불발');return;}
- if(p.cardId==='COC-32-002'){
+ if(p.cardId==='COC-32-001'||p.cardId==='COC-32-011'){
+  if(r.turn!==e.owner||p.eventTurn!==r.turnNumber)return;
+  if(u.bonusAttackTurn!==r.turnNumber){u.bonusAttackTurn=r.turnNumber;u.bonusAttackCount=0;}
+  u.bonusAttackCount=(u.bonusAttackCount||0)+1;
+  H.log(r,'effect',`${H.name(r,e.sourceId)}: 이 턴 추가 공격 기회 1회 획득`);
+ }else if(p.cardId==='COC-32-002'){
   const a=r.units[p.attackerId],az=H.zone(r,p.attackerId);
   if(!a||az?.zone!=='field'||az.player!==p.attackerController||(a.fieldRevision||0)!==p.attackerRevision)return;
   if(swordActualAttack(r,p.attackerId,{getZone:(room,id)=>H.zone(room,id)})>u.hp){
