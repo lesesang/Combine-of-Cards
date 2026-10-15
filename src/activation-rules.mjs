@@ -42,6 +42,10 @@ register('COC-05-010',c=>require_(!c.hasField('카툰 랜드'),'카툰 랜드가
 register('COC-06-001',c=>require_((c.player.metalElementUsedGame||0)>=5,'금속 또는 원소 카드 5장 사용 기록이 필요합니다.'));
 register('COC-06-005',c=>require_((c.player.elementSpellPlaysThisTurn||0)>=2,'이번 턴에 원소 주문을 2장 이상 사용해야 합니다.'));
 register('COC-06-007',c=>require_((c.player.roundPlays||0)>=5,'이 카드를 제외하고 이번 턴에 카드 5장을 먼저 사용해야 합니다.'));
+register('COC-07-002',c=>{
+ require_(c.room.units[c.unitId].activationTurn!==c.room.turnNumber,'이 렌 카드는 이번 턴에 이미 사용했습니다.');
+ return {costs:[{markActivation:c.unitId},{draw:1,player:1-c.who}]};
+});
 register('COC-08-001',c=>require_(c.deckCount('요괴')>=2,'덱에 요괴 속성 카드가 2장 이상 있어야 합니다.'));
 register('COC-08-003',c=>require_(c.fieldCount('요괴')>=1,'필드에 요괴 몬스터가 필요합니다.'));
 register('COC-08-004',c=>require_(c.fieldCount('요괴')>=3,'필드에 요괴 몬스터 3장이 필요합니다.'));
@@ -177,6 +181,10 @@ export function commitActivationCosts(room,plan,{move,destroy,draw}){
  // Validate the entire cost set before moving the first card; one protected
  // material must not let the action partially pay the other materials.
  for(const cost of plan.costs){
+  if(cost.markActivation){
+   if(!room.units[cost.markActivation]||room.units[cost.markActivation].activationTurn===room.turnNumber)deny('이 카드의 턴당 사용 횟수를 이미 지불했습니다.');
+   continue;
+  }
   if(cost.scheduleFieldDestruction){
    if(cost.scheduleFieldDestruction.some(c=>!room.players[cost.player].field.includes(c.id)||(room.units[c.id]?.fieldRevision||0)!==c.revision))deny('지연 파괴를 약정할 자신의 필드가 변경되었습니다.');
    continue;
@@ -192,6 +200,7 @@ export function commitActivationCosts(room,plan,{move,destroy,draw}){
    deny('파괴할 수 없는 몬스터는 파괴 비용으로 지불할 수 없습니다.');
  }
  for(const cost of plan.costs){
+  if(cost.markActivation){room.units[cost.markActivation].activationTurn=room.turnNumber;continue;}
   if(cost.scheduleFieldDestruction){
    room.effects??=[];room.effects.push({type:'next-enemy-turn-destroy',player:cost.player,appliedAtTurn:room.turnNumber,targets:structuredClone(cost.scheduleFieldDestruction)});continue;
   }

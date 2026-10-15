@@ -40,7 +40,7 @@ export function chooseSummonBatch(r,who,ids,H){
 export function resumeSummonBatch(r,H){
  const p=r.pendingSummonBatch;if(!p||p.stage==='choice')return;
  if(r.status!=='active'){r.pendingSummonBatch=null;return;}
- if(r.pendingExtraSummon||r.pendingAbility||r.pendingSpell||r.pendingTriggerOrder||r.pendingMonsterTriggers||r.pendingTriggerTargetChoice||r.pendingInfinityChoice||r.effectStack?.length)return;
+ if(r.pendingExtraSummon||r.pendingAbility||r.pendingSpell||r.pendingTriggerOrder||r.pendingMonsterTriggers||r.pendingTriggerTargetChoice||r.pendingInfinityChoice||r.pendingDeckSearch||r.pendingRecruitChoice||r.pendingElementalChoice||r.effectStack?.length)return;
  while(p.queue.length){
   const next=p.queue.shift();
   if(!r.players[p.who].field.includes(null)){p.queue=[];break;}

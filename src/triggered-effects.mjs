@@ -1,10 +1,14 @@
 import {beginAutomaticTriggerOrder} from './effect-runtime.mjs';
 import {effectUsedThisTurn,markEffectUsed} from './effect-usage.mjs';
 import {swordActualAttack} from './life-eating-sword.mjs';
+import {SUMMON_TRIGGER_RULES,resolveSummonTrigger,settleSummonTrigger} from './summon-trigger-effects.mjs';
+import {beginDeckSearch,eligibleSearchIds} from './deck-search.mjs';
 
 // Draft automation: the user requested implementation batches before testing.
-// These are automatic monster triggers, not selectable MAIN field abilities.
+// Automatic monster/integration triggers, not selectable MAIN abilities.
 export const TRIGGER_RULES=Object.freeze({
+ ...Object.fromEntries(Object.entries(SUMMON_TRIGGER_RULES).map(([id,rule])=>[id,{effectNumber:1,event:'summoned',...rule}])),
+ 'COC-06-001':{effectNumber:1,event:'own-turn-start',sourceZone:'integration'},
  'COC-08-001':{effectNumber:1,event:'summoned',target:'return-field'},
  'COC-08-008':{effectNumber:1,event:'summoned',target:'capture-enemy'},
  'COC-23-005':{effectNumber:1,event:'summoned',target:'banish-enemy'},
@@ -19,18 +23,19 @@ export const TRIGGER_RULES=Object.freeze({
  'COC-32-015':{effectNumber:1,event:'attack-declared'}
 });
 function trigger(r,who,id,extra={}){
- const u=r.units[id];
- return {key:`trigger-${r.turnNumber}-${id}`,effectId:'monster-trigger-resolution',owner:who,sourceId:id,sourceZone:'field',priority:0,
+ const u=r.units[id],sourceZone=TRIGGER_RULES[u.cardId].sourceZone||'field';
+ return {key:`trigger-${r.turnNumber}-${id}`,effectId:'monster-trigger-resolution',owner:who,sourceId:id,sourceZone,priority:0,
   title:`${u.cardId} · 효과 ${TRIGGER_RULES[u.cardId].effectNumber}`,
-  payload:{cardId:u.cardId,sourceRevision:u.fieldRevision||0,...extra}};
+  payload:{cardId:u.cardId,sourceRevision:(sourceZone==='integration'?u.integrationRevision:u.fieldRevision)||0,...extra}};
 }
 export function recordSummonTrigger(r,who,id,H){
  const u=r.units[id],rule=u&&TRIGGER_RULES[u.cardId];
  if(rule?.event!=='summoned')return false;
+ if(u.cardId==='COC-10-003'&&r.players[who].hp<=500)return true;
  if(!u.effectsNegated&&!effectUsedThisTurn(r,who,id,rule.effectNumber)){
   const pending=r.deferredMonsterTriggers??=[];
   if(!pending.some(e=>e.sourceId===id&&e.payload.eventTurn===r.turnNumber))pending.push(trigger(r,who,id,{eventTurn:r.turnNumber}));
- }
+ }else settleSummonTrigger(r,trigger(r,who,id),H);
  return true;
 }
 export function recordDestroyedTrigger(r,id,{sourceId,sourcePlayer},H){
@@ -49,6 +54,13 @@ export function recordDestroyedTrigger(r,id,{sourceId,sourcePlayer},H){
 function triggerTargetChoices(r,p,H){
  const kind=TRIGGER_RULES[p.cardId]?.target;
  if(kind==='capture-enemy'&&!r.players[p.who].field.includes(null))return [];
+ if(kind==='destroy-lower-printed'){
+  const attack=swordActualAttack(r,p.sourceId,{getZone:(room,id)=>H.zone(room,id)});
+  return r.players.flatMap(pp=>pp.field.filter(Boolean)).filter(id=>{
+   const printed=H.cards.get(r.units[id].cardId)||r.units[id].tokenCard;
+   return printed&&Number.isFinite(Number(printed.atk))&&Math.max(0,Number(printed.atk))<attack;
+  });
+ }
  return r.players.flatMap((pp,who)=>kind==='return-field'||who!==p.who?pp.field.filter(Boolean):[]);
 }
 export function triggerTargetView(r,viewer,H){
@@ -65,6 +77,14 @@ export function chooseTriggerTarget(r,who,id,H){
  r.pendingTriggerTargetChoice=null;
  if(!u||u.cardId!==p.cardId||u.effectsNegated||z?.zone!=='field'||z.player!==who||(u.fieldRevision||0)!==p.sourceRevision){H.log(r,'effect','소환 효과의 소스 상태 변경으로 불발');return;}
  const kind=TRIGGER_RULES[p.cardId].target;
+ if(kind==='destroy-lower-printed'){H.destroy(r,id,{sourceId:p.sourceId});H.outcome(r);return;}
+ if(kind==='coin-weaken-enemy'){
+  // Choose before rolling; neither client nor AI may see the outcome first.
+  const faces=Array.from({length:3},()=>H.roll(2));
+  H.log(r,'dice',`카스테: 코인 ${faces.join(', ')}`);
+  if(faces.filter(x=>x===1).length===2){r.units[id].atk=Math.max(0,r.units[id].atk-100);if(r.units[id].atk===0)H.destroy(r,id,{sourceId:p.sourceId});}
+  H.outcome(r);return;
+ }
  H.move(r,id,kind==='return-field'?'hand':kind==='capture-enemy'?'field':'banished',kind==='capture-enemy'?who:r.units[id].owner);
  H.log(r,'effect',`${H.cards.get(p.cardId).name}: 선택한 몬스터 ${kind==='return-field'?'패 복귀':kind==='capture-enemy'?'조종권 획득':'제외'}`);
 }
@@ -116,6 +136,11 @@ export function landTurnTriggers(r,who){
  }
  return group;
 }
+export function integrationTurnTriggers(r,who,H){
+ const id=r.players[who].integration,u=id&&r.units[id];
+ if(u?.cardId!=='COC-06-001'||u.effectsNegated||effectUsedThisTurn(r,who,id,1)||!eligibleSearchIds(r,who,u.cardId,H.cards).length)return [];
+ return [trigger(r,who,id,{eventTurn:r.turnNumber})];
+}
 export function queueMonsterTriggers(r,effects,H){
  if(!effects.length)return;
  if(r.pendingMonsterTriggers||r.pendingAbility||r.pendingSpell||r.pendingExtraSummon)throw new Error('another response chain is pending');
@@ -126,7 +151,7 @@ export function queueMonsterTriggers(r,effects,H){
 }
 export function resumeMonsterTriggers(r,H){
  const pending=r.pendingMonsterTriggers;
- if(!pending||r.pendingTriggerOrder||r.pendingAbility||r.pendingInfinityChoice||r.pendingTriggerTargetChoice)return;
+ if(!pending||r.pendingTriggerOrder||r.pendingAbility||r.pendingInfinityChoice||r.pendingTriggerTargetChoice||r.pendingDeckSearch)return;
  if(r.status!=='active'){r.pendingMonsterTriggers=null;return;}
  if(pending.stage==='ordering'){
   if(!r.effectStack?.length||r.effectStack.some(e=>e.effectId!=='monster-trigger-resolution'))throw new Error('invalid ordered monster trigger stack');
@@ -150,13 +175,18 @@ export function resolveMonsterTrigger(r,e,H){
   else r.players[t.player].hp-=p.amount;
   H.log(r,'effect',`저지먼트 매치: 파괴 직전 공격력 ${p.amount} 반사 피해`);H.outcome(r);return;
  }
- if(!u||u.cardId!==p.cardId||u.effectsNegated||z?.zone!=='field'||z.player!==e.owner||(u.fieldRevision||0)!==p.sourceRevision){H.log(r,'effect','유발 소스 이탈/재진입·조종권/무효 상태로 불발');return;}
+ const sourceZone=TRIGGER_RULES[p.cardId].sourceZone||'field';
+ if(!u||u.cardId!==p.cardId||u.effectsNegated||z?.zone!==sourceZone||z.player!==e.owner||((sourceZone==='integration'?u.integrationRevision:u.fieldRevision)||0)!==p.sourceRevision){H.log(r,'effect','유발 소스 이탈/재진입·조종권/무효 상태로 불발');return;}
+ if(p.cardId==='COC-06-001'){
+  beginDeckSearch(r,e.owner,p.cardId,H.cards,H,{sourceId:e.sourceId,sourceZone,sourceRevision:p.sourceRevision});return;
+ }
  if(TRIGGER_RULES[p.cardId].target){
   const choice={who:e.owner,sourceId:e.sourceId,cardId:p.cardId,sourceRevision:p.sourceRevision};
   if(triggerTargetChoices(r,choice,H).length)r.pendingTriggerTargetChoice=choice;
   else H.log(r,'effect','소환 효과: 유효한 대상 또는 빈 필드 소실');
   return;
  }
+ if(resolveSummonTrigger(r,e,H))return;
  if(p.cardId==='COC-23-008'){
   u.atk+=55;
   const integration=r.players[e.owner].integration;if(integration)r.units[integration].atk+=55;
@@ -165,7 +195,7 @@ export function resolveMonsterTrigger(r,e,H){
   return;
  }
  if(p.cardId==='COC-26-005'){
-  H.search(r,e.owner,'퓨전업');return;
+  beginDeckSearch(r,e.owner,p.cardId,H.cards,H,{sourceId:e.sourceId,sourceZone,sourceRevision:p.sourceRevision});return;
  }
  if(p.cardId==='COC-32-001'||p.cardId==='COC-32-011'){
   if(r.turn!==e.owner||p.eventTurn!==r.turnNumber)return;

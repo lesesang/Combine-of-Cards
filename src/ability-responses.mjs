@@ -2,6 +2,7 @@ import {declareEffect,resolveEffectStack} from './effect-runtime.mjs';
 import {FIELD_EFFECT_RULES,prepareFieldEffect,payFieldEffect,resolveFieldEffect} from './field-ability-effects.mjs';
 import {availableCounters,declareCardCounter,resolveCardCounter,counterEffectIds} from './counter-effects.mjs';
 import {resolveMonsterTrigger} from './triggered-effects.mjs';
+import {settleSummonTrigger} from './summon-trigger-effects.mjs';
 export const abilityResponsePlayer=r=>r.pendingAbility&&r.pendingAbility.stage!=='cost-triggers'?(r.pendingAbility.awaiting??1-r.pendingAbility.who):null;
 export const legalAbilityCounters=(r,who)=>r.pendingAbility?.stage==='cost-triggers'?[]:availableCounters(r,who,r.pendingAbility,'ability');
 export const declareAbilityCounter=(r,who,id)=>declareCardCounter(r,who,id,r.pendingAbility,'ability');
@@ -40,7 +41,8 @@ export function finishFieldAbility(r,H){
    }
    if(effect.effectId!=='field-ability-resolution'||effect.sequence!==pending.sequence||effect.owner!==pending.who||effect.sourceId!==pending.sourceId||effect.payload.cardId!==pending.cardId)throw new Error('unexpected field ability effect');
    if(resolveFieldEffect(r,effect.owner,effect.payload,H))H.log(r,'effect',`${H.name(r,effect.sourceId)}: 필드 효과 해결`);
-  },onResult:result=>{
+  },onResult:(result,effect)=>{
+   if(effect.effectId==='monster-trigger-resolution')settleSummonTrigger(r,effect,H);
    if(result.status==='negated-by-effect')H.log(r,'effect','필드/대응 효과 무효화 (비용 반환 없음)');
    if(result.status==='negated-source-moved')H.log(r,'effect','필드/대응 효과 소스 이탈로 불발 (비용 반환 없음)');
   }});
