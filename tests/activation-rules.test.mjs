@@ -53,10 +53,10 @@ test('Pharaoh general requires a mummy soldier token as a material',()=>{
  r.units[mummy].cardId='TOKEN:미라 병사';
  assert.equal(check(r,0,general,{costUnitIds:[mummy]}).costs[0].to,'grave');
 });
-test('rich envy rejects sacrifice below combined 250 and absent enemy target',()=>{
+test('rich envy rejects sacrifice below combined 200 and absent enemy target',()=>{
  const r=room(),spell=put(r,0,'COC-21-004','hand'),own=put(r,0,'COC-21-009','field');
- r.units[own].atk=100;r.units[own].hp=149;
+ r.units[own].atk=100;r.units[own].hp=99;
  const foe=put(r,1,'COC-03-005','field');
- assert.throws(()=>check(r,0,spell,{costUnitIds:[own],target:{type:'unit',id:foe}}),/250/);
- r.units[own].hp=150;assert.equal(check(r,0,spell,{costUnitIds:[own],target:{type:'unit',id:foe}}).costs.length,1);
+ assert.throws(()=>check(r,0,spell,{costUnitIds:[own],target:{type:'unit',id:foe}}),/200/);
+ r.units[own].hp=100;assert.equal(check(r,0,spell,{costUnitIds:[own],target:{type:'unit',id:foe}}).costs.length,1);
 });

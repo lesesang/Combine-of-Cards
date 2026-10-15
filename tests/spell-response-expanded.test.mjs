@@ -112,7 +112,7 @@ test('R01: unconditional healing starts after response; one pass only',()=>{
  assert.throws(()=>I.apply(r,1,'spellResponse',{choice:'negate'}),/무효화 응답은 사용할 수 없습니다/);
  assert.equal(r.players[0].hp,250);
  resolve(r);
- assert.equal(r.players[0].hp,550);
+ assert.equal(r.players[0].hp,490);
  assert.throws(()=>I.apply(r,1,'spellResponse',{choice:'pass'}),/상대가/);
 });
 test('R01: AI passes the response for a newly queued spell through normal action',()=>{
@@ -121,5 +121,5 @@ test('R01: AI passes the response for a newly queued spell through normal action
  declare(r,id);
  I.runAI(r);
  assert.equal(r.pendingSpell,null);
- assert.equal(r.players[0].hp,400);
+ assert.equal(r.players[0].hp,340);
 });

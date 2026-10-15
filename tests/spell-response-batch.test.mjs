@@ -113,7 +113,7 @@ test('batch: maximum dice and all-tail branches retain their printed results',t=
   if(cardId==='COC-20-004'){assert.equal(f.r.units[f.ally].atk,550);assert.equal(f.r.players[0].hp,500);}
   if(cardId==='COC-31-006')assert.equal(f.r.units[f.target].atk,80);
   if(cardId==='COC-31-008')assert.ok(f.r.players[1].field.includes(f.target));
-  if(cardId==='COC-31-010'){assert.equal(f.r.units[f.ally].atk,50);assert.equal(f.r.units[f.target].hp,250);}
+  if(cardId==='COC-31-010'){assert.equal(f.r.units[f.ally].atk,50);assert.equal(f.r.units[f.target].hp,500);}
   if(cardId==='COC-32-005')assert.equal(f.r.players[1].hp,800);
  }
 });

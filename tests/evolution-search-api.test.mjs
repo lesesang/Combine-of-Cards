@@ -48,7 +48,7 @@ test('evolution/search HTTP: eleven declarations roll back failures and restore 
    const actual=JSON.parse(fs.readFileSync(storage,'utf8'))[f.r.code];
    assert.equal(actual.units[f.source].cardId,evolutionRules[f.cardId].target);
    assert.equal(actual.units[f.source].atk,(Number(I.cards.get(evolutionRules[f.cardId].target).atk)||0)+50);
-   if(f.cardId==='COC-30-009'){assert.equal(actual.players[0].hp,1800);assert.ok(f.body.costDeckIds.every(id=>actual.players[0].grave.includes(id)));}
+   if(f.cardId==='COC-30-009'){assert.equal(actual.players[0].hp,1600);assert.ok(f.body.costDeckIds.every(id=>actual.players[0].grave.includes(id)));}
   }else{
    assert.equal(result.state.pendingDeckSearch.choices,undefined);
    const own=(await call(f.r.code,0)).state;assert.ok(own.pendingDeckSearch.choices.length);saved.set(f.r.code,own);

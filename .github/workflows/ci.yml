@@ -21,6 +21,7 @@ jobs:
           node --check public/app.js
           node --check src/automated-effects.mjs
       - run: npm run check:data
+      - run: npm run check:balance
       - run: npm run check:coverage -- --check
       - run: npm test
       - run: npm run test:matrix

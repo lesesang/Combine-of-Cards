@@ -17,6 +17,8 @@ jobs:
           cache: ''
       - name: Validate card data
         run: npm run check:data
+      - name: Check complete balance audit
+        run: npm run check:balance
       - name: Integration tests
         run: npm test
       - name: AI 24-deck smoke matrix

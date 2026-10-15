@@ -102,5 +102,3273 @@
     "afterEffect1": "자신의 필드에 있는 이 카드를 파괴하는 비용을 지불하고 발동한다. 효과 해결 시 자신의 패·덱·묘지에서 소환 조건을 만족하는 '원소의 마법사' 몬스터 1장을 선택하여 소환한다. 이 효과의 비용으로 파괴한 이 카드도 선택할 수 있다. 상대 턴에도 발동할 수 있다. 이 1번 효과는 플레이어별로 플레임·워터·윈드·랜드 4종을 합쳐 한 턴에 1회만 발동할 수 있다.",
     "authority": "2026-10-15 user delegated ruling and balance editing, preserving deck flow and creative intent",
     "rationale": "Clarify self-destruction cost, own zones, resolution-time choice and existing per-player shared cap; preserve situational form switching and printed summon condition. No numerical balance change."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-01-001",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-01-001",
+      "deckId": "01",
+      "name": "G-머신 그란레오",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "G",
+      "atk": "100",
+      "hp": "100",
+      "conditions": [
+        "내 덱에 주문이 5장 이상일경우 이 카드는 무조건 시작시 패에 잡힙니다."
+      ],
+      "effects": [],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-01-001",
+      "deckId": "01",
+      "name": "G-머신 그란레오",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "G",
+      "atk": "100",
+      "hp": "130",
+      "conditions": [
+        "내 덱에 주문이 5장 이상일경우 이 카드는 무조건 시작시 패에 잡힙니다."
+      ],
+      "effects": [],
+      "notes": []
+    },
+    "rationale": "툴/일체화 전개에 필요한 보장 초동이 교환 없이 쉽게 사라지는 점을 보완한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-03-002",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-03-002",
+      "deckId": "03",
+      "name": "영매의 퇴마부",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영매",
+      "atk": "100",
+      "hp": "100",
+      "conditions": [
+        "이 카드가 필드에 있을 때, 자신의 턴마다 1회 발동할 수 있다."
+      ],
+      "effects": [
+        "영매사 베리아를 어느 영역에서든 자신의 패로 가져온다. 이미 일체화 중이라면 대신 혼령의 맹약을 어느 영역에서든 자신의 패로 가져온다."
+      ],
+      "notes": [
+        "효과 사용 횟수는 자신의 턴마다 1회이며, 카드 검색 범위는 모든 영역이다."
+      ]
+    },
+    "after": {
+      "id": "COC-03-002",
+      "deckId": "03",
+      "name": "영매의 퇴마부",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영매",
+      "atk": "100",
+      "hp": "120",
+      "conditions": [
+        "이 카드가 필드에 있을 때, 자신의 턴마다 1회 발동할 수 있다."
+      ],
+      "effects": [
+        "영매사 베리아를 어느 영역에서든 자신의 패로 가져온다. 이미 일체화 중이라면 대신 혼령의 맹약을 어느 영역에서든 자신의 패로 가져온다."
+      ],
+      "notes": [
+        "효과 사용 횟수는 자신의 턴마다 1회이며, 카드 검색 범위는 모든 영역이다."
+      ]
+    },
+    "rationale": "영매 진화 검색의 중심 카드를 소폭 보호하되 공격력/검색 횟수는 유지한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-05-003",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-05-003",
+      "deckId": "05",
+      "name": "카툰 브레드코기",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "100",
+      "hp": "100",
+      "conditions": [
+        "이 카드는 카툰랜드가 없으면 공격할 수 없다."
+      ],
+      "effects": [],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-05-003",
+      "deckId": "05",
+      "name": "카툰 브레드코기",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "120",
+      "hp": "120",
+      "conditions": [
+        "이 카드는 카툰랜드가 없으면 공격할 수 없다."
+      ],
+      "effects": [],
+      "notes": []
+    },
+    "rationale": "카툰 랜드가 없으면 공격 불가인 일반 전투원의 조건 부담을 보상한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-06-005",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-06-005",
+      "deckId": "06",
+      "name": "마도 합성수 블레이즈 피닉스",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "원소",
+      "atk": "200",
+      "hp": "150",
+      "conditions": [
+        "이번 턴에 원소 속성 주문을 2장이상 발동해야 소환할 수 있다."
+      ],
+      "effects": [
+        "이 카드가 파괴되면 부활 조건을 기록한다. 어느 플레이어의 턴이든 그 턴에 원소 속성 카드 2장을 사용했다면, 그다음 상대의 드로우 페이즈에 이 카드를 부활시킨다."
+      ],
+      "notes": [
+        "원소 카드 2장은 같은 턴에 사용해야 한다."
+      ]
+    },
+    "after": {
+      "id": "COC-06-005",
+      "deckId": "06",
+      "name": "마도 합성수 블레이즈 피닉스",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "원소",
+      "atk": "220",
+      "hp": "170",
+      "conditions": [
+        "이번 턴에 원소 속성 주문을 2장이상 발동해야 소환할 수 있다."
+      ],
+      "effects": [
+        "이 카드가 파괴되면 부활 조건을 기록한다. 어느 플레이어의 턴이든 그 턴에 원소 속성 카드 2장을 사용했다면, 그다음 상대의 드로우 페이즈에 이 카드를 부활시킨다."
+      ],
+      "notes": [
+        "원소 카드 2장은 같은 턴에 사용해야 한다."
+      ]
+    },
+    "rationale": "원소 주문2회 선행이 필요한 피닉스의 소환 부담을 보상한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-06-006",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-06-006",
+      "deckId": "06",
+      "name": "마도합성수 쿠퍼 타이거",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "원소 / 금속",
+      "atk": "120",
+      "hp": "120",
+      "conditions": [],
+      "effects": [
+        "필드에 대상을 하나 지정한다. 이 카드가 필드에 있는동안 내 일체화의 공격력을 그 대상의 공격력의 절반과 같게합니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-06-006",
+      "deckId": "06",
+      "name": "마도합성수 쿠퍼 타이거",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "원소 / 금속",
+      "atk": "140",
+      "hp": "140",
+      "conditions": [],
+      "effects": [
+        "필드에 대상을 하나 지정한다. 이 카드가 필드에 있는동안 내 일체화의 공격력을 그 대상의 공격력의 절반과 같게합니다."
+      ],
+      "notes": []
+    },
+    "rationale": "초반 연결 몬스터를 보강하되 일체화 공격력 참조 비율은 유지한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-07-001",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-07-001",
+      "deckId": "07",
+      "name": "포식자 알리자",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "포식",
+      "atk": "+100",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "상대는 자신의 드로우 페이즈마다 덱 위에서 카드를 2장 묘지로 보내야 한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-07-001",
+      "deckId": "07",
+      "name": "포식자 알리자",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "포식",
+      "atk": "80",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "상대는 자신의 드로우 페이즈마다 덱 위에서 카드를 2장 묘지로 보내야 한다."
+      ],
+      "notes": []
+    },
+    "rationale": "드로우 페이즈마다 덱2장 밀기와 동시에 얻는 직접 공격력을 낮춘다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-07-007",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-07-007",
+      "deckId": "07",
+      "name": "포식자 알리자 라팍스",
+      "type": "일체화",
+      "zone": "created",
+      "attribute": "포식",
+      "atk": "150",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "상대는 드로우할 수 없을 시 패배한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-07-007",
+      "deckId": "07",
+      "name": "포식자 알리자 라팍스",
+      "type": "일체화",
+      "zone": "created",
+      "attribute": "포식",
+      "atk": "130",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "상대는 드로우할 수 없을 시 패배한다."
+      ],
+      "notes": []
+    },
+    "rationale": "특수 승리 위협과 병행되는 본체 전투 압박을 소폭 낮춘다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-07-011",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-07-011",
+      "deckId": "07",
+      "name": "자가포식",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "포식",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "상대는 카드를 1장 뽑습니다. 덱 위에서 카드를 3장 묘지로 보냅니다."
+      ],
+      "effects": [
+        "400HP를 회복하고, 자신의 일체화에 공격력 +200을 1턴 동안 부여한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-07-011",
+      "deckId": "07",
+      "name": "자가포식",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "포식",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "효과가 해결되면 상대는 카드 1장을 뽑고, 상대 덱 위에서 3장을 묘지로 보낸다."
+      ],
+      "effects": [
+        "자신의 플레이어 체력을 300 회복하고, 자신의 일체화에 공격력 +150을 이번 턴 종료까지 부여한다."
+      ],
+      "notes": []
+    },
+    "rationale": "제약 없는 대량 회복/일체화 공격 버프를400/200→300/150으로 완화한다. 해결 시 상대 드로우/덱3장 연계는 유지한다. 기존 엔진의 상대 드로우/덱 밀기 대상을 문구에 명시한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-08-001",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-08-001",
+      "deckId": "08",
+      "name": "츠쿠모가미 카사",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "요괴",
+      "atk": "150",
+      "hp": "50",
+      "conditions": [
+        "내 덱의 요괴 속성 카드가 2장 이상이어야 합니다."
+      ],
+      "effects": [
+        "필드의 몬스터 하나를 패로 돌려 보냅니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-08-001",
+      "deckId": "08",
+      "name": "츠쿠모가미 카사",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "요괴",
+      "atk": "120",
+      "hp": "50",
+      "conditions": [
+        "내 덱의 요괴 속성 카드가 2장 이상이어야 합니다."
+      ],
+      "effects": [
+        "필드의 몬스터 하나를 패로 돌려 보냅니다."
+      ],
+      "notes": []
+    },
+    "rationale": "소환 즉시 패 반환의 템포 이득은 유지하되 동시에 남는 공격력을 줄인다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-08-003",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-08-003",
+      "deckId": "08",
+      "name": "츠쿠모가미 쿠로쿠로비",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "요괴",
+      "atk": "150",
+      "hp": "300",
+      "conditions": [
+        "내 필드의 요괴 속성 몬스터가 1장 이상이어야 한다."
+      ],
+      "effects": [
+        "패를 1장 덱으로 되돌리고 1장을 뽑습니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-08-003",
+      "deckId": "08",
+      "name": "츠쿠모가미 쿠로쿠로비",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "요괴",
+      "atk": "130",
+      "hp": "240",
+      "conditions": [
+        "내 필드의 요괴 속성 몬스터가 1장 이상이어야 한다."
+      ],
+      "effects": [
+        "패를 1장 덱으로 되돌리고 1장을 뽑습니다."
+      ],
+      "notes": []
+    },
+    "rationale": "낮은 필드 조건에 비해 과한150/300 몸값을 줄이고 패 교환 기능은 보존한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-08-004",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-08-004",
+      "deckId": "08",
+      "name": "츠쿠모가미 야시키",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "요괴",
+      "atk": "+50",
+      "hp": "—",
+      "conditions": [
+        "내 필드의 요괴 속성 몬스터가 3장이상 이어야 합니다."
+      ],
+      "effects": [
+        "내 필드의 요괴 속성 몬스터의 공격력을 100 올린다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-08-004",
+      "deckId": "08",
+      "name": "츠쿠모가미 야시키",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "요괴",
+      "atk": "70",
+      "hp": "—",
+      "conditions": [
+        "내 필드의 요괴 속성 몬스터가 3장이상 이어야 합니다."
+      ],
+      "effects": [
+        "내 필드의 요괴 속성 몬스터의 공격력을 100 올린다."
+      ],
+      "notes": []
+    },
+    "rationale": "요괴3장 전개를 요구하는 일체화의 보상을 소폭 높인다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-09-003",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-09-003",
+      "deckId": "09",
+      "name": "타오르는 분노의 검",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "무기",
+      "atk": "100",
+      "hp": "100",
+      "conditions": [],
+      "effects": [
+        "이 몬스터는 한 턴에 두 번 공격할 수 있다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-09-003",
+      "deckId": "09",
+      "name": "타오르는 분노의 검",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "무기",
+      "atk": "100",
+      "hp": "80",
+      "conditions": [],
+      "effects": [
+        "이 몬스터는 한 턴에 두 번 공격할 수 있다."
+      ],
+      "notes": []
+    },
+    "rationale": "2회 공격과 사망 후 무기 전환의 장점은 남기고 전투로 제거할 여지를 늘린다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-10-001",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-10-001",
+      "deckId": "10",
+      "name": "배회자 - 심히 부패한 디트리히",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "언데드",
+      "atk": "200",
+      "hp": "200",
+      "conditions": [],
+      "effects": [
+        "이 몬스터가 소환될 때 이 몬스터와 공격력과 체력이 동일한 '썩어 떨어진 찌꺼기'를 내 손으로 가져온다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-10-001",
+      "deckId": "10",
+      "name": "배회자 - 심히 부패한 디트리히",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "언데드",
+      "atk": "170",
+      "hp": "170",
+      "conditions": [],
+      "effects": [
+        "이 몬스터가 소환될 때 이 몬스터와 공격력과 체력이 동일한 '썩어 떨어진 찌꺼기'를 내 손으로 가져온다."
+      ],
+      "notes": []
+    },
+    "rationale": "즉시 동급 찌꺼기를 추가 확보하는2장 전투 가치의 기댓값을 낮춘다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-10-003",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-10-003",
+      "deckId": "10",
+      "name": "배회자 - 영원한 젊음의 프란츠",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "언데드",
+      "atk": "100",
+      "hp": "200",
+      "conditions": [],
+      "effects": [
+        "자신의 플레이어 체력이 500을 초과할 때만 발동한다. 자신에게 체력이 500이 되도록 피해를 주고, 그 피해량만큼 상대 플레이어에게 피해를 준다. 체력이 500 이하라면 발동하지 않는다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-10-003",
+      "deckId": "10",
+      "name": "배회자 - 영원한 젊음의 프란츠",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "언데드",
+      "atk": "100",
+      "hp": "160",
+      "conditions": [],
+      "effects": [
+        "자신의 플레이어 체력이 500을 초과할 때만 발동한다. 자신에게 체력이 500이 되도록 피해를 주고, 그 피해량만큼 상대 플레이어에게 피해를 준다. 체력이 500 이하라면 발동하지 않는다."
+      ],
+      "notes": []
+    },
+    "rationale": "고정 체력 교환 재정은 그대로 두고 즉시 피해 뒤 남는 생존력을 낮춘다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-10-006",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-10-006",
+      "deckId": "10",
+      "name": "괴수 지그문두스",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "언데드",
+      "atk": "200",
+      "hp": "300",
+      "conditions": [],
+      "effects": [
+        "이 몬스터가 준 피해만큼 본체의 체력을 회복한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-10-006",
+      "deckId": "10",
+      "name": "괴수 지그문두스",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "언데드",
+      "atk": "180",
+      "hp": "250",
+      "conditions": [],
+      "effects": [
+        "이 몬스터가 준 피해만큼 본체의 체력을 회복한다."
+      ],
+      "notes": []
+    },
+    "rationale": "제약 없는 전투+회복의 지속 우위를 줄이되 흡혈 정체성은 보존한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-11-001",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-11-001",
+      "deckId": "11",
+      "name": "낙동강 이무기",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "50",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신의 드로우 페이즈가 시작될 때 자신의 필드에 용 속성 몬스터가 없으면 드로우와 별개로 손패에 들어온다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-11-001",
+      "deckId": "11",
+      "name": "낙동강 이무기",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "70",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신의 드로우 페이즈가 시작될 때 자신의 필드에 용 속성 몬스터가 없으면 드로우와 별개로 손패에 들어온다."
+      ],
+      "notes": []
+    },
+    "rationale": "용왕/보물 축적 전에 살아남을 기반을 보강한다. 토큰 사건 수, 황금/반지 순서와 보물×10은 바꾸지 않는다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-11-003",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-11-003",
+      "deckId": "11",
+      "name": "해풍을 다스리는 용왕",
+      "type": "일체화",
+      "zone": "created",
+      "attribute": "용",
+      "atk": "150",
+      "hp": "—",
+      "conditions": [
+        "1000년의 비원 여의보주의 효과로만 사용 가능하다."
+      ],
+      "effects": [
+        "매 턴 자신의 어택 페이즈가 시작될 때 상대 전체에게 50의 피해를 입힌다.",
+        "용/드래곤 속성에게 적용되는 공격력·체력 상승 효과의 ×1.5를 한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-11-003",
+      "deckId": "11",
+      "name": "해풍을 다스리는 용왕",
+      "type": "일체화",
+      "zone": "created",
+      "attribute": "용",
+      "atk": "170",
+      "hp": "—",
+      "conditions": [
+        "1000년의 비원 여의보주의 효과로만 사용 가능하다."
+      ],
+      "effects": [
+        "매 턴 자신의 어택 페이즈가 시작될 때 상대 전체에게 50의 피해를 입힌다.",
+        "용/드래곤 속성에게 적용되는 공격력·체력 상승 효과의 ×1.5를 한다."
+      ],
+      "notes": []
+    },
+    "rationale": "용왕/보물 축적 전에 살아남을 기반을 보강한다. 토큰 사건 수, 황금/반지 순서와 보물×10은 바꾸지 않는다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-11-004",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-11-004",
+      "deckId": "11",
+      "name": "천공을 자유롭게 누비는 와이번",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "드래곤",
+      "atk": "100",
+      "hp": "100",
+      "conditions": [],
+      "effects": [
+        "한 턴에 1회 덱/패/필드를 오갈 수 있다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-11-004",
+      "deckId": "11",
+      "name": "천공을 자유롭게 누비는 와이번",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "드래곤",
+      "atk": "150",
+      "hp": "140",
+      "conditions": [],
+      "effects": [
+        "한 턴에 1회 덱/패/필드를 오갈 수 있다."
+      ],
+      "notes": []
+    },
+    "rationale": "용왕/보물 축적 전에 살아남을 기반을 보강한다. 토큰 사건 수, 황금/반지 순서와 보물×10은 바꾸지 않는다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-11-005",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-11-005",
+      "deckId": "11",
+      "name": "흉작의 꽝철이",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "100",
+      "hp": "100",
+      "conditions": [],
+      "effects": [
+        "이 몬스터가 필드에 존재하는 동안 상대에게 적용되는 모든 공격력·체력 상승 효과는 반감된다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-11-005",
+      "deckId": "11",
+      "name": "흉작의 꽝철이",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "130",
+      "hp": "160",
+      "conditions": [],
+      "effects": [
+        "이 몬스터가 필드에 존재하는 동안 상대에게 적용되는 모든 공격력·체력 상승 효과는 반감된다."
+      ],
+      "notes": []
+    },
+    "rationale": "용왕/보물 축적 전에 살아남을 기반을 보강한다. 토큰 사건 수, 황금/반지 순서와 보물×10은 바꾸지 않는다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-11-006",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-11-006",
+      "deckId": "11",
+      "name": "팔두룡 야마타노오로치",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "150",
+      "hp": "150",
+      "conditions": [],
+      "effects": [
+        "상대 전체에게 자신의 어택 페이즈가 시작될 때 이 몬스터가 공격한 횟수×80의 피해를 준다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-11-006",
+      "deckId": "11",
+      "name": "팔두룡 야마타노오로치",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "170",
+      "hp": "180",
+      "conditions": [],
+      "effects": [
+        "상대 전체에게 자신의 어택 페이즈가 시작될 때 이 몬스터가 공격한 횟수×80의 피해를 준다."
+      ],
+      "notes": []
+    },
+    "rationale": "용왕/보물 축적 전에 살아남을 기반을 보강한다. 토큰 사건 수, 황금/반지 순서와 보물×10은 바꾸지 않는다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-11-007",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-11-007",
+      "deckId": "11",
+      "name": "탐욕의 악룡 파프니르",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "드래곤",
+      "atk": "0",
+      "hp": "1",
+      "conditions": [
+        "이 몬스터는 덱/패에 존재할 때 토큰이 사용/생성되면 소환된다."
+      ],
+      "effects": [
+        "이 몬스터가 소환되면 라인의 황금과 니벨룽겐의 반지를 나의 패에 생성한다.",
+        "이 몬스터는 소환된 후 사용/생성된 보물의 개수×10 만큼 공격력·체력가 상승한다."
+      ],
+      "notes": [
+        "토큰 생성·사용에 반응하는 파프니르 소환은 라인의 황금의 보물 전환보다 먼저 처리한다."
+      ]
+    },
+    "after": {
+      "id": "COC-11-007",
+      "deckId": "11",
+      "name": "탐욕의 악룡 파프니르",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "드래곤",
+      "atk": "20",
+      "hp": "40",
+      "conditions": [
+        "이 몬스터는 덱/패에 존재할 때 토큰이 사용/생성되면 소환된다."
+      ],
+      "effects": [
+        "이 몬스터가 소환되면 라인의 황금과 니벨룽겐의 반지를 나의 패에 생성한다.",
+        "이 몬스터는 소환된 후 사용/생성된 보물의 개수×10 만큼 공격력·체력가 상승한다."
+      ],
+      "notes": [
+        "토큰 생성·사용에 반응하는 파프니르 소환은 라인의 황금의 보물 전환보다 먼저 처리한다."
+      ]
+    },
+    "rationale": "용왕/보물 축적 전에 살아남을 기반을 보강한다. 토큰 사건 수, 황금/반지 순서와 보물×10은 바꾸지 않는다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-11-011",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-11-011",
+      "deckId": "11",
+      "name": "드래곤 레어",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "드래곤",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신의 필드 전체에 필드에 있는 용/드래곤 속성 몬스터의 공격력·체력가 20씩 올라가는 효과를 부여한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-11-011",
+      "deckId": "11",
+      "name": "드래곤 레어",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "드래곤",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신 필드의 용/드래곤 속성 몬스터 모두의 공격력과 현재 체력을 각각 30 올린다. 이 강화는 그 몬스터가 필드를 떠날 때까지 유지된다."
+      ],
+      "notes": []
+    },
+    "rationale": "전체 강화20→30. 현재 필드 한정으로 명확화해 아직 소환하지 않은 용에게 무한히 재적용되는 해석을 막는다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-12-001",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-12-001",
+      "deckId": "12",
+      "name": "F=HERO 블래스트 보이",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영웅",
+      "atk": "100",
+      "hp": "100",
+      "conditions": [],
+      "effects": [
+        "1회 상대 주문을 무효로 합니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-12-001",
+      "deckId": "12",
+      "name": "F=HERO 블래스트 보이",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영웅",
+      "atk": "80",
+      "hp": "90",
+      "conditions": [],
+      "effects": [
+        "1회 상대 주문을 무효로 합니다."
+      ],
+      "notes": []
+    },
+    "rationale": "검색·드로우·무효화·퓨전 연계는 유지하고 유틸리티와 동시에 얻는 전투 수치/생존력을 낮춘다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-12-002",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-12-002",
+      "deckId": "12",
+      "name": "F=HERO 라이징 윈드 걸",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영웅",
+      "atk": "150",
+      "hp": "50",
+      "conditions": [],
+      "effects": [
+        "1회 상대 몬스터의 효과를 무효로 합니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-12-002",
+      "deckId": "12",
+      "name": "F=HERO 라이징 윈드 걸",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영웅",
+      "atk": "120",
+      "hp": "50",
+      "conditions": [],
+      "effects": [
+        "1회 상대 몬스터의 효과를 무효로 합니다."
+      ],
+      "notes": []
+    },
+    "rationale": "검색·드로우·무효화·퓨전 연계는 유지하고 유틸리티와 동시에 얻는 전투 수치/생존력을 낮춘다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-12-003",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-12-003",
+      "deckId": "12",
+      "name": "F=HERO 일렉트릭 보이",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영웅",
+      "atk": "90",
+      "hp": "90",
+      "conditions": [],
+      "effects": [
+        "덱에 있는 F=HERO라 이름붙여진 카드 1장을 패로 가져온다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-12-003",
+      "deckId": "12",
+      "name": "F=HERO 일렉트릭 보이",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영웅",
+      "atk": "70",
+      "hp": "70",
+      "conditions": [],
+      "effects": [
+        "덱에 있는 F=HERO라 이름붙여진 카드 1장을 패로 가져온다."
+      ],
+      "notes": []
+    },
+    "rationale": "검색·드로우·무효화·퓨전 연계는 유지하고 유틸리티와 동시에 얻는 전투 수치/생존력을 낮춘다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-12-004",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-12-004",
+      "deckId": "12",
+      "name": "F=HERO 스플래쉬 걸",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영웅",
+      "atk": "80",
+      "hp": "120",
+      "conditions": [
+        "내 패가 1장 이하여야 합니다."
+      ],
+      "effects": [
+        "이 카드가 소환되었을 때 카드를 2장 뽑습니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-12-004",
+      "deckId": "12",
+      "name": "F=HERO 스플래쉬 걸",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영웅",
+      "atk": "60",
+      "hp": "100",
+      "conditions": [
+        "내 패가 1장 이하여야 합니다."
+      ],
+      "effects": [
+        "이 카드가 소환되었을 때 카드를 2장 뽑습니다."
+      ],
+      "notes": []
+    },
+    "rationale": "검색·드로우·무효화·퓨전 연계는 유지하고 유틸리티와 동시에 얻는 전투 수치/생존력을 낮춘다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-12-006",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-12-006",
+      "deckId": "12",
+      "name": "F=HERO 파트너 보이",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영웅",
+      "atk": "10",
+      "hp": "130",
+      "conditions": [],
+      "effects": [
+        "이 카드가 필드에 나와있을 때 자신 필드의 영웅 속성의 몬스터는 상대 몬스터를 공격할 때 피해가 100 오릅니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-12-006",
+      "deckId": "12",
+      "name": "F=HERO 파트너 보이",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영웅",
+      "atk": "10",
+      "hp": "100",
+      "conditions": [],
+      "effects": [
+        "이 카드의 효과가 유효한 채 자신의 필드에 존재하는 동안, 자신의 영웅 속성 몬스터가 상대 몬스터를 공격하여 주는 전투 피해를 50 늘린다. 직접 공격에는 적용하지 않는다."
+      ],
+      "notes": []
+    },
+    "rationale": "검색·드로우·무효화·퓨전 연계는 유지하고 유틸리티와 동시에 얻는 전투 수치/생존력을 낮춘다. 기본 주사위보다 큰 고정 +100 지원을 +50으로 낮추며 직접 공격·무효 상태 적용을 명확화한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-12-007",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-12-007",
+      "deckId": "12",
+      "name": "F=HERO 랜드 보이",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영웅",
+      "atk": "80",
+      "hp": "180",
+      "conditions": [],
+      "effects": [
+        "이 카드가 필드에 나와있을 때 상대 플레이어는 이 카드만 공격 대상으로 설정할 수 있다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-12-007",
+      "deckId": "12",
+      "name": "F=HERO 랜드 보이",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영웅",
+      "atk": "60",
+      "hp": "160",
+      "conditions": [],
+      "effects": [
+        "이 카드가 필드에 나와있을 때 상대 플레이어는 이 카드만 공격 대상으로 설정할 수 있다."
+      ],
+      "notes": []
+    },
+    "rationale": "검색·드로우·무효화·퓨전 연계는 유지하고 유틸리티와 동시에 얻는 전투 수치/생존력을 낮춘다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-12-008",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-12-008",
+      "deckId": "12",
+      "name": "F=HERO 피어스 보이",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영웅",
+      "atk": "160",
+      "hp": "80",
+      "conditions": [],
+      "effects": [
+        "이 카드가 적 카드를 파괴했을 시 그 남은 체력을 공격력이 넘은 만큼 관통 피해를 준다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-12-008",
+      "deckId": "12",
+      "name": "F=HERO 피어스 보이",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영웅",
+      "atk": "140",
+      "hp": "70",
+      "conditions": [],
+      "effects": [
+        "이 카드가 적 카드를 파괴했을 시 그 남은 체력을 공격력이 넘은 만큼 관통 피해를 준다."
+      ],
+      "notes": []
+    },
+    "rationale": "검색·드로우·무효화·퓨전 연계는 유지하고 유틸리티와 동시에 얻는 전투 수치/생존력을 낮춘다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-12-010",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-12-010",
+      "deckId": "12",
+      "name": "F=HERO 유니버스",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영웅",
+      "atk": "250",
+      "hp": "200",
+      "conditions": [
+        "이 카드가 필드에 나오려면 필드의 몬스터 2장을 묘지로 버려야 합니다."
+      ],
+      "effects": [
+        "소환되었을 때, 이 카드 자신을 제외한 필드의 모든 카드를 각 카드 소유자의 덱으로 되돌린다."
+      ],
+      "notes": [
+        "유니버스 자신은 효과의 반환 대상에서 제외한다."
+      ]
+    },
+    "after": {
+      "id": "COC-12-010",
+      "deckId": "12",
+      "name": "F=HERO 유니버스",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영웅",
+      "atk": "230",
+      "hp": "180",
+      "conditions": [
+        "이 카드가 필드에 나오려면 필드의 몬스터 2장을 묘지로 버려야 합니다."
+      ],
+      "effects": [
+        "소환되었을 때, 이 카드 자신을 제외한 필드의 모든 카드를 각 카드 소유자의 덱으로 되돌린다."
+      ],
+      "notes": [
+        "유니버스 자신은 효과의 반환 대상에서 제외한다."
+      ]
+    },
+    "rationale": "검색·드로우·무효화·퓨전 연계는 유지하고 유틸리티와 동시에 얻는 전투 수치/생존력을 낮춘다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-12-011",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-12-011",
+      "deckId": "12",
+      "name": "F=HERO 버디 히트토네이도",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "영웅",
+      "atk": "210",
+      "hp": "100",
+      "conditions": [
+        "이 카드는 \"용기의 패왕\"의 효과로 \"블래스트 보이”와 \"라이징 윈드 걸\"을 버렸을 때 소환할 수 있다."
+      ],
+      "effects": [
+        "이 카드가 몬스터를 파괴했을 때 그 몬스터의 공격력 만큼 상대에게 피해를 준다."
+      ],
+      "notes": [
+        "원문에서는 엑스트라 몬스터로 기재. 소환 방식은 용기의 패왕 효과를 따름.",
+        "v1.2 소환 분류: 퓨전. 용기의 패왕 효과로 지정 소재를 사용해 엑스트라 덱에서 소환한다."
+      ]
+    },
+    "after": {
+      "id": "COC-12-011",
+      "deckId": "12",
+      "name": "F=HERO 버디 히트토네이도",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "영웅",
+      "atk": "200",
+      "hp": "100",
+      "conditions": [
+        "이 카드는 \"용기의 패왕\"의 효과로 \"블래스트 보이”와 \"라이징 윈드 걸\"을 버렸을 때 소환할 수 있다."
+      ],
+      "effects": [
+        "이 카드가 몬스터를 파괴했을 때 그 몬스터의 공격력 만큼 상대에게 피해를 준다."
+      ],
+      "notes": [
+        "원문에서는 엑스트라 몬스터로 기재. 소환 방식은 용기의 패왕 효과를 따름.",
+        "v1.2 소환 분류: 퓨전. 용기의 패왕 효과로 지정 소재를 사용해 엑스트라 덱에서 소환한다."
+      ]
+    },
+    "rationale": "검색·드로우·무효화·퓨전 연계는 유지하고 유틸리티와 동시에 얻는 전투 수치/생존력을 낮춘다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-12-012",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-12-012",
+      "deckId": "12",
+      "name": "F=HERO 버디 스파클링오션",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "영웅",
+      "atk": "240",
+      "hp": "150",
+      "conditions": [
+        "이 카드는 \"용기의 패왕\"의 효과로 \"일렉트릭 보이\"와 \"스플래쉬 걸\"을 버렸을 때 소환할 수 있다."
+      ],
+      "effects": [
+        "이 카드가 소환되었을 때 이 몬스터의 공격력보다 낮은 본래 공격력을 가진 몬스터를 1장 파괴한다."
+      ],
+      "notes": [
+        "v1.2 소환 분류: 퓨전. 용기의 패왕 효과로 지정 소재를 사용해 엑스트라 덱에서 소환한다."
+      ]
+    },
+    "after": {
+      "id": "COC-12-012",
+      "deckId": "12",
+      "name": "F=HERO 버디 스파클링오션",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "영웅",
+      "atk": "220",
+      "hp": "140",
+      "conditions": [
+        "이 카드는 \"용기의 패왕\"의 효과로 \"일렉트릭 보이\"와 \"스플래쉬 걸\"을 버렸을 때 소환할 수 있다."
+      ],
+      "effects": [
+        "이 카드가 소환되었을 때 이 몬스터의 공격력보다 낮은 본래 공격력을 가진 몬스터를 1장 파괴한다."
+      ],
+      "notes": [
+        "v1.2 소환 분류: 퓨전. 용기의 패왕 효과로 지정 소재를 사용해 엑스트라 덱에서 소환한다."
+      ]
+    },
+    "rationale": "검색·드로우·무효화·퓨전 연계는 유지하고 유틸리티와 동시에 얻는 전투 수치/생존력을 낮춘다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-12-013",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-12-013",
+      "deckId": "12",
+      "name": "F=HERO 버디 크래쉬볼티지",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "영웅",
+      "atk": "260",
+      "hp": "230",
+      "conditions": [
+        "이 카드는 \"용기의 패왕\"의 효과로 \"일렉트릭 보이\"와 \"피어스 보이\"를 버렸을 때 소환할 수 있다."
+      ],
+      "effects": [
+        "패를 1장을 버리고 발동할 수 있다. 상대 필드 위에 존재하는 몬스터 1장을 선택하고 파괴한다.",
+        "이 카드가 적 카드를 파괴했을 시 그 남은 체력을 공격력이 넘은 만큼 관통 피해를 준다."
+      ],
+      "notes": [
+        "v1.2 소환 분류: 퓨전. 용기의 패왕 효과로 지정 소재를 사용해 엑스트라 덱에서 소환한다."
+      ]
+    },
+    "after": {
+      "id": "COC-12-013",
+      "deckId": "12",
+      "name": "F=HERO 버디 크래쉬볼티지",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "영웅",
+      "atk": "240",
+      "hp": "200",
+      "conditions": [
+        "이 카드는 \"용기의 패왕\"의 효과로 \"일렉트릭 보이\"와 \"피어스 보이\"를 버렸을 때 소환할 수 있다."
+      ],
+      "effects": [
+        "패를 1장을 버리고 발동할 수 있다. 상대 필드 위에 존재하는 몬스터 1장을 선택하고 파괴한다.",
+        "이 카드가 적 카드를 파괴했을 시 그 남은 체력을 공격력이 넘은 만큼 관통 피해를 준다."
+      ],
+      "notes": [
+        "v1.2 소환 분류: 퓨전. 용기의 패왕 효과로 지정 소재를 사용해 엑스트라 덱에서 소환한다."
+      ]
+    },
+    "rationale": "검색·드로우·무효화·퓨전 연계는 유지하고 유틸리티와 동시에 얻는 전투 수치/생존력을 낮춘다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-12-014",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-12-014",
+      "deckId": "12",
+      "name": "F=HERO 버디 히든스나이퍼",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "영웅",
+      "atk": "200",
+      "hp": "250",
+      "conditions": [
+        "이 카드는 \"용기의 패왕\"의 효과로 \"랜드 보이\"와 \"블래스트 보이\"를 버렸을 때 소환할 수 있다."
+      ],
+      "effects": [
+        "이 카드는 공격 선언을 할 수 없습니다. 이 카드는 한 턴에 두 번 자기 공격력의 절반만큼의 효과 피해를 줄 수 있다.",
+        "이 카드가 필드에 나와있을 때 상대 플레이어는 이 카드만 공격 대상으로 설정할 수 있다."
+      ],
+      "notes": [
+        "v1.2 소환 분류: 퓨전. 용기의 패왕 효과로 지정 소재를 사용해 엑스트라 덱에서 소환한다."
+      ]
+    },
+    "after": {
+      "id": "COC-12-014",
+      "deckId": "12",
+      "name": "F=HERO 버디 히든스나이퍼",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "영웅",
+      "atk": "160",
+      "hp": "220",
+      "conditions": [
+        "이 카드는 \"용기의 패왕\"의 효과로 \"랜드 보이\"와 \"블래스트 보이\"를 버렸을 때 소환할 수 있다."
+      ],
+      "effects": [
+        "이 카드는 공격 선언을 할 수 없습니다. 이 카드는 한 턴에 두 번 자기 공격력의 절반만큼의 효과 피해를 줄 수 있다.",
+        "이 카드가 필드에 나와있을 때 상대 플레이어는 이 카드만 공격 대상으로 설정할 수 있다."
+      ],
+      "notes": [
+        "v1.2 소환 분류: 퓨전. 용기의 패왕 효과로 지정 소재를 사용해 엑스트라 덱에서 소환한다."
+      ]
+    },
+    "rationale": "검색·드로우·무효화·퓨전 연계는 유지하고 유틸리티와 동시에 얻는 전투 수치/생존력을 낮춘다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-12-015",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-12-015",
+      "deckId": "12",
+      "name": "F=HERO 버디 더 이모탈",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "영웅",
+      "atk": "280",
+      "hp": "280",
+      "conditions": [
+        "이 카드는 \"용기의 패왕\"의 효과로 \"일렉트릭 보이\"와 \"스플래쉬 걸\"과 \"라이징 윈드 걸\"을 버렸을 때 소환할 수 있다."
+      ],
+      "effects": [
+        "자신 덱의 카드 1장을 묘지로 보내고, 자신 필드 위의 몬스터 1장을 선택한다. 이 카드가 필드에 존재하는 한, 선택한 몬스터는 전투에 의해서는 파괴되지 않는다."
+      ],
+      "notes": [
+        "v1.2 소환 분류: 퓨전. 용기의 패왕 효과로 지정 소재를 사용해 엑스트라 덱에서 소환한다."
+      ]
+    },
+    "after": {
+      "id": "COC-12-015",
+      "deckId": "12",
+      "name": "F=HERO 버디 더 이모탈",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "영웅",
+      "atk": "260",
+      "hp": "240",
+      "conditions": [
+        "이 카드는 \"용기의 패왕\"의 효과로 \"일렉트릭 보이\"와 \"스플래쉬 걸\"과 \"라이징 윈드 걸\"을 버렸을 때 소환할 수 있다."
+      ],
+      "effects": [
+        "자신 덱의 카드 1장을 묘지로 보내고, 자신 필드 위의 몬스터 1장을 선택한다. 이 카드가 필드에 존재하는 한, 선택한 몬스터는 전투에 의해서는 파괴되지 않는다."
+      ],
+      "notes": [
+        "v1.2 소환 분류: 퓨전. 용기의 패왕 효과로 지정 소재를 사용해 엑스트라 덱에서 소환한다."
+      ]
+    },
+    "rationale": "검색·드로우·무효화·퓨전 연계는 유지하고 유틸리티와 동시에 얻는 전투 수치/생존력을 낮춘다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-13-004",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-13-004",
+      "deckId": "13",
+      "name": "당나귀같은 도둑",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "괴도",
+      "atk": "170",
+      "hp": "120",
+      "conditions": [
+        "상대 필드에 몬스터가 존재한다."
+      ],
+      "effects": [
+        "한 턴에 1회 상대 필드의 몬스터를 자신의 필드로 가져오고, 자신의 필드에 '사랑 도둑'을 효과 무시로 소환한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-13-004",
+      "deckId": "13",
+      "name": "당나귀같은 도둑",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "괴도",
+      "atk": "140",
+      "hp": "100",
+      "conditions": [
+        "상대 필드에 몬스터가 존재한다."
+      ],
+      "effects": [
+        "한 턴에 1회 상대 필드의 몬스터를 자신의 필드로 가져오고, 자신의 필드에 '사랑 도둑'을 효과 무시로 소환한다."
+      ],
+      "notes": []
+    },
+    "rationale": "탈취와 추가 소환을 겸하는 카드 자체의 전투 가치를 낮춘다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-13-005",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-13-005",
+      "deckId": "13",
+      "name": "도둑 M",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "괴도",
+      "atk": "190",
+      "hp": "140",
+      "conditions": [
+        "상대 필드에 몬스터가 존재한다."
+      ],
+      "effects": [
+        "한 턴에 1회 상대 필드의 몬스터를 자신의 필드로 가져오고, 가져온 몬스터의 공격력만큼 상대 본체에 피해를 입힌다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-13-005",
+      "deckId": "13",
+      "name": "도둑 M",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "괴도",
+      "atk": "160",
+      "hp": "120",
+      "conditions": [
+        "상대 필드에 몬스터가 존재한다."
+      ],
+      "effects": [
+        "자신의 메인 페이즈에 한 턴에 1회, 상대 필드 몬스터 1장을 자신의 빈 필드로 가져온다. 가져오기 직전 그 몬스터의 실제 공격력의 절반(소수점 버림)만큼 상대 플레이어에게 피해를 준다."
+      ],
+      "notes": []
+    },
+    "rationale": "탈취·직접 피해를 동시에 얻는 카드 자체의 전투 가치를 낮춘다. 탈취만으로 이미 발생하는2방향 전투력 차이에 얹는 직접 피해를 절반으로 낮춘다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-14-004",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-14-004",
+      "deckId": "14",
+      "name": "스톰 블레이거 나이트",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "스톰",
+      "atk": "300",
+      "hp": "300",
+      "conditions": [
+        "자신을 제외한 자신의 필드 몬스터를 1~2장 게임에서 제외한다."
+      ],
+      "effects": [
+        "제외한 몬스터가 1장이면 공격력 0 / 체력 50의 스톰 토큰 1장을 소환한다.",
+        "제외한 몬스터가 2장이면 몬스터 1장을 선택해 그 공격력을 절반으로 낮춘다."
+      ],
+      "notes": [
+        "자기 자신은 제거 대상이 될 수 없어 최대 2장까지 제거할 수 있다.",
+        "자기 자신은 제거 대상에 포함할 수 없으므로 최대 2장의 다른 아군 몬스터 제거 가능.",
+        "자기 자신을 제거할 수 없으므로 제거 가능한 자신의 다른 몬스터는 최대 2장입니다."
+      ]
+    },
+    "after": {
+      "id": "COC-14-004",
+      "deckId": "14",
+      "name": "스톰 블레이거 나이트",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "스톰",
+      "atk": "260",
+      "hp": "260",
+      "conditions": [
+        "자신을 제외한 자신의 필드 몬스터를 1~2장 게임에서 제외한다."
+      ],
+      "effects": [
+        "제외한 몬스터가 1장이면 공격력 0 / 체력 50의 스톰 토큰 1장을 소환한다.",
+        "제외한 몬스터가 2장이면 몬스터 1장을 선택해 그 공격력을 절반으로 낮춘다."
+      ],
+      "notes": [
+        "자기 자신은 제거 대상이 될 수 없어 최대 2장까지 제거할 수 있다.",
+        "자기 자신은 제거 대상에 포함할 수 없으므로 최대 2장의 다른 아군 몬스터 제거 가능.",
+        "자기 자신을 제거할 수 없으므로 제거 가능한 자신의 다른 몬스터는 최대 2장입니다."
+      ]
+    },
+    "rationale": "토큰1장 제외만으로300/300과 대체 토큰을 얻는 효율을 낮춘다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-14-005",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-14-005",
+      "deckId": "14",
+      "name": "스톰 팬니르",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "스톰",
+      "atk": "60",
+      "hp": "50",
+      "conditions": [
+        "내 덱에 카드를 무작위로 1장 버린다."
+      ],
+      "effects": [
+        "스톰 토큰 0/50을 1장 소환한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-14-005",
+      "deckId": "14",
+      "name": "스톰 팬니르",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "스톰",
+      "atk": "80",
+      "hp": "70",
+      "conditions": [
+        "내 덱에 카드를 무작위로 1장 버린다."
+      ],
+      "effects": [
+        "스톰 토큰 0/50을 1장 소환한다."
+      ],
+      "notes": []
+    },
+    "rationale": "자신 덱1장 비용으로 만드는 저공격 초동의 몸값을 보완한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-17-004",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-17-004",
+      "deckId": "17",
+      "name": "파라오의 권능–미라 군사 소환",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "파라오",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "80/100의 미라 병사를 최대 3개 소환한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-17-004",
+      "deckId": "17",
+      "name": "파라오의 권능–미라 군사 소환",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "파라오",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "공격력60/체력80의 미라 병사 토큰을 자신의 빈 필드에 최대3장 소환한다."
+      ],
+      "notes": []
+    },
+    "rationale": "한 주문으로3칸 전개하는 정체성은 보존하면서 소환 직후 공격과 필드 강화의 총효율을 낮춘다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-17-008",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-17-008",
+      "deckId": "17",
+      "name": "불사의 명장–미라 대장군",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "파라오",
+      "atk": "150",
+      "hp": "150",
+      "conditions": [
+        "필드에 미라 병사 하나를 제물로 바치고 소환된다."
+      ],
+      "effects": [
+        "필드에 존재하는 동안 아군 전체에 공격력을 50 높인다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-17-008",
+      "deckId": "17",
+      "name": "불사의 명장–미라 대장군",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "파라오",
+      "atk": "170",
+      "hp": "170",
+      "conditions": [
+        "필드에 미라 병사 하나를 제물로 바치고 소환된다."
+      ],
+      "effects": [
+        "필드에 존재하는 동안 아군 전체에 공격력을 50 높인다."
+      ],
+      "notes": []
+    },
+    "rationale": "병사 제물1장으로 전개하는 지휘관에 실제 승급 수치를 준다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-19-001",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-19-001",
+      "deckId": "19",
+      "name": "토우 병사",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "토우병사",
+      "atk": "50",
+      "hp": "50",
+      "conditions": [],
+      "effects": [
+        "이번 게임에서 소환된 다른 토우 병사 하나당 50/50을 얻는다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-19-001",
+      "deckId": "19",
+      "name": "토우 병사",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "토우병사",
+      "atk": "50",
+      "hp": "70",
+      "conditions": [],
+      "effects": [
+        "이번 게임에서 소환된 다른 토우 병사 하나당 50/50을 얻는다."
+      ],
+      "notes": []
+    },
+    "rationale": "첫 토우의 생존력을 보강하되 소환 이력당50/50 성장 폭은 유지한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-20-001",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-20-001",
+      "deckId": "20",
+      "name": "버닝 데몬즈 드래곤",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "악마",
+      "atk": "500",
+      "hp": "500",
+      "conditions": [
+        "자신의 턴 종료 시 이 카드가 피해 150을 받는다."
+      ],
+      "effects": [
+        "\"버닝데몬즈\"일체화 카드를 사용한 이후부터 조건피해를 받지 않는다."
+      ],
+      "notes": [
+        "턴 종료 시 체력 피해 150은 자신의 턴 종료에만 적용한다.",
+        "피해 발생 시점은 자신의 턴 종료 시입니다."
+      ]
+    },
+    "after": {
+      "id": "COC-20-001",
+      "deckId": "20",
+      "name": "버닝 데몬즈 드래곤",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "악마",
+      "atk": "450",
+      "hp": "400",
+      "conditions": [
+        "자신의 턴 종료 시 이 카드가 피해 150을 받는다."
+      ],
+      "effects": [
+        "\"버닝데몬즈\"일체화 카드를 사용한 이후부터 조건피해를 받지 않는다."
+      ],
+      "notes": [
+        "턴 종료 시 체력 피해 150은 자신의 턴 종료에만 적용한다.",
+        "피해 발생 시점은 자신의 턴 종료 시입니다."
+      ]
+    },
+    "rationale": "즉시 공격 가능한500/500과 파괴 면역 주문의 조합을 완화한다. 자해/해제 연계는 유지한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-21-002",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-21-002",
+      "deckId": "21",
+      "name": "생명을 먹는 마검",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "저주",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "선택한 몬스터 또는 일체화 플레이어는 자신의 턴마다 체력 30을 강제로 지불하고 공격력 +100을 얻는다. 몬스터를 공격 또는 효과로 처치하면 그다음 자신의 턴에 한 턴 동안 공격력이 2배가 된다.",
+        "강제 체력 지불을 할 수 없으면 이 카드를 적용받는 몬스터·카드를 파괴한다. 플레이어가 직접 효과를 사용한 상태라면 그 플레이어는 패배한다."
+      ],
+      "notes": [
+        "체력 지불 불가 시 몬스터와 플레이어의 결과가 다르다."
+      ]
+    },
+    "after": {
+      "id": "COC-21-002",
+      "deckId": "21",
+      "name": "생명을 먹는 마검",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "저주",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "선택한 필드 몬스터 또는 일체화 플레이어는 자신의 어택 페이즈가 시작할 때 이 효과 하나당 체력30을 강제로 지불하고 공격력+100을 얻는다. 어택 페이즈를 생략하면 지불하지 않는다. 이 효과를 받은 주체가 공격 또는 효과로 상대 몬스터를 처치할 때마다 다음 자신의 턴 전체 동안 공격력×2를 얻는다. 여러 효과와 처치는 독립적으로 누적하여 곱한다.",
+        "강제 체력 지불을 할 수 없으면 이 카드를 적용받는 몬스터·카드를 파괴한다. 플레이어가 직접 효과를 사용한 상태라면 그 플레이어는 패배한다."
+      ],
+      "notes": [
+        "체력 지불 불가 시 몬스터와 플레이어의 결과가 다르다."
+      ]
+    },
+    "rationale": "기존 사용자 확정인 어택 시작/처치마다 다음 자기 턴/중복을 문구에 반영한다. 너프·버프가 아니다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-21-004",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-21-004",
+      "deckId": "21",
+      "name": "풍족한자의 시기",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "저주",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "공격력과 체력 총합 250 이상의 몬스터 하나를 제물로 바친다."
+      ],
+      "effects": [
+        "적 몬스터 하나를 상대의 효과/주문을 무시하고 파괴시킨다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-21-004",
+      "deckId": "21",
+      "name": "풍족한자의 시기",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "저주",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "현재 공격력과 체력의 합계가 200 이상인 자신의 필드 몬스터 1장을 제물로 바친다."
+      ],
+      "effects": [
+        "상대 필드 몬스터 1장을 파괴한다. 대상 몬스터의 효과에 의한 파괴 면역은 무시한다. 이 주문의 발동 자체는 무효화할 수 있다."
+      ],
+      "notes": []
+    },
+    "rationale": "제물 문턱250→200으로 약한 악마도 강화 뒤 제거 주문의 재료가 되게 한다. 무시 범위를 대상의 직접 파괴 면역으로 명확화하여 강한 제거와 상대의 대응권을 함께 보존한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-21-005",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-21-005",
+      "deckId": "21",
+      "name": "끝없는 욕망",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "저주",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "자신의 몬스터에게만 사용 가능하다."
+      ],
+      "effects": [
+        "대상인 자신의 몬스터의 남은 체력을 전부 흡수해 플레이어 자신의 체력에 더합니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-21-005",
+      "deckId": "21",
+      "name": "끝없는 욕망",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "저주",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "자신의 몬스터에게만 사용 가능하다."
+      ],
+      "effects": [
+        "자신 필드 몬스터 1장의 남은 체력을 전부 흡수하여 그 몬스터를 파괴하고, 흡수한 만큼 자신의 플레이어 체력을 회복한다. 이 흡수는 대상의 효과 파괴 면역을 무시하지만 주문 발동 자체는 무효화할 수 있다."
+      ],
+      "notes": []
+    },
+    "rationale": "자기 제물의 남은 체력만 회복하도록 명확화한다. 파괴 면역으로 제물을 보존한 채 반복 회복하는 허점을 막는다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-21-007",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-21-007",
+      "deckId": "21",
+      "name": "교만한 흡혈 공작",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "저주 / 악마",
+      "atk": "150",
+      "hp": "100",
+      "conditions": [],
+      "effects": [
+        "공격으로 입힌 피해의 1/3만큼 체력을 회복한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-21-007",
+      "deckId": "21",
+      "name": "교만한 흡혈 공작",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "저주 / 악마",
+      "atk": "180",
+      "hp": "140",
+      "conditions": [],
+      "effects": [
+        "이 카드의 효과가 유효한 동안 공격으로 실제 입힌 피해의 절반(소수점 버림)만큼 자신의 플레이어 체력을 회복한다. 몬스터에게 준 피해는 파괴 직전 남은 체력을 초과하여 회복량에 포함하지 않는다."
+      ],
+      "notes": []
+    },
+    "rationale": "자해·제물 중심 덱의 초반 전투/생존 효율을 보완하며 마검 배율과 영구 강화 규칙은 유지한다. 피해 흡수 1/3→1/2로 제물 비용 회복을 돕고 과잉 피해 회복은 배제한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-21-008",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-21-008",
+      "deckId": "21",
+      "name": "나태한 밀짚인형",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "저주",
+      "atk": "50",
+      "hp": "50",
+      "conditions": [
+        "이 몬스터는 소환되고 2턴간 공격하지 않는다."
+      ],
+      "effects": [
+        "적용된 효과/주문을 필드에 있는 몬스터 하나와 같이 적용받는다. 제물로 30의 체력을 바쳤을 때 소환되는 몬스터."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-21-008",
+      "deckId": "21",
+      "name": "나태한 밀짚인형",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "저주",
+      "atk": "70",
+      "hp": "90",
+      "conditions": [
+        "이 몬스터는 소환되고 2턴간 공격하지 않는다."
+      ],
+      "effects": [
+        "적용된 효과/주문을 필드에 있는 몬스터 하나와 같이 적용받는다. 제물로 30의 체력을 바쳤을 때 소환되는 몬스터."
+      ],
+      "notes": []
+    },
+    "rationale": "자해·제물 중심 덱의 초반 전투/생존 효율을 보완하며 마검 배율과 영구 강화 규칙은 유지한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-21-009",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-21-009",
+      "deckId": "21",
+      "name": "임프",
+      "type": "몬스터",
+      "zone": "created",
+      "attribute": "악마",
+      "atk": "50",
+      "hp": "50",
+      "conditions": [],
+      "effects": [
+        "제물로 100의 체력을 바쳤을 때 소환되는 몬스터."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-21-009",
+      "deckId": "21",
+      "name": "임프",
+      "type": "몬스터",
+      "zone": "created",
+      "attribute": "악마",
+      "atk": "90",
+      "hp": "80",
+      "conditions": [],
+      "effects": [
+        "사바스의 재단으로 소환할 때 자신의 플레이어 체력 60을 제물로 바친다."
+      ],
+      "notes": []
+    },
+    "rationale": "자해·제물 중심 덱의 초반 전투/생존 효율을 보완하며 마검 배율과 영구 강화 규칙은 유지한다. 제물100→60. 재단의 제한된 소환 자원이라는 역할을 유지하며 낮은 기본 몸값을 개선한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-21-010",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-21-010",
+      "deckId": "21",
+      "name": "가고일",
+      "type": "몬스터",
+      "zone": "created",
+      "attribute": "악마",
+      "atk": "100",
+      "hp": "150",
+      "conditions": [
+        "제물로 플레이어 체력 200을 지불해야 소환할 수 있다."
+      ],
+      "effects": [
+        "상대는 이 몬스터를 유효 대상으로 지정할 수 있는 공격·주문을 사용할 때 이 몬스터를 대상으로 지정해야 한다."
+      ],
+      "notes": [
+        "이 카드가 합법적인 대상일 때만 공격·주문 대상 강제가 적용된다.",
+        "도발은 가고일을 합법적인 대상으로 지정할 수 있는 공격·주문에만 적용한다."
+      ]
+    },
+    "after": {
+      "id": "COC-21-010",
+      "deckId": "21",
+      "name": "가고일",
+      "type": "몬스터",
+      "zone": "created",
+      "attribute": "악마",
+      "atk": "120",
+      "hp": "180",
+      "conditions": [
+        "사바스의 재단으로 소환할 때 자신의 플레이어 체력 150을 제물로 바친다."
+      ],
+      "effects": [
+        "상대는 이 몬스터를 유효 대상으로 지정할 수 있는 공격·주문을 사용할 때 이 몬스터를 대상으로 지정해야 한다."
+      ],
+      "notes": [
+        "이 카드가 합법적인 대상일 때만 공격·주문 대상 강제가 적용된다.",
+        "도발은 가고일을 합법적인 대상으로 지정할 수 있는 공격·주문에만 적용한다."
+      ]
+    },
+    "rationale": "자해·제물 중심 덱의 초반 전투/생존 효율을 보완하며 마검 배율과 영구 강화 규칙은 유지한다. 제물200→150으로 방어 전개가 자신의 패배를 과도하게 앞당기지 않게 한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-21-011",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-21-011",
+      "deckId": "21",
+      "name": "몽마",
+      "type": "몬스터",
+      "zone": "created",
+      "attribute": "저주 / 악마",
+      "atk": "100",
+      "hp": "100",
+      "conditions": [],
+      "effects": [
+        "적 몬스터를 지정 후 코인토스(1d2)를 굴려 앞면(1)이 나오면 1턴 후 자신에 공격 페이즈가 끝날 때까지 어떤 행동도 할 수 없게 하며 뒷면(2)이 나왔다면 그 몬스터의 다음 효과/공격을 이 몬스터에게 사용하게 만든다. 제물로 333의 체력을 바쳤을 때 소환되는 몬스터."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-21-011",
+      "deckId": "21",
+      "name": "몽마",
+      "type": "몬스터",
+      "zone": "created",
+      "attribute": "저주 / 악마",
+      "atk": "140",
+      "hp": "140",
+      "conditions": [],
+      "effects": [
+        "사바스의 재단으로 소환할 때 자신의 플레이어 체력 200을 제물로 바친다. 소환 시 상대 필드 몬스터 1장을 지정하고 1d2를 굴린다. 1이면 자신의 다음 어택 페이즈 종료까지 그 몬스터는 공격하거나 효과를 발동할 수 없다. 2이면 그 몬스터의 다음 공격 또는 단일 대상 효과는 이 카드가 합법적인 대상일 때 이 카드를 대상으로 해야 한다."
+      ],
+      "notes": []
+    },
+    "rationale": "자해·제물 중심 덱의 초반 전투/생존 효율을 보완하며 마검 배율과 영구 강화 규칙은 유지한다. 제물333→200으로 실패 가능성이 있는 제어의 비용을 낮추고 불가능한 대상 강제/기간을 명확히 한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-21-012",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-21-012",
+      "deckId": "21",
+      "name": "나락의 귀족",
+      "type": "몬스터",
+      "zone": "created",
+      "attribute": "저주 / 악마",
+      "atk": "300",
+      "hp": "300",
+      "conditions": [],
+      "effects": [
+        "아군 한 명의 공격력과 체력을 게임이 끝날 때까지 30 올린다. 몬스터의 경우 파괴되고 다시 소환되어도 올라간 수치가 적용된 상태로 소환된다.",
+        "필드에 존재하는 동안 악마 속성의 공격력을 30 올린다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-21-012",
+      "deckId": "21",
+      "name": "나락의 귀족",
+      "type": "몬스터",
+      "zone": "created",
+      "attribute": "저주 / 악마",
+      "atk": "300",
+      "hp": "320",
+      "conditions": [],
+      "effects": [
+        "아군 한 명의 공격력과 체력을 게임이 끝날 때까지 30 올린다. 몬스터의 경우 파괴되고 다시 소환되어도 올라간 수치가 적용된 상태로 소환된다.",
+        "필드에 존재하는 동안 악마 속성의 공격력을 30 올린다."
+      ],
+      "notes": []
+    },
+    "rationale": "자해·제물 중심 덱의 초반 전투/생존 효율을 보완하며 마검 배율과 영구 강화 규칙은 유지한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-22-001",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-22-001",
+      "deckId": "22",
+      "name": "블랙 메탈 팔콘",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "100",
+      "hp": "100",
+      "conditions": [],
+      "effects": [
+        "한 턴에 1회 공격력을 50으로 줄이고 공격 기회를 2번으로 늘린다.",
+        "공격 기회를 하나 사용해서 덱의 \"블랙 메탈 체인지\"를 가져온다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-22-001",
+      "deckId": "22",
+      "name": "블랙 메탈 팔콘",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "100",
+      "hp": "110",
+      "conditions": [],
+      "effects": [
+        "한 턴에 1회 공격력을 50으로 줄이고 공격 기회를 2번으로 늘린다.",
+        "공격 기회를 하나 사용해서 덱의 \"블랙 메탈 체인지\"를 가져온다."
+      ],
+      "notes": []
+    },
+    "rationale": "공격 기회를 자원으로 바꾸기 전에 살아남도록 소폭 보강한다. 체인지의 공격력100 연결과 모든 퓨전 참조 값은 보존한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-22-002",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-22-002",
+      "deckId": "22",
+      "name": "블랙 메탈 램",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "100",
+      "hp": "100",
+      "conditions": [],
+      "effects": [
+        "한 턴에 1회 공격력을 50으로 줄이고 공격 기회를 2번으로 늘린다.",
+        "공격 기회를 하나 사용해서 플레이어 혹은 몬스터의 체력을 50회복시킨다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-22-002",
+      "deckId": "22",
+      "name": "블랙 메탈 램",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "100",
+      "hp": "110",
+      "conditions": [],
+      "effects": [
+        "한 턴에 1회 공격력을 50으로 줄이고 공격 기회를 2번으로 늘린다.",
+        "공격 기회를 하나 사용해서 플레이어 혹은 몬스터의 체력을 50회복시킨다."
+      ],
+      "notes": []
+    },
+    "rationale": "공격 기회를 자원으로 바꾸기 전에 살아남도록 소폭 보강한다. 체인지의 공격력100 연결과 모든 퓨전 참조 값은 보존한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-22-003",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-22-003",
+      "deckId": "22",
+      "name": "블랙 메탈 샤크",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "100",
+      "hp": "100",
+      "conditions": [],
+      "effects": [
+        "한 턴에 1회 공격력을 50으로 줄이고 공격 기회를 2번으로 만든다.",
+        "공격 기회를 하나 사용해서 덱의 \"퓨전업\"을 가져온다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-22-003",
+      "deckId": "22",
+      "name": "블랙 메탈 샤크",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "100",
+      "hp": "110",
+      "conditions": [],
+      "effects": [
+        "한 턴에 1회 공격력을 50으로 줄이고 공격 기회를 2번으로 만든다.",
+        "공격 기회를 하나 사용해서 덱의 \"퓨전업\"을 가져온다."
+      ],
+      "notes": []
+    },
+    "rationale": "공격 기회를 자원으로 바꾸기 전에 살아남도록 소폭 보강한다. 체인지의 공격력100 연결과 모든 퓨전 참조 값은 보존한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-22-004",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-22-004",
+      "deckId": "22",
+      "name": "블랙 메탈 솔저",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "100",
+      "hp": "100",
+      "conditions": [],
+      "effects": [
+        "한 턴에 1회 공격력을 50으로 줄이고 공격 기회를 2번으로 만든다.",
+        "소환하고 1회,공격 기회를 하나 사용해서 묘지의 블랙 메탈 카드를 패로 가져온다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-22-004",
+      "deckId": "22",
+      "name": "블랙 메탈 솔저",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "100",
+      "hp": "110",
+      "conditions": [],
+      "effects": [
+        "한 턴에 1회 공격력을 50으로 줄이고 공격 기회를 2번으로 만든다.",
+        "소환하고 1회,공격 기회를 하나 사용해서 묘지의 블랙 메탈 카드를 패로 가져온다."
+      ],
+      "notes": []
+    },
+    "rationale": "공격 기회를 자원으로 바꾸기 전에 살아남도록 소폭 보강한다. 체인지의 공격력100 연결과 모든 퓨전 참조 값은 보존한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-22-005",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-22-005",
+      "deckId": "22",
+      "name": "블랙 메탈 가드너",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "100",
+      "hp": "100",
+      "conditions": [],
+      "effects": [
+        "한 턴에 1회 공격력을 50으로 줄이고 공격 기회를 2번으로 만든다.",
+        "한게임당 1회 공격 기회를 하나 사용해서 필드 위의 블랙 메탈 몬스터에게 주문/효과 파괴 무효 효과를 부여한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-22-005",
+      "deckId": "22",
+      "name": "블랙 메탈 가드너",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "100",
+      "hp": "110",
+      "conditions": [],
+      "effects": [
+        "한 턴에 1회 공격력을 50으로 줄이고 공격 기회를 2번으로 만든다.",
+        "한게임당 1회 공격 기회를 하나 사용해서 필드 위의 블랙 메탈 몬스터에게 주문/효과 파괴 무효 효과를 부여한다."
+      ],
+      "notes": []
+    },
+    "rationale": "공격 기회를 자원으로 바꾸기 전에 살아남도록 소폭 보강한다. 체인지의 공격력100 연결과 모든 퓨전 참조 값은 보존한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-23-002",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-23-002",
+      "deckId": "23",
+      "name": "라이드 머신 플레임",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "라이드",
+      "atk": "150",
+      "hp": "50",
+      "conditions": [
+        "라이드 위저드와 일체화 되어야 합니다."
+      ],
+      "effects": [
+        "라이드 위저드에 공격력을 +50 추가한다. (1회만 발동한다.)."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-23-002",
+      "deckId": "23",
+      "name": "라이드 머신 플레임",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "라이드",
+      "atk": "140",
+      "hp": "80",
+      "conditions": [
+        "라이드 위저드와 일체화 되어야 합니다."
+      ],
+      "effects": [
+        "라이드 위저드에 공격력을 +50 추가한다. (1회만 발동한다.)."
+      ],
+      "notes": []
+    },
+    "rationale": "일체화 선행과 게임1회 강화의 지원 역할에 맞게 공격 일부를 생존력으로 옮긴다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-23-003",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-23-003",
+      "deckId": "23",
+      "name": "라이드 머신 워터",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "라이드",
+      "atk": "40",
+      "hp": "190",
+      "conditions": [
+        "라이드 위저드와 일체화 되어야 합니다."
+      ],
+      "effects": [
+        "자신의 플레이어 체력을 100 회복한다."
+      ],
+      "notes": [
+        "회복량 100은 사용자 위임에 따라 확정한 초기 밸런스 수치."
+      ]
+    },
+    "after": {
+      "id": "COC-23-003",
+      "deckId": "23",
+      "name": "라이드 머신 워터",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "라이드",
+      "atk": "50",
+      "hp": "200",
+      "conditions": [
+        "라이드 위저드와 일체화 되어야 합니다."
+      ],
+      "effects": [
+        "소환되었을 때 자신의 플레이어 체력을 130 회복한다."
+      ],
+      "notes": [
+        "회복량 100은 사용자 위임에 따라 확정한 초기 밸런스 수치."
+      ]
+    },
+    "rationale": "일체화가 있어야 소환하는 수비/회복 기체의 효율을 보완한다. 일체화 조건/기체 연계를 요구하는 회복을100→130으로 개선한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-23-005",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-23-005",
+      "deckId": "23",
+      "name": "라이드머신 랜드",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "라이드",
+      "atk": "60",
+      "hp": "100",
+      "conditions": [
+        "라이드 위저드와 일체화 되어야 합니다."
+      ],
+      "effects": [
+        "필드에 원하는 카드를 2장까지 제거합니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-23-005",
+      "deckId": "23",
+      "name": "라이드머신 랜드",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "라이드",
+      "atk": "60",
+      "hp": "100",
+      "conditions": [
+        "라이드 위저드와 일체화 되어야 합니다."
+      ],
+      "effects": [
+        "소환되었을 때 상대 필드 몬스터 1장을 선택하여 게임에서 제외한다."
+      ],
+      "notes": []
+    },
+    "rationale": "일체화 외 비용 없이2장 제거하던 폭을1장으로 줄이고 소환 유발/상대 몬스터 범위를 명확화한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-24-002",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-24-002",
+      "deckId": "24",
+      "name": "카미 매치",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "지니어스",
+      "atk": "20",
+      "hp": "180",
+      "conditions": [
+        "덱에 베스트 지니어스가 있어야 한다."
+      ],
+      "effects": [
+        "베스트 지니어스를 손패로 가져온다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-24-002",
+      "deckId": "24",
+      "name": "카미 매치",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "지니어스",
+      "atk": "20",
+      "hp": "200",
+      "conditions": [
+        "덱에 베스트 지니어스가 있어야 한다."
+      ],
+      "effects": [
+        "베스트 지니어스를 손패로 가져온다."
+      ],
+      "notes": []
+    },
+    "rationale": "매치 체계의 일체화 검색 초동을 보호한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-24-004",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-24-004",
+      "deckId": "24",
+      "name": "저지먼트 매치",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "지니어스",
+      "atk": "120",
+      "hp": "50",
+      "conditions": [
+        "베스트 지니어스와 일체화 되어야 합니다."
+      ],
+      "effects": [
+        "필드의 원하는 카드를 2장까지 제거합니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-24-004",
+      "deckId": "24",
+      "name": "저지먼트 매치",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "지니어스",
+      "atk": "120",
+      "hp": "50",
+      "conditions": [
+        "베스트 지니어스와 일체화 되어야 합니다."
+      ],
+      "effects": [
+        "소환되었을 때 상대 필드 몬스터 1장을 선택하여 게임에서 제외한다."
+      ],
+      "notes": []
+    },
+    "rationale": "일체화 외 비용 없이2장 제거하던 폭을1장으로 줄이고 소환 유발/상대 몬스터 범위를 명확화한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-26-002",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-26-002",
+      "deckId": "26",
+      "name": "카미 매치",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "지니어스",
+      "atk": "20",
+      "hp": "180",
+      "conditions": [
+        "덱에 베스트 지니어스가 있어야 한다."
+      ],
+      "effects": [
+        "베스트 지니어스를 손패로 가져온다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-26-002",
+      "deckId": "26",
+      "name": "카미 매치",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "지니어스",
+      "atk": "20",
+      "hp": "200",
+      "conditions": [
+        "덱에 베스트 지니어스가 있어야 한다."
+      ],
+      "effects": [
+        "베스트 지니어스를 손패로 가져온다."
+      ],
+      "notes": []
+    },
+    "rationale": "매치 체계의 일체화 검색 초동을 보호한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-26-005",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-26-005",
+      "deckId": "26",
+      "name": "디텍티브 매치",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "지니어스",
+      "atk": "40",
+      "hp": "30",
+      "conditions": [
+        "필드에 저지먼트 매치가 소환되어 있어야 한다."
+      ],
+      "effects": [
+        "퓨전업 카드를 내 패로 가져온다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-26-005",
+      "deckId": "26",
+      "name": "디텍티브 매치",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "지니어스",
+      "atk": "60",
+      "hp": "70",
+      "conditions": [
+        "필드에 저지먼트 매치가 소환되어 있어야 한다."
+      ],
+      "effects": [
+        "퓨전업 카드를 내 패로 가져온다."
+      ],
+      "notes": []
+    },
+    "rationale": "저지먼트가 있어야 소환하는 퓨전 검색원의 낮은 몸값을 보완한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-27-001",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-27-001",
+      "deckId": "27",
+      "name": "드로우 건맨",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "슈페리얼",
+      "atk": "30",
+      "hp": "50",
+      "conditions": [],
+      "effects": [
+        "이 카드가 소환될시 나와 상대는 1장씩 드로우한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-27-001",
+      "deckId": "27",
+      "name": "드로우 건맨",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "슈페리얼",
+      "atk": "40",
+      "hp": "70",
+      "conditions": [],
+      "effects": [
+        "이 카드가 소환될시 나와 상대는 1장씩 드로우한다."
+      ],
+      "notes": []
+    },
+    "rationale": "상대도 드로우하는 대칭 지원원의 기본 생존력을 보완한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-27-004",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-27-004",
+      "deckId": "27",
+      "name": "간드레이드래곤",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "250",
+      "hp": "100",
+      "conditions": [
+        "이 카드 자신을 제외한 자신의 패를 모두 버려야 소환할 수 있다."
+      ],
+      "effects": [
+        "필드를 전부 파괴한다."
+      ],
+      "notes": [
+        "소환할 간드레이드래곤 자신은 버릴 카드에서 제외한다."
+      ]
+    },
+    "after": {
+      "id": "COC-27-004",
+      "deckId": "27",
+      "name": "간드레이드래곤",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "250",
+      "hp": "100",
+      "conditions": [
+        "이 카드 자신을 제외한 자신의 패를 모두 버려야 소환할 수 있다."
+      ],
+      "effects": [
+        "소환되었을 때 이 카드 자신을 제외한 양쪽 필드의 다른 몬스터를 모두 파괴한다."
+      ],
+      "notes": [
+        "소환할 간드레이드래곤 자신은 버릴 카드에서 제외한다."
+      ]
+    },
+    "rationale": "자기 자신 제외라는 기존 사용자 확정을 실제 카드 문구에 반영한다. 밸런스 변경이 아니다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-30-007",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-30-007",
+      "deckId": "30",
+      "name": "삼림 요양",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "자연",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "내 체력을 300 회복한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-30-007",
+      "deckId": "30",
+      "name": "삼림 요양",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "자연",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신의 플레이어 체력을 240 회복한다."
+      ],
+      "notes": []
+    },
+    "rationale": "조건 없는300회복의 반복 효율을 낮추되 주문 중심 덱의 생존 수단은 남긴다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-30-010",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-30-010",
+      "deckId": "30",
+      "name": "대자연의 여신 유리카",
+      "type": "일체화",
+      "zone": "created",
+      "attribute": "자연",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "숲속의 맹약으로만 사용가능하다."
+      ],
+      "effects": [
+        "일체화할 때 자신의 플레이어 체력을 800 회복한다.",
+        "한 턴에 1회, 이번 게임에서 사용한 주문 1개의 효과를 다시 사용한다. 해당 주문 효과를 해결하는 동안에만 기본 다이스 최댓값을 100으로 변경하며, 무리의 집결과 중첩되면 증가분을 더한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-30-010",
+      "deckId": "30",
+      "name": "대자연의 여신 유리카",
+      "type": "일체화",
+      "zone": "created",
+      "attribute": "자연",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "숲속의 맹약으로만 사용가능하다."
+      ],
+      "effects": [
+        "일체화할 때 자신의 플레이어 체력을 600 회복한다.",
+        "한 턴에 1회, 이번 게임에서 사용한 주문 1개의 효과를 다시 사용한다. 해당 주문 효과를 해결하는 동안에만 기본 다이스 최댓값을 100으로 변경하며, 무리의 집결과 중첩되면 증가분을 더한다."
+      ],
+      "notes": []
+    },
+    "rationale": "진화로 회복800을 얻는 장기 반복 효율을 줄이되2장 덱 비용/진화 보상은 보존한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-31-001",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-31-001",
+      "deckId": "31",
+      "name": "환락의 마술사 – 크로와",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "마술사",
+      "atk": "150",
+      "hp": "100",
+      "conditions": [
+        "상대 필드에 카드가 존재한다."
+      ],
+      "effects": [
+        "코인토스(1d2)에서 앞면(1)이 나왔다면 드로우하고, 뒷면(2)이 나온다면 상대가 드로우한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-31-001",
+      "deckId": "31",
+      "name": "환락의 마술사 – 크로와",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "마술사",
+      "atk": "150",
+      "hp": "120",
+      "conditions": [
+        "상대 필드에 카드가 존재한다."
+      ],
+      "effects": [
+        "코인토스(1d2)에서 앞면(1)이 나왔다면 드로우하고, 뒷면(2)이 나온다면 상대가 드로우한다."
+      ],
+      "notes": []
+    },
+    "rationale": "상대 드로우 위험을 갖는 연계 초동의 생존력을 보완한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-31-002",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-31-002",
+      "deckId": "31",
+      "name": "환락의 마술사 – 카스테",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "마술사",
+      "atk": "120",
+      "hp": "70",
+      "conditions": [
+        "필드에 환락의 마술사 – 크로와가 존재한다."
+      ],
+      "effects": [
+        "코인 토스 3회(3d2)에서 앞면이 2개 나오면 상대 몬스터 1장의 공격력을 100 낮춘다. 감소 처리 후 그 몬스터의 공격력이 0이면 파괴한다."
+      ],
+      "notes": [
+        "0 미만이 아닌 공격력 0을 파괴 조건으로 적용한다."
+      ]
+    },
+    "after": {
+      "id": "COC-31-002",
+      "deckId": "31",
+      "name": "환락의 마술사 – 카스테",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "마술사",
+      "atk": "120",
+      "hp": "90",
+      "conditions": [
+        "필드에 환락의 마술사 – 크로와가 존재한다."
+      ],
+      "effects": [
+        "코인 토스 3회(3d2)에서 앞면이 2개 나오면 상대 몬스터 1장의 공격력을 100 낮춘다. 감소 처리 후 그 몬스터의 공격력이 0이면 파괴한다."
+      ],
+      "notes": [
+        "0 미만이 아닌 공격력 0을 파괴 조건으로 적용한다."
+      ]
+    },
+    "rationale": "크로와 선행과 동전 조건을 갖는 후속 카드의 생존력을 보완한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-31-003",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-31-003",
+      "deckId": "31",
+      "name": "환희의 마법사 – 베이플",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "마법사",
+      "atk": "300",
+      "hp": "175",
+      "conditions": [
+        "필드에 환락의 마술사 – 크로와와 환락의 마술사 – 카스테가 존재한다."
+      ],
+      "effects": [
+        "코인토스(5d2)에서 앞면(1)의 수 × 100 만큼 상대의 체력에 피해를 준다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-31-003",
+      "deckId": "31",
+      "name": "환희의 마법사 – 베이플",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "마법사",
+      "atk": "260",
+      "hp": "160",
+      "conditions": [
+        "필드에 환락의 마술사 – 크로와와 환락의 마술사 – 카스테가 존재한다."
+      ],
+      "effects": [
+        "코인토스(5d2)에서 앞면(1)의 수 × 100 만큼 상대의 체력에 피해를 준다."
+      ],
+      "notes": []
+    },
+    "rationale": "5회 동전의 소환 즉시 피해와 큰 몸값을 동시에 얻는 마무리 효율을 낮춘다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-31-007",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-31-007",
+      "deckId": "31",
+      "name": "환희의 마법 – FLASH",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "마법사",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "체력을 100 지불하고 상대 필드의 몬스터를 자신의 필드로 가져온다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-31-007",
+      "deckId": "31",
+      "name": "환희의 마법 – FLASH",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "마법사",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신의 플레이어 체력200을 지불하고, 상대 필드 몬스터1장을 자신의 빈 필드로 가져온다."
+      ],
+      "notes": []
+    },
+    "rationale": "조건 없는 영구 탈취의 비용100→200. 자기 손해/상대 대응이 있는 제어로 조정한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-31-010",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-31-010",
+      "deckId": "31",
+      "name": "최광(最光)의 대마법 – ROYAL STRAIGHT FLUSH",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "마술사",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "최광(最光)의 대마법사 – 슈와 일체화한다."
+      ],
+      "effects": [
+        "코인토스 5번(5d2)에서 앞면(1)이라면 나의 필드의 몬스터 전체 공격력을 앞면(1) 수 ×100를 올리고, 뒷면(2)이라면 상대의 필드 몬스터 전체 HP 뒷면(2)수×150을 내린다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-31-010",
+      "deckId": "31",
+      "name": "최광(最光)의 대마법 – ROYAL STRAIGHT FLUSH",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "마술사",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "최광(最光)의 대마법사 – 슈와 일체화한다."
+      ],
+      "effects": [
+        "1d2를5회 굴린다. 자신의 필드 몬스터 모두의 공격력을 앞면(1) 수×80 올리고, 상대 필드 몬스터 모두에게 뒷면(2) 수×100의 효과 피해를 준다."
+      ],
+      "notes": []
+    },
+    "rationale": "한 주문의 전체 강화와 전체 피해를100/150→80/100으로 조정하며5회의 혼합 동전/일체화 조건은 보존한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-32-002",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-32-002",
+      "deckId": "32",
+      "name": "원소의 마법사 – 워터",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "원소",
+      "atk": "0",
+      "hp": "165",
+      "conditions": [
+        "패에 주문카드가 존재."
+      ],
+      "effects": [
+        "자신의 필드에 있는 이 카드를 파괴하는 비용을 지불하고 발동한다. 효과 해결 시 자신의 패·덱·묘지에서 소환 조건을 만족하는 '원소의 마법사' 몬스터 1장을 선택하여 소환한다. 이 효과의 비용으로 파괴한 이 카드도 선택할 수 있다. 상대 턴에도 발동할 수 있다. 이 1번 효과는 플레이어별로 플레임·워터·윈드·랜드 4종을 합쳐 한 턴에 1회만 발동할 수 있다.",
+        "상대 몬스터의 전투 선언 시, 이 카드의 체력 보다 상대 몬스터의 공격력이 높다면 그 몬스터를 파괴한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-32-002",
+      "deckId": "32",
+      "name": "원소의 마법사 – 워터",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "원소",
+      "atk": "0",
+      "hp": "165",
+      "conditions": [
+        "패에 주문카드가 존재."
+      ],
+      "effects": [
+        "자신의 필드에 있는 이 카드를 파괴하는 비용을 지불하고 발동한다. 효과 해결 시 자신의 패·덱·묘지에서 소환 조건을 만족하는 '원소의 마법사' 몬스터 1장을 선택하여 소환한다. 이 효과의 비용으로 파괴한 이 카드도 선택할 수 있다. 상대 턴에도 발동할 수 있다. 이 1번 효과는 플레이어별로 플레임·워터·윈드·랜드 4종을 합쳐 한 턴에 1회만 발동할 수 있다.",
+        "상대 몬스터가 이 카드를 공격 대상으로 선언했을 때, 한 턴에1회 발동한다. 공격을 선언한 몬스터의 현재 실제 공격력이 이 카드의 현재 체력보다 높으면 그 몬스터를 파괴한다."
+      ],
+      "notes": []
+    },
+    "rationale": "필드 전체 공격을 봉쇄하는 해석 대신 자기 수비 반격으로 범위를 제한하고 현재 수치와 독립 횟수를 명확화한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-32-003",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-32-003",
+      "deckId": "32",
+      "name": "원소의 마법사 – 윈드",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "원소",
+      "atk": "200",
+      "hp": "50",
+      "conditions": [
+        "패에 주문카드가 존재."
+      ],
+      "effects": [
+        "자신의 필드에 있는 이 카드를 파괴하는 비용을 지불하고 발동한다. 효과 해결 시 자신의 패·덱·묘지에서 소환 조건을 만족하는 '원소의 마법사' 몬스터 1장을 선택하여 소환한다. 이 효과의 비용으로 파괴한 이 카드도 선택할 수 있다. 상대 턴에도 발동할 수 있다. 이 1번 효과는 플레이어별로 플레임·워터·윈드·랜드 4종을 합쳐 한 턴에 1회만 발동할 수 있다.",
+        "이 몬스터의 직접 공격 시, 다이스 6을 굴려서 나온 수 × 50을 추가로 입힌다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-32-003",
+      "deckId": "32",
+      "name": "원소의 마법사 – 윈드",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "원소",
+      "atk": "200",
+      "hp": "50",
+      "conditions": [
+        "패에 주문카드가 존재."
+      ],
+      "effects": [
+        "자신의 필드에 있는 이 카드를 파괴하는 비용을 지불하고 발동한다. 효과 해결 시 자신의 패·덱·묘지에서 소환 조건을 만족하는 '원소의 마법사' 몬스터 1장을 선택하여 소환한다. 이 효과의 비용으로 파괴한 이 카드도 선택할 수 있다. 상대 턴에도 발동할 수 있다. 이 1번 효과는 플레이어별로 플레임·워터·윈드·랜드 4종을 합쳐 한 턴에 1회만 발동할 수 있다.",
+        "이 카드의 효과가 유효한 동안 직접 공격 시1d6을 굴려 나온 수×40의 추가 피해를 준다."
+      ],
+      "notes": []
+    },
+    "rationale": "조건 없는 직접 공격 추가 기대 피해175→140으로 낮춰 교체 소환에 붙는 마무리 효율을 줄인다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-32-004",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-32-004",
+      "deckId": "32",
+      "name": "원소의 마법사 – 랜드",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "원소",
+      "atk": "120",
+      "hp": "230",
+      "conditions": [
+        "패에 주문카드가 존재."
+      ],
+      "effects": [
+        "자신의 필드에 있는 이 카드를 파괴하는 비용을 지불하고 발동한다. 효과 해결 시 자신의 패·덱·묘지에서 소환 조건을 만족하는 '원소의 마법사' 몬스터 1장을 선택하여 소환한다. 이 효과의 비용으로 파괴한 이 카드도 선택할 수 있다. 상대 턴에도 발동할 수 있다. 이 1번 효과는 플레이어별로 플레임·워터·윈드·랜드 4종을 합쳐 한 턴에 1회만 발동할 수 있다.",
+        "이 카드가 필드에 두 턴 이상 있다면 이 카드의 공격력과 체력을 뒤바꾼다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-32-004",
+      "deckId": "32",
+      "name": "원소의 마법사 – 랜드",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "원소",
+      "atk": "120",
+      "hp": "230",
+      "conditions": [
+        "패에 주문카드가 존재."
+      ],
+      "effects": [
+        "자신의 필드에 있는 이 카드를 파괴하는 비용을 지불하고 발동한다. 효과 해결 시 자신의 패·덱·묘지에서 소환 조건을 만족하는 '원소의 마법사' 몬스터 1장을 선택하여 소환한다. 이 효과의 비용으로 파괴한 이 카드도 선택할 수 있다. 상대 턴에도 발동할 수 있다. 이 1번 효과는 플레이어별로 플레임·워터·윈드·랜드 4종을 합쳐 한 턴에 1회만 발동할 수 있다.",
+        "이 카드가 소환된 뒤 자신의 턴 시작을 두 번 맞았을 때 한 번 발동한다. 이 카드의 현재 공격력과 현재 체력을 서로 바꾼다. 필드를 떠나면 체류 기록을 초기화한다."
+      ],
+      "notes": []
+    },
+    "rationale": "두 턴의 기준을 자기 턴 시작2회로 고정하고 매번 뒤집히는 자동 반복을 방지한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-32-012",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-32-012",
+      "deckId": "32",
+      "name": "드래곤 위저드 – 오션",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "원소",
+      "atk": "170",
+      "hp": "120",
+      "conditions": [
+        "이 카드는 '웨이크업 드래곤!'으로 '원소의 마법사 – 워터'를 파괴했을 때에만 소환 가능하다."
+      ],
+      "effects": [
+        "이 카드는 룰상 '원소의 마법사 – 워터'로 취급한다.",
+        "이 카드의 공격력이 상대 몬스터의 체력보다 낮다면, 그 몬스터를 파괴한다."
+      ],
+      "notes": [
+        "v1.2 소환 분류: 퓨전. 웨이크업 드래곤! 또는 카드 자체에 기재된 지정 소재 처리로 엑스트라 덱에서 소환한다."
+      ]
+    },
+    "after": {
+      "id": "COC-32-012",
+      "deckId": "32",
+      "name": "드래곤 위저드 – 오션",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "원소",
+      "atk": "170",
+      "hp": "120",
+      "conditions": [
+        "이 카드는 '웨이크업 드래곤!'으로 '원소의 마법사 – 워터'를 파괴했을 때에만 소환 가능하다."
+      ],
+      "effects": [
+        "이 카드는 룰상 '원소의 마법사 – 워터'로 취급한다.",
+        "자신의 메인 페이즈에 한 턴에1회, 자신의 현재 실제 공격력보다 현재 체력이 높은 상대 필드 몬스터1장을 선택하여 파괴한다."
+      ],
+      "notes": [
+        "v1.2 소환 분류: 퓨전. 웨이크업 드래곤! 또는 카드 자체에 기재된 지정 소재 처리로 엑스트라 덱에서 소환한다."
+      ]
+    },
+    "rationale": "사건 없이 모든 적을 즉시 파괴하는 해석을 막고 고체력 대응이라는 역할을 명확화한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-32-013",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-32-013",
+      "deckId": "32",
+      "name": "드래곤 위저드 – 허리케인",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "원소",
+      "atk": "300",
+      "hp": "75",
+      "conditions": [
+        "이 카드는 '웨이크업 드래곤!'으로 '원소의 마법사 – 윈드'를 파괴했을 때에만 소환 가능하다."
+      ],
+      "effects": [
+        "이 카드는 룰상 '원소의 마법사 – 윈드'로 취급한다.",
+        "이 카드의 직접공격 시 다이스 6을 굴려서 나온 수 × 100을 추가로 입힌다."
+      ],
+      "notes": [
+        "v1.2 소환 분류: 퓨전. 웨이크업 드래곤! 또는 카드 자체에 기재된 지정 소재 처리로 엑스트라 덱에서 소환한다."
+      ]
+    },
+    "after": {
+      "id": "COC-32-013",
+      "deckId": "32",
+      "name": "드래곤 위저드 – 허리케인",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "원소",
+      "atk": "300",
+      "hp": "75",
+      "conditions": [
+        "이 카드는 '웨이크업 드래곤!'으로 '원소의 마법사 – 윈드'를 파괴했을 때에만 소환 가능하다."
+      ],
+      "effects": [
+        "이 카드는 룰상 '원소의 마법사 – 윈드'로 취급한다.",
+        "이 카드의 효과가 유효한 동안 직접 공격 시1d6을 굴려 나온 수×60의 추가 피해를 준다."
+      ],
+      "notes": [
+        "v1.2 소환 분류: 퓨전. 웨이크업 드래곤! 또는 카드 자체에 기재된 지정 소재 처리로 엑스트라 덱에서 소환한다."
+      ]
+    },
+    "rationale": "한 몬스터의 기본 공격+추가 피해 기댓값500.5→360.5로 낮추고 윈드의 상위 직접 공격 형태는 보존한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-32-014",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-32-014",
+      "deckId": "32",
+      "name": "드래곤 위저드 – 테라",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "원소",
+      "atk": "180",
+      "hp": "300",
+      "conditions": [
+        "이 카드는 '웨이크업 드래곤!'으로 '원소의 마법사 – 랜드'를 파괴했을 때에만 소환 가능하다."
+      ],
+      "effects": [
+        "이 카드는 룰상 '원소의 마법사 – 랜드'로 취급한다.",
+        "이 카드가 필드에 두 턴 이상 있다면 이 카드의 체력만큼 상대의 체력에 피해를 준다."
+      ],
+      "notes": [
+        "v1.2 소환 분류: 퓨전. 웨이크업 드래곤! 또는 카드 자체에 기재된 지정 소재 처리로 엑스트라 덱에서 소환한다."
+      ]
+    },
+    "after": {
+      "id": "COC-32-014",
+      "deckId": "32",
+      "name": "드래곤 위저드 – 테라",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "원소",
+      "atk": "180",
+      "hp": "300",
+      "conditions": [
+        "이 카드는 '웨이크업 드래곤!'으로 '원소의 마법사 – 랜드'를 파괴했을 때에만 소환 가능하다."
+      ],
+      "effects": [
+        "이 카드는 룰상 '원소의 마법사 – 랜드'로 취급한다.",
+        "이 카드가 소환된 뒤 자신의 턴 시작을 두 번 이상 맞았다면, 자신의 메인 페이즈에 한 턴에1회 자신의 현재 체력의 절반(소수점 버림)만큼 상대 플레이어에게 피해를 준다. 필드를 떠나면 체류 기록을 초기화한다."
+      ],
+      "notes": [
+        "v1.2 소환 분류: 퓨전. 웨이크업 드래곤! 또는 카드 자체에 기재된 지정 소재 처리로 엑스트라 덱에서 소환한다."
+      ]
+    },
+    "rationale": "체류 보상을 보존하되체력 전체의 반복 직접 피해를 절반으로 줄이고 시점을 명확화한다."
+  },
+  {
+    "patchId": "BALANCE-B1",
+    "cardId": "COC-32-015",
+    "source": "Runtime main 461b69201556138a26b44ac7161a9404b921a3ca; NOT canonical v1.3",
+    "authority": "User delegated all-card balancing; F=HERO nerfs, Curse/Dragon buffs prioritized",
+    "before": {
+      "id": "COC-32-015",
+      "deckId": "32",
+      "name": "판타직 소서러 – 인피니티",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "원소",
+      "atk": "250",
+      "hp": "200",
+      "conditions": [
+        "자신의 필드에 '원소의 마법사' 또는 '드래곤 위저드' 몬스터 3장이 소재로 존재해야 한다. 소환 시 이 소재 몬스터 3장을 모두 묘지로 보내고 이 카드를 소환한다."
+      ],
+      "effects": [
+        "이 카드의 공격 시, 상대의 패ㆍ덱ㆍ묘지의 카드를 모두 게임에서 제외시킨다."
+      ],
+      "notes": [
+        "v1.2 소환 분류: 퓨전. 웨이크업 드래곤! 또는 카드 자체에 기재된 지정 소재 처리로 엑스트라 덱에서 소환한다."
+      ]
+    },
+    "after": {
+      "id": "COC-32-015",
+      "deckId": "32",
+      "name": "판타직 소서러 – 인피니티",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "원소",
+      "atk": "250",
+      "hp": "200",
+      "conditions": [
+        "자신의 필드에 '원소의 마법사' 또는 '드래곤 위저드' 몬스터 3장이 소재로 존재해야 한다. 소환 시 이 소재 몬스터 3장을 모두 묘지로 보내고 이 카드를 소환한다."
+      ],
+      "effects": [
+        "이 카드가 공격을 선언했을 때 한 턴에1회 발동한다. 상대의 패에서 무작위로 최대2장, 덱 맨 위에서 최대2장, 묘지에서 상대가 선택한 최대2장을 게임에서 제외한다. 각 영역의 카드가 부족하면 존재하는 카드만 처리한다."
+      ],
+      "notes": [
+        "v1.2 소환 분류: 퓨전. 웨이크업 드래곤! 또는 카드 자체에 기재된 지정 소재 처리로 엑스트라 덱에서 소환한다."
+      ]
+    },
+    "rationale": "3소재 피니셔의 전 영역 압박은 보존하면서 패·덱·묘지 전체를 한꺼번에 지우는 회복 불가능한 봉쇄를 최대6장으로 제한한다."
   }
 ]

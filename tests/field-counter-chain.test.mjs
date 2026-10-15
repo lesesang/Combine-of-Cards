@@ -27,14 +27,14 @@ test('field counters: latest opposing effect alone is legal and two or three cou
   assert.deepEqual(legalSpellCounters(r,0),[second]);assert.throws(()=>counter(r,0,spellOnly),{status:409});
   counter(r,0,second);assert.deepEqual(legalSpellCounters(r,1),[third]);
   if(count===3)counter(r,1,third);const restored=JSON.parse(JSON.stringify(r));pass(restored,count===2?1:0);
-  assert.equal(restored.players[0].hp,count===2?400:100);assert.equal(restored.pendingSpell,null);
+  assert.equal(restored.players[0].hp,count===2?340:100);assert.equal(restored.pendingSpell,null);
   assert.equal(restored.units[first].counterUsedThisStay,true);assert.equal(restored.units[second].counterUsedThisStay,true);
  }
 });
 function prepare(r,cid){
  const who=cid==='COC-12-002'?0:1,source=add(r,cid,who,'field');
  const ready=()=>{spell(r);if(who===0)counter(r,1,add(r,'COC-12-001',1,'field'));};
- ready();return {who,source,ready,success:who===0?400:100,fizzle:who===0?100:400};
+ ready();return {who,source,ready,success:who===0?340:100,fizzle:who===0?100:340};
 }
 test('field counters: returning and resummoning resets only the field limit and invalidates the old declaration',()=>{
  for(const cid of fieldCards){const r=setup(),f=prepare(r,cid),{who,source}=f;counter(r,who,source);I.move(r,source,'hand',who);I.move(r,source,'field',who);
@@ -43,7 +43,7 @@ test('field counters: returning and resummoning resets only the field limit and 
   f.ready();assert.deepEqual(legalSpellCounters(r,who),[]);pass(r,who);
  }
  const r=setup(),source=add(r,'COC-12-001',1,'field');spell(r);counter(r,1,source);I.move(r,source,'field',0);I.move(r,source,'field',1);
- assert.equal(r.units[source].counterUsedThisStay,true);pass(r,0);assert.equal(r.players[0].hp,400);
+ assert.equal(r.units[source].counterUsedThisStay,true);pass(r,0);assert.equal(r.players[0].hp,340);
 });
 test('field counters: source negation, wrong controller and invalid selection do not bypass legality',()=>{
  for(const cid of fieldCards){const r=setup(),{who,source,fizzle}=prepare(r,cid);r.units[source].effectsNegated=true;const before=structuredClone(r);
@@ -79,7 +79,7 @@ test('field counters: legacy Wind Girl declarations against spells or integratio
   const restored=legacyWind(r,pending,who,source,r.effectStack.at(-1));
   I.apply(restored,1-who,kind==='storm-summon'?'extraResponse':'spellResponse',{choice:'pass'});
   assert.deepEqual(restored.effectStack,[]);assert.equal(restored.units[source].counterUsedThisStay,true);
-  if(kind!=='storm-summon')assert.equal(restored.players[0].hp,kind==='spell'?400:100);
+  if(kind!=='storm-summon')assert.equal(restored.players[0].hp,kind==='spell'?340:100);
   else {assert.ok(restored.players[0].extra.includes(extra));assert.ok(!restored.players[0].field.includes(extra));}
   assert.ok(restored.logs.some(l=>JSON.stringify(l).includes('상대 몬스터 효과가 아니므로 불발')));
  }
@@ -88,11 +88,11 @@ test('field counters: AI uses each legal field counter and answers a counter wit
  for(const level of ['easy','medium','hard'])for(const cid of spellCards){const r=setup(),source=add(r,cid,1,'field');r.mode='ai';r.aiDifficulty=level;spell(r);I.runAI(r);
   assert.equal(r.pendingSpell.counter.sourceId,source);pass(r,0);assert.equal(r.players[0].hp,100);
  }
- const r=setup(),source=add(r,'COC-12-001',1,'field'),wind=add(r,'COC-12-002',0,'field');r.mode='ai';spell(r);I.runAI(r);counter(r,0,wind);I.runAI(r);assert.equal(r.pendingSpell,null);assert.equal(r.players[0].hp,400);
+ const r=setup(),source=add(r,'COC-12-001',1,'field'),wind=add(r,'COC-12-002',0,'field');r.mode='ai';spell(r);I.runAI(r);counter(r,0,wind);I.runAI(r);assert.equal(r.pendingSpell,null);assert.equal(r.players[0].hp,340);
 });
 test('field counters: all AI levels pass spells and Storm effects but counter opposing monster effects with Wind Girl',()=>{
  for(const level of ['easy','medium','hard']){
-  const r=setup(),wind=add(r,'COC-12-002',1,'field');r.mode='ai';r.aiDifficulty=level;spell(r);I.runAI(r);assert.equal(r.pendingSpell,null);assert.equal(r.players[0].hp,400);assert.equal(r.units[wind].counterUsedThisStay,undefined);
+  const r=setup(),wind=add(r,'COC-12-002',1,'field');r.mode='ai';r.aiDifficulty=level;spell(r);I.runAI(r);assert.equal(r.pendingSpell,null);assert.equal(r.players[0].hp,340);assert.equal(r.units[wind].counterUsedThisStay,undefined);
   for(const cid of spellCards){const q=setup(),first=add(q,cid,1,'field'),second=add(q,'COC-12-002',0,'field'),third=add(q,'COC-12-002',1,'field');spell(q);counter(q,1,first);counter(q,0,second);q.mode='ai';q.aiDifficulty=level;I.runAI(q);assert.equal(q.pendingSpell.counter.sourceId,third);pass(q,0);assert.equal(q.players[0].hp,100);}
   // AI is player 1; test a spell cast by player 1 and countered by player 0's Storm.
   const q=setup(),storm=add(q,'COC-14-001',0,'integration'),qw=add(q,'COC-12-002',1,'field'),id=add(q,'COC-30-007',1,'hand');I.queueAutomatedSpell(q,1,id,I.cards.get('COC-30-007'),{});counter(q,0,storm);q.mode='ai';q.aiDifficulty=level;I.runAI(q);assert.equal(q.pendingSpell,null);assert.equal(q.units[qw].counterUsedThisStay,undefined);

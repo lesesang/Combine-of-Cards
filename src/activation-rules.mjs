@@ -1,3 +1,4 @@
+import {balanceValues as B} from './balance-values.mjs';
 import {evolutionRules,validateEvolution,natureEvolutionCosts} from './evolution.mjs';
 /**
  * Audited preflight rules for main-deck cards with explicit v1.3 requirements.
@@ -89,9 +90,10 @@ register('COC-07-004',c=>({costs:[{player:1-c.who,draw:1}]}));
 
 // Paid before the opponent responds. Resolution never charges these again.
 register('COC-05-002 COC-31-007',c=>{
- require_(c.player.hp>100,'필요한 체력을 지불할 수 없습니다.');
+ const cost=c.card.id==='COC-31-007'?B.flashHpCost:100;
+ require_(c.player.hp>cost,'필요한 체력을 지불할 수 없습니다.');
  require_(c.player.field.includes(null),'카드를 놓을 빈 필드 칸이 없습니다.');
- return {costs:[{player:c.who,hp:100}]};
+ return {costs:[{player:c.who,hp:cost}]};
 });
 register('COC-14-002',c=>{
  require_(c.player.deck.length>0,'비용으로 버릴 덱 맨 위 카드가 필요합니다.');
@@ -140,7 +142,7 @@ register('COC-21-004',c=>{
  const ids=c.body.costUnitIds;
  if(!Array.isArray(ids)||ids.length!==1||!c.ownField.includes(ids[0]))deny('제물로 바칠 아군 몬스터를 지정해야 합니다.');
  const unit=c.room.units[ids[0]];
- if(!Number.isFinite(unit.atk)||!Number.isFinite(unit.hp)||unit.atk+unit.hp<250)deny('제물 몬스터의 현재 공격력과 체력 합계가 250 이상이어야 합니다.');
+ if(!Number.isFinite(unit.atk)||!Number.isFinite(unit.hp)||unit.atk+unit.hp<B.envySacrificeTotal)deny(`제물 몬스터의 현재 공격력과 체력 합계가 ${B.envySacrificeTotal} 이상이어야 합니다.`);
  if(!c.enemyField.includes(c.body.target?.id))deny('파괴할 상대 필드 몬스터를 선택해야 합니다.');
  return {costs:[{unitId:ids[0],to:'grave'}]};
 });

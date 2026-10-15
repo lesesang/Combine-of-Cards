@@ -21,7 +21,7 @@ This file is for a new coding assistant taking over the repository after the 202
 - Preserve the user's custom TCG v1.3: **24 premade playable decks**, **254 card records**, no card mixing across premade decks.
 - Never restore the deleted decks: 합체 기계, 코미컬, 럭키, 카지노이드, 비트스타즈, 파트너 몬스터즈, 코브라, 아홉꼬리.
 - The goal is **fully automatic server-authoritative card effects**, AI duels (choose opponent deck/random; easy, medium, hard), PvP, rules conflict diagnostics and production-ready deployment.
-- **Latest implementation (four elemental replacements, 2026-10-15): 163 partially supported / 90 manually unsupported / 1 basic, 71 registered spell handlers, 61 spells in opponent-pass effect stack and only 69 effect-number evidence records. Complete coverage certified: 0.** The older server banner remains beta.10, not an accurate support inventory. Full automation is not achieved.
+- **Latest implementation (whole-roster balance B1, 2026-10-15): 163 partially supported / 90 manually unsupported / 1 basic, 72 registered spell handlers, 64 spells in opponent-pass effect stack and only 77 effect-number evidence records. Complete coverage certified: 0.** The server banner is beta.11, not an accurate support inventory. Full automation is not achieved.
 - Source v1.3 DOCX and comparison JSON were created in a prior conversation but are **not yet committed** to this public repository. See docs/SOURCE_DATA_PROVENANCE.md.
 
 ## Latest user-confirmed rules to preserve (PR #57–#58)
@@ -91,3 +91,11 @@ This file is for a new coding assistant taking over the repository after the 202
 ## 2026-10-15 user-delegated card and ruling refinement
 
 The user authorized autonomous fixes for ambiguous rulings and overpowered effects, while preserving the whole deck’s flow and creative intent. Follow docs/CARD_REFINEMENT_POLICY.md. Do not re-request approval for each ruling. Preserve established rulings as the baseline; justify any necessary revision with before/after text, deck-wide reasoning and regression evidence. Runtime card text may be patched under this authorization, with history in docs/card-patches.json; never pretend it is the missing canonical source. Current four elemental replacement summons negate back to their original hand/deck/grave zone (user-confirmed); already-paid costs and shared usage stay spent.
+
+## 2026-10-15 전체 카드 밸런스 B1 / D1 운영 목표
+
+254장·24덱 설계 검토: **80장 개정·174장 유지**. F=HERO는 전투 효율 너프, 용/드래곤·저주/악마는 초동·회복·비용 버프를 우선했다. 기존17재정·마검·장착 해제 금지·간드레이 자기 제외·진화·개별 횟수·원소 공유1회는 유지한다. 개발자 재정 개정과 사용자 확정은 구분한다. [전수 검토와 변경 사유](docs/BALANCE_PATCH_B1.md), [변경 전후](docs/card-patches.json).
+
+현재 **163 partial /90 manual /1 basic, 주문 핸들러72, 대응 주문64, 효과 증거77건(73장), 완전 인증0**. 용의 둥지 자동화와 질투/욕망 대응, 새 수치와 도발/흡혈/효과 무효·만료 오류를 수정했다. 미구현 원소2번/드래곤·재단·소환 제외는 여전히 미완료다. 254장 검토는 전 효과 자동화 또는 실전 승률 균형 인증이 아니다.
+
+다음은 미구현 개정 효과의 상태/반응 명세→공통 체인 연결→24×24 대전과 난이도 평가다. 운영 DB는 사용자 개인 **Cloudflare D1**을 목표로 한다. [D1 저장소 분리·동시성·이전 계획](docs/CLOUDFLARE_D1_PLAN.md). D1 연결과 운영 배포는 아직 하지 않았다.

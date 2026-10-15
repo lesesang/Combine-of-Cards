@@ -16,7 +16,7 @@ export const passiveAutomations = new Set([
  'COC-01-001','COC-09-001','COC-11-001','COC-07-001','COC-07-007',
  'COC-09-002','COC-09-003','COC-10-011','COC-05-001','COC-12-006',
  'COC-12-008','COC-10-006','COC-21-007','COC-08-002','COC-09-004',
- 'COC-12-007','COC-21-008','COC-21-010'
+ 'COC-12-007','COC-12-014','COC-21-010'
 ]);
 export const combatAutomations = new Set([
  'COC-12-011','COC-12-008','COC-26-011','COC-32-001',

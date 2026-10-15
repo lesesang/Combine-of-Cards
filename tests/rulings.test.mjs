@@ -47,7 +47,7 @@ test('ROYAL STRAIGHT FLUSH applies both heads attack and tails health adjustment
  r.players[1].field=['foe',null,null];r.units.foe={atk:100,hp:1000};
  let flips=0;H.roll=()=>[1,2,1,2,1][flips++];H.hurt=(rr,id,n)=>{rr.units[id].hp-=n};
  cast('COC-31-010');
- assert.equal(r.units.ally.atk,350);assert.equal(r.units.foe.hp,700);assert.equal(flips,5);
+ assert.equal(r.units.ally.atk,290);assert.equal(r.units.foe.hp,800);assert.equal(flips,5);
 });
 test('G-attack damages both selected player and caster then sets integration attack to zero',()=>{
  const {r,H,cast}=harness();r.players[0].integration='g';r.units.g={cardId:'COC-01-001',atk:200};
