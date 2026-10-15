@@ -3272,5 +3272,319 @@
         "name": "Shuu recruit: Storm negates every origin without summon triggers or a refunded usage"
       }
     ]
+  },
+  {
+    "cardId": "COC-32-011",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "이 카드는 룰상 '원소의 마법사 – 플레임'으로 취급한다.",
+    "trigger": "지정 이름·소재 조건 검사",
+    "condition": "룰상 지정 원소의 마법사와 동일 이름, 효과 무효에도 유지",
+    "cost": "없음",
+    "target": "양쪽 필드 원소 주문 조건/자기 웨이크업 소재",
+    "resolution": "정확한 카드ID 동등성으로 지정 이름 인정, 다른 카드의 일부 문자열 오인 금지; 물리ID/유형/고유 효과 유지",
+    "duration": "룰상 정체성, 교체1번 및 공유 횟수 상속 안 함",
+    "remaining": "다른 향후 이름 참조 경로·복사 조합 검증",
+    "implementation": [
+      "src/elemental-dragons.mjs",
+      "src/activation-rules.mjs",
+      "src/extra-summons.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: all four rule names satisfy exact spells on either field even under negation"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: unrelated names cannot satisfy exact magician spell conditions"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: rule identity enables wakeup materials without copying magician abilities"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: immune wakeup costs reject atomically for magician and dragon identities"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: alias wakeup survives AI legality and Storm negation retains paid material"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-32-012",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "이 카드는 룰상 '원소의 마법사 – 워터'로 취급한다.",
+    "trigger": "지정 이름·소재 조건 검사",
+    "condition": "룰상 지정 원소의 마법사와 동일 이름, 효과 무효에도 유지",
+    "cost": "없음",
+    "target": "양쪽 필드 원소 주문 조건/자기 웨이크업 소재",
+    "resolution": "정확한 카드ID 동등성으로 지정 이름 인정, 다른 카드의 일부 문자열 오인 금지; 물리ID/유형/고유 효과 유지",
+    "duration": "룰상 정체성, 교체1번 및 공유 횟수 상속 안 함",
+    "remaining": "다른 향후 이름 참조 경로·복사 조합 검증",
+    "implementation": [
+      "src/elemental-dragons.mjs",
+      "src/activation-rules.mjs",
+      "src/extra-summons.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: all four rule names satisfy exact spells on either field even under negation"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: unrelated names cannot satisfy exact magician spell conditions"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: rule identity enables wakeup materials without copying magician abilities"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: immune wakeup costs reject atomically for magician and dragon identities"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: alias wakeup survives AI legality and Storm negation retains paid material"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-32-013",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "이 카드는 룰상 '원소의 마법사 – 윈드'로 취급한다.",
+    "trigger": "지정 이름·소재 조건 검사",
+    "condition": "룰상 지정 원소의 마법사와 동일 이름, 효과 무효에도 유지",
+    "cost": "없음",
+    "target": "양쪽 필드 원소 주문 조건/자기 웨이크업 소재",
+    "resolution": "정확한 카드ID 동등성으로 지정 이름 인정, 다른 카드의 일부 문자열 오인 금지; 물리ID/유형/고유 효과 유지",
+    "duration": "룰상 정체성, 교체1번 및 공유 횟수 상속 안 함",
+    "remaining": "다른 향후 이름 참조 경로·복사 조합 검증",
+    "implementation": [
+      "src/elemental-dragons.mjs",
+      "src/activation-rules.mjs",
+      "src/extra-summons.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: all four rule names satisfy exact spells on either field even under negation"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: unrelated names cannot satisfy exact magician spell conditions"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: rule identity enables wakeup materials without copying magician abilities"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: immune wakeup costs reject atomically for magician and dragon identities"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: alias wakeup survives AI legality and Storm negation retains paid material"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-32-014",
+    "effectNumber": 1,
+    "status": "partial",
+    "sourceText": "이 카드는 룰상 '원소의 마법사 – 랜드'로 취급한다.",
+    "trigger": "지정 이름·소재 조건 검사",
+    "condition": "룰상 지정 원소의 마법사와 동일 이름, 효과 무효에도 유지",
+    "cost": "없음",
+    "target": "양쪽 필드 원소 주문 조건/자기 웨이크업 소재",
+    "resolution": "정확한 카드ID 동등성으로 지정 이름 인정, 다른 카드의 일부 문자열 오인 금지; 물리ID/유형/고유 효과 유지",
+    "duration": "룰상 정체성, 교체1번 및 공유 횟수 상속 안 함",
+    "remaining": "다른 향후 이름 참조 경로·복사 조합 검증",
+    "implementation": [
+      "src/elemental-dragons.mjs",
+      "src/activation-rules.mjs",
+      "src/extra-summons.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: all four rule names satisfy exact spells on either field even under negation"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: unrelated names cannot satisfy exact magician spell conditions"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: rule identity enables wakeup materials without copying magician abilities"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: immune wakeup costs reject atomically for magician and dragon identities"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: alias wakeup survives AI legality and Storm negation retains paid material"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-32-012",
+    "effectNumber": 2,
+    "status": "partial",
+    "sourceText": "자신의 메인 페이즈에 한 턴에1회, 자신의 현재 실제 공격력보다 현재 체력이 높은 상대 필드 몬스터1장을 선택하여 파괴한다.",
+    "trigger": "자신의 MAIN 필드 발동",
+    "condition": "유효한 자기 필드 소스; 상대 대상의 현재HP > 자신의 실제ATK",
+    "cost": "별도 자원 비용 없음, 실물UID/효과2 사용 횟수 선기록",
+    "target": "상대 필드 몬스터1장",
+    "resolution": "대응/LIFO 뒤 조건 재검사·면역 적용 파괴, 소스UID attribution",
+    "duration": "실물UID/효과2 자기 턴1회, 공유 원소1번과 독립; 소스/목표 세대 검증, JSON 유지",
+    "remaining": "일반 후발 체인 삽입·전체 복사/유발 조합",
+    "implementation": [
+      "src/elemental-dragons.mjs",
+      "src/field-ability-effects.mjs",
+      "src/ability-responses.mjs",
+      "server.mjs",
+      "public/app.js"
+    ],
+    "tests": [
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: Ocean and Terra declare effect two and resolve only after opponent pass"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: Wind counters both monsters and negation spends only that physical effect"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: source movement control negation and target reentry fizzle"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: all AI levels use the same Ocean legality and Terra delay and wait for humans"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: Ocean checks strict current HP versus actual attack at declaration and resolution"
+      },
+      {
+        "path": "tests/elemental-dragon-api.test.mjs",
+        "name": "elemental dragon HTTP: both effect-two declarations counters and limits persist without hidden information"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-32-014",
+    "effectNumber": 2,
+    "status": "partial",
+    "sourceText": "이 카드가 소환된 뒤 자신의 턴 시작을 두 번 이상 맞았다면, 자신의 메인 페이즈에 한 턴에1회 자신의 현재 체력의 절반(소수점 버림)만큼 상대 플레이어에게 피해를 준다. 필드를 떠나면 체류 기록을 초기화한다.",
+    "trigger": "자신의 MAIN 필드 발동",
+    "condition": "유효한 자기 필드 소스; 현재 조종자 턴 시작을 필드 체류 중 두 번 이상 맞음",
+    "cost": "별도 자원 비용 없음, 실물UID/효과2 사용 횟수 선기록",
+    "target": "상대 플레이어",
+    "resolution": "대응/LIFO 뒤 해결 시 현재HP/2 내림 피해, HP 비용 아님",
+    "duration": "실물UID/효과2 자기 턴1회, 공유 원소1번과 독립; 소스/목표 세대 검증, JSON 유지",
+    "remaining": "일반 후발 체인 삽입·전체 복사/유발 조합",
+    "implementation": [
+      "src/elemental-dragons.mjs",
+      "src/field-ability-effects.mjs",
+      "src/ability-responses.mjs",
+      "server.mjs",
+      "public/app.js"
+    ],
+    "tests": [
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: Ocean and Terra declare effect two and resolve only after opponent pass"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: Wind counters both monsters and negation spends only that physical effect"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: source movement control negation and target reentry fizzle"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: all AI levels use the same Ocean legality and Terra delay and wait for humans"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental dragons: Terra counts two controlled turn starts and resets only after leaving"
+      },
+      {
+        "path": "tests/elemental-dragon-api.test.mjs",
+        "name": "elemental dragon HTTP: both effect-two declarations counters and limits persist without hidden information"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-32-001",
+    "effectNumber": 2,
+    "status": "partial",
+    "sourceText": "이 카드의 공격력이 상대 공격력을 넘었을 시 이 카드는 공격을 1회 더 실행 할 수 있다. 직접공격이라면 발동하지 않는다.",
+    "trigger": "몬스터 대상 전투 해결",
+    "condition": "소스 효과 유효·현재 자기 필드; 전투 직전 양쪽 실제ATK 비교에서 소스가 큼",
+    "cost": "없음, 효과2 실물 사용 기록",
+    "target": "공격한 자기 몬스터",
+    "resolution": "추가 공격1회, 다른 부여와 합산; 무효/직접 공격 제외",
+    "duration": "실물UID/효과2 자기 턴1회, 플레임 공유1번과 독립. 부여는 현재 턴/체류만, 사용 기록은 이탈에도 유지",
+    "remaining": "전투 유발 독립 대응 창·볼케이노의 효과 처치 경로·전역 동시 사건/복사",
+    "implementation": [
+      "src/elemental-dragons.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental combat: independent second effects add to existing attack grants and cannot reset by resummoning"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental combat: Flame compares both actual attacks and grants through battle immunity but not direct attacks"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental combat: granted attacks persist through control transfer but clear on zone departure"
+      }
+    ]
+  },
+  {
+    "cardId": "COC-32-011",
+    "effectNumber": 2,
+    "status": "partial",
+    "sourceText": "이 카드로 상대 몬스터를 파괴했을 시, 공격 기회가 1회 더 주어진다.",
+    "trigger": "몬스터 대상 전투 해결",
+    "condition": "소스 효과 유효·현재 자기 필드; 상대 몬스터 실제 전투 파괴",
+    "cost": "없음, 효과2 실물 사용 기록",
+    "target": "공격한 자기 몬스터",
+    "resolution": "추가 공격1회, 다른 부여와 합산; 무효/직접 공격 제외",
+    "duration": "실물UID/효과2 자기 턴1회, 플레임 공유1번과 독립. 부여는 현재 턴/체류만, 사용 기록은 이탈에도 유지",
+    "remaining": "전투 유발 독립 대응 창·볼케이노의 효과 처치 경로·전역 동시 사건/복사",
+    "implementation": [
+      "src/elemental-dragons.mjs",
+      "server.mjs"
+    ],
+    "tests": [
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental combat: independent second effects add to existing attack grants and cannot reset by resummoning"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental combat: Volcano requires a real battle destruction and honors effect negation"
+      },
+      {
+        "path": "tests/elemental-dragon.test.mjs",
+        "name": "elemental combat: granted attacks persist through control transfer but clear on zone departure"
+      }
+    ]
   }
 ]

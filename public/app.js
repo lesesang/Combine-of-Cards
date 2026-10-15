@@ -91,7 +91,7 @@ function openFieldAbility(){
  if(!sources.length){notify('현재 자동 판정을 지원하는 필드 카드 효과가 없습니다.',true);return}
  const all=[...g.players[1-g.you].field,...me.field].filter(Boolean);
  showModal(`<div class="section-eyebrow">ACTIVE ABILITY · VERIFIED</div><h2>필드 카드 효과</h2><p class="muted small">이 목록은 서버에서 개별 구현한 효과만 포함합니다. 효과 발동 가능 여부, 턴당 제한, 대상·비용은 서버가 검사합니다.</p>
- <div class="form-field"><label>효과 발동 카드</label><select id="abilitySource">${unitOptions(sources)}</select></div>
+ <div class="form-field"><label>효과 발동 카드</label><select id="abilitySource">${sources.map(u=>`<option value="${esc(u.id)}">${esc(u.card.name)} · 효과 ${g.automation.fieldAbilityEffects?.[u.card.id]||1}</option>`).join('')}</select></div>
  <div class="form-field"><label>효과 대상(필요할 경우)</label><select id="abilityTarget"><option value="">대상 없음</option>${all.map(u=>`<option value="${esc(u.id)}">${esc(u.card.name)}</option>`).join('')}</select></div>
  <div class="form-field"><label>비용으로 파괴할 내 몬스터(필요할 경우)</label><select id="abilityCostTarget"><option value="">없음</option>${me.field.filter(Boolean).map(u=>`<option value="${esc(u.id)}">${esc(u.card.name)}</option>`).join('')}</select></div>
  <div class="form-field"><label id="abilityCostLabel">비용으로 덱에 되돌릴 패(필요할 경우)</label><select id="abilityCostCard"><option value="">없음</option>${me.hand.map(u=>`<option value="${esc(u.id)}">${esc(u.card.name)}</option>`).join('')}</select></div>

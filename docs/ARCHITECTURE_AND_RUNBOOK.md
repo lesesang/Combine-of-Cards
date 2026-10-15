@@ -9,7 +9,7 @@
 - Node.js **20 이상**, GitHub Actions에서는 Node 22. 외부 npm 런타임 패키지 없이 node 표준 라이브러리 기반.
 - 기본 서버 주소: http://localhost:3000, PORT 환경 변수로 변경.
 - 데이터 위치: 기본 **.data/rooms.json**, DATA_DIR 환경 변수로 변경.
-- 룰/엔진 식별 문자열: server.mjs 안의 **1.3-ai-beta.12**. 카드/룰북 정본은 v1.3.
+- 룰/엔진 식별 문자열: server.mjs 안의 **1.3-ai-beta.13**. 카드/룰북 정본은 v1.3.
 - 테스트/빌드/운영 명령:
 
 ~~~bash
@@ -92,7 +92,7 @@ Windows PowerShell에서도 동일하게 npm 명령 사용. npm run check:covera
 
 **보고서 갱신:** `npm run check:coverage`는 AUTOMATION_COVERAGE.md / automation-audit.json / EFFECT_COVERAGE.md만 재생성한다. 수동 설명은 **AUTOMATION_NOTES.md**, 효과 명세는 **effect-coverage.json**에 쓴다. `npm run check:coverage -- --check`는 파일을 바꾸지 않고 출력 일치·원문/효과 번호·구현 경로·테스트 이름을 검증한다. CI는 이 읽기 전용 검사를 사용한다. 정본 전체 검증이나 완전 자동화 인증을 뜻하지 않는다.
 
-**Codex 현행 문서:** [CODEX_HANDOFF](CODEX_HANDOFF.md) · [CODEX_IMPLEMENTATION_PLAN](CODEX_IMPLEMENTATION_PLAN.md) · [CODEX_RULES_REFERENCE](CODEX_RULES_REFERENCE.md). 최신 163 partial/90 manual/1 basic, 72 주문 핸들러, 64 일반 주문 응답 스택, 83개 효과별 추적 등록. `1.3-ai-beta.12` 서버 버전 문자열은 이 자동화 범위 집계를 나타내지 않는다.
+**Codex 현행 문서:** [CODEX_HANDOFF](CODEX_HANDOFF.md) · [CODEX_IMPLEMENTATION_PLAN](CODEX_IMPLEMENTATION_PLAN.md) · [CODEX_RULES_REFERENCE](CODEX_RULES_REFERENCE.md). 최신 163 partial/90 manual/1 basic, 72 주문 핸들러, 64 일반 주문 응답 스택, 91개 효과별 추적 등록. `1.3-ai-beta.13` 서버 버전 문자열은 이 자동화 범위 집계를 나타내지 않는다.
 
 신규 `src/grave-abilities.mjs`는 순수 비용 검사와 묘지 회수, `src/effect-usage.mjs`는 효과 번호별 턴 제한을 담당한다. actions API의 `graveAbility`는 `sourceUnitId`, `costUnitId`, `expectedVersion`을 받는다. 본인 상태의 `graveAbilities`에 현재 합법적인 조합만 제공하고 상대 비공개 영역은 포함하지 않는다. 규칙/엔진 버전은 beta.10이며, 기존 방에 없던 `effectUsage`는 첫 사용부터 생성된다. 이전 버전에서 수행한 효과 횟수를 소급 복원하지는 않는다.
 
@@ -159,8 +159,15 @@ Windows PowerShell에서도 동일하게 npm 명령 사용. npm run check:covera
 
 다음은 미구현 개정 효과의 상태/반응 명세→공통 체인 연결→24×24 대전과 난이도 평가다. 운영 DB는 사용자 개인 **Cloudflare D1**을 목표로 한다. [D1 저장소 분리·동시성·이전 계획](CLOUDFLARE_D1_PLAN.md). D1 연결과 운영 배포는 아직 하지 않았다.
 
-## 2026-10-15 필드 효과6종 대응 / 슈 선택 소환
+## 2026-10-15 필드 효과6종 대응 / 슈 선택 소환 (PR #73 당시)
 
 기존 즉시 실행6종을 공통 대응으로 옮겨 **등록 필드 발동17종 모두 대응 연결(몬스터13·일체화4)**. 쿠로쿠로비 반환·프람덴베르카 제물과 게임3회·라이드 플레임 게임1회·매치2종 현재HP 설정·슈 비공개 선택/소환 대응을 PvP/AI/복구에 연결했다. 원문/B1 수치와 기존 확정 재정은 유지한다. [명세·재정 해석·검증·미완료](REMAINING_FIELD_RESPONSES.md).
 
-현재 **163 partial /90 manual /1 basic, 주문 핸들러72·대응64, 효과 증거83건(79장), 완전 인증0**. 신규 카드 완성 인증이 아니라 기존 부분 효과의 비용·무효화·소환 처리 보완이다. 일반 체인 삽입/전체 유발·일체화 진입 이력·B1 미구현 조항은 남는다. 다음은 원소 반격/지연과 소환·파괴·묘지 사건 묶음이다. 개인 Cloudflare D1 저장소 분리/이전은 별도 계획을 유지하며 아직 연결/배포하지 않았다.
+당시 **163 partial /90 manual /1 basic, 주문 핸들러72·대응64, 효과 증거83건(79장), 완전 인증0**. 신규 카드 완성 인증이 아니라 기존 부분 효과의 비용·무효화·소환 처리 보완이다. 일반 체인 삽입/전체 유발·일체화 진입 이력·B1 미구현 조항은 남는다. 다음은 원소 반격/지연과 소환·파괴·묘지 사건 묶음이다. 개인 Cloudflare D1 저장소 분리/이전은 별도 계획을 유지하며 아직 연결/배포하지 않았다.
+
+
+## 2026-10-15 원소 드래곤 8개 효과 조항 묶음
+
+드래곤4종의 규칙상 이름을 정확한 주문/웨이크업 소재 조건에 연결하고, 오션·테라2번을 선언→상대 대응→LIFO에 구현했다. 테라 체류/실제 턴 시작을 JSON으로 기록한다. 플레임·볼케이노 추가 공격은 현재 실제ATK·무효·다른 추가 공격과 합산·UID/효과2 횟수·영역 이탈 초기화를 보완했다. 파괴 면역 웨이크업 비용을 사전 거부한다. 원문/B1 수치·기존 확정 재정은 변경하지 않았다. [명세·개발자 판단·검증·잔여](ELEMENTAL_DRAGON_EFFECTS.md).
+
+최신 **163 partial /90 manual /1 basic, 등록 필드19종/대응19종(몬스터15·일체화4), 효과 증거91건(82장), 완전 인증0**. 주문72/대응64·엑스트라21 유지. 다음은 워터 공격 선언 반격·랜드 턴 시작 교환·인피니티 제외/선택과 공통 유발 대응이다. 플레임/볼케이노 전투 유발 독립 대응·볼케이노 전체 효과 처치는 남는다. 개인 Cloudflare D1은 계획만 있으며 연결/운영 배포하지 않았다.

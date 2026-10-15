@@ -16,8 +16,8 @@ function setup(deck='13',opponent='03'){
  return {r,take,use};
 }
 test('17 field ability handlers are registered distinctly',()=>{
- assert.equal(FIELD_ABILITY_IDS.length,17);
- assert.equal(new Set(FIELD_ABILITY_IDS).size,17);
+ assert.equal(FIELD_ABILITY_IDS.length,19);
+ assert.equal(new Set(FIELD_ABILITY_IDS).size,19);
 });
 test('shaman talisman searches anywhere exactly once per turn',()=>{
  const {r,take,use}=setup('03');

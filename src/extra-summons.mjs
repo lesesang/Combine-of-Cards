@@ -3,6 +3,7 @@
  * Verifies summon eligibility only; triggered and continuous effects have separate support.
  */
 import {FUSION_UP_ID,requireUnusedEffect} from './effect-usage.mjs';
+import {elementalFormId} from './elemental-dragons.mjs';
 const id=(...ids)=>ids.map(value=>({kind:'id',value}));
 export const EXTRA_RECIPES=Object.freeze({
  'COC-12-011':{method:'hero',parts:id('COC-12-001','COC-12-002')},
@@ -33,7 +34,7 @@ function reject(message){const e=new Error(message);e.status=409;throw e}
 function matches(card,part){
  if(!card||!card.type.includes('몬스터'))return false;
  switch(part.kind){
- case 'id':return card.id===part.value;
+ case 'id':return card.id===part.value||elementalFormId(card.id)===part.value;
  case 'prefix':return card.name.startsWith(part.value);
  case 'attribute':return card.attribute===part.value;
  case 'family':return part.value.some(name=>card.name.includes(name));
@@ -63,6 +64,7 @@ export function validateExtraSummon({room,who,extraUnitId,materials,spellUnitId,
  const materialCards=materials.map(unitId=>{
   const zone=player.field.includes(unitId)?'field':player.hand.includes(unitId)?'hand':null;
   if(!zone||(fieldOnly&&zone!=='field'))reject('소재를 자신의 올바른 패·필드 영역에서 선택해야 합니다.');
+  if(recipe.method==='wakeup'&&room.units[unitId].effectDestructionImmune)reject('파괴 면역인 몬스터는 웨이크업 파괴 비용으로 지불할 수 없습니다.');
   const card=cards.get(room.units[unitId]?.cardId);
   if(!card)reject('존재하지 않는 소재 카드입니다.');
   return card;

@@ -190,3 +190,10 @@ test('recruit UI: only controller sees choices, posts selected UID and waits on 
  t.run("state.game.pendingRecruitChoice=null;state.game.pendingExtraSummon={who:0,awaiting:1,method:'recruit',card:{name:'크로와'},materialCount:0}");
  assert.match(t.run('battlePending(state.game)'),/슈의 효과/);assert.match(t.run('battlePending(state.game)'),/원래 영역 유지/);
 });
+
+test('elemental dragon UI: field selection labels effect two and posts target with expected version',async()=>{
+ const t=ui();t.run("state.game.automation={fieldAbilityIds:['COC-32-012'],fieldAbilityEffects:{'COC-32-012':2}};state.game.players[0].field[0].card.id='COC-32-012';state.game.players[0].field[0].card.name='오션';openFieldAbility()");
+ assert.match(t.node('modalRoot').innerHTML,/효과 2/);
+ t.node('abilityTarget').value='enemy';await t.node('abilitySubmit').onclick();
+ assert.deepEqual(t.requests[0].body,{type:'ability',sourceUnitId:'falcon',target:{type:'unit',id:'enemy'},expectedVersion:7});
+});
