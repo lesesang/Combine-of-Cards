@@ -180,3 +180,13 @@ test('elemental UI: opponent-turn activation private selection and cost-trigger 
  t.run("state.game.pendingElementalChoice=null;state.game.pendingAbility={stage:'cost-triggers'};state.game.pendingTriggerOrder={awaiting:0,options:[{key:'a',title:'회복',priority:0}]}");
  assert.match(t.run('battlePending(state.game)'),/triggerOrderSubmit/);assert.doesNotMatch(t.run('battlePending(state.game)'),/abilityPass/);
 });
+
+test('recruit UI: only controller sees choices, posts selected UID and waits on the summon response',async()=>{
+ const t=ui();t.run("state.game.pendingRecruitChoice={who:0,choices:[{id:'croix',zone:'grave',card:{name:'크로와'}}]}");
+ assert.match(t.run('battlePending(state.game)'),/croix/);assert.equal(t.run('battleControls(state.game)'),'');
+ t.node('recruitChoice').value='croix';await t.listeners.click({target:{closest:()=>({id:'recruitSubmit',dataset:{}})}});
+ assert.deepEqual(t.requests[0].body,{type:'recruitChoice',unitId:'croix',expectedVersion:7});
+ t.run('state.game.pendingRecruitChoice={who:1}');assert.doesNotMatch(t.run('battlePending(state.game)'),/croix|recruitSubmit/);
+ t.run("state.game.pendingRecruitChoice=null;state.game.pendingExtraSummon={who:0,awaiting:1,method:'recruit',card:{name:'크로와'},materialCount:0}");
+ assert.match(t.run('battlePending(state.game)'),/슈의 효과/);assert.match(t.run('battlePending(state.game)'),/원래 영역 유지/);
+});

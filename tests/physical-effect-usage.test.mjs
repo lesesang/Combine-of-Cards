@@ -17,7 +17,7 @@ test('physical effect usage: identical card copies each activate while one UID c
 test('physical effect usage: different cards with the same text and identical legacy field cards are independent',()=>{
  const f=fieldAbilityFixture(I,'COC-24-003');f.r.units[f.source].hp=100;
  const same=f.add('COC-24-003',0,'field'),other=f.add('COC-26-003',0,'field');
- for(const sourceUnitId of [f.source,same,other])I.apply(f.r,0,'ability',{sourceUnitId,target:{id:f.source}});
+ for(const sourceUnitId of [f.source,same,other]){I.apply(f.r,0,'ability',{sourceUnitId,target:{id:f.source}});I.apply(f.r,1,'abilityResponse',{choice:'pass'});}
  for(const sourceUnitId of [f.source,same,other])assert.throws(()=>I.apply(f.r,0,'ability',{sourceUnitId,target:{id:f.source}}),/이번 턴/);
 });
 test('physical effect usage: two Fusion Up copies have separate fusion and grave recovery limits',()=>{

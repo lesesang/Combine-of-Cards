@@ -1,13 +1,19 @@
+import {recruitChoices,beginRecruitChoice} from './recruit-summons.mjs';
 import {balanceValues as B} from './balance-values.mjs';
 import {ELEMENTAL_MAGICIAN_IDS} from './effect-usage.mjs';
 import {isElemental,prepareElemental,beginElementalChoice} from './elemental-replacement.mjs';
 import {requireUnusedEffect,markEffectUsed} from './effect-usage.mjs';
 import {swordActualAttack} from './life-eating-sword.mjs';
 
-// Audited activated effects only. Monster triggers and the other six legacy
-// handlers are not implicitly enrolled in this response window.
+// Audited activated effects only; unrelated summon/death triggers remain partial.
 export const FIELD_EFFECT_RULES=Object.freeze({
  ...Object.fromEntries(ELEMENTAL_MAGICIAN_IDS.map(id=>[id,{zone:'field',sourceType:'monster',oncePerTurn:true,selfCost:true}])),
+ 'COC-08-003':{zone:'field',sourceType:'monster',oncePerTurn:true},
+ 'COC-10-005':{zone:'integration',sourceType:'integration',oncePerTurn:true,costTriggers:true},
+ 'COC-23-002':{zone:'field',sourceType:'monster',oncePerTurn:true},
+ 'COC-24-003':{zone:'field',sourceType:'monster',oncePerTurn:true},
+ 'COC-26-003':{zone:'field',sourceType:'monster',oncePerTurn:true},
+ 'COC-31-004':{zone:'integration',sourceType:'integration',oncePerTurn:true},
  'COC-03-002':{zone:'field',sourceType:'monster',oncePerTurn:true},
  'COC-05-004':{zone:'field',sourceType:'monster',oncePerTurn:true},
  'COC-12-013':{zone:'field',sourceType:'monster',oncePerTurn:true},
@@ -30,14 +36,34 @@ export function prepareFieldEffect(r,who,body,H){
  if(rule.oncePerTurn)requireUnusedEffect(r,who,sourceId,1);
  const plan={cardId:u.cardId,sourceId,sourceZone:z.zone,sourceRevision:revision(u,z.zone)};
  if(isElemental(u.cardId)){prepareElemental(r,who,sourceId,H);return plan;}
+ if(u.cardId==='COC-08-003'){
+  if(!p.hand.includes(body.costCardId))invalid(H,'패에서 덱으로 되돌릴 카드를 골라야 합니다.');
+  plan.costCardId=body.costCardId;return plan;
+ }
+ if(u.cardId==='COC-31-004'){
+  if(!p.field.includes(null)||!recruitChoices(r,who).length)invalid(H,'빈 필드와 자신의 패·덱·묘지의 크로와가 필요합니다.');
+  return plan;
+ }
+ if(u.cardId==='COC-23-002'){
+  if(u.abilityGameUsed)invalid(H,'이 효과의 게임당 사용 횟수를 모두 사용했습니다.');
+  if(!p.integration||r.units[p.integration].cardId!=='COC-23-001')invalid(H,'라이드 위저드와 일체화해야 합니다.');
+  plan.integrationId=p.integration;plan.integrationRevision=r.units[p.integration].integrationRevision||0;return plan;
+ }
+ if(u.cardId==='COC-10-005'){
+  if((u.abilityGameCount||0)>=3)invalid(H,'이번 게임의 최대 3회 사용 한도를 초과했습니다.');
+  const costId=body.costTarget?.id,cz=costId&&H.zone(r,costId);
+  if(cz?.zone!=='field'||cz.player!==who||r.units[costId].effectDestructionImmune)invalid(H,'파괴 가능한 자신의 필드 몬스터를 비용으로 선택하세요.');
+  plan.costUnitId=costId;
+ }
  if(u.cardId==='COC-03-002'){
   plan.searchCardId=p.integration&&r.units[p.integration]?.cardId==='COC-03-001'?'COC-03-003':'COC-03-001';
   if(!findSearch(r,who,plan.searchCardId))invalid(H,'대상 카드가 자신의 영역에 없습니다.');
  }else{
-  const targetId=body.target?.id,tz=targetId&&H.zone(r,targetId),own=u.cardId==='COC-22-010';
-  if(!tz||tz.zone!=='field'||tz.player!==(own?who:1-who)||targetId===sourceId)invalid(H,'올바른 필드 대상을 선택해야 합니다.');
+  const targetId=body.target?.id,tz=targetId&&H.zone(r,targetId),own=['COC-22-010','COC-24-003','COC-26-003'].includes(u.cardId);
+  if(!tz||tz.zone!=='field'||tz.player!==(own?who:1-who)||(targetId===sourceId&&!['COC-24-003','COC-26-003'].includes(u.cardId)))invalid(H,'올바른 필드 대상을 선택해야 합니다.');
   Object.assign(plan,{targetId,targetController:tz.player,targetRevision:r.units[targetId].fieldRevision||0});
  }
+ if(['COC-24-003','COC-26-003'].includes(u.cardId)&&!Number.isFinite(r.units[plan.targetId].hp))invalid(H,'대상에게 현재 체력이 필요합니다.');
  if(captureIds.has(u.cardId)&&!p.field.includes(null))invalid(H,'내 필드에 빈 자리가 필요합니다.');
  if(u.cardId==='COC-12-013'){
   if(!p.hand.includes(body.costCardId))invalid(H,'버릴 자신의 패 1장을 선택해야 합니다.');
@@ -53,6 +79,12 @@ export function payFieldEffect(r,who,plan,H){
   if(H.zone(r,plan.sourceId)?.zone!=='grave')invalid(H,'자기 파괴 비용 지불에 실패했습니다.');
   if(r.turn!==who&&r.pendingAttack?.target?.id===plan.sourceId){r.pendingAttack.stage='retarget';H.log(r,'attack','원소 교체로 공격 대상이 사라져 재선택이 필요합니다.');}
  }
+ if(plan.cardId==='COC-08-003')H.move(r,plan.costCardId,'deck',r.units[plan.costCardId].owner);
+ if(plan.cardId==='COC-10-005'){
+  H.destroy(r,plan.costUnitId,{cause:'cost',sourceId:plan.sourceId});
+  u.abilityGameCount=(u.abilityGameCount||0)+1;
+ }
+ if(plan.cardId==='COC-23-002')u.abilityGameUsed=true;
  if(plan.cardId==='COC-12-013'){
   H.move(r,plan.costCardId,'grave',r.units[plan.costCardId].owner);
   H.log(r,'cost',`${p.label}: 크래쉬볼티지 효과 비용으로 ${H.name(r,plan.costCardId)} 1장을 버렸습니다.`);
@@ -73,6 +105,19 @@ export function resolveFieldEffect(r,who,plan,H){
  const p=r.players[who],c=plan.cardId,t=plan.targetId;
  if(captureIds.has(c)&&!p.field.includes(null))return fizzle('필드 빈 자리 소실');
  switch(c){
+ case 'COC-08-003':H.draw(r,who);break;
+ case 'COC-10-005':H.destroy(r,t,{sourceId:plan.sourceId});break;
+ case 'COC-23-002':{
+  const iz=H.zone(r,plan.integrationId),iu=r.units[plan.integrationId];
+  if(iz?.zone!=='integration'||iz.player!==who||iu.cardId!=='COC-23-001'||(iu.integrationRevision||0)!==plan.integrationRevision)return fizzle('라이드 위저드 이탈/진화/재진입');
+  iu.atk+=50;break;
+ }
+ case 'COC-24-003':case 'COC-26-003':{
+  const target=r.units[t];if(!Number.isFinite(target.hp))return fizzle('현재 체력 소실');
+  target.atk=Math.max(0,Math.floor(target.hp));if(target.atk===0)H.destroy(r,t,{sourceId:plan.sourceId});break;
+ }
+ case 'COC-31-004':return beginRecruitChoice(r,who,H);
+
  case 'COC-03-002':{
   const id=findSearch(r,who,plan.searchCardId);if(!id)return fizzle('검색 카드 소실');H.move(r,id,'hand',who);break;
  }

@@ -9,7 +9,7 @@ export function queueFieldAbility(r,who,body,H){
  if(r.effectStack?.length||r.pendingTriggerOrder||r.pendingAbility||r.pendingSpell||r.pendingExtraSummon)H.fail(409,'다른 효과 체인이 해결되기 전에는 발동할 수 없습니다.');
  const plan=prepareFieldEffect(r,who,body,H);
  return atomic(r,()=>{
-  if(FIELD_EFFECT_RULES[plan.cardId].selfCost){
+  if(FIELD_EFFECT_RULES[plan.cardId].selfCost||FIELD_EFFECT_RULES[plan.cardId].costTriggers){
    payFieldEffect(r,who,plan,H);
    r.pendingAbility={who,sourceId:plan.sourceId,cardId:plan.cardId,stage:'cost-triggers',plan};
    resumeFieldAbility(r,H);
@@ -24,7 +24,7 @@ export function queueFieldAbility(r,who,body,H){
 export function resumeFieldAbility(r,H){
  const p=r.pendingAbility;if(p?.stage!=='cost-triggers'||r.pendingTriggerOrder)return;
  if(r.status!=='active'){r.pendingAbility=null;return;}
- const effect=declareEffect(r,{effectId:'field-ability-resolution',owner:p.who,sourceId:p.sourceId,sourceZone:'field',exception:'self-cost',payload:p.plan});
+ const effect=declareEffect(r,{effectId:'field-ability-resolution',owner:p.who,sourceId:p.sourceId,sourceZone:p.plan.sourceZone,...(FIELD_EFFECT_RULES[p.cardId].selfCost?{exception:'self-cost'}:{}),payload:p.plan});
  p.sequence=effect.sequence;p.stage='response';delete p.plan;
 }
 export function finishFieldAbility(r,H){
