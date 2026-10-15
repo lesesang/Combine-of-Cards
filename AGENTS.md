@@ -1,5 +1,11 @@
 # Repository agent instructions — Combine of Cards
 
+## 사용자 변경: 구현 우선, 일괄 검증은 후속 단계 (2026-10-15)
+
+사용자가 “지금부터는 일단 자동화만 해줘. 테스트는 나중에 한 번에”라고 지시했다. 현재 구현 단계에서는 테스트/CI를 실행하지 않고 별도 브랜치·draft PR에 모은다. 커밋의 `[skip ci]`로 자동 CI 실행도 보류하며 테스트 자체를 삭제하거나 약화하지 않는다. 기존의 최종 검증/병합 절차는 후속 일괄 검증 단계에 적용한다. 미검증 변경을 완료 인증/CI 성공으로 표시하거나 main에 병합·배포하지 않는다. 이 최신 사용자 요청이 아래 과거 작업별 즉시 테스트 지침보다 우선한다.
+
+
+
 This file is for a new coding assistant taking over the repository after the 2026-10-13 ChatGPT conversation.
 
 ## Read these before changing source

@@ -14,13 +14,13 @@ export function hasElementalForm(room,ids,formId){
 // Count actual controlled turn starts, not elapsed global turns or original
 // owner turns. A control transfer preserves residence; leaving resets it.
 export function moveDragonResidence(unit,from,to){
- if(unit.cardId!=='COC-32-014')return;
+ if(!['COC-32-014','COC-32-004'].includes(unit.cardId))return;
  if(to!=='field'){delete unit.dragonResidence;return;}
  if(from?.zone!=='field')unit.dragonResidence={ownTurnStarts:0,lastTurnNumber:null};
 }
 export function beginDragonTurn(room,who){
  for(const id of room.players[who].field.filter(Boolean)){
-  const u=room.units[id];if(u.cardId!=='COC-32-014')continue;
+  const u=room.units[id];if(!['COC-32-014','COC-32-004'].includes(u.cardId))continue;
   // Legacy saves cannot prove unrecorded residence. Start counting now.
   u.dragonResidence??={ownTurnStarts:0,lastTurnNumber:null};
   if(u.dragonResidence.lastTurnNumber===room.turnNumber)continue;

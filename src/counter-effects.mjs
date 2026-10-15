@@ -1,5 +1,6 @@
 import {FIELD_EFFECT_RULES} from './field-ability-effects.mjs';
 import {declareEffect} from './effect-runtime.mjs';
+import {TRIGGER_RULES} from './triggered-effects.mjs';
 
 export const COUNTER_RULES=Object.freeze({
  'COC-14-001':{zone:'integration',kinds:['spell','summon']},
@@ -11,13 +12,14 @@ export const COUNTER_IDS=Object.freeze(Object.keys(COUNTER_RULES));
 export const counterEffectIds=new Set(['storm-spell-counter','storm-summon-counter','card-counter']);
 export function currentCounterTarget(room,pending,kind){
  if(pending.counter)return room.effectStack?.find(e=>e.sequence===pending.counter.sequence);
- if(kind==='ability')return room.effectStack?.find(e=>e.sequence===pending.sequence&&e.effectId==='field-ability-resolution');
+ if(kind==='ability')return room.effectStack?.find(e=>e.sequence===pending.sequence&&['field-ability-resolution','monster-trigger-resolution'].includes(e.effectId));
  if(kind==='spell')return room.effectStack?.find(e=>e.effectId==='auto-spell-resolution'&&e.sourceId===pending.sourceId&&e.owner===pending.who);
  return room.effectStack?.find(e=>e.sequence===pending.sequence&&e.effectId==='extra-summon-resolution')||{owner:pending.who,effectId:'extra-summon-resolution'};
 }
 function targetKind(effect){
  if(effect?.effectId==='auto-spell-resolution')return 'spell';
  if(effect?.effectId==='extra-summon-resolution')return 'summon';
+ if(effect?.effectId==='monster-trigger-resolution'&&TRIGGER_RULES[effect.payload?.cardId])return 'monster-effect';
  if(effect?.effectId==='field-ability-resolution')return FIELD_EFFECT_RULES[effect.payload?.cardId]?.sourceType==='monster'?'monster-effect':'integration-effect';
  // Classify the declared source snapshot, not its current zone or a generic counter ID.
  // Only registered monster effects are supported; other monster triggers need integration.
