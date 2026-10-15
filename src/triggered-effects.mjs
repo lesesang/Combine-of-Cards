@@ -9,6 +9,8 @@ import {beginDeckSearch,eligibleSearchIds} from './deck-search.mjs';
 export const TRIGGER_RULES=Object.freeze({
  ...Object.fromEntries(Object.entries(SUMMON_TRIGGER_RULES).map(([id,rule])=>[id,{effectNumber:1,event:'summoned',...rule}])),
  'COC-06-001':{effectNumber:1,event:'own-turn-start',sourceZone:'integration'},
+ 'COC-03-001':{effectNumber:1,event:'grave-effect-activation',sourceZone:'integration',repeatPerEvent:true},
+ 'COC-03-004':{effectNumber:1,event:'grave-effect-activation',sourceZone:'integration',repeatPerEvent:true,target:'optional-destroy-board'},
  'COC-08-001':{effectNumber:1,event:'summoned',target:'return-field'},
  'COC-08-008':{effectNumber:1,event:'summoned',target:'capture-enemy'},
  'COC-23-005':{effectNumber:1,event:'summoned',target:'banish-enemy'},
@@ -38,6 +40,45 @@ export function recordSummonTrigger(r,who,id,H){
  }else settleSummonTrigger(r,trigger(r,who,id),H);
  return true;
 }
+// Called by an actual effect declaration/committed grave choice, never by the
+// generic move helper. Reload, manual movement and discarding are not triggers.
+export function recordGraveEffectActivation(r,{eventKey,cardId},H){
+ if(r.status!=='active')return;
+ r.graveEffectSequence=(r.graveEffectSequence||0)+1;
+ const key=eventKey||`grave-event-${r.graveEffectSequence}`;
+ r.graveEffectSeen??=[];if(r.graveEffectSeen.includes(key))return;
+ r.graveEffectSeen.push(key);if(r.graveEffectSeen.length>256)r.graveEffectSeen.shift();
+ for(const [who,p] of r.players.entries()){
+  const id=p.integration,u=id&&r.units[id];
+  if(!u||u.effectsNegated||!['COC-03-001','COC-03-004'].includes(u.cardId))continue;
+  const effect=trigger(r,who,id,{eventTurn:r.turnNumber,graveEvent:key,activatedCardId:cardId||null});
+  effect.key=`grave-${r.graveEffectSequence}-${id}`;
+  (r.deferredMonsterTriggers??=[]).push(effect);
+ }
+}
+const RESPONSE_FRAME_KEYS=['pendingAbility','pendingSpell','pendingExtraSummon','pendingMonsterTriggers'];
+const responseChoices=r=>['pendingTriggerOrder','pendingTriggerTargetChoice','pendingInfinityChoice','pendingDeckSearch','pendingElementalChoice','pendingRecruitChoice'].some(key=>r[key]);
+export function suspendResponseForGraveTriggers(r,H){
+ if(r.status!=='active'||responseChoices(r))return;
+ const root=r.pendingAbility||r.pendingSpell||r.pendingExtraSummon;
+ if(!root||root.stage==='cost-triggers')return;
+ const effects=(r.deferredMonsterTriggers||[]).filter(e=>e.payload.graveEvent&&e.payload.eventTurn===r.turnNumber);
+ if(!effects.length)return;
+ r.suspendedResponses??=[];
+ if(r.suspendedResponses.length>=32)throw new Error('nested response safety budget reached');
+ const frame={effectStack:r.effectStack||[]};
+ for(const key of RESPONSE_FRAME_KEYS){frame[key]=r[key]||null;r[key]=null;}
+ r.effectStack=[];r.suspendedResponses.push(frame);
+ r.deferredMonsterTriggers=r.deferredMonsterTriggers.filter(e=>!effects.includes(e));
+ queueMonsterTriggers(r,effects,H);
+}
+export function resumeSuspendedResponse(r){
+ if(r.status!=='active'){r.suspendedResponses=[];return;}
+ if(!r.suspendedResponses?.length||RESPONSE_FRAME_KEYS.some(key=>r[key])||responseChoices(r)||r.effectStack?.length||r.deferredMonsterTriggers?.length)return;
+ const frame=r.suspendedResponses.pop();
+ for(const key of RESPONSE_FRAME_KEYS)r[key]=frame[key];
+ r.effectStack=frame.effectStack;
+}
 export function recordDestroyedTrigger(r,id,{sourceId,sourcePlayer},H){
  const u=r.units[id],z=H.zone(r,id);
  if(u?.cardId!=='COC-26-004'||u.effectsNegated||z?.zone!=='field'||effectUsedThisTurn(r,z.player,id,1))return;
@@ -53,6 +94,7 @@ export function recordDestroyedTrigger(r,id,{sourceId,sourcePlayer},H){
 }
 function triggerTargetChoices(r,p,H){
  const kind=TRIGGER_RULES[p.cardId]?.target;
+ if(kind==='optional-destroy-board')return r.players.flatMap(pp=>[...pp.field,pp.integration].filter(Boolean));
  if(kind==='capture-enemy'&&!r.players[p.who].field.includes(null))return [];
  if(kind==='destroy-lower-printed'){
   const attack=swordActualAttack(r,p.sourceId,{getZone:(room,id)=>H.zone(room,id)});
@@ -65,18 +107,21 @@ function triggerTargetChoices(r,p,H){
 }
 export function triggerTargetView(r,viewer,H){
  const p=r.pendingTriggerTargetChoice;if(!p)return null;
- return {who:p.who,name:H.cards.get(p.cardId)?.name,...(viewer===p.who?{choices:triggerTargetChoices(r,p,H).map(id=>({id,card:H.cards.get(r.units[id].cardId)||r.units[id].tokenCard}))}:{})};
+ return {who:p.who,name:H.cards.get(p.cardId)?.name,optional:TRIGGER_RULES[p.cardId]?.target==='optional-destroy-board',...(viewer===p.who?{choices:triggerTargetChoices(r,p,H).map(id=>({id,card:H.cards.get(r.units[id].cardId)||r.units[id].tokenCard}))}:{})};
 }
 export function chooseTriggerTarget(r,who,id,H){
  const p=r.pendingTriggerTargetChoice;
- if(r.status!=='active'||!p||p.who!==who)H.fail(409,'소환 효과의 대상 선택권자가 아닙니다.');
+ if(r.status!=='active'||!p||p.who!==who)H.fail(409,'유발 효과의 대상 선택권자가 아닙니다.');
+ if(id===null&&TRIGGER_RULES[p.cardId]?.target==='optional-destroy-board'){r.pendingTriggerTargetChoice=null;H.log(r,'effect','스트로베리아: 선택 파괴를 사용하지 않음');return;}
  const choices=triggerTargetChoices(r,p,H);
  if(!choices.length){r.pendingTriggerTargetChoice=null;return;}
- if(!choices.includes(id))H.fail(409,'현재 선택 가능한 필드 몬스터를 지정하세요.');
+ if(!choices.includes(id))H.fail(409,'현재 선택 가능한 필드 카드를 지정하세요.');
  const u=r.units[p.sourceId],z=H.zone(r,p.sourceId);
  r.pendingTriggerTargetChoice=null;
- if(!u||u.cardId!==p.cardId||u.effectsNegated||z?.zone!=='field'||z.player!==who||(u.fieldRevision||0)!==p.sourceRevision){H.log(r,'effect','소환 효과의 소스 상태 변경으로 불발');return;}
+ const sourceZone=TRIGGER_RULES[p.cardId].sourceZone||'field';
+ if(!u||u.cardId!==p.cardId||u.effectsNegated||z?.zone!==sourceZone||z.player!==who||((sourceZone==='integration'?u.integrationRevision:u.fieldRevision)||0)!==p.sourceRevision){H.log(r,'effect','유발 효과의 소스 상태 변경으로 불발');return;}
  const kind=TRIGGER_RULES[p.cardId].target;
+ if(kind==='optional-destroy-board'){H.destroy(r,id,{sourceId:p.sourceId});H.outcome(r);return;}
  if(kind==='destroy-lower-printed'){H.destroy(r,id,{sourceId:p.sourceId});H.outcome(r);return;}
  if(kind==='coin-weaken-enemy'){
   // Choose before rolling; neither client nor AI may see the outcome first.
@@ -111,9 +156,9 @@ export function drainDeferredMonsterTriggers(r,H){
  // Destruction can occur within a spell, paid cost, summon, or heal group.
  // Collect there, declare only after that complete chain and its choices.
  if(r.pendingMonsterTriggers||r.pendingAbility||r.pendingSpell||r.pendingExtraSummon||r.pendingTriggerOrder||r.pendingTriggerTargetChoice||r.pendingInfinityChoice||r.pendingElementalChoice||r.pendingRecruitChoice||r.pendingDeckSearch||r.effectStack?.length)return;
- const effects=(r.deferredMonsterTriggers||[]).filter(e=>r.units[e.sourceId]?.cardId===e.payload.cardId&&e.payload.eventTurn===r.turnNumber&&!effectUsedThisTurn(r,e.owner,e.sourceId,TRIGGER_RULES[e.payload.cardId].effectNumber));
- if(effects.length)queueMonsterTriggers(r,effects,H);
+ const effects=(r.deferredMonsterTriggers||[]).filter(e=>r.units[e.sourceId]?.cardId===e.payload.cardId&&e.payload.eventTurn===r.turnNumber&&(TRIGGER_RULES[e.payload.cardId].repeatPerEvent||!effectUsedThisTurn(r,e.owner,e.sourceId,TRIGGER_RULES[e.payload.cardId].effectNumber)));
  r.deferredMonsterTriggers=[];
+ if(effects.length)queueMonsterTriggers(r,effects,H);
 }
 export function attackDeclarationTriggers(r,attackerId,target,H,{retarget=false}={}){
  const source=r.units[attackerId],who=r.turn,group=[];
@@ -145,7 +190,11 @@ export function queueMonsterTriggers(r,effects,H){
  if(!effects.length)return;
  if(r.pendingMonsterTriggers||r.pendingAbility||r.pendingSpell||r.pendingExtraSummon)throw new Error('another response chain is pending');
  beginAutomaticTriggerOrder(r,effects.map(e=>({...e,title:`${H.name(r,e.sourceId)} · 효과 ${TRIGGER_RULES[e.payload.cardId].effectNumber}`})),r.turn);
- for(const e of effects){markEffectUsed(r,e.owner,e.sourceId,TRIGGER_RULES[e.payload.cardId].effectNumber);}
+ for(const e of effects){
+  if(!TRIGGER_RULES[e.payload.cardId].repeatPerEvent)markEffectUsed(r,e.owner,e.sourceId,TRIGGER_RULES[e.payload.cardId].effectNumber);
+  if(e.payload.cardId==='COC-06-001'||e.payload.cardId==='COC-32-015'&&r.players[1-e.owner].grave.length)
+   H.graveActivation?.(r,{eventKey:`trigger-grave-${e.key}`,cardId:e.payload.cardId});
+ }
  r.pendingMonsterTriggers={stage:'ordering',queue:[]};
  resumeMonsterTriggers(r,H);
 }
@@ -180,6 +229,7 @@ export function resolveMonsterTrigger(r,e,H){
  if(p.cardId==='COC-06-001'){
   beginDeckSearch(r,e.owner,p.cardId,H.cards,H,{sourceId:e.sourceId,sourceZone,sourceRevision:p.sourceRevision});return;
  }
+ if(p.cardId==='COC-03-001'){u.atk+=50;H.log(r,'effect','베리아: 묘지 이동 효과의 발동으로 공격력 +50');return;}
  if(TRIGGER_RULES[p.cardId].target){
   const choice={who:e.owner,sourceId:e.sourceId,cardId:p.cardId,sourceRevision:p.sourceRevision};
   if(triggerTargetChoices(r,choice,H).length)r.pendingTriggerTargetChoice=choice;

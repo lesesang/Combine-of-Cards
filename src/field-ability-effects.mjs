@@ -46,7 +46,7 @@ export function prepareFieldEffect(r,who,body,H){
  if(isElemental(u.cardId)){prepareElemental(r,who,sourceId,H);return plan;}
  if(u.cardId==='COC-08-011'){
   if(!batchSummonCount(r,who,u.cardId,H))invalid(H,'부활 가능한 파괴된 츠쿠모가미와 빈 필드가 필요합니다.');
-  return plan;
+  plan.graveActivation=true;return plan;
  }
  if(u.cardId==='COC-20-008'){
   if(!Number.isInteger(body.discardCount)||body.discardCount<1||body.discardCount>Math.min(4,p.deck.length))invalid(H,'덱에서 버릴 카드 수를 1~4장 중 선택하세요.');
@@ -82,7 +82,9 @@ export function prepareFieldEffect(r,who,body,H){
  }
  if(u.cardId==='COC-03-002'){
   plan.searchCardId=p.integration&&r.units[p.integration]?.cardId==='COC-03-001'?'COC-03-003':'COC-03-001';
-  if(!findSearch(r,who,plan.searchCardId))invalid(H,'대상 카드가 자신의 영역에 없습니다.');
+  const selected=findSearch(r,who,plan.searchCardId);
+  if(!selected)invalid(H,'대상 카드가 자신의 영역에 없습니다.');
+  plan.graveActivation=H.zone(r,selected)?.zone==='grave';
  }else{
   const targetId=body.target?.id,tz=targetId&&H.zone(r,targetId),own=['COC-22-010','COC-24-003','COC-26-003'].includes(u.cardId);
   if(!tz||tz.zone!=='field'||tz.player!==(own?who:1-who)||(targetId===sourceId&&!['COC-24-003','COC-26-003'].includes(u.cardId)))invalid(H,'올바른 필드 대상을 선택해야 합니다.');

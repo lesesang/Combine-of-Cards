@@ -40,6 +40,7 @@ export function chooseElemental(r,who,id,H){
  const choices=elementalChoices(r,who,H);
  if(!choices.length||!r.players[who].field.includes(null)){r.pendingElementalChoice=null;H.log(r,'effect','교체 소환 대상 또는 빈 자리 소실 (비용 반환 없음)');return;}
  const choice=choices.find(c=>c.id===id);if(!choice)deny(H,'자신의 패·덱·묘지에서 소환 가능한 원소의 마법사를 선택하세요.');
+ if(choice.zone==='grave')H.graveActivation?.(r,{cardId:r.units[p.sourceId]?.cardId});
  H.queueEffectSummon(r,{who,extraUnitId:id,originZone:choice.zone,recipe:{method:'elemental',materials:[]},turnNumber:r.turnNumber});
  r.pendingElementalChoice=null;
 }

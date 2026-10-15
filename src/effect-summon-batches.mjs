@@ -36,6 +36,7 @@ export function chooseSummonBatch(r,who,ids,H){
  const choices=batchSummonChoices(r,who,p.cardId,H),count=batchSummonCount(r,who,p.cardId,H);
  if(!Array.isArray(ids)||ids.length!==count||new Set(ids).size!==count||ids.some(id=>!choices.some(c=>c.id===id)))H.fail(409,`서로 다른 소환 후보 ${count}장을 선택하세요.`);
  p.queue=ids.map(id=>choices.find(c=>c.id===id));p.stage='summoning';
+ if(['COC-20-010','COC-23-010'].includes(p.cardId)&&p.queue.some(c=>c.zone==='grave'))H.graveActivation?.(r,{cardId:p.cardId});
 }
 export function resumeSummonBatch(r,H){
  const p=r.pendingSummonBatch;if(!p||p.stage==='choice')return;

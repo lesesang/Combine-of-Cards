@@ -3,6 +3,8 @@ import {FIELD_EFFECT_RULES,prepareFieldEffect,payFieldEffect,resolveFieldEffect}
 import {availableCounters,declareCardCounter,resolveCardCounter,counterEffectIds} from './counter-effects.mjs';
 import {resolveMonsterTrigger} from './triggered-effects.mjs';
 import {settleSummonTrigger} from './summon-trigger-effects.mjs';
+import {resolveSpellReuse} from './spell-reuse.mjs';
+import {resolveGraveAbility} from './grave-abilities.mjs';
 export const abilityResponsePlayer=r=>r.pendingAbility&&r.pendingAbility.stage!=='cost-triggers'?(r.pendingAbility.awaiting??1-r.pendingAbility.who):null;
 export const legalAbilityCounters=(r,who)=>r.pendingAbility?.stage==='cost-triggers'?[]:availableCounters(r,who,r.pendingAbility,'ability');
 export const declareAbilityCounter=(r,who,id)=>declareCardCounter(r,who,id,r.pendingAbility,'ability');
@@ -21,6 +23,7 @@ export function queueFieldAbility(r,who,body,H){
    r.pendingAbility={who,sourceId:plan.sourceId,cardId:plan.cardId,sequence:effect.sequence,stage:'response'};
   }
   H.log(r,'effect',`${H.name(r,plan.sourceId)}: 필드 효과 선언 및 대응 대기`);
+  if(plan.graveActivation)H.graveActivation?.(r,{eventKey:`field-grave-${r.pendingAbility.sequence}`,cardId:plan.cardId});
  });
 }
 export function resumeFieldAbility(r,H){
@@ -35,6 +38,14 @@ export function finishFieldAbility(r,H){
   const pending=r.pendingAbility;r.pendingAbility=null;
   const results=resolveEffectStack(r,{getZone:id=>H.zone(r,id),execute:effect=>{
    if(counterEffectIds.has(effect.effectId)){resolveCardCounter(r,pending,effect,H);return;}
+   if(pending.kind==='grave'){
+    if(effect.effectId!=='grave-ability-resolution'||effect.sequence!==pending.sequence||effect.sourceId!==pending.sourceId||effect.owner!==pending.who)throw new Error('unexpected grave ability');
+    resolveGraveAbility(r,effect,H);return;
+   }
+   if(pending.kind==='reuse'){
+    if(effect.effectId!=='spell-reuse-resolution'||effect.sequence!==pending.sequence||effect.owner!==pending.who||effect.sourceId!==pending.sourceId)throw new Error('unexpected spell reuse effect');
+    resolveSpellReuse(r,effect,H);return;
+   }
    if(pending.kind==='trigger'){
     if(effect.effectId!=='monster-trigger-resolution'||effect.sequence!==pending.sequence||effect.owner!==pending.who||effect.sourceId!==pending.sourceId||effect.payload.cardId!==pending.cardId)throw new Error('unexpected monster trigger');
     resolveMonsterTrigger(r,effect,H);return;
