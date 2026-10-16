@@ -1,6 +1,8 @@
 // Source/target IDs from the committed runtime catalog. New base-stat and
 // hand/deck/grave restoration rules confirmed by the user on 2026-10-14.
 export const evolutionRules=Object.freeze({
+ 'COC-07-006':{source:null,target:'COC-07-007'},
+ 'COC-11-002':{source:'COC-11-001',target:'COC-11-003'},
  'COC-03-003':{source:null,target:'COC-03-004'},
  'COC-08-010':{source:'COC-08-004',target:'COC-08-011'},
  'COC-20-007':{source:'COC-20-006',target:'COC-20-008'},

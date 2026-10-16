@@ -1,3 +1,5 @@
+import {TIMED_SPELL_IDS,requireUnusedEffect} from './effect-usage.mjs';
+import {covenantReady} from './undead-spells.mjs';
 import {clayRevivalReady,clayCopyCandidates} from './clay-copies.mjs';
 import {damagePlayer} from './weapon-equipment.mjs';
 import {balanceValues as B} from './balance-values.mjs';
@@ -59,7 +61,15 @@ register('COC-08-009',c=>{
 register('COC-08-010',c=>require_(c.hasIntegration('츠쿠모가미 야시키'),'츠쿠모가미 야시키와 일체화 중이어야 합니다.'));
 register('COC-09-001',c=>require_(c.deckCount('무기')>=3,'덱에 무기 속성 카드 3장이 필요합니다.'));
 register('COC-09-005 COC-09-006 COC-09-007',c=>require_(Boolean(c.player.integration),'일체화 상태여야 합니다.'));
+register('COC-10-010',c=>require_(covenantReady(c.room,c.who),'현재 프람덴베르카와 일체화한 동안 자신의 몬스터가 3장 이상 파괴되고 빈 필드가 있어야 합니다.'));
 register('COC-10-005',c=>require_(allWanderersDied(c.room,c.who),'자신 소유의 디트리히·프란츠·율리우스가 각각 필드에서 파괴된 기록이 필요합니다.'));
+register('COC-07-006',c=>{validateEvolution(c.room,c.who,c.card.id,c.catalog);return require_((c.foe.reloads||0)>=1,'상대가 드로우 부족으로 리로드 피해를 받은 기록이 필요합니다.');});
+register('COC-11-002',c=>{
+ validateEvolution(c.room,c.who,c.card.id,c.catalog);
+ require_([...c.ownField,...c.enemyField].filter(id=>/용|드래곤/.test(c.attribute(id))).length>=2,'양쪽 필드에 용/드래곤 속성 몬스터가 합계 2장 이상 있어야 합니다.');
+ require_(c.player.hp>300,'체력 300을 지불한 뒤 생존해야 합니다.');
+ return {costs:[{player:c.who,hp:300}]};
+});
 register('COC-11-010',c=>require_(c.hasIntegration('해풍을 다스리는 용왕'),'해풍을 다스리는 용왕 일체화 상태가 필요합니다.'));
 register('COC-12-004',c=>require_(c.player.hand.length<=1,'손패가 1장 이하여야 합니다.'));
 register('COC-12-009',c=>require_(c.deckCount('영웅')>=6,'덱에 영웅 속성 카드 6장 이상이 필요합니다.'));
@@ -175,6 +185,7 @@ register('COC-08-008',c=>({costs:c.player.hand.filter(id=>id!==c.unitId).map(id=
 /** Validation has no side effects and can be safely used for AI move planning. */
 export function planActivation({room,who,unitId,cards,body={}}){
  const c=context(room,who,unitId,cards,body);
+ if(TIMED_SPELL_IDS.includes(c.card.id))requireUnusedEffect(room,who,unitId,1);
  if(cardUseForbidden(room,who,c.card))deny('라이드머신 어나더의 게임 중 사용 금지로 다른 라이드머신을 사용할 수 없습니다.');
  if(evolutionRules[c.card.id])validateEvolution(room,who,c.card.id,cards);
  const predicate=SPEC.get(c.card.id);

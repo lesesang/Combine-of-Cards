@@ -17,6 +17,12 @@ export const batchResponseSpellIds=Object.freeze(Object.keys(batchResponseTarget
 // Pure preflight: freeze the existing default target at declaration so a
 // later missing target can never silently redirect the spell to another unit.
 export function prepareResponseTargets(room,who,cardId,body,H){
+ if(cardId==='COC-09-007'){
+  const id=room.players[who].integration,u=id&&room.units[id];
+  if(!u)H.fail(409,'뜨임질을 사용할 일체화가 필요합니다.');
+  if(body.temperingSourceId!==undefined&&(id!==body.temperingSourceId||(u.integrationRevision||0)!==body.temperingRevision))H.fail(409,'뜨임질의 일체화가 이탈하거나 재진입했습니다.');
+  body={...body,temperingSourceId:id,temperingRevision:u.integrationRevision||0};
+ }
  body=prepareChoiceDeclaration(room,who,cardId,body,H);
  let kind=batchResponseTargets[cardId]??choiceResponseTargets[cardId]??balanceResponseTargets[cardId];
  if(kind==='two-non-toon')return body;

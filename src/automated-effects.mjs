@@ -1,3 +1,5 @@
+import {beginTempering} from './attack-sequences.mjs';
+import {drawLantern,summonCovenant} from './undead-spells.mjs';
 import {beginClayCopies} from './clay-copies.mjs';
 import {balanceValues as B} from './balance-values.mjs';
 import {evolutionSpellIds} from './evolution.mjs';
@@ -8,6 +10,9 @@ import {beginWeaponSelection,damagePlayer} from './weapon-equipment.mjs';
 // A handler must be backed by a particular v1.3 card wording.
 const aliases={};
 const register=(ids,handler)=>{for(const id of ids.split(' '))aliases[id]=handler;};
+register('COC-09-007',ctx=>beginTempering(ctx.r,ctx.who,ctx.body,ctx.H));
+register('COC-10-008',ctx=>drawLantern(ctx.r,ctx.who,ctx.H));
+register('COC-10-010',ctx=>summonCovenant(ctx.r,ctx.who,ctx.H));
 register('COC-19-007',ctx=>beginClayCopies(ctx.r,ctx.who,ctx.H));
 register('COC-19-002',ctx=>{
  const {r,who,body,H}=ctx,id=body.target.id,u=r.units[id],z=H.zone(r,id);

@@ -3809,5 +3809,173 @@
     },
     "authority": "User-delegated developer interpretation and deck-preserving balance refinement; not a newly user-confirmed official ruling",
     "rationale": "불명확한 자신 100피해를 플레이어의 일반 소환 선언 전 피해 비용으로 정비. 버닝 덱의 체력 구간 일체화 연계를 돕고 비용을 검색 무효화와 분리. 이전 코드의 소환 후 몬스터 피해100 제거."
+  },
+  {
+    "patchId": "ATTACK-UNDEAD-2026-10-16-DRAFT",
+    "cardId": "COC-09-007",
+    "source": "Tracked runtime catalog at 2f7b92b; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-09-007",
+      "deckId": "09",
+      "name": "영혼의 뜨임질",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "무기",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "일체화 상태여야 합니다."
+      ],
+      "effects": [
+        "이번 턴에 공격력을 100만큼 추가로 얻고, 모든 적을 공격합니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-09-007",
+      "deckId": "09",
+      "name": "영혼의 뜨임질",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "무기",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "일체화 상태여야 합니다."
+      ],
+      "effects": [
+        "발동 시 자신의 일체화를 지정한다. 해결 시 그 일체화의 공격력이 이번 턴 종료까지 100 증가한다. 이어서 해결 시점에 있던 상대 플레이어와 상대 필드 몬스터 각각에게 최대 1회씩 효과 공격한다. 공격 순서는 자신이 선택하며 매 공격마다 대응과 공격 다이스를 처리한다. 일반 공격 기회는 소모하지 않지만 공격 금지·동결·직접 공격 금지·강제 대상을 따른다. 남은 합법 대상이 없거나 공격한 일체화가 떠나면 종료한다. 새로 등장하거나 필드에 재진입한 적을 추가 대상으로 삼지 않는다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation; confirmed rules preserved, no new individual user ruling claimed",
+    "rationale": "전체 공격을 독립된 유한 공격 목록으로 명확화. 기존 어그로/금지와 공격별 대응을 유지하고 재진입/반복 공격 악용 방지. 무기 장착→뜨임질 강화라는 덱 마무리 흐름 보존."
+  },
+  {
+    "patchId": "ATTACK-UNDEAD-2026-10-16-DRAFT",
+    "cardId": "COC-10-008",
+    "source": "Tracked runtime catalog at 2f7b92b; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-10-008",
+      "deckId": "10",
+      "name": "망령의 등불",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "언데드",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신의 덱에서 몬스터 카드를 최대 2장 드로우한다. 덱에 몬스터가 1장뿐이라면 그 1장을 가져온 다음 리로드를 처리한다. 이 주문으로 덱의 카드를 모두 뽑았다면 이 효과로 가져온 몬스터들의 공격력과 체력을 각각 100 올린다."
+      ],
+      "notes": [
+        "몬스터 1장만 남은 경우 1장 획득 후 리로드하는 카드별 예외를 적용한다."
+      ]
+    },
+    "after": {
+      "id": "COC-10-008",
+      "deckId": "10",
+      "name": "망령의 등불",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "언데드",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신의 덱에서 위쪽에 있는 몬스터부터 최대 2장 드로우하여 공개한다. 다음 몬스터를 드로우하려는데 덱에 몬스터가 없으면 리로드 피해를 받고 자신의 묘지를 남아 있는 덱에 합쳐 섞은 뒤 다시 시도한다. 덱에 몬스터가 1장뿐이면 반드시 그 1장을 먼저 뽑고 다음 드로우에서 리로드한다. 리로드 후에도 몬스터가 없으면 드로우 실패로 종료한다. 이 효과의 드로우로 덱이 한 번이라도 0장이 되었다면 이 효과로 패에 가져온 몬스터의 공격력과 체력을 각각 100 올린다."
+      ],
+      "notes": [
+        "몬스터 1장만 남은 경우 1장 획득 후 리로드하는 카드별 예외를 적용한다."
+      ]
+    },
+    "authority": "User-delegated developer interpretation; confirmed rules preserved, no new individual user ruling claimed",
+    "rationale": "몬스터1장 먼저 드로우 후 리로드라는 확정 재정을 유지. 일반 검색 선택과 구별해 덱에서 먼저 만나는 몬스터를 뽑고, 비몬스터가 남은 경우와 리로드 후 추가 시도/실패/강화 시점을 명시."
+  },
+  {
+    "patchId": "ATTACK-UNDEAD-2026-10-16-DRAFT",
+    "cardId": "COC-10-010",
+    "source": "Tracked runtime catalog at 2f7b92b; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-10-010",
+      "deckId": "10",
+      "name": "강령의 맹약",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "언데드",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "여교주 프람덴베르카와 일체화한 상태에서 내 몬스터가 셋 이상 파괴됐을 것."
+      ],
+      "effects": [
+        "내 필드에 '뒤섞인 백작 빌헬름'을 소환한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-10-010",
+      "deckId": "10",
+      "name": "강령의 맹약",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "언데드",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "현재 여교주 프람덴베르카와 일체화한 동안 자신이 조종하는 몬스터가 3장 이상 파괴되었고 자신의 필드에 빈 칸이 있어야 한다."
+      ],
+      "effects": [
+        "뒤섞인 백작 빌헬름 1장을 기본 상태로 자신의 패에 생성하고 그 카드를 소환한다. 이 소환은 별도로 무효화할 수 있으며, 무효화되면 생성한 카드는 패에 남는다. 파괴된 몬스터 3장의 기록은 비용으로 소모하지 않는다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation; confirmed rules preserved, no new individual user ruling claimed",
+    "rationale": "현재 일체화 체류 중 파괴3회라는 조건을 명시하고 과거 다른 일체화의 사망을 재활용하지 않음. 원본 생성 카드만 사용, 각 소환 R22 대응, 조건과 비용을 구분."
+  },
+  {
+    "patchId": "ATTACK-UNDEAD-2026-10-16-DRAFT",
+    "cardId": "COC-11-002",
+    "source": "Tracked runtime catalog at 2f7b92b; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-11-002",
+      "deckId": "11",
+      "name": "1000년의 비원 여의보주",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "낙동강 이무기를 사용 중이어야 한다.",
+        "필드에 용/드래곤 속성 몬스터가 2개 이상 있어야 한다.",
+        "체력을 300 바친다."
+      ],
+      "effects": [
+        "자신의 일체화를 해풍을 다스리는 용왕으로 만든다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-11-002",
+      "deckId": "11",
+      "name": "1000년의 비원 여의보주",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "낙동강 이무기와 일체화 중이어야 한다.",
+        "양쪽 필드에 용/드래곤 속성 몬스터가 합계 2장 이상 있어야 한다.",
+        "발동 비용으로 자신의 플레이어 체력 300을 지불한다. 지불 후 생존해야 하며 효과가 무효화되어도 반환하지 않는다."
+      ],
+      "effects": [
+        "자신의 일체화를 해풍을 다스리는 용왕으로 만든다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation; confirmed rules preserved, no new individual user ruling claimed",
+    "rationale": "필드의 용/드래곤 범위를 양쪽 합계로 명확화하여 원문의 비한정 범위와 용 덱 연계를 유지.300은 피해가 아닌 지불 비용, 무효화 시 미반환. 진화 기본값/강화/원형 복원 확정 유지."
   }
 ]
