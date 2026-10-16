@@ -1,3 +1,4 @@
+import {applySharedUnitEffect,destroySharedUnits,moveSharedUnits,captureSharedUnits} from './shared-unit-effects.mjs';
 import {declareEffect} from './effect-runtime.mjs';
 import {effectUsedThisTurn,markEffectUsed} from './effect-usage.mjs';
 import {REUSABLE_SPELL_IDS,prepareCopiedSpellBody} from './spell-reuse.mjs';
@@ -125,13 +126,13 @@ export function resolveOriginalSin(r,e,H){
  }else if(monsters.has(cid)){
   if(['COC-13-002','COC-13-005'].includes(cid)&&!player.field.includes(null))return;
   if(cid==='COC-08-003')H.draw(r,who);
-  else if(cid==='COC-05-004')H.move(r,target.id,'deck',r.units[target.id].owner);
-  else if(cid==='COC-12-013')H.destroy(r,target.id,{sourceId:p.sourceId,sourcePlayer:who,sourceCardId:cid});
+  else if(cid==='COC-05-004')moveSharedUnits(r,[target.id],'deck',H,{sourceId:p.sourceId});
+  else if(cid==='COC-12-013')destroySharedUnits(r,[target.id],H,{sourceId:p.sourceId,sourcePlayer:who,sourceCardId:cid});
   else if(cid==='COC-21-012')grantNoble(r,who,target,H);
-  else if(['COC-24-003','COC-26-003'].includes(cid)){const t=r.units[target.id];t.atk=Math.max(0,Math.floor(t.hp));if(!t.atk)H.destroy(r,t.id,{sourceId:p.sourceId});}
+  else if(['COC-24-003','COC-26-003'].includes(cid)){applySharedUnitEffect(r,[target.id],H,(id,t)=>{if(!Number.isFinite(t.hp))return;t.atk=Math.max(0,Math.floor(t.hp));if(!t.atk)H.destroy(r,id,{sourceId:p.sourceId});});}
   else{
    if(cid==='COC-13-002'){const face=H.roll(2);H.log(r,'dice',`원죄·사랑 도둑: 1d2 = ${face}`);if(face!==1)return;}
-   const attack=swordActualAttack(r,target.id,{getZone:H.zone});H.capture(r,who,target.id);
+   const attack=swordActualAttack(r,target.id,{getZone:H.zone});captureSharedUnits(r,[target.id],who,H);
    if(cid==='COC-13-005')damagePlayer(r,1-who,Math.floor(attack/B.thiefDamageDivisor));
   }
  }else throw new Error('unsupported persisted Original Sin clause');

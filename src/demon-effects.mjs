@@ -1,3 +1,4 @@
+import {applySharedUnitEffect} from './shared-unit-effects.mjs';
 // Draft demon effects. Grants are JSON data, independent of the granting card.
 export function actionLocked(r,id){
  const u=r.units[id];
@@ -7,9 +8,11 @@ export function expireSuccubusAttack(r,who){
  for(const u of Object.values(r.units))u.succubusLocks=(u.succubusLocks||[]).filter(lock=>lock.owner!==who||lock.appliedTurn>=r.turnNumber);
 }
 export function applySuccubus(r,who,sourceId,targetId,H){
- const u=r.units[targetId],source=r.units[sourceId],face=H.roll(2);
- if(face===1)(u.succubusLocks??=[]).push({owner:who,appliedTurn:r.turnNumber,revision:u.fieldRevision||0});
- else u.succubusLure={sourceId,sourceRevision:source.fieldRevision||0,sourceController:who,revision:u.fieldRevision||0};
+ const source=r.units[sourceId],face=H.roll(2);
+ applySharedUnitEffect(r,[targetId],H,(id,u)=>{
+  if(face===1)(u.succubusLocks??=[]).push({owner:who,appliedTurn:r.turnNumber,revision:u.fieldRevision||0});
+  else u.succubusLure={sourceId,sourceRevision:source.fieldRevision||0,sourceController:who,revision:u.fieldRevision||0};
+ });
  H.log(r,'dice',`몽마: 1d2 = ${face} · ${face===1?'다음 자신의 어택 종료까지 공격·효과 발동 금지':'다음 공격/단일 대상 효과 유도'}`);
 }
 export function lureTarget(r,id,H){
@@ -33,7 +36,7 @@ export function grantNoble(r,who,target,H){
   const p=r.players[who];p.hp+=30;p.playerAtkBonus=(p.playerAtkBonus||0)+30;
   if(p.integration){const host=r.units[p.integration];host.atk+=30;host.playerAttackBonusApplied=(host.playerAttackBonusApplied||0)+30;}
  }else{
-  const u=r.units[target.id];u.noblePermanent=(u.noblePermanent||0)+30;u.atk+=30;u.hp+=30;
+  applySharedUnitEffect(r,[target.id],H,(id,u)=>{u.noblePermanent=(u.noblePermanent||0)+30;u.atk+=30;if(Number.isFinite(u.hp))u.hp+=30;});
  }
  H.log(r,'effect','나락의 귀족: 아군 1명에게 게임 종료까지 공격력·체력 +30');
 }

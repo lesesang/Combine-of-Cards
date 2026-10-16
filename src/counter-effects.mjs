@@ -33,7 +33,7 @@ function targetKind(effect){
 export function availableCounters(room,who,pending,kind){
  if(room.status!=='active'||!pending||(pending.awaiting??1-pending.who)!==who)return [];
  const target=currentCounterTarget(room,pending,kind),type=targetKind(target);
- if(!target||target.owner===who)return [];
+ if(!target||target.owner===who||target.preventedBy)return [];
  const p=room.players[who];
  return [p.integration,...p.field].filter(id=>{
   const u=room.units[id],rule=u&&COUNTER_RULES[u.cardId];

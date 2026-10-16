@@ -1,3 +1,4 @@
+import {linkStraw,applySharedUnitEffect,destroySharedUnits,hurtSharedUnits,moveSharedUnits,captureSharedUnits} from './shared-unit-effects.mjs';
 import {actionLocked,applySuccubus,lureTarget,consumeLure} from './demon-effects.mjs';
 import {damagePlayer} from './weapon-equipment.mjs';
 import {beginAutomaticTriggerOrder} from './effect-runtime.mjs';
@@ -11,6 +12,7 @@ import {queueDeathRevival} from './death-revival.mjs';
 // Draft automation: the user requested implementation batches before testing.
 // Automatic monster/integration triggers, not selectable MAIN abilities.
 export const TRIGGER_RULES=Object.freeze({
+ 'COC-21-008':{effectNumber:1,event:'summoned',target:'straw-link'},
  'COC-21-011':{effectNumber:1,event:'summoned',target:'succubus-enemy'},
  'COC-01-005':{effectNumber:2,event:'integration-attacks-monster'},
  'COC-07-001':{effectNumber:1,event:'enemy-turn-start',sourceZone:'integration'},
@@ -121,6 +123,7 @@ export function recordDestroyedTrigger(r,id,{sourceId,sourcePlayer},H){
 }
 function baseTriggerTargetChoices(r,p,H){
  const kind=TRIGGER_RULES[p.cardId]?.target;
+ if(kind==='straw-link')return r.players.flatMap(pp=>pp.field.filter(id=>id&&id!==p.sourceId));
  if(kind==='optional-destroy-board')return r.players.flatMap(pp=>[...pp.field,pp.integration].filter(Boolean));
  if(kind==='capture-enemy'&&!r.players[p.who].field.includes(null))return [];
  if(kind==='destroy-lower-printed'){
@@ -138,7 +141,7 @@ function triggerTargetChoices(r,p,H){
 }
 export function triggerTargetView(r,viewer,H){
  const p=r.pendingTriggerTargetChoice;if(!p)return null;
- return {who:p.who,name:H.cards.get(p.cardId)?.name,optional:TRIGGER_RULES[p.cardId]?.target==='optional-destroy-board',...(viewer===p.who?{choices:triggerTargetChoices(r,p,H).map(id=>({id,card:H.cards.get(r.units[id].cardId)||r.units[id].tokenCard}))}:{})};
+ return {who:p.who,kind:TRIGGER_RULES[p.cardId]?.target,name:H.cards.get(p.cardId)?.name,optional:TRIGGER_RULES[p.cardId]?.target==='optional-destroy-board',...(viewer===p.who?{choices:triggerTargetChoices(r,p,H).map(id=>({id,controller:H.zone(r,id)?.player,card:H.cards.get(r.units[id].cardId)||r.units[id].tokenCard}))}:{})};
 }
 export function chooseTriggerTarget(r,who,id,H){
  const p=r.pendingTriggerTargetChoice;
@@ -152,17 +155,19 @@ export function chooseTriggerTarget(r,who,id,H){
  const sourceZone=TRIGGER_RULES[p.cardId].sourceZone||'field';
  if(!u||u.cardId!==p.cardId||u.effectsNegated||z?.zone!==sourceZone||z.player!==who||((sourceZone==='integration'?u.integrationRevision:sourceZone==='field'?u.fieldRevision:u.zoneRevision)||0)!==p.sourceRevision){H.log(r,'effect','유발 효과의 소스 상태 변경으로 불발');return;}
  const kind=TRIGGER_RULES[p.cardId].target;
+ if(kind==='straw-link'){linkStraw(r,p.sourceId,id,H);return;}
  if(kind==='succubus-enemy'){applySuccubus(r,who,p.sourceId,id,H);return;}
- if(kind==='optional-destroy-board'){H.destroy(r,id,{sourceId:p.sourceId});H.outcome(r);return;}
- if(kind==='destroy-lower-printed'){H.destroy(r,id,{sourceId:p.sourceId});H.outcome(r);return;}
+ if(kind==='optional-destroy-board'){destroySharedUnits(r,[id],H,{sourceId:p.sourceId});H.outcome(r);return;}
+ if(kind==='destroy-lower-printed'){destroySharedUnits(r,[id],H,{sourceId:p.sourceId});H.outcome(r);return;}
  if(kind==='coin-weaken-enemy'){
   // Choose before rolling; neither client nor AI may see the outcome first.
   const faces=Array.from({length:3},()=>H.roll(2));
   H.log(r,'dice',`카스테: 코인 ${faces.join(', ')}`);
-  if(faces.filter(x=>x===1).length===2){r.units[id].atk=Math.max(0,r.units[id].atk-100);if(r.units[id].atk===0)H.destroy(r,id,{sourceId:p.sourceId});}
+  if(faces.filter(x=>x===1).length===2)applySharedUnitEffect(r,[id],H,(uid,u)=>{u.atk=Math.max(0,u.atk-100);if(u.atk===0)H.destroy(r,uid,{sourceId:p.sourceId});});
   H.outcome(r);return;
  }
- H.move(r,id,kind==='return-field'?'hand':kind==='capture-enemy'?'field':'banished',kind==='capture-enemy'?who:r.units[id].owner,{sourceId:p.sourceId});
+ if(kind==='capture-enemy')captureSharedUnits(r,[id],who,H);
+ else moveSharedUnits(r,[id],kind==='return-field'?'hand':'banished',H,{sourceId:p.sourceId});
  H.log(r,'effect',`${H.cards.get(p.cardId).name}: 선택한 몬스터 ${kind==='return-field'?'패 복귀':kind==='capture-enemy'?'조종권 획득':'제외'}`);
 }
 function deferAttackBonus(r,id,H,extra){
@@ -276,14 +281,14 @@ export function resolveMonsterTrigger(r,e,H){
    if(u.effectsNegated)return;
    H.destroy(r,e.sourceId,{sourceId:e.sourceId});
   }
-  for(const id of r.players.flatMap(pp=>pp.field.filter(Boolean)))H.move(r,id,'hand',r.units[id].owner);
+  moveSharedUnits(r,r.players.flatMap(pp=>pp.field.filter(Boolean)),'hand',H,{sourceId:e.sourceId});
   H.log(r,'effect','감독관: 필드의 모든 몬스터를 원래 소유자의 패로 반환');return;
  }
  if(p.cardId==='COC-10-011'){queueDeathRevival(r,e,H);return;}
  if(p.cardId==='COC-26-004'){
   // This declared destruction trigger deliberately survives its own death.
   const t=p.target;
-  if(t.id){const target=r.units[t.id],tz=H.zone(r,t.id);if(target&&tz?.zone==='field'&&tz.player===t.controller&&(target.fieldRevision||0)===t.revision)H.hurt(r,t.id,p.amount,{sourceId:e.sourceId});}
+  if(t.id){const target=r.units[t.id],tz=H.zone(r,t.id);if(target&&tz?.zone==='field'&&tz.player===t.controller&&(target.fieldRevision||0)===t.revision)hurtSharedUnits(r,[t.id],p.amount,H,{sourceId:e.sourceId});}
   else damagePlayer(r,t.player,p.amount);
   H.log(r,'effect',`저지먼트 매치: 파괴 직전 공격력 ${p.amount} 반사 피해`);H.outcome(r);return;
  }
@@ -292,7 +297,7 @@ export function resolveMonsterTrigger(r,e,H){
  if(p.cardId==='COC-07-001'){H.mill(r,1-e.owner,2);return;}
  if(p.cardId==='COC-01-005'){
   const target=r.units[p.targetId],tz=target&&H.zone(r,p.targetId);
-  if(u.gToolBody&&tz?.zone==='field'&&tz.player===p.targetController&&(target.fieldRevision||0)===p.targetRevision)H.move(r,p.targetId,'deck',target.owner);
+  if(u.gToolBody&&tz?.zone==='field'&&tz.player===p.targetController&&(target.fieldRevision||0)===p.targetRevision)moveSharedUnits(r,[p.targetId],'deck',H,{sourceId:e.sourceId});
   return;
  }
  if(p.cardId==='COC-11-001'){
@@ -338,7 +343,7 @@ export function resolveMonsterTrigger(r,e,H){
   const a=r.units[p.attackerId],az=H.zone(r,p.attackerId);
   if(!a||az?.zone!=='field'||az.player!==p.attackerController||(a.fieldRevision||0)!==p.attackerRevision)return;
   if(swordActualAttack(r,p.attackerId,{getZone:(room,id)=>H.zone(room,id)})>u.hp){
-   H.destroy(r,p.attackerId,{sourceId:e.sourceId});
+   destroySharedUnits(r,[p.attackerId],H,{sourceId:e.sourceId});
    // A destroyed then revived attacker is a different field stay too.
    const after=H.zone(r,p.attackerId);
    if(after?.zone!=='field'||after.player!==p.attackerController||(r.units[p.attackerId]?.fieldRevision||0)!==p.attackerRevision){r.pendingAttack=null;H.log(r,'attack','워터의 반격으로 공격자가 이탈하여 공격 종료');}

@@ -1,3 +1,4 @@
+import {applySharedUnitEffect,destroySharedUnits,moveSharedUnits} from './shared-unit-effects.mjs';
 import {queueCardRevival} from './death-revival.mjs';
 import {damagePlayer} from './weapon-equipment.mjs';
 import {beginDeckSearch} from './deck-search.mjs';
@@ -46,11 +47,11 @@ export function resolveSummonTrigger(r,e,H){
   H.log(r,'effect','골과 몰: 기본 상태의 복사본을 패에 생성하고 소환 예약 (복사본의 증식 효과는 발동하지 않음)');break;
  }
  case 'pharaoh-buff':
-  for(const id of r.players.flatMap(pp=>pp.field.filter(Boolean))){r.units[id].atk+=50;r.units[id].hp=(r.units[id].hp??0)+50;}break;
+  applySharedUnitEffect(r,r.players.flatMap(pp=>pp.field.filter(Boolean)),H,(id,u)=>{u.atk+=50;u.hp=(u.hp??0)+50;});break;
  case 'yurika-heal':p.hp+=B.yurikaHeal;break;
  case 'restore-battlefield':{
   const targets=[r.turn,1-r.turn].flatMap(controller=>r.players[controller].field.filter(Boolean).map(id=>({id,controller,revision:r.units[id].zoneRevision||0})));
-  H.destroyBatch(r,targets.map(t=>t.id),{sourceId:e.sourceId});
+  destroySharedUnits(r,targets.map(t=>t.id),H,{sourceId:e.sourceId});
   let revived=0;
   for(const t of targets){
    const unit=r.units[t.id],zone=unit&&H.zone(r,t.id);
@@ -83,9 +84,9 @@ export function resolveSummonTrigger(r,e,H){
  case 'freeze-enemy-turn':foe.noAttackUntil=(foe.turnsTaken||0)+(r.turn===who?1:0);break;
  case 'return-other-field':{
   const ids=r.players.flatMap(pp=>[...pp.field,pp.integration].filter(id=>id&&id!==e.sourceId));
-  for(const id of ids)if(H.zone(r,id))H.move(r,id,'deck',r.units[id].owner);break;
+  moveSharedUnits(r,ids,'deck',H,{sourceId:e.sourceId},{exclude:[e.sourceId]});break;
  }
- case 'destroy-other-monsters':H.destroyBatch(r,r.players.flatMap(pp=>pp.field.filter(id=>id&&id!==e.sourceId)),{sourceId:e.sourceId});break;
+ case 'destroy-other-monsters':destroySharedUnits(r,r.players.flatMap(pp=>pp.field.filter(id=>id&&id!==e.sourceId)),H,{sourceId:e.sourceId},{exclude:[e.sourceId]});break;
  case 'mill-for-stats':{
   let count=0;
   while(count<2&&p.deck.length){

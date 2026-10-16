@@ -1,4 +1,4 @@
-import {choiceResponseTargets,prepareChoiceDeclaration,isNonToonField} from './spell-choice-batch.mjs';
+import {choiceResponseTargets,prepareChoiceDeclaration,isNonToonField,mercuryTargetsStillPresent} from './spell-choice-batch.mjs';
 import {prepareTrade} from './trade-separation.mjs';
 import {prepareBlackMetal} from './black-metal-change.mjs';
 import {validWrathTarget} from './history-spells.mjs';
@@ -39,7 +39,7 @@ export function prepareResponseTargets(room,who,cardId,body,H){
  }
  body=prepareChoiceDeclaration(room,who,cardId,body,H);
  let kind=extendedTargets[cardId]??batchResponseTargets[cardId]??choiceResponseTargets[cardId]??balanceResponseTargets[cardId];
- if(kind==='two-non-toon')return body;
+ if(kind==='two-non-toon'||kind==='mercury')return body;
  if(kind==='option')kind=body.option===1?'enemy-field':'any';
  if(!kind)return body;
  let target=body.target;
@@ -80,6 +80,11 @@ export function prepareResponseTargets(room,who,cardId,body,H){
 }
 
 export function responseTargetStillValid(room,who,cardId,body,H){
+ if(cardId==='COC-06-004'&&body.mercuryTargets)return mercuryTargetsStillPresent(room,body,H).length>0;
+ if(cardId==='COC-24-006'&&body.mindChangeHost){
+  const id=room.players[who].integration;
+  return id===body.mindChangeHost&&(room.units[id]?.integrationRevision||0)===body.mindChangeRevision;
+ }
  if(cardId==='COC-05-006')return body.targets.some(id=>isNonToonField(room,id,H));
  if(['COC-05-002','COC-05-007','COC-31-007'].includes(cardId)&&!room.players[who].field.includes(null))return false;
  try{prepareResponseTargets(room,who,cardId,body,H);return true;}
@@ -91,6 +96,7 @@ export function responseTargetStillValid(room,who,cardId,body,H){
 export function responseTargetChoices(room,who,cardId,H,body={}){
  const kind=extendedTargets[cardId]??batchResponseTargets[cardId]??choiceResponseTargets[cardId]??balanceResponseTargets[cardId];
  if(!kind||kind==='two-non-toon')return null;
+ if(kind==='mercury')return room.players.flatMap(p=>p.field.filter(Boolean).map(id=>({type:'unit',id})));
  const candidates=[...room.players.flatMap(p=>[...p.field,...(kind==='board'?[p.integration]:[])].filter(Boolean).map(id=>({type:'unit',id}))),
   {type:'player',player:1-who},{type:'player',player:who}];
  return candidates.filter(target=>responseTargetStillValid(room,who,cardId,{...body,target},H));

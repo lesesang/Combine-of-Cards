@@ -1,3 +1,4 @@
+import {hurtSharedUnits} from './shared-unit-effects.mjs';
 import {swordActualAttack} from './life-eating-sword.mjs';
 import {damagePlayer} from './weapon-equipment.mjs';
 // Keep rule history in state, never infer it from the capped public log.
@@ -32,13 +33,13 @@ export function validWrathTarget(r,who,target,H){
 export function resolveWrath(ctx){
  const {r,who,body,H}=ctx;if(!validWrathTarget(r,who,body.target,H))return;
  const amount=Math.floor(r.players[who].recentMonsterLosses.reduce((n,e)=>n+e.peakAttack,0)/3);
- if(body.target.type==='unit')H.hurt(r,body.target.id,amount);else damagePlayer(r,body.target.player,amount);
+ if(body.target.type==='unit')hurtSharedUnits(r,[body.target.id],amount,H);else damagePlayer(r,body.target.player,amount);
  H.outcome(r);
 }
 export function resolvePredatorJudgment(ctx){
  const {r,body,H}=ctx;let amount=0;
  for(let i=0;i<recentMillCount(r);i++)amount+=ctx.rollValue(100);
- if(body.target.type==='unit')H.hurt(r,body.target.id,amount);else damagePlayer(r,body.target.player,amount);
+ if(body.target.type==='unit')hurtSharedUnits(r,[body.target.id],amount,H);else damagePlayer(r,body.target.player,amount);
  H.outcome(r);
 }
 export function cartoonChoices(r,p,cards){

@@ -1,3 +1,4 @@
+import {preventDestructiveDeclaration} from './destruction-prevention.mjs';
 /**
  * Serialized effect scheduler (v1.3).
  *
@@ -81,6 +82,7 @@ export function declareEffect(room, effect) {
   room.effectStack = stack;
   stack.push(entry);
   room.effectSequence = nextSequence;
+  preventDestructiveDeclaration(room,entry);
   return entry;
 }
 
@@ -115,6 +117,7 @@ export function declareAutomaticGroup(room, effects, activePlayer, orderedIds = 
   const entries=ordered.map(effect=>declareEffect(staged,effect));
   room.effectStack=staged.effectStack;
   room.effectSequence=staged.effectSequence;
+  for(const entry of entries)preventDestructiveDeclaration(room,entry);
   return entries;
 }
 
@@ -162,6 +165,7 @@ export function beginAutomaticTriggerOrder(room, effects, activePlayer) {
   if (!needsChoice.length) {
     room.effectStack = staged.effectStack;
     room.effectSequence = staged.effectSequence;
+    for(const entry of room.effectStack)preventDestructiveDeclaration(room,entry);
     return {pending:false,awaiting:null};
   }
   room.pendingTriggerOrder = {
@@ -226,7 +230,7 @@ export function resolveEffectStack(room, { getZone, execute, onResult, fingerpri
         throw new TypeError('fingerprint must return a bounded string');
       }
       const stackKey = JSON.stringify(room.effectStack.map(e=>[
-        e.effectId,e.owner,e.sourceId,e.exception,e.priority,e.payload,e.negatedBy
+        e.effectId,e.owner,e.sourceId,e.exception,e.priority,e.payload,e.negatedBy,e.preventedBy
       ]));
       const key = signature + '\\n' + stackKey;
       if (seen.has(key)) {
@@ -248,6 +252,10 @@ export function resolveEffectStack(room, { getZone, execute, onResult, fingerpri
     const before = structuredClone(room);
     const effect = room.effectStack.pop();
     try {
+      if(effect.preventedBy?.kind==='sphinx'){
+        const result={effectId:effect.effectId,sequence:effect.sequence,status:'prevented-by-sphinx'};
+        onResult?.(result,effect);results.push(result);continue;
+      }
       if (Number.isSafeInteger(effect.negatedBy) && effect.negatedBy > 0) {
         const result = {effectId:effect.effectId,sequence:effect.sequence,status:'negated-by-effect'};
         onResult?.(result,effect);

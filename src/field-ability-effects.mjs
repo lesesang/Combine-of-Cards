@@ -1,3 +1,4 @@
+import {applySharedUnitEffect,destroySharedUnits,moveSharedUnits,captureSharedUnits} from './shared-unit-effects.mjs';
 import {actionLocked,nobleTarget,grantNoble,lureTarget,consumeLure} from './demon-effects.mjs';
 import {damagePlayer} from './weapon-equipment.mjs';
 import {prepareGTool,summonGTool,prepareAltar,summonAltar} from './monsterized-spells.mjs';
@@ -163,16 +164,16 @@ export function resolveFieldEffect(r,who,plan,H){
   u.atk+=count*50;H.log(r,'effect',`워리어 드라고닉: 덱 위 ${count}장 묘지 이동, 공격력 +${count*50}`);break;
  }
  case 'COC-26-001':
-  for(const pp of r.players)for(const id of pp.field.filter(Boolean))if(H.name(r,id).includes('매치'))r.units[id].atk+=50;
+  applySharedUnitEffect(r,r.players.flatMap(pp=>pp.field.filter(id=>id&&H.name(r,id).includes('매치'))),H,(id,u)=>{u.atk+=50;});
   break;
  case 'COC-32-012':
   if(!(r.units[t].hp>swordActualAttack(r,plan.sourceId,{getZone:(room,id)=>H.zone(room,id)})))return fizzle('대상 체력이 현재 실제 공격력 이하');
-  H.destroy(r,t,{sourceId:plan.sourceId});break;
+  destroySharedUnits(r,[t],H,{sourceId:plan.sourceId});break;
  case 'COC-32-014':
   if(!terraReady(u)||!Number.isFinite(u.hp)||u.hp<=0)return fizzle('체류 조건 또는 현재 체력 소실');
   damagePlayer(r,1-who,Math.floor(u.hp/2));H.outcome(r);break;
  case 'COC-08-003':H.draw(r,who);break;
- case 'COC-10-005':H.destroy(r,t,{sourceId:plan.sourceId});break;
+ case 'COC-10-005':destroySharedUnits(r,[t],H,{sourceId:plan.sourceId});break;
  case 'COC-23-002':{
   const iz=H.zone(r,plan.integrationId),iu=r.units[plan.integrationId];
   if(iz?.zone!=='integration'||iz.player!==who||iu.cardId!=='COC-23-001'||(iu.integrationRevision||0)!==plan.integrationRevision)return fizzle('라이드 위저드 이탈/진화/재진입');
@@ -180,22 +181,22 @@ export function resolveFieldEffect(r,who,plan,H){
  }
  case 'COC-24-003':case 'COC-26-003':{
   const target=r.units[t];if(!Number.isFinite(target.hp))return fizzle('현재 체력 소실');
-  target.atk=Math.max(0,Math.floor(target.hp));if(target.atk===0)H.destroy(r,t,{sourceId:plan.sourceId});break;
+  applySharedUnitEffect(r,[t],H,(id,u)=>{if(!Number.isFinite(u.hp))return;u.atk=Math.max(0,Math.floor(u.hp));if(u.atk===0)H.destroy(r,id,{sourceId:plan.sourceId});});break;
  }
  case 'COC-31-004':return beginRecruitChoice(r,who,H);
 
  case 'COC-03-002':{
   const id=findSearch(r,who,plan.searchCardId);if(!id)return fizzle('검색 카드 소실');H.move(r,id,'hand',who);break;
  }
- case 'COC-05-004':H.move(r,t,'deck',r.units[t].owner);break;
- case 'COC-12-013':H.destroy(r,t,{sourceId:plan.sourceId});break;
+ case 'COC-05-004':moveSharedUnits(r,[t],'deck',H,{sourceId:plan.sourceId});break;
+ case 'COC-12-013':destroySharedUnits(r,[t],H,{sourceId:plan.sourceId});break;
  case 'COC-13-001':case 'COC-13-002':case 'COC-13-005':{
   if(c==='COC-13-002'){const result=H.roll(2);H.log(r,'dice',`사랑 도둑: 1d2 = ${result}`);if(result!==1)break;}
   const attack=swordActualAttack(r,t,{getZone:(room,id)=>H.zone(room,id)});
-  H.capture(r,who,t);if(c==='COC-13-005'){damagePlayer(r,1-who,Math.floor(attack/B.thiefDamageDivisor));H.outcome(r);}break;
+  captureSharedUnits(r,[t],who,H);if(c==='COC-13-005'){damagePlayer(r,1-who,Math.floor(attack/B.thiefDamageDivisor));H.outcome(r);}break;
  }
  case 'COC-22-010':{
-  const target=r.units[t];if(target.bonusAttackTurn!==r.turnNumber){target.bonusAttackTurn=r.turnNumber;target.bonusAttackCount=0;}target.bonusAttackCount++;break;
+  applySharedUnitEffect(r,[t],H,(id,target)=>{if(target.bonusAttackTurn!==r.turnNumber){target.bonusAttackTurn=r.turnNumber;target.bonusAttackCount=0;}target.bonusAttackCount++;});break;
  }
  default:throw new Error('unregistered field effect');
  }

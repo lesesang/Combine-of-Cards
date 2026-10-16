@@ -59,6 +59,7 @@ export function finishFieldAbility(r,H){
    if(resolveFieldEffect(r,effect.owner,effect.payload,H))H.log(r,'effect',`${H.name(r,effect.sourceId)}: 필드 효과 해결`);
   },onResult:(result,effect)=>{
    if(effect.effectId==='monster-trigger-resolution')settleSummonTrigger(r,effect,H);
+   if(result.status==='prevented-by-sphinx')H.log(r,'effect','스핑크스: 상대 파괴 효과 발동 차단 (지불한 비용·횟수 반환 없음)');
    if(result.status==='negated-by-effect')H.log(r,'effect','필드/대응 효과 무효화 (비용 반환 없음)');
    if(result.status==='negated-source-moved')H.log(r,'effect','필드/대응 효과 소스 이탈로 불발 (비용 반환 없음)');
   }});

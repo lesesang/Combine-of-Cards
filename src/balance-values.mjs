@@ -1,5 +1,5 @@
 // v1.3 balance B1. Named values keep engine changes auditable against card text.
-export const BALANCE_REVISION='1.3-balance-b1-sin-demons-draft';
+export const BALANCE_REVISION='1.3-balance-b1-sharing-sphinx-draft';
 export const balanceValues=Object.freeze({
  heroPartnerDamage:50,
  vampireDrainDivisor:2,
