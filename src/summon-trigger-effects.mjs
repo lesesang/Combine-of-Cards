@@ -1,4 +1,5 @@
 import {gainUnitStats,gainPlayerStats} from './stat-gains.mjs';
+import {createDragonTreasures,settleDragonTrigger} from './dragon-gold.mjs';
 import {applySharedUnitEffect,destroySharedUnits,moveSharedUnits} from './shared-unit-effects.mjs';
 import {queueCardRevival} from './death-revival.mjs';
 import {damagePlayer} from './weapon-equipment.mjs';
@@ -9,6 +10,7 @@ import {swordActualAttack} from './life-eating-sword.mjs';
 // These handlers resolve only after the summon and its separate monster-effect
 // response window. Printed summon costs belong to activation-rules instead.
 export const SUMMON_TRIGGER_RULES=Object.freeze({
+ 'COC-11-007':{action:'create-dragon-treasures'},
  'COC-10-007':{action:'twins-copy'},
  'COC-17-001':{action:'pharaoh-buff',sourceZone:'integration',event:'integration-enter'},
  'COC-19-006':{action:'restore-battlefield',sourceZone:'integration',event:'integration-enter'},
@@ -40,6 +42,7 @@ export function resolveSummonTrigger(r,e,H){
  const rule=SUMMON_TRIGGER_RULES[e.payload.cardId];if(!rule?.action)return false;
  const who=e.owner,p=r.players[who],foe=r.players[1-who],u=r.units[e.sourceId];
  switch(rule.action){
+ case 'create-dragon-treasures':createDragonTreasures(r,who,u.id,H);break;
  case 'twins-copy':{
   if(u.twinsOffspring||!p.field.includes(null))break;
   const id=H.instantiate(r,u.cardId,who);r.units[id].twinsOffspring=true;
@@ -111,6 +114,7 @@ export function resolveSummonTrigger(r,e,H){
 }
 
 export function settleSummonTrigger(r,e,H){
+ settleDragonTrigger(r,e,H);
  // Tyranno's printed HP is unspecified because this trigger supplies it.
  // A negated/empty-deck effect must not leave an immortal null-HP monster.
  if(e.payload?.cardId!=='COC-27-003')return;

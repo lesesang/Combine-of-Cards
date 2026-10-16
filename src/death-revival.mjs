@@ -32,7 +32,7 @@ export function resumeDeathRevivals(r,H){
 }
 export function finishDeathRevival(r,p,H){
  const kind=p.revivalKind||'wilhelm',u=r.units[p.extraUnitId];
- if(!eligible(r,p,H)||(kind==='wilhelm'&&u.cardId!=='COC-10-011')){H.log(r,'revive','부활 대상/빈 자리/사용 금지 변경으로 불발');return;}
+ if(!eligible(r,p,H)||(kind==='wilhelm'&&u.cardId!=='COC-10-011')||(kind==='wyvern'&&u.cardId!=='COC-11-004')){H.log(r,'revive','부활 대상/빈 자리/사용 금지 변경으로 불발');return;}
  H.move(r,u.id,'field',p.who);
  H.prepareMonsterizedUnit?.(r,p,H);
  if(kind==='wilhelm')u.revivedOnce=true;

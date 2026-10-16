@@ -6,6 +6,7 @@ import {resolveMonsterTrigger} from './triggered-effects.mjs';
 import {settleSummonTrigger} from './summon-trigger-effects.mjs';
 import {resolveSpellReuse} from './spell-reuse.mjs';
 import {resolveGraveAbility} from './grave-abilities.mjs';
+import {resolveZoneAbility} from './zone-abilities.mjs';
 export const abilityResponsePlayer=r=>r.pendingAbility&&r.pendingAbility.stage!=='cost-triggers'?(r.pendingAbility.awaiting??1-r.pendingAbility.who):null;
 export const legalAbilityCounters=(r,who)=>r.pendingAbility?.stage==='cost-triggers'?[]:availableCounters(r,who,r.pendingAbility,'ability');
 export const declareAbilityCounter=(r,who,id)=>declareCardCounter(r,who,id,r.pendingAbility,'ability');
@@ -39,6 +40,10 @@ export function finishFieldAbility(r,H){
   const pending=r.pendingAbility;r.pendingAbility=null;
   const results=resolveEffectStack(r,{getZone:id=>H.zone(r,id),execute:effect=>{
    if(counterEffectIds.has(effect.effectId)){resolveCardCounter(r,pending,effect,H);return;}
+   if(pending.kind==='zone'){
+    if(effect.effectId!=='zone-ability-resolution'||effect.sequence!==pending.sequence||effect.sourceId!==pending.sourceId||effect.owner!==pending.who)throw new Error('unexpected zone ability');
+    resolveZoneAbility(r,effect,H);return;
+   }
    if(pending.kind==='grave'){
     if(effect.effectId!=='grave-ability-resolution'||effect.sequence!==pending.sequence||effect.sourceId!==pending.sourceId||effect.owner!==pending.who)throw new Error('unexpected grave ability');
     resolveGraveAbility(r,effect,H);return;

@@ -1,4 +1,5 @@
 import {gainUnitStats} from './stat-gains.mjs';
+import {dragonAttackTriggers,resolveDragonTrigger} from './dragon-gold.mjs';
 import {linkStraw,applySharedUnitEffect,destroySharedUnits,hurtSharedUnits,moveSharedUnits,captureSharedUnits} from './shared-unit-effects.mjs';
 import {actionLocked,applySuccubus,lureTarget,consumeLure} from './demon-effects.mjs';
 import {damagePlayer} from './weapon-equipment.mjs';
@@ -20,6 +21,8 @@ export const TRIGGER_RULES=Object.freeze({
  'COC-11-001':{effectNumber:1,event:'own-turn-start',sourceZone:'deck',sourceType:'integration'},
  'COC-11-003':{effectNumber:1,event:'own-attack-start',sourceZone:'integration'},
  'COC-11-006':{effectNumber:1,event:'own-attack-start'},
+ 'COC-11-008':{effectNumber:2,event:'own-attack-start',sourceZone:'grave',sourceType:'spell',repeatPerEvent:true},
+ 'COC-11-009':{effectNumber:1,event:'fafnir-destroyed',sourceZone:'grave',sourceType:'spell',repeatPerEvent:true},
  'COC-19-003':{effectNumber:1,event:'own-turn-start'},
  'COC-09-001':{effectNumber:1,event:'own-monster-destroyed',sourceZone:'integration',repeatPerEvent:true},
  'COC-10-011':{effectNumber:1,event:'destroyed',repeatPerEvent:true},
@@ -196,7 +199,7 @@ export function drainDeferredMonsterTriggers(r,H){
  // Destruction can occur within a spell, paid cost, summon, or heal group.
  // Collect there, declare only after that complete chain and its choices.
  if(r.pendingMonsterTriggers||r.pendingAbility||r.pendingSpell||r.pendingExtraSummon||r.pendingTriggerOrder||r.pendingTriggerTargetChoice||r.pendingInfinityChoice||r.pendingElementalChoice||r.pendingRecruitChoice||r.pendingDeckSearch||r.effectStack?.length)return;
- const effects=(r.deferredMonsterTriggers||[]).filter(e=>r.units[e.sourceId]?.cardId===e.payload.cardId&&e.payload.eventTurn===r.turnNumber&&(TRIGGER_RULES[e.payload.cardId].repeatPerEvent||!effectUsedThisTurn(r,e.owner,e.sourceId,TRIGGER_RULES[e.payload.cardId].effectNumber)));
+ const effects=(r.deferredMonsterTriggers||[]).filter(e=>(e.payload.cardId==='COC-11-009'||r.units[e.sourceId]?.cardId===e.payload.cardId)&&e.payload.eventTurn===r.turnNumber&&(TRIGGER_RULES[e.payload.cardId].repeatPerEvent||!effectUsedThisTurn(r,e.owner,e.sourceId,TRIGGER_RULES[e.payload.cardId].effectNumber)));
  r.deferredMonsterTriggers=[];
  if(effects.length)queueMonsterTriggers(r,effects,H);
 }
@@ -241,7 +244,7 @@ export function integrationTurnTriggers(r,who,H){
  return group;
 }
 export function attackPhaseTriggers(r,who){
- const p=r.players[who],group=[];
+ const p=r.players[who],group=dragonAttackTriggers(r,who);
  for(const id of [p.integration,...p.field].filter(Boolean)){
   const u=r.units[id],king=p.integration===id&&u.cardId==='COC-11-003';
   const orochi=p.field.includes(id)&&u.cardId==='COC-11-006';
@@ -295,6 +298,7 @@ export function resumeMonsterTriggers(r,H){
 }
 export function resolveMonsterTrigger(r,e,H){
  const u=r.units[e.sourceId],z=H.zone(r,e.sourceId),p=e.payload;
+ if(resolveDragonTrigger(r,e,H))return;
  if(p.cardId==='COC-19-003'){
   // Printed source-leave exception: the declared return survives destruction.
   if(z?.zone==='field'&&z.player===e.owner&&(u.fieldRevision||0)===p.sourceRevision){

@@ -112,6 +112,7 @@ export function processSwordAttackPhase(room,who,{getZone,destroy,outcome,log}={
     log?.(room,'effect','생명을 먹는 마검: 공격 페이즈 시작에 체력 30 지불 불가 — 대상 몬스터 파괴');
    }else{
     room.players[who].hp=0;
+    (room.forcedLosers??=[false,false])[who]=true;
     log?.(room,'effect','생명을 먹는 마검: 공격 페이즈 시작에 체력 30 지불 불가 — 플레이어 패배');
    }
    outcome?.(room);
