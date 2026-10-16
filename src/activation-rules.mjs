@@ -16,9 +16,9 @@ const deny = message => { const e = new Error(message); e.status = 409; throw e;
 const ok = () => ({costs:[]});
 const require_ = (condition, message) => { if (!condition) deny(message); return ok(); };
 
-function context(room, who, unitId, catalog, body) {
+function context(room, who, unitId, catalog, body, copiedCardId=null) {
  const player=room.players[who], foe=room.players[1-who];
- const card= catalog.get(room.units[unitId]?.cardId);
+ const card= catalog.get(copiedCardId??room.units[unitId]?.cardId);
  if(!player||!foe||!card)deny('존재하지 않는 플레이어 또는 카드입니다.');
  const named=id=>catalog.get(room.units[id]?.cardId)?.name||room.units[id]?.tokenCard?.name||'';
  const type=id=>catalog.get(room.units[id]?.cardId)?.type||'';
@@ -105,7 +105,7 @@ register('COC-32-009',c=>require_(['COC-32-001','COC-32-002','COC-32-003','COC-3
 register('COC-32-010',c=>require_((c.player.spellsThisTurn||0)>=1,'이번 턴에 주문을 사용한 기록이 있어야 합니다.'));
 
 register('COC-03-003',c=>{validateEvolution(c.room,c.who,c.card.id,c.catalog);return ok();});
-register('COC-07-004',c=>({costs:[{player:1-c.who,draw:1}]}));
+register('COC-07-003 COC-07-004 COC-07-010',c=>({costs:[{player:1-c.who,draw:1}]}));
 
 // Paid before the opponent responds. Resolution never charges these again.
 register('COC-05-002 COC-31-007',c=>{
@@ -175,6 +175,18 @@ export function planActivation({room,who,unitId,cards,body={}}){
  if(evolutionRules[c.card.id])validateEvolution(room,who,c.card.id,cards);
  const predicate=SPEC.get(c.card.id);
  return {...(predicate?predicate(c):ok()),verified:!!predicate,cardId:c.card.id};
+}
+
+// Reuse checks the original spell's requirements with the real executor UID.
+// No synthetic unit, catalog mutation or original card movement is required.
+// The caller owns its explicit audited-copy allowlist; this is not Original Sin.
+export function planReusedSpellActivation({room,who,sourceId,cardId,cards,body={}}){
+ if(!room.units[sourceId]||cards.get(cardId)?.type!=='주문')deny('재사용 실행자와 원본 주문이 필요합니다.');
+ const c=context(room,who,sourceId,cards,body,cardId);
+ if(cardUseForbidden(room,who,c.card))deny('원본 주문의 사용 금지를 우회할 수 없습니다.');
+ if(evolutionRules[cardId])deny('진화 주문 재사용은 아직 지원하지 않습니다.');
+ const predicate=SPEC.get(cardId);
+ return {...(predicate?predicate(c):ok()),verified:!!predicate,cardId};
 }
 
 export function commitActivationCosts(room,plan,{move,destroy,draw}){

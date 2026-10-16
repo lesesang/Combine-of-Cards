@@ -1,5 +1,5 @@
 // Selection opens only after the effect survives the opponent response.
-export const deckSearchSpellIds=Object.freeze(['COC-07-004','COC-20-003','COC-24-008','COC-26-008']);
+export const deckSearchSpellIds=Object.freeze(['COC-07-004','COC-19-004','COC-20-003','COC-24-008','COC-26-008']);
 const SEARCH_NAMES=Object.freeze({
  'COC-12-003':['F=HERO'],
  'COC-22-015':['퓨전업','블랙메탈퓨전업'],

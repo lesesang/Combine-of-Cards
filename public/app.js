@@ -103,16 +103,36 @@ function openFieldAbility(){
  $('#abilitySubmit').onclick=async()=>{const sourceUnitId=$('#abilitySource').value,targetId=$('#abilityTarget').value,costTargetId=$('#abilityCostTarget').value,costCardId=$('#abilityCostCard').value||undefined,discardCount=Number($('#abilityDiscardCount').value);closeModal();await action('ability',{sourceUnitId,target:targetId?{type:'unit',id:targetId}:undefined,costTarget:costTargetId?{type:'unit',id:costTargetId}:undefined,costCardId,discardCount})};
 }
 function openSpellReuse(){
- const g=state.game,sources=g.spellReuse||[];
+ const g=state.game,sources=g.spellReuse||[],me=g.players[g.you];
  if(!sources.length){notify('현재 사용할 수 있는 아젤리아·유리카 또는 하우스 파티가 없습니다.',true);return;}
- showModal(`<h2>주문 효과 재사용</h2><p>이미 사용한 주문의 효과를 다시 해결합니다. 원본 카드는 소모하지 않습니다.</p>
+ showModal(`<h2>주문 효과 재사용</h2><p>이미 사용한 주문의 효과를 다시 해결합니다. 원본 카드는 소모하지 않으며, 원본의 조건과 비용은 충족해야 합니다.</p>
  <div class="form-field"><label>발동 카드</label><select id="reuseSource">${sources.map((s,i)=>`<option value="${i}">${esc(cardById(s.cardId)?.name)} · 효과 ${s.effectNumber}</option>`).join('')}</select></div>
  <div class="form-field"><label>재사용할 주문</label><select id="reuseCard"></select></div>
  <div class="form-field"><label>대상 (필요한 효과만 적용)</label><select id="reuseTarget">${spellTargetOptions(g)}</select></div>
+ <div class="form-field" id="reuseOptionField" hidden><label>라이드 드레고닉 브레스! 효과 선택</label><select id="reuseOption"><option value="1">상대 몬스터 파괴</option><option value="2">선택 대상에게 200피해</option></select></div>
+ <div class="form-field" id="reuseDiscardField" hidden><label>BLOCK 비용: 버릴 내 패 1장</label><select id="reuseDiscard"></select></div>
+ <div class="form-field" id="reuseSacrificeField" hidden><label>시기 비용: 제물로 보낼 내 몬스터 1장</label><select id="reuseSacrifice">${me.field.filter(Boolean).map(u=>`<option value="${esc(u.id)}">${esc(u.card.name)} · ATK ${u.atk} / HP ${u.hp}</option>`).join('')}</select></div>
+ <p id="reuseDescription" class="small"></p>
  <p id="reuseUnsupported" class="small muted"></p><div class="modal-actions"><button class="btn" data-close>취소</button><button class="btn primary" id="reuseSubmit">재사용 선언</button></div>`);
- const update=()=>{const source=sources[Number($('#reuseSource').value)];$('#reuseCard').innerHTML=source.choices.map(c=>`<option value="${esc(c.cardId)}">${esc(c.name)}</option>`).join('');$('#reuseSubmit').disabled=!source.choices.length;$('#reuseUnsupported').textContent=source.unsupported.length?'아직 재사용을 지원하지 않는 주문: '+source.unsupported.map(c=>c.name).join(', '):'등록된 기본 주문 효과만 지원합니다. 추가 몬스터화·장착 효과는 포함하지 않습니다.';};
+ const updateCard=()=>{
+  const source=sources[Number($('#reuseSource').value)],card=cardById($('#reuseCard').value);
+  $('#reuseOptionField').hidden=card?.id!=='COC-23-009';
+  $('#reuseDiscardField').hidden=card?.id!=='COC-31-009';
+  $('#reuseSacrificeField').hidden=card?.id!=='COC-21-004';
+  $('#reuseDiscard').innerHTML=me.hand.filter(u=>u.id!==source.sourceUnitId).map(u=>`<option value="${esc(u.id)}">${esc(u.card.name)}</option>`).join('');
+  $('#reuseDescription').textContent=card?[...(card.conditions||[]),...(card.effects||[])].join(' '):'';
+ };
+ const update=()=>{const source=sources[Number($('#reuseSource').value)];$('#reuseCard').innerHTML=source.choices.map(c=>`<option value="${esc(c.cardId)}">${esc(c.name)}</option>`).join('');$('#reuseSubmit').disabled=!source.choices.length;$('#reuseUnsupported').textContent=source.unsupported.length?'아직 재사용을 지원하지 않는 주문: '+source.unsupported.map(c=>c.name).join(', '):'등록된 기본 주문 효과만 지원합니다. 추가 몬스터화·장착 효과는 포함하지 않습니다.';updateCard();};
+ $('#reuseCard').onchange=updateCard;
  $('#reuseSource').onchange=update;update();
- $('#reuseSubmit').onclick=async()=>{const source=sources[Number($('#reuseSource').value)],copyCardId=$('#reuseCard').value,t=$('#reuseTarget').value,target=t.startsWith('player:')?{type:'player',player:Number(t.slice(7))}:{type:'unit',id:t};closeModal();await action('reuseSpell',{sourceUnitId:source.sourceUnitId,copyCardId,target});};
+ $('#reuseSubmit').onclick=async()=>{
+  const source=sources[Number($('#reuseSource').value)],copyCardId=$('#reuseCard').value,t=$('#reuseTarget').value;
+  const body={sourceUnitId:source.sourceUnitId,copyCardId,target:t.startsWith('player:')?{type:'player',player:Number(t.slice(7))}:{type:'unit',id:t}};
+  if(copyCardId==='COC-23-009')body.option=Number($('#reuseOption').value);
+  if(copyCardId==='COC-31-009')body.costCardId=$('#reuseDiscard').value;
+  if(copyCardId==='COC-21-004')body.costUnitIds=[$('#reuseSacrifice').value];
+  closeModal();await action('reuseSpell',body);
+ };
 }
 function openGraveAbility(){
  const g=state.game,me=g.players[g.you],choices=g.graveAbilities||[];

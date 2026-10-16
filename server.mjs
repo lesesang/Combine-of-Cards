@@ -40,7 +40,7 @@ const ROOT=path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC=path.join(ROOT,'public');
 const DATA_DIR=process.env.DATA_DIR || path.join(ROOT,'.data');
 const STORAGE=path.join(DATA_DIR,'rooms.json');
-const RULES='1.3-ai-beta.17-draft';
+const RULES='1.3-ai-beta.18-draft';
 // Add a spell only after auditing declaration-time conditions, target choices,
 // costs and retention. This shared registry also drives coverage reporting.
 const REACTIVE_SPELL_IDS=new Set(responseSpellIds);
@@ -578,6 +578,12 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
     !activation.costs.some(cost=>p.field.includes(cost.unitId)))
   fail(409,'필드 세 칸이 모두 차 있습니다.');
  commitActivationCosts(r,activation,{draw,move:(room,id,to,owner)=>move(room,id,to,owner,{tokenAction:to==='grave'?'릴리스':to==='banished'?'사용':undefined}),destroy:(room,id)=>H.destroy(room,id,{cause:'cost'})});
+ // A reload loss while paying a draw cost ends the action. Do not recreate
+ // response state after outcome handling has cleared it.
+ if(r.status==='finished'){
+  if(c.type==='주문'){move(r,id,'grave',r.units[id].owner);recordCardUse(r,who,id,cards);}
+  break;
+ }
  if(c.type==='몬스터'){if(r.status==='active'){H.queueEffectSummon(r,{who,extraUnitId:id,originZone:'hand',recipe:{method:'normal',materials:[]},summonBody:structuredClone(body),turnNumber:r.turnNumber});}}else if(c.type==='일체화'){move(r,id,'integration',who);runIntegrationOnEnter(r,who,id)}else if(c.type==='주문'){
  const automated=hasAutoSpell(c.id);
  if(automated&&REACTIVE_SPELL_IDS.has(c.id)){queueAutomatedSpell(r,who,id,c,body)}
