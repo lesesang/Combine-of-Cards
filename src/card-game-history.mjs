@@ -20,7 +20,20 @@ export function recordCardUse(r,who,id,cards){
  if(['COC-20-006','COC-20-008'].includes(card.id))p.usedBurningIntegration=true;
  refreshHistoryAttack(r,cards);
 }
+export function recordSummonedCard(r,who,id,cards){
+ const u=r.units[id];if(!u||u.cardId!=='COC-19-001')return;
+ r.claySummonedCards??={};r.claySummonedCards[id]??={cardId:u.cardId,controller:who};
+ refreshHistoryAttack(r,cards);
+}
 export function refreshHistoryAttack(r,cards){
+ const clayIds=Object.keys(r.claySummonedCards||{});
+ for(const p of r.players)for(const id of p.field.filter(Boolean)){
+  const u=r.units[id];if(u.cardId!=='COC-19-001')continue;
+  const bonus=u.effectsNegated?0:clayIds.filter(uid=>uid!==id).length*50;
+  // Change the continuous HP layer only by its delta, preserving damage.
+  u.hp+=bonus-(u.clayHpBonus||0);u.clayHpBonus=bonus;u.clayAttackBonus=bonus;
+ }
+
  for(const u of Object.values(r.units)){delete u.historyAttackBonus;delete u.fieldAura;}
  for(const u of Object.values(r.units)){
   delete u.weaponAttackBonus;delete u.weaponDoubleAttack;

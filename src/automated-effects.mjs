@@ -1,3 +1,4 @@
+import {beginClayCopies} from './clay-copies.mjs';
 import {balanceValues as B} from './balance-values.mjs';
 import {evolutionSpellIds} from './evolution.mjs';
 import {isNonToonField} from './spell-choice-batch.mjs';
@@ -7,6 +8,15 @@ import {beginWeaponSelection,damagePlayer} from './weapon-equipment.mjs';
 // A handler must be backed by a particular v1.3 card wording.
 const aliases={};
 const register=(ids,handler)=>{for(const id of ids.split(' '))aliases[id]=handler;};
+register('COC-19-007',ctx=>beginClayCopies(ctx.r,ctx.who,ctx.H));
+register('COC-19-002',ctx=>{
+ const {r,who,body,H}=ctx,id=body.target.id,u=r.units[id],z=H.zone(r,id);
+ if(!u||z?.zone!=='field'||z.player!==who||(u.fieldRevision||0)!==body.copyTargetRevision)return;
+ const copy=H.instantiate(r,u.cardId,who);
+ // Printed state only: no damage, enchantments, counters or borrowed effects.
+ H.move(r,copy,body.option===1?'hand':'deck',who);
+ H.log(r,'effect',`형틀: ${H.name(r,id)} 기본 상태 복사본을 ${body.option===1?'패':'덱'}에 생성`);
+});
 register('COC-09-005 COC-09-006',ctx=>beginWeaponSelection(ctx.r,ctx.who,ctx.c.id,ctx.H));
 register('COC-20-010 COC-23-010 COC-24-007',ctx=>{beginSummonBatch(ctx.r,ctx.who,ctx.c.id,ctx.H);});
 register('COC-08-009',ctx=>{

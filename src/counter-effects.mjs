@@ -21,7 +21,7 @@ function targetKind(effect){
  if(effect?.effectId==='spell-reuse-resolution')return effect.payload?.originCardId==='COC-26-006'?'spell':'integration-effect';
  if(effect?.effectId==='auto-spell-resolution')return 'spell';
  if(effect?.effectId==='extra-summon-resolution')return 'summon';
- if(effect?.effectId==='monster-trigger-resolution'&&TRIGGER_RULES[effect.payload?.cardId])return TRIGGER_RULES[effect.payload.cardId].sourceZone==='integration'?'integration-effect':'monster-effect';
+ if(effect?.effectId==='monster-trigger-resolution'&&TRIGGER_RULES[effect.payload?.cardId])return (TRIGGER_RULES[effect.payload.cardId].sourceZone==='integration'||TRIGGER_RULES[effect.payload.cardId].sourceType==='integration')?'integration-effect':'monster-effect';
  if(effect?.effectId==='field-ability-resolution')return FIELD_EFFECT_RULES[effect.payload?.cardId]?.sourceType==='monster'?'monster-effect':'integration-effect';
  // Classify the declared source snapshot, not its current zone or a generic counter ID.
  // Only registered monster effects are supported; other monster triggers need integration.

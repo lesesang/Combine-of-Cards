@@ -1,5 +1,6 @@
 // Explicit clauses from the runtime catalog; not full-card certification.
 export const choiceResponseTargets=Object.freeze({
+ 'COC-19-002':'own-field',
  'COC-03-007':'any','COC-03-008':'any','COC-05-002':null,
  'COC-05-006':'two-non-toon','COC-05-007':'enemy-field',
  'COC-14-002':null,'COC-14-009':null,'COC-23-009':'option',
@@ -14,7 +15,7 @@ export function isNonToonField(room,id,H){
   !room.players[z.player].field.some(uid=>uid&&H.name(room,uid).includes('카툰 랜드')));
 }
 export function prepareChoiceDeclaration(room,who,cardId,body,H){
- if(['COC-14-009','COC-23-009'].includes(cardId)&&![1,2].includes(body.option))
+ if(['COC-14-009','COC-23-009','COC-19-002'].includes(cardId)&&![1,2].includes(body.option))
   H.fail(409,'사용할 효과 1 또는 2를 선택해야 합니다.');
  if(cardId==='COC-05-006'){
   if(!Array.isArray(body.targets)||body.targets.length!==2||new Set(body.targets).size!==2)

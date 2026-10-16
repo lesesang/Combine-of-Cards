@@ -1,3 +1,4 @@
+import {queueCardRevival} from './death-revival.mjs';
 import {damagePlayer} from './weapon-equipment.mjs';
 import {beginDeckSearch} from './deck-search.mjs';
 import {balanceValues as B} from './balance-values.mjs';
@@ -6,6 +7,11 @@ import {swordActualAttack} from './life-eating-sword.mjs';
 // These handlers resolve only after the summon and its separate monster-effect
 // response window. Printed summon costs belong to activation-rules instead.
 export const SUMMON_TRIGGER_RULES=Object.freeze({
+ 'COC-10-007':{action:'twins-copy'},
+ 'COC-17-001':{action:'pharaoh-buff',sourceZone:'integration',event:'integration-enter'},
+ 'COC-19-006':{action:'restore-battlefield',sourceZone:'integration',event:'integration-enter'},
+ 'COC-20-009':{action:'search'},
+ 'COC-30-010':{action:'yurika-heal',sourceZone:'integration',event:'integration-enter'},
  'COC-05-010':{action:'both-draw'},
  'COC-07-002':{action:'enemy-mill'},
  'COC-10-001':{action:'create-remnant'},
@@ -32,6 +38,32 @@ export function resolveSummonTrigger(r,e,H){
  const rule=SUMMON_TRIGGER_RULES[e.payload.cardId];if(!rule?.action)return false;
  const who=e.owner,p=r.players[who],foe=r.players[1-who],u=r.units[e.sourceId];
  switch(rule.action){
+ case 'twins-copy':{
+  if(u.twinsOffspring||!p.field.includes(null))break;
+  const id=H.instantiate(r,u.cardId,who);r.units[id].twinsOffspring=true;
+  H.move(r,id,'hand',who);
+  queueCardRevival(r,who,id,H,{kind:'twins',originZone:'hand'});
+  H.log(r,'effect','골과 몰: 기본 상태의 복사본을 패에 생성하고 소환 예약 (복사본의 증식 효과는 발동하지 않음)');break;
+ }
+ case 'pharaoh-buff':
+  for(const id of r.players.flatMap(pp=>pp.field.filter(Boolean))){r.units[id].atk+=50;r.units[id].hp=(r.units[id].hp??0)+50;}break;
+ case 'yurika-heal':p.hp+=B.yurikaHeal;break;
+ case 'restore-battlefield':{
+  const targets=[r.turn,1-r.turn].flatMap(controller=>r.players[controller].field.filter(Boolean).map(id=>({id,controller,revision:r.units[id].zoneRevision||0})));
+  H.destroyBatch(r,targets.map(t=>t.id),{sourceId:e.sourceId});
+  let revived=0;
+  for(const t of targets){
+   const unit=r.units[t.id],zone=unit&&H.zone(r,t.id);
+   // Only monsters actually destroyed by this effect are eligible. Tokens
+   // cease to exist; immunity, prior movement and an old grave are excluded.
+   if(zone?.zone!=='grave'||(unit.zoneRevision||0)!==t.revision+1)continue;
+   unit.cannotAttackUntil=r.turnNumber;
+   queueCardRevival(r,t.controller,t.id,H,{kind:'sherulong',cannotAttackUntil:r.turnNumber});revived++;
+  }
+  if(revived)H.graveActivation?.(r,{cardId:e.payload.cardId});
+  H.log(r,'effect','셔우롱: 파괴된 실물 몬스터의 기본 상태 부활 예약, 각 소환에 별도 대응');break;
+ }
+
  case 'search':beginDeckSearch(r,who,e.payload.cardId,H.cards,H,{sourceId:e.sourceId,sourceZone:'field',sourceRevision:e.payload.sourceRevision});break;
  case 'both-draw':H.draw(r,who);if(r.status==='active')H.draw(r,1-who);break;
  case 'draw-two':for(let i=0;i<2&&r.status==='active;i++)H.draw(r,who);break;

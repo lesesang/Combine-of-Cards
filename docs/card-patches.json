@@ -3497,5 +3497,317 @@
       ]
     },
     "rationale": "몬스터 전투→일시 장착→묘지 재사용이라는 무기 덱 흐름을 보존한다. 용광로의 주문/일체화까지 장착하는 해석을 몬스터로 좁히고, 직접 장착·부활 장착에 같은 3턴 수명을 적용해 영구 피해1 방패와 영구 강화 누적을 제한한다. 새 사용자 개별 확정이나 검증 완료가 아니다."
+  },
+  {
+    "patchId": "TURN-CLAY-2026-10-16-DRAFT",
+    "cardId": "COC-10-007",
+    "source": "Tracked runtime catalog at f50f84c; not the absent canonical v1.3 source",
+    "before": {
+      "id": "COC-10-007",
+      "deckId": "10",
+      "name": "들러붙은 쌍둥이 골과 몰",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "언데드",
+      "atk": "100",
+      "hp": "150",
+      "conditions": [],
+      "effects": [
+        "이 몬스터가 소환될 때 자신을 하나 더 소환한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-10-007",
+      "deckId": "10",
+      "name": "들러붙은 쌍둥이 골과 몰",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "언데드",
+      "atk": "100",
+      "hp": "150",
+      "conditions": [],
+      "effects": [
+        "이 몬스터가 소환될 때 빈 필드가 있으면, 기본 상태의 복사본 1장을 자신의 패에 만들고 그 복사본을 소환한다. 이 효과로 만든 복사본은 게임 동안 이 증식 효과를 발동하지 않는다. 복사본의 소환이 무효화되면 패에 남는다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and deck-preserving balance refinement; not a newly user-confirmed official ruling",
+    "rationale": "쌍둥이 한 쌍이라는 의도를 유지하고 복사본의 재귀 증식으로 필드를 자동으로 가득 채우는 해석을 방지. 일반 횟수 제한은 실물별로 유지."
+  },
+  {
+    "patchId": "TURN-CLAY-2026-10-16-DRAFT",
+    "cardId": "COC-11-001",
+    "source": "Tracked runtime catalog at f50f84c; not the absent canonical v1.3 source",
+    "before": {
+      "id": "COC-11-001",
+      "deckId": "11",
+      "name": "낙동강 이무기",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "70",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신의 드로우 페이즈가 시작될 때 자신의 필드에 용 속성 몬스터가 없으면 드로우와 별개로 손패에 들어온다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-11-001",
+      "deckId": "11",
+      "name": "낙동강 이무기",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "70",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신의 드로우 페이즈가 시작될 때 이 카드가 자신의 덱에 있고 자신의 필드에 용/드래곤 속성 몬스터가 없으면 발동한다. 해결 시에도 같은 조건을 만족하면 이 카드를 공개하고, 일반 드로우와 별개로 자신의 패에 넣는다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and deck-preserving balance refinement; not a newly user-confirmed official ruling",
+    "rationale": "용 덱의 초반 일체화 확보를 보존. 기존 구현의 덱 출발점을 문구에 명시하고 재진입 세대 검사와 용/드래곤 부재 재검사. 상대에게 나머지 덱은 공개하지 않음."
+  },
+  {
+    "patchId": "TURN-CLAY-2026-10-16-DRAFT",
+    "cardId": "COC-17-001",
+    "source": "Tracked runtime catalog at f50f84c; not the absent canonical v1.3 source",
+    "before": {
+      "id": "COC-17-001",
+      "deckId": "17",
+      "name": "호루스의 현신–파라오",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "파라오",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "태양신–호루스가 필드에 있어야 사용 가능하다, 사용후 태양신–호루스가 필드에서 사라져도 무효화 되지는 않는다."
+      ],
+      "effects": [
+        "필드에 존재하는 몬스터에 체력과 공격력을 50씩 높인다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-17-001",
+      "deckId": "17",
+      "name": "호루스의 현신–파라오",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "파라오",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "태양신–호루스가 필드에 있어야 사용 가능하다, 사용후 태양신–호루스가 필드에서 사라져도 무효화 되지는 않는다."
+      ],
+      "effects": [
+        "일체화할 때 양쪽 필드에 현재 존재하는 모든 몬스터의 공격력과 현재 체력을 각각 50 올린다. 이 강화는 각 몬스터가 필드를 떠날 때까지 유지된다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and deck-preserving balance refinement; not a newly user-confirmed official ruling",
+    "rationale": "원문 필드에 존재하는 몬스터 범위에 맞춰 기존 아군 한정 오류 수정. 일체화 진입의 일회 강화이며 이후 소환 몬스터에는 소급하지 않음."
+  },
+  {
+    "patchId": "TURN-CLAY-2026-10-16-DRAFT",
+    "cardId": "COC-19-001",
+    "source": "Tracked runtime catalog at f50f84c; not the absent canonical v1.3 source",
+    "before": {
+      "id": "COC-19-001",
+      "deckId": "19",
+      "name": "토우 병사",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "토우병사",
+      "atk": "50",
+      "hp": "70",
+      "conditions": [],
+      "effects": [
+        "이번 게임에서 소환된 다른 토우 병사 하나당 50/50을 얻는다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-19-001",
+      "deckId": "19",
+      "name": "토우 병사",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "토우병사",
+      "atk": "50",
+      "hp": "70",
+      "conditions": [],
+      "effects": [
+        "이번 게임에서 양쪽 플레이어가 실제로 소환한 다른 토우 병사 카드 1장당 이 카드의 공격력과 현재 체력이 각각 50 증가한다. 같은 실물 카드를 다시 소환해도 이력에는 한 번만 센다. 새로운 복사본은 별개의 카드로 센다. 이 지속 효과가 무효화되면 증가분을 제거하며, 다시 적용할 때 이미 받은 피해는 유지한다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and deck-preserving balance refinement; not a newly user-confirmed official ruling",
+    "rationale": "토우의 복제 성장 의도는 유지하되 동일 UID 반복 소환으로 무한 성장을 만드는 해석을 제외. 양측의 새 병사는 각각 누적하며 HP 재계산으로 피해가 사라지지 않음."
+  },
+  {
+    "patchId": "TURN-CLAY-2026-10-16-DRAFT",
+    "cardId": "COC-19-002",
+    "source": "Tracked runtime catalog at f50f84c; not the absent canonical v1.3 source",
+    "before": {
+      "id": "COC-19-002",
+      "deckId": "19",
+      "name": "형틀",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "토우병사",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "내 몬스터 하나를 복사해서 내 패로 가져오거나, 내 덱에 섞어 넣습니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-19-002",
+      "deckId": "19",
+      "name": "형틀",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "토우병사",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신이 소유하고 조종하는 필드의 기본 몬스터 1장을 선택한다. 자신의 덱에 속한 그 카드의 기본 상태 복사본 1장을 자신의 패에 넣거나 덱에 섞는다. 공격력·체력 변화, 부여 효과와 사용 이력은 복사하지 않는다. 생성 토큰·엑스트라 몬스터는 선택할 수 없다. 대상과 복사본의 이동 위치는 발동 시 정한다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and deck-preserving balance refinement; not a newly user-confirmed official ruling",
+    "rationale": "병사를 늘려 덱/패를 순환하는 의도 보존. 강화 및 카운터 복제, 탈취 카드의 다른 덱 혼합과 엑스트라 일반 소환 우회를 방지."
+  },
+  {
+    "patchId": "TURN-CLAY-2026-10-16-DRAFT",
+    "cardId": "COC-19-006",
+    "source": "Tracked runtime catalog at f50f84c; not the absent canonical v1.3 source",
+    "before": {
+      "id": "COC-19-006",
+      "deckId": "19",
+      "name": "잠든 황제 셔우롱",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "토우병사",
+      "atk": "150",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "필드의 모든 몬스터를 파괴한 뒤 원래 상태로 부활시킨다. 부활 직후 적용 중인 지속·누적 효과를 다시 계산해 능력치를 조정한다. 이 몬스터들은 이번 턴에 공격할 수 없다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-19-006",
+      "deckId": "19",
+      "name": "잠든 황제 셔우롱",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "토우병사",
+      "atk": "150",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "일체화할 때 필드의 모든 몬스터를 파괴한다. 이 효과로 실제 파괴되어 묘지에 남아 있는 몬스터를 파괴 전 조종자의 빈 필드에 기본 상태로 차례로 부활시킨다. 각 부활 소환은 별도로 무효화할 수 있으며, 무효화된 카드는 묘지에 남는다. 부활 직후 적용 중인 지속·누적 효과를 다시 계산한다. 이 효과로 파괴된 몬스터는 이번 턴에 공격할 수 없다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and deck-preserving balance refinement; not a newly user-confirmed official ruling",
+    "rationale": "기존 원래 상태 복구와 재계산/공격 금지 유지. 파괴 면역/토큰 소멸을 존중하고 실물 부활마다 R22 대응. 순서는 현재 필드 슬롯 순서(턴 플레이어 우선)."
+  },
+  {
+    "patchId": "TURN-CLAY-2026-10-16-DRAFT",
+    "cardId": "COC-19-007",
+    "source": "Tracked runtime catalog at f50f84c; not the absent canonical v1.3 source",
+    "before": {
+      "id": "COC-19-007",
+      "deckId": "19",
+      "name": "흙거북 노지귀",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "토우병사",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "내 필드가 지난 턴부터 비어 있어야 한다."
+      ],
+      "effects": [
+        "파괴된 몬스터 하나를 복사해 되살립니다. 3번 반복합니다."
+      ],
+      "notes": [
+        "원문 표기: 맹약. 일체화 교체가 아닌 부활 효과를 가진 주문."
+      ]
+    },
+    "after": {
+      "id": "COC-19-007",
+      "deckId": "19",
+      "name": "흙거북 노지귀",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "토우병사",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "지난 한 턴 전체부터 현재까지 자신의 필드에 몬스터가 없었어야 한다."
+      ],
+      "effects": [
+        "자신의 묘지에 있는, 필드에서 파괴된 자기 소유 기본 몬스터 1장을 선택한다. 자신의 덱에 속한 그 카드의 기본 상태 복사본을 묘지에 최대 3장 만들고, 빈 필드 수만큼 차례로 부활 소환한다. 원본은 묘지에 남긴다. 각 소환은 별도로 무효화할 수 있으며, 무효화된 복사본은 묘지에 남는다. 능력치 변화·부여 효과·사용 이력은 복사하지 않는다."
+      ],
+      "notes": [
+        "원문 표기: 맹약. 일체화 교체가 아닌 부활 효과를 가진 주문."
+      ]
+    },
+    "authority": "User-delegated developer interpretation and deck-preserving balance refinement; not a newly user-confirmed official ruling",
+    "rationale": "빈 필드를 견디고 병사를 복구하는 덱 의도 보존. 자신의 파괴된 기본 몬스터 복사, 세 번 복구, 기본값/개별 대응/원본 유지 명시. 생성한 복사본은 무효 시 원래 묘지 유지."
+  },
+  {
+    "patchId": "TURN-CLAY-2026-10-16-DRAFT",
+    "cardId": "COC-20-009",
+    "source": "Tracked runtime catalog at f50f84c; not the absent canonical v1.3 source",
+    "before": {
+      "id": "COC-20-009",
+      "deckId": "20",
+      "name": "버닝 데몬즈 와이번",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "악마",
+      "atk": "200",
+      "hp": "150",
+      "conditions": [
+        "자신이 100피해를 받습니다."
+      ],
+      "effects": [
+        "덱의 버닝 데몬즈 드래곤을 패로 가져온다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-20-009",
+      "deckId": "20",
+      "name": "버닝 데몬즈 와이번",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "악마",
+      "atk": "200",
+      "hp": "150",
+      "conditions": [
+        "일반 소환을 선언하기 전에 자신의 플레이어가 피해 100을 받는다. 이 피해로 패배하면 소환하지 않는다. 소환이 무효화되어도 받은 피해를 되돌리지 않는다."
+      ],
+      "effects": [
+        "이 몬스터가 소환되면 자신의 덱에서 버닝 데몬즈 드래곤 1장을 선택해 공개하고 패에 넣는다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and deck-preserving balance refinement; not a newly user-confirmed official ruling",
+    "rationale": "불명확한 자신 100피해를 플레이어의 일반 소환 선언 전 피해 비용으로 정비. 버닝 덱의 체력 구간 일체화 연계를 돕고 비용을 검색 무효화와 분리. 이전 코드의 소환 후 몬스터 피해100 제거."
   }
 ]

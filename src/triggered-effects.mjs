@@ -10,6 +10,9 @@ import {queueDeathRevival} from './death-revival.mjs';
 // Draft automation: the user requested implementation batches before testing.
 // Automatic monster/integration triggers, not selectable MAIN abilities.
 export const TRIGGER_RULES=Object.freeze({
+ 'COC-07-001':{effectNumber:1,event:'enemy-turn-start',sourceZone:'integration'},
+ 'COC-11-001':{effectNumber:1,event:'own-turn-start',sourceZone:'deck',sourceType:'integration'},
+ 'COC-19-003':{effectNumber:1,event:'own-turn-start'},
  'COC-09-001':{effectNumber:1,event:'own-monster-destroyed',sourceZone:'integration',repeatPerEvent:true},
  'COC-10-011':{effectNumber:1,event:'destroyed',repeatPerEvent:true},
  ...Object.fromEntries(Object.entries(SUMMON_TRIGGER_RULES).map(([id,rule])=>[id,{effectNumber:1,event:'summoned',...rule}])),
@@ -33,11 +36,12 @@ function trigger(r,who,id,extra={}){
  const u=r.units[id],sourceZone=TRIGGER_RULES[u.cardId].sourceZone||'field';
  return {key:`trigger-${r.turnNumber}-${id}`,effectId:'monster-trigger-resolution',owner:who,sourceId:id,sourceZone,priority:0,
   title:`${u.cardId} · 효과 ${TRIGGER_RULES[u.cardId].effectNumber}`,
-  payload:{cardId:u.cardId,sourceRevision:(sourceZone==='integration'?u.integrationRevision:u.fieldRevision)||0,...extra}};
+  payload:{cardId:u.cardId,sourceRevision:(sourceZone==='integration'?u.integrationRevision:sourceZone==='field'?u.fieldRevision:u.zoneRevision)||0,...extra}};
 }
 export function recordSummonTrigger(r,who,id,H){
  const u=r.units[id],rule=u&&TRIGGER_RULES[u.cardId];
- if(rule?.event!=='summoned')return false;
+ if(!['summoned','integration-enter'].includes(rule?.event))return false;
+ if(u.cardId==='COC-10-007'&&u.twinsOffspring)return true;
  if(u.cardId==='COC-10-003'&&r.players[who].hp<=500)return true;
  if(!u.effectsNegated&&!effectUsedThisTurn(r,who,id,rule.effectNumber)){
   const pending=r.deferredMonsterTriggers??=[];
@@ -139,7 +143,7 @@ export function chooseTriggerTarget(r,who,id,H){
  const u=r.units[p.sourceId],z=H.zone(r,p.sourceId);
  r.pendingTriggerTargetChoice=null;
  const sourceZone=TRIGGER_RULES[p.cardId].sourceZone||'field';
- if(!u||u.cardId!==p.cardId||u.effectsNegated||z?.zone!==sourceZone||z.player!==who||((sourceZone==='integration'?u.integrationRevision:u.fieldRevision)||0)!==p.sourceRevision){H.log(r,'effect','유발 효과의 소스 상태 변경으로 불발');return;}
+ if(!u||u.cardId!==p.cardId||u.effectsNegated||z?.zone!==sourceZone||z.player!==who||((sourceZone==='integration'?u.integrationRevision:sourceZone==='field'?u.fieldRevision:u.zoneRevision)||0)!==p.sourceRevision){H.log(r,'effect','유발 효과의 소스 상태 변경으로 불발');return;}
  const kind=TRIGGER_RULES[p.cardId].target;
  if(kind==='optional-destroy-board'){H.destroy(r,id,{sourceId:p.sourceId});H.outcome(r);return;}
  if(kind==='destroy-lower-printed'){H.destroy(r,id,{sourceId:p.sourceId});H.outcome(r);return;}
@@ -202,9 +206,20 @@ export function landTurnTriggers(r,who){
  return group;
 }
 export function integrationTurnTriggers(r,who,H){
- const id=r.players[who].integration,u=id&&r.units[id];
- if(u?.cardId!=='COC-06-001'||u.effectsNegated||effectUsedThisTurn(r,who,id,1)||!eligibleSearchIds(r,who,u.cardId,H.cards).length)return [];
- return [trigger(r,who,id,{eventTurn:r.turnNumber})];
+ const group=[],p=r.players[who];
+ const add=(owner,id,extra={})=>{
+  const u=id&&r.units[id];if(!u||u.effectsNegated||effectUsedThisTurn(r,owner,id,1))return;
+  group.push({...trigger(r,owner,id,{eventTurn:r.turnNumber}),...extra});
+ };
+ const own=p.integration;
+ if(r.units[own]?.cardId==='COC-06-001'&&eligibleSearchIds(r,who,'COC-06-001',H.cards).length)add(who,own);
+ const enemy=r.players[1-who].integration;
+ if(r.units[enemy]?.cardId==='COC-07-001')add(1-who,enemy);
+ for(const id of p.field.filter(Boolean))if(r.units[id].cardId==='COC-19-003')add(who,id,{exception:'destroy-trigger'});
+ if(!p.field.some(id=>id&&/용|드래곤/.test(H.attribute(r,id)))){
+  for(const id of p.deck)if(r.units[id].cardId==='COC-11-001')add(who,id,{exception:'independent'});
+ }
+ return group;
 }
 export function queueMonsterTriggers(r,effects,H){
  if(!effects.length)return;
@@ -237,6 +252,15 @@ export function resumeMonsterTriggers(r,H){
 }
 export function resolveMonsterTrigger(r,e,H){
  const u=r.units[e.sourceId],z=H.zone(r,e.sourceId),p=e.payload;
+ if(p.cardId==='COC-19-003'){
+  // Printed source-leave exception: the declared return survives destruction.
+  if(z?.zone==='field'&&z.player===e.owner&&(u.fieldRevision||0)===p.sourceRevision){
+   if(u.effectsNegated)return;
+   H.destroy(r,e.sourceId,{sourceId:e.sourceId});
+  }
+  for(const id of r.players.flatMap(pp=>pp.field.filter(Boolean)))H.move(r,id,'hand',r.units[id].owner);
+  H.log(r,'effect','감독관: 필드의 모든 몬스터를 원래 소유자의 패로 반환');return;
+ }
  if(p.cardId==='COC-10-011'){queueDeathRevival(r,e,H);return;}
  if(p.cardId==='COC-26-004'){
   // This declared destruction trigger deliberately survives its own death.
@@ -246,7 +270,14 @@ export function resolveMonsterTrigger(r,e,H){
   H.log(r,'effect',`저지먼트 매치: 파괴 직전 공격력 ${p.amount} 반사 피해`);H.outcome(r);return;
  }
  const sourceZone=TRIGGER_RULES[p.cardId].sourceZone||'field';
- if(!u||u.cardId!==p.cardId||u.effectsNegated||z?.zone!==sourceZone||z.player!==e.owner||((sourceZone==='integration'?u.integrationRevision:u.fieldRevision)||0)!==p.sourceRevision){H.log(r,'effect','유발 소스 이탈/재진입·조종권/무효 상태로 불발');return;}
+ if(!u||u.cardId!==p.cardId||u.effectsNegated||z?.zone!==sourceZone||z.player!==e.owner||((sourceZone==='integration'?u.integrationRevision:sourceZone==='field'?u.fieldRevision:u.zoneRevision)||0)!==p.sourceRevision){H.log(r,'effect','유발 소스 이탈/재진입·조종권/무효 상태로 불발');return;}
+ if(p.cardId==='COC-07-001'){H.mill(r,1-e.owner,2);return;}
+ if(p.cardId==='COC-11-001'){
+  if(!r.players[e.owner].field.some(id=>id&&/용|드래곤/.test(H.attribute(r,id)))){
+   H.move(r,e.sourceId,'hand',e.owner);H.log(r,'search','낙동강 이무기 공개 후 드로우와 별개로 패에 넣음');
+  }
+  return;
+ }
  if(p.cardId==='COC-06-001'){
   beginDeckSearch(r,e.owner,p.cardId,H.cards,H,{sourceId:e.sourceId,sourceZone,sourceRevision:p.sourceRevision});return;
  }

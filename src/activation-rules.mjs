@@ -1,3 +1,5 @@
+import {clayRevivalReady,clayCopyCandidates} from './clay-copies.mjs';
+import {damagePlayer} from './weapon-equipment.mjs';
 import {balanceValues as B} from './balance-values.mjs';
 import {allWanderersDied,enemyFieldEmptyThreeTurns} from './integration-history.mjs';
 import {cardUseForbidden} from './card-game-history.mjs';
@@ -67,9 +69,11 @@ register('COC-14-003',c=>require_(Boolean(c.player.integration),'일체화 상�
 register('COC-14-006',c=>require_(c.enemyField.some(id=>c.room.units[id]?.atk>=350),'상대 필드에 공격력 350 이상 몬스터가 필요합니다.'));
 register('COC-17-001',c=>require_(c.hasField('태양신')&&c.hasField('호루스'),'필드에 태양신 호루스가 있어야 합니다.'));
 register('COC-17-005 COC-17-006',c=>require_(c.hasIntegration('호루스의 현신'),'호루스의 현신–파라오와 일체화해야 합니다.'));
+register('COC-19-007',c=>{require_(clayRevivalReady(c.room,c.who),'지난 한 턴 전체부터 현재까지 자신의 필드가 비어 있어야 합니다.');return require_(clayCopyCandidates(c.room,c.who,c.catalog).length>0,'묘지에 파괴된 자신의 기본 몬스터가 필요합니다.');});
 register('COC-20-003',c=>require_(c.player.hp<=600,'체력이 600 이하여야 합니다.'));
 register('COC-20-006',c=>require_(c.player.hp<=700,'체력이 700 이하여야 합니다.'));
 register('COC-20-007',c=>require_(c.player.hp<=500&&c.hasIntegration('버닝 데몬즈'),'버닝데몬즈 일체화와 체력 500 이하가 필요합니다.'));
+register('COC-20-009',c=>({costs:[{player:c.who,hp:100,damage:true}]}));
 register('COC-20-010',c=>{
  require_(batchSummonCount(c.room,c.who,c.card.id,{cards:c.catalog})>0,'필드를 떠난 자신의 버닝데몬즈와 빈 필드가 필요합니다.');
  const hp=Math.ceil(c.player.hp/2);require_(c.player.hp>hp,'체력 절반을 지불한 뒤 생존해야 합니다.');
@@ -217,7 +221,7 @@ export function commitActivationCosts(room,plan,{move,destroy,draw}){
    room.effects??=[];room.effects.push({type:'next-enemy-turn-destroy',player:cost.player,appliedAtTurn:room.turnNumber,targets:structuredClone(cost.scheduleFieldDestruction)});continue;
   }
   if(cost.draw){draw(room,cost.player);continue;}
-  if(cost.hp!==undefined){room.players[cost.player].hp-=cost.hp;continue;}
+  if(cost.hp!==undefined){if(cost.damage)damagePlayer(room,cost.player,cost.hp);else room.players[cost.player].hp-=cost.hp;continue;}
   const unit=room.units[cost.unitId];
   if(cost.to==='destroy'){
    if(destroy(room,cost.unitId)===false)

@@ -23,6 +23,14 @@ export function prepareResponseTargets(room,who,cardId,body,H){
  if(kind==='option')kind=body.option===1?'enemy-field':'any';
  if(!kind)return body;
  let target=body.target;
+ if(cardId==='COC-19-002'&&target?.id){
+  const u=room.units[target.id],c=u&&H.cards.get(u.cardId);
+  if(!c||c.type!=='몬스터'||c.zone!=='main'||u.created||u.owner!==who||c.deckId!==room.players[who].deckId)
+   H.fail(409,'자신 소유 덱의 기본 몬스터를 선택해야 합니다.');
+  if(body.copyTargetRevision!==undefined&&(u.fieldRevision||0)!==body.copyTargetRevision)H.fail(409,'복사 대상이 필드를 떠났다가 재진입했습니다.');
+  body={...body,copyTargetRevision:u.fieldRevision||0};
+ }
+
  if(!target&&(kind==='any'||kind.startsWith('enemy'))){
   const id=room.players[1-who].field.find(Boolean);
   target=id?{type:'unit',id}:{type:'player',player:1-who};

@@ -13,7 +13,7 @@ export const summonAutomations = new Set([
  'COC-26-002','COC-23-004','COC-20-009','COC-10-001','COC-10-007'
 ]);
 export const passiveAutomations = new Set([
- 'COC-01-001','COC-09-001','COC-11-001','COC-07-001','COC-07-007',
+ 'COC-19-001','COC-19-003','COC-01-001','COC-09-001','COC-11-001','COC-07-001','COC-07-007',
  'COC-09-002','COC-09-003','COC-10-011','COC-05-001','COC-12-006',
  'COC-12-008','COC-10-006','COC-21-007','COC-08-002','COC-09-004',
  'COC-12-007','COC-12-014','COC-21-010'
