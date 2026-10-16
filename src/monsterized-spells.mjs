@@ -1,3 +1,4 @@
+import {restoreNobleStats} from './demon-effects.mjs';
 import {queueCardRevival} from './death-revival.mjs';
 export const G_TOOLS=Object.freeze(['COC-01-004','COC-01-005','COC-01-007']);
 // Existing runtime cards only. These are developer-delegated cost clarifications,
@@ -49,6 +50,7 @@ export function prepareMonsterizedUnit(r,p,H){
  if(p.revivalKind==='g-tool'){
   const c=H.cards.get(u.cardId);u.atk=Math.max(0,Number(c.atk)||0);u.hp=Math.max(1,Number(c.hp)||1);u.cannotAttack=['COC-01-004','COC-01-005'].includes(u.cardId);u.gToolBody=true;
  }
+ if(p.revivalKind==='altar-body'||p.revivalKind==='g-tool')restoreNobleStats(u);
  if(p.revivalKind==='altar-recruit'){
   u.altarDisposable={controller:p.who};
   if(u.cardId==='COC-21-008')u.cannotAttackThroughTurn=r.turnNumber+1;

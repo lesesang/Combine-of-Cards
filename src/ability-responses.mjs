@@ -1,3 +1,4 @@
+import {resolveOriginalSin} from './original-sin.mjs';
 import {declareEffect,resolveEffectStack} from './effect-runtime.mjs';
 import {FIELD_EFFECT_RULES,prepareFieldEffect,payFieldEffect,resolveFieldEffect} from './field-ability-effects.mjs';
 import {availableCounters,declareCardCounter,resolveCardCounter,counterEffectIds} from './counter-effects.mjs';
@@ -41,6 +42,10 @@ export function finishFieldAbility(r,H){
    if(pending.kind==='grave'){
     if(effect.effectId!=='grave-ability-resolution'||effect.sequence!==pending.sequence||effect.sourceId!==pending.sourceId||effect.owner!==pending.who)throw new Error('unexpected grave ability');
     resolveGraveAbility(r,effect,H);return;
+   }
+   if(pending.kind==='original-sin'){
+    if(effect.effectId!=='original-sin-resolution'||effect.sequence!==pending.sequence||effect.owner!==pending.who||effect.sourceId!==pending.sourceId)throw new Error('unexpected Original Sin effect');
+    resolveOriginalSin(r,effect,H);return;
    }
    if(pending.kind==='reuse'){
     if(effect.effectId!=='spell-reuse-resolution'||effect.sequence!==pending.sequence||effect.owner!==pending.who||effect.sourceId!==pending.sourceId)throw new Error('unexpected spell reuse effect');

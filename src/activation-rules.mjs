@@ -40,6 +40,10 @@ function context(room, who, unitId, catalog, body, copiedCardId=null) {
  return {room,who,unitId,catalog,body:body||{},player,foe,card,named,type,attribute,ownField,enemyField,ownIntegration,hasField,hasIntegration,fieldCount,deckCount,handCount,fieldAnywhere};
 }
 
+register('COC-21-001',c=>{
+ require_((c.player.curseDestructions||0)>=2,'저주 속성 주문/몬스터가 몬스터를 2번 이상 파괴한 실제 이력이 필요합니다.');
+ return {costs:[c.player.hp>333?{player:c.who,hp:333}:{player:c.who,hpSet:50}]};
+});
 register('COC-01-009',c=>require_(Boolean(c.player.integration),'이 주문은 일체화 상태에서만 사용할 수 있습니다.'));
 register('COC-01-002',c=>{
  const ids=c.body.costUnitIds;
@@ -231,6 +235,7 @@ export function commitActivationCosts(room,plan,{move,destroy,draw}){
    continue;
   }
   if(cost.draw){if(!room.players[cost.player]||typeof draw!=='function')deny('드로우 비용을 처리할 수 없습니다.');continue;}
+  if(cost.hpSet!==undefined){if(!room.players[cost.player]||cost.hpSet!==50)deny('잘못된 체력 설정 비용입니다.');continue;}
   if(cost.hp!==undefined){
    if(!room.players[cost.player]||(!cost.damage&&room.players[cost.player].hp<=cost.hp))deny('필요한 체력을 지불할 수 없습니다.');
    continue;
@@ -246,6 +251,7 @@ export function commitActivationCosts(room,plan,{move,destroy,draw}){
    room.effects??=[];room.effects.push({type:'next-enemy-turn-destroy',player:cost.player,appliedAtTurn:room.turnNumber,targets:structuredClone(cost.scheduleFieldDestruction)});continue;
   }
   if(cost.draw){draw(room,cost.player);continue;}
+  if(cost.hpSet!==undefined){room.players[cost.player].hp=cost.hpSet;continue;}
   if(cost.hp!==undefined){if(cost.damage)damagePlayer(room,cost.player,cost.hp);else room.players[cost.player].hp-=cost.hp;continue;}
   const unit=room.units[cost.unitId];
   if(cost.to==='destroy'){

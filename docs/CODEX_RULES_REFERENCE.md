@@ -1,5 +1,9 @@
 # Codex 규칙·카드 재정 참조표 — v1.3 (2026-10-13)
 
+## 2026-10-16 구현 범위 갱신 — 확정 룰 변경 없음
+
+[원죄·악마 초안](ORIGINAL_SIN_AND_DEMONS_DRAFT.md)은 원죄의 조건 면제/플레이어 주체/실물별 제한을 유지하며 선택 복사59개 조항을 연결했다. 사건 의존/지속/계승 복사는 미완료다. 몽마/귀족/호루스의 개발자 명확화와 원죄 선택 정보 주석은 `card-patches.json`에 전후 기록했다. 확정17재정·마검·장착 해제 금지·진화·원소 공유 예외는 유지한다. 테스트/CI는 보류 상태다.
+
 이 문서는 **현재 확정된 내용을 Codex가 빠르게 찾는 색인**이다. 모든 카드 원문의 완전한 정본을 대체하지 않는다. 명확한 확정 출처: `docs/PRODUCT_VISION_AND_RULES.md`, `docs/DECISIONS_AND_CORRECTIONS.md`, `docs/RULINGS_CONFIRMED_2026-10-13.md` 및 사용자 최신 마검 확정(병합 PR #58). **구현 완료 여부는 별도**: `docs/OPEN_RULINGS_REGISTER.md`, `docs/EFFECT_COVERAGE.md`, 코드·테스트·CI와 대조한다.
 
 ## 2026-10-14 사용자 명확화 — 서로 다른 실제 카드의 효과는 별개

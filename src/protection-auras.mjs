@@ -1,3 +1,4 @@
+import {demonAura,refreshDemonAttributes} from './demon-effects.mjs';
 // Independent spell grants are serialized separately from printed abilities.
 // HP payment, absorption, HP setting and reload never call this damage guard.
 export function damageProtected(r,target){
@@ -44,7 +45,7 @@ export function continuousAttackBonus(r,unit){
  if(!unit)return 0;
  const p=r.players.find(p=>p.integration===unit.id||p.field.includes(unit.id));
  if(!p)return 0;
- let bonus=p.field.filter(id=>id&&r.units[id]?.cardId==='COC-17-008'&&!r.units[id].effectsNegated).length*50;
+ let bonus=demonAura(r,unit)+p.field.filter(id=>id&&r.units[id]?.cardId==='COC-17-008'&&!r.units[id].effectsNegated).length*50;
  if(p.integration===unit.id)for(const id of p.field.filter(Boolean)){
   const u=r.units[id];if(u.effectsNegated)continue;
   if(u.gToolBody&&['COC-01-004','COC-01-005'].includes(u.cardId))bonus+=100;
@@ -53,6 +54,7 @@ export function continuousAttackBonus(r,unit){
  return bonus;
 }
 export function refreshContinuousAuras(r,cards){
+ refreshDemonAttributes(r,cards);
  for(const u of Object.values(r.units)){delete u.continuousAttackBonus;delete u.gatlingDoubleAttack;delete u.gToolDiceMin;}
  for(const p of r.players){
   const hp=Object.keys(p.pyramidSources||{}).length*50;
@@ -66,4 +68,11 @@ export function refreshContinuousAuras(r,cards){
    if(p.field.some(id=>id&&r.units[id].cardId==='COC-01-004'&&r.units[id].gToolBody&&!r.units[id].effectsNegated))r.units[p.integration].gToolDiceMin=50;
   }
  }
+}
+
+// Horus increases only the numerical dice of the two named authority spells.
+// It is a live aura from either field, not a stored buff or an activation count.
+export function horusSpellDiceBonus(r,cardId){
+ if(!['COC-17-005','COC-17-006'].includes(cardId))return 0;
+ return r.players.reduce((n,p)=>n+p.field.filter(id=>id&&r.units[id]?.cardId==='COC-17-009'&&!r.units[id].effectsNegated).length*100,0);
 }

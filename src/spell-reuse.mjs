@@ -50,7 +50,7 @@ export function spellReuseView(r,who,H){
    unsupported:ids.filter(cid=>!reusable.has(cid)).map(cardId=>({cardId,name:H.cards.get(cardId).name}))};
  });
 }
-function prepareBody(r,who,cardId,body,H){
+export function prepareCopiedSpellBody(r,who,cardId,body,H){
  const selected={};
  // Ignore unrelated client fields; only this original clause defines choices.
  if(['COC-01-004','COC-01-005','COC-03-007','COC-03-008','COC-08-005','COC-19-005','COC-21-002','COC-27-006','COC-30-002','COC-30-003','COC-30-006','COC-31-006',
@@ -60,6 +60,7 @@ function prepareBody(r,who,cardId,body,H){
  if(cardId==='COC-21-004')selected.costUnitIds=body.costUnitIds;
  // The two legacy handlers used implicit targets; copies always freeze one.
  if(['COC-08-005','COC-30-003'].includes(cardId))return prepareResponseTargets(r,who,'COC-30-002',selected,H);
+ if(['COC-03-007','COC-03-008'].includes(cardId))return prepareResponseTargets(r,who,'COC-06-007',selected,H);
  if(cardId==='COC-21-002')validateLifeEatingSwordTarget(r,selected,H,who);
  return prepareResponseTargets(r,who,cardId,selected,H);
 }
@@ -68,7 +69,7 @@ export function prepareSpellReuse(r,who,body,H){
  if(r.turn!==who||!idle(r)||!sourceReady(r,who,id,H))H.fail(409,'현재 발동할 수 있는 주문 재사용 카드가 아닙니다.');
  const u=r.units[id],rule=REUSE_RULES[u.cardId],original=history(r,who,rule).find(e=>e.cardId===body.copyCardId);
  if(!original||!reusable.has(original.cardId))H.fail(409,'사용 이력에 있고 현재 재사용을 지원하는 주문을 선택하세요.');
- const prepared=prepareBody(r,who,original.cardId,body,H);
+ const prepared=prepareCopiedSpellBody(r,who,original.cardId,body,H);
  const activation=planReusedSpellActivation({room:r,who,sourceId:id,cardId:original.cardId,cards:H.cards,body:prepared});
  const targets=prepared.target?.type==='unit'?[prepared.target.id]:[];
  return {originCardId:u.cardId,sourceId:id,sourceZone:rule.zone,sourceRevision:u.integrationRevision||0,
@@ -105,7 +106,7 @@ export function resolveSpellReuse(r,e,H){
  }
  const valid=p.targets.every(t=>{const target=r.units[t.id],tz=target&&H.zone(r,t.id);return tz?.zone===t.zone&&tz.player===t.controller&&(t.zone==='integration'?(target.integrationRevision||0):(target.fieldRevision||0))===t.revision;});
  if(!valid||!responseTargetStillValid(r,e.owner,p.original.cardId,p.body,H)){H.log(r,'effect','주문 재사용 대상 이탈/재진입으로 불발');return;}
- try{prepareBody(r,e.owner,p.original.cardId,p.body,H);}catch(error){if(error.status!==409)throw error;H.log(r,'effect','주문 재사용 대상 조건 변경으로 불발');return;}
+ try{prepareCopiedSpellBody(r,e.owner,p.original.cardId,p.body,H);}catch(error){if(error.status!==409)throw error;H.log(r,'effect','주문 재사용 대상 조건 변경으로 불발');return;}
  const result=castAutomatedSpell(r,e.owner,H.cards.get(p.original.cardId),p.body,H,{activationValidated:true,baseDiceMax:p.baseDiceMax});
  if(result.retain||result.evolution)throw new Error('copy handler requires unsupported physical continuation');
  if(result.deckSearch&&r.status==='active')beginDeckSearch(r,e.owner,p.original.cardId,H.cards,H);

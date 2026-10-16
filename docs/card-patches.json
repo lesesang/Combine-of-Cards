@@ -4803,5 +4803,168 @@
     },
     "authority": "User-delegated developer interpretation and balance patch; confirmed rulings preserved; not a new individual user confirmation",
     "rationale": "스톰 판본의 공격 판정 후 해제 순서를 기준으로 불명확한 피해 수신자를 각 일체화 플레이어의 반동으로 명시한다. 다이스 경계/양측 동시 피해/장착 해제 순서와 슈페리얼 판본을 통일한다."
+  },
+  {
+    "patchId": "SIN-DEMONS-2026-10-16-DRAFT",
+    "cardId": "COC-17-009",
+    "source": "Tracked runtime catalog at ce08e811ec17298aba668a30187b0ca860de7817; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-17-009",
+      "deckId": "17",
+      "name": "태양 신–호루스",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "파라오",
+      "atk": "200",
+      "hp": "200",
+      "conditions": [],
+      "effects": [
+        "이 카드가 필드에 존재하는 동안 호루스의 권능이 이름에 들어가 있는 카드는 다이스의 최댓값을 100 올린다. 다르다면 레스 주세요."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-17-009",
+      "deckId": "17",
+      "name": "태양 신–호루스",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "파라오",
+      "atk": "200",
+      "hp": "200",
+      "conditions": [],
+      "effects": [
+        "이 카드가 필드에 있고 효과가 유효한 동안 이름에 「호루스의 권능」이 들어가는 주문의 수치 다이스 최댓값을 100 올린다. 양쪽 플레이어에게 적용하고, 별개의 실제 호루스와 다른 주사위 상한 증가분은 중첩한다. 해당 주문 효과의 재사용·복사에도 적용하며 코인토스에는 적용하지 않는다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation; confirmed rulings preserved; not an individual new user confirmation",
+    "rationale": "본문에 섞여 있던 대화 요청을 제거하고 이름 범위/양측 적용/실물 중첩/복사 수치 다이스만 명시한다. 권능 주문2종의 피해 보조라는 파라오 덱 의도를 보존하며 기존 +100 수치를 유지한다."
+  },
+  {
+    "patchId": "SIN-DEMONS-2026-10-16-DRAFT",
+    "cardId": "COC-21-011",
+    "source": "Tracked runtime catalog at ce08e811ec17298aba668a30187b0ca860de7817; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-21-011",
+      "deckId": "21",
+      "name": "몽마",
+      "type": "몬스터",
+      "zone": "created",
+      "attribute": "저주 / 악마",
+      "atk": "140",
+      "hp": "140",
+      "conditions": [],
+      "effects": [
+        "사바스의 재단으로 소환할 때 자신의 플레이어 체력 200을 제물로 바친다. 소환 시 상대 필드 몬스터 1장을 지정하고 1d2를 굴린다. 1이면 자신의 다음 어택 페이즈 종료까지 그 몬스터는 공격하거나 효과를 발동할 수 없다. 2이면 그 몬스터의 다음 공격 또는 단일 대상 효과는 이 카드가 합법적인 대상일 때 이 카드를 대상으로 해야 한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-21-011",
+      "deckId": "21",
+      "name": "몽마",
+      "type": "몬스터",
+      "zone": "created",
+      "attribute": "저주 / 악마",
+      "atk": "140",
+      "hp": "140",
+      "conditions": [],
+      "effects": [
+        "사바스의 재단으로 소환할 때 자신의 플레이어 체력 200을 제물로 바친다. 소환 시 상대 필드 몬스터 1장을 지정하고 1d2를 굴린다. 1이면 발동한 턴이 지난 뒤 처음 맞는 자신의 어택 페이즈가 끝날 때까지 그 몬스터는 공격하거나 효과를 발동할 수 없다. 어택 페이즈를 생략하면 제한이 유지된다. 2이면 그 몬스터의 다음 공격 또는 단일 대상 효과는 이 몽마가 합법적인 대상일 때 이 몽마를 대상으로 해야 한다. 나중에 다른 몽마가 유인하면 새 유인으로 교체한다. 부여받은 몬스터의 필드 이탈 또는 조종권 변경 시 제한·유인을 해제한다. 몽마가 필드를 떠나거나 조종권이 바뀌면 그 몽마를 향한 유인은 적용하지 않는다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation; confirmed rulings preserved; not an individual new user confirmation",
+    "rationale": "200HP 소환 비용에 맞게 봉쇄가 상대 턴에도 작용하도록 발동 턴 이후 첫 자기 ATTACK 종료를 명확화했다. 지속 무효가 아니라 새 발동 금지이며 이미 선언한 효과는 소급 무효화하지 않는다. 유인 중첩·이탈/조종권 변경을 명시한다."
+  },
+  {
+    "patchId": "SIN-DEMONS-2026-10-16-DRAFT",
+    "cardId": "COC-21-012",
+    "source": "Tracked runtime catalog at ce08e811ec17298aba668a30187b0ca860de7817; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-21-012",
+      "deckId": "21",
+      "name": "나락의 귀족",
+      "type": "몬스터",
+      "zone": "created",
+      "attribute": "저주 / 악마",
+      "atk": "300",
+      "hp": "320",
+      "conditions": [],
+      "effects": [
+        "아군 한 명의 공격력과 체력을 게임이 끝날 때까지 30 올린다. 몬스터의 경우 파괴되고 다시 소환되어도 올라간 수치가 적용된 상태로 소환된다.",
+        "필드에 존재하는 동안 악마 속성의 공격력을 30 올린다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-21-012",
+      "deckId": "21",
+      "name": "나락의 귀족",
+      "type": "몬스터",
+      "zone": "created",
+      "attribute": "저주 / 악마",
+      "atk": "300",
+      "hp": "320",
+      "conditions": [],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드마다 턴당 1회, 자신의 플레이어 또는 필드 몬스터 1명을 선택한다. 그 대상의 공격력과 현재 체력을 30 올리고 게임이 끝날 때까지 그 강화를 유지한다. 플레이어의 공격력 강화는 이후 일체화에도 적용한다. 몬스터는 같은 실제 카드라면 파괴되어 다시 소환되어도 +30/+30을 유지하며 별도로 생성한 복사본에는 이 영구 강화를 복제하지 않는다.",
+        "이 카드가 필드에 있고 효과가 유효한 동안 양쪽 필드의 악마 속성 몬스터와 악마 속성 일체화 플레이어의 공격력을 30 올린다. 다른 실제 귀족의 지속 강화와 중첩한다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation; confirmed rulings preserved; not an individual new user confirmation",
+    "rationale": "원래 영구 강화와 악마 전체 오라를 유지한다. 아군 한 명을 자신의 플레이어/몬스터로 명시하고 기본 실물별 턴 제한, 재소환/일체화/복제 상속 범위 및 편 제한 없는 오라를 구체화한다. 수치는 유지했다."
+  },
+  {
+    "patchId": "SIN-DEMONS-2026-10-16-DRAFT",
+    "cardId": "COC-21-001",
+    "source": "Tracked runtime catalog at ce08e811ec17298aba668a30187b0ca860de7817; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-21-001",
+      "deckId": "21",
+      "name": "원죄를 저지른 자",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "저주 / 악마",
+      "atk": "50",
+      "hp": "—",
+      "conditions": [
+        "자신의 체력을 333 바친다. 체력이 333 이하라면 자신의 체력을 50으로 만든다.",
+        "저주 속성 주문/몬스터의 공격/효과/조건으로 둘 이상의 몬스터를 파괴했어야 한다."
+      ],
+      "effects": [
+        "자신 또는 상대의 패·필드에 존재하는 몬스터·주문의 효과 1개를 선택해 사용한다. 선택한 카드의 조건 항목 전체를 무시하며, 그 조건 항목에 포함된 비용성 요구도 무시한다. 조건 밖의 비용과 효과 해결 중 지불은 정상 처리한다. 선택한 원본 카드는 소모하지 않는다.",
+        "복사해 사용한 효과에서 「이 카드」 또는 「자신」은 원죄를 저지른 자와 일체화한 플레이어를 가리킨다. 발동 사건을 새로 만들지는 않으며, 원본 카드 효과의 발동 횟수 제한은 플레이어별로 적용한다."
+      ],
+      "notes": [
+        "사용 주체=원죄를 저지른 자의 플레이어. 조건 항목 밖의 비용은 면제되지 않는다."
+      ]
+    },
+    "after": {
+      "id": "COC-21-001",
+      "deckId": "21",
+      "name": "원죄를 저지른 자",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "저주 / 악마",
+      "atk": "50",
+      "hp": "—",
+      "conditions": [
+        "자신의 체력을 333 바친다. 체력이 333 이하라면 자신의 체력을 50으로 만든다.",
+        "저주 속성 주문/몬스터의 공격/효과/조건으로 둘 이상의 몬스터를 파괴했어야 한다."
+      ],
+      "effects": [
+        "자신 또는 상대의 패·필드에 존재하는 몬스터·주문의 효과 1개를 선택해 사용한다. 선택한 카드의 조건 항목 전체를 무시하며, 그 조건 항목에 포함된 비용성 요구도 무시한다. 조건 밖의 비용과 효과 해결 중 지불은 정상 처리한다. 선택한 원본 카드는 소모하지 않는다.",
+        "복사해 사용한 효과에서 「이 카드」 또는 「자신」은 원죄를 저지른 자와 일체화한 플레이어를 가리킨다. 발동 사건을 새로 만들지는 않으며, 원본 카드 효과의 발동 횟수 제한은 플레이어별로 적용한다."
+      ],
+      "notes": [
+        "사용 주체=원죄를 저지른 자의 플레이어. 조건 항목 밖의 비용은 면제되지 않는다.",
+        "개발자 명확화: 효과를 발동할 수 있는 자신의 메인 페이즈에 원본 선택을 위해 양측 패의 몬스터·주문 정체를 복사하는 플레이어만 확인한다. 조건 면제는 새 소환·공격·파괴 사건을 만들지 않는다. 원죄 자체의 기본 턴당 횟수와 원본 실물/효과별 플레이어 사용 기록을 별도로 관리한다."
+      ]
+    },
+    "authority": "User-delegated developer clarification; existing confirmed effect paragraphs unchanged",
+    "rationale": "확정한 조건 면제/플레이어 주체/발동 사건 비조작을 유지한다. 원본을 선택할 수 있게 하는 최소 패 정보 공개 범위와 기본 원죄 발동 횟수/독립 원본 실물별 기록을 주석으로 명확화한다. 트리거/이력 의존 조항의 미구현을 완료로 표시하지 않는다."
   }
 ]

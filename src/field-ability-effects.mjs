@@ -1,3 +1,4 @@
+import {actionLocked,nobleTarget,grantNoble,lureTarget,consumeLure} from './demon-effects.mjs';
 import {damagePlayer} from './weapon-equipment.mjs';
 import {prepareGTool,summonGTool,prepareAltar,summonAltar} from './monsterized-spells.mjs';
 import {destructionProtected} from './protection-auras.mjs';
@@ -13,6 +14,7 @@ import {batchSummonCount,beginSummonBatch} from './effect-summon-batches.mjs';
 // Audited activated effects only; unrelated summon/death triggers remain partial.
 export const FIELD_EFFECT_RULES=Object.freeze({
  'COC-01-003':{zone:'integration',sourceType:'integration',oncePerTurn:true},
+ 'COC-21-012':{zone:'field',sourceType:'monster',oncePerTurn:true},
  'COC-21-003':{zone:'field',sourceType:'monster',oncePerTurn:true,effectNumber:2},
  'COC-08-011':{zone:'integration',sourceType:'integration',oncePerTurn:true},
  'COC-20-008':{zone:'integration',sourceType:'integration',oncePerTurn:true},
@@ -43,11 +45,19 @@ function findSearch(r,who,cardId){
  const p=r.players[who];
  return ['deck','grave','banished','extra','field','integration'].flatMap(z=>z==='integration'?[p.integration]:p[z]).find(id=>id&&r.units[id]?.cardId===cardId);
 }
-export function prepareFieldEffect(r,who,body,H){
+export function prepareFieldEffect(r,who,body,H,checkingLure=false){
  const sourceId=body.sourceUnitId,u=r.units[sourceId],z=H.zone(r,sourceId),rule=u&&FIELD_EFFECT_RULES[u.cardId],p=r.players[who];
- if(!rule||!z||z.player!==who||z.zone!==rule.zone||u.effectsNegated)invalid(H,'효과가 유효한 자신의 필드 또는 일체화 카드가 필요합니다.');
+ if(!rule||!z||z.player!==who||z.zone!==rule.zone||u.effectsNegated||actionLocked(r,sourceId))invalid(H,'효과가 유효한 자신의 필드 또는 일체화 카드가 필요합니다.');
  if(rule.oncePerTurn)requireUnusedEffect(r,who,sourceId,fieldEffectNumber(u.cardId));
+ if(!checkingLure&&body.target){
+  const forced=lureTarget(r,sourceId,H);
+  if(forced){try{return prepareFieldEffect(r,who,{...body,target:forced},H,true);}catch(error){if(error.status!==409)throw error;}}
+ }
  const plan={cardId:u.cardId,sourceId,sourceZone:z.zone,sourceRevision:revision(u,z.zone)};
+ if(u.cardId==='COC-21-012'){
+  const target=nobleTarget(r,who,body.target,H);
+  return {...plan,nobleTarget:target,...(target.type==='unit'?{targetId:target.id,targetController:who,targetRevision:r.units[target.id].fieldRevision||0}:{})};
+ }
  if(u.cardId==='COC-01-003')return {...plan,...prepareGTool(r,who,body,H)};
  if(u.cardId==='COC-21-003')return {...plan,...prepareAltar(r,who,body,H)};
  if(isElemental(u.cardId)){prepareElemental(r,who,sourceId,H);return plan;}
@@ -109,6 +119,7 @@ export function prepareFieldEffect(r,who,body,H){
 }
 export function payFieldEffect(r,who,plan,H){
  const p=r.players[who],u=r.units[plan.sourceId];
+ if(plan.targetId||plan.nobleTarget)consumeLure(r,plan.sourceId);
  if(plan.cardId==='COC-21-003')p.hp-=plan.altarHpCost;
  if(plan.cardId==='COC-26-001')p.hp-=100;
  if(isElemental(plan.cardId)){
@@ -142,6 +153,7 @@ export function resolveFieldEffect(r,who,plan,H){
  const p=r.players[who],c=plan.cardId,t=plan.targetId;
  if(captureIds.has(c)&&!p.field.includes(null))return fizzle('필드 빈 자리 소실');
  switch(c){
+ case 'COC-21-012':grantNoble(r,who,plan.nobleTarget,H);break;
  case 'COC-01-003':return summonGTool(r,who,plan,H);
  case 'COC-21-003':return summonAltar(r,who,plan,H);
  case 'COC-08-011':return beginSummonBatch(r,who,c,H);

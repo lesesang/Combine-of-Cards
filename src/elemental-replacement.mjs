@@ -1,3 +1,4 @@
+import {actionLocked} from './demon-effects.mjs';
 import {ELEMENTAL_MAGICIAN_IDS,effectUsedThisTurn} from './effect-usage.mjs';
 import {planActivation} from './activation-rules.mjs';
 export const isElemental=id=>ELEMENTAL_MAGICIAN_IDS.includes(id);
@@ -22,7 +23,7 @@ export function legalElementalAbilities(r,who,H){
  if(r.status!=='active'||r.pendingAttackSequence?.stage==='choice'||r.pendingManual||r.pendingAbility||r.pendingElementalChoice||r.pendingRecruitChoice||r.pendingInfinityChoice||r.pendingTriggerTargetChoice||r.pendingSummonBatch||r.pendingMonsterTriggers||r.pendingTriggerOrder||r.pendingSpell||r.pendingDeckSearch||r.pendingExtraSummon||r.effectStack?.length)return [];
  if(r.turn===who&&(r.phase!=='MAIN'||r.pendingAttack))return [];
  if(r.pendingAttack&&r.pendingAttack.stage!=='response')return [];
- return r.players[who].field.filter(id=>id&&isElemental(r.units[id].cardId)&&!r.units[id].effectsNegated&&!effectUsedThisTurn(r,who,id,1)).filter(id=>{
+ return r.players[who].field.filter(id=>id&&isElemental(r.units[id].cardId)&&!r.units[id].effectsNegated&&!actionLocked(r,id)&&!effectUsedThisTurn(r,who,id,1)).filter(id=>{
   try{prepareElemental(r,who,id,H);return true;}catch(e){if(e.status===409)return false;throw e;}
  });
 }

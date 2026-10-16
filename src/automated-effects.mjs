@@ -1,5 +1,5 @@
 import {beginTempering} from './attack-sequences.mjs';
-import {grantSpirit,grantPeace,grantPyramid} from './protection-auras.mjs';
+import {grantSpirit,grantPeace,grantPyramid,horusSpellDiceBonus} from './protection-auras.mjs';
 import {beginCartoonSchedule,resolvePredatorJudgment,resolveWrath} from './history-spells.mjs';
 import {beginTrade,resolveSeparation} from './trade-separation.mjs';
 import {beginBlackMetal} from './black-metal-change.mjs';
@@ -340,16 +340,16 @@ export function castAutomatedSpell(r,who,c,body,H,{activationValidated=false,bas
  // double by destroying an opposing monster with an effect. Do not attribute
  // a physical unit's kill to unrelated equipped/enhanced monsters.
  const attributedH={...H};
- if(typeof H.move==='function')attributedH.move=(room,id,to,owner,options={})=>H.move(room,id,to,owner,{...options,sourcePlayer:who});
+ if(typeof H.move==='function')attributedH.move=(room,id,to,owner,options={})=>H.move(room,id,to,owner,{...options,sourcePlayer:who,sourceCardId:c.id});
  // Preserve optional helper detection: unit-test/third-party handlers may
  // only implement destroy, without a batch variant.
  if(typeof H.hurt==='function')
-  attributedH.hurt=(room,id,n,meta={})=>H.hurt(room,id,n,{...meta,sourcePlayer:who});
+  attributedH.hurt=(room,id,n,meta={})=>H.hurt(room,id,n,{...meta,sourcePlayer:who,sourceCardId:c.id});
  if(typeof H.destroy==='function')
-  attributedH.destroy=(room,id,meta={})=>H.destroy(room,id,{...meta,sourcePlayer:who});
+  attributedH.destroy=(room,id,meta={})=>H.destroy(room,id,{...meta,sourcePlayer:who,sourceCardId:c.id});
  if(typeof H.destroyBatch==='function')
-  attributedH.destroyBatch=(room,ids,meta={})=>H.destroyBatch(room,ids,{...meta,sourcePlayer:who});
- const rollValue=(maximum,min=1)=>H.roll(Math.max(1,(baseDiceMax??maximum)+(r.players[who].spellDiceBonus||0)),min);
+  attributedH.destroyBatch=(room,ids,meta={})=>H.destroyBatch(room,ids,{...meta,sourcePlayer:who,sourceCardId:c.id});
+ const rollValue=(maximum,min=1)=>H.roll(Math.max(1,(baseDiceMax??maximum)+(r.players[who].spellDiceBonus||0)+horusSpellDiceBonus(r,c.id)),min);
  const ctx={r,who,c,body,H:attributedH,activationValidated,rollValue};
  const result=f(ctx)||{};
  return {supported:true,...result};

@@ -1,3 +1,4 @@
+import {actionLocked,applySuccubus,lureTarget,consumeLure} from './demon-effects.mjs';
 import {damagePlayer} from './weapon-equipment.mjs';
 import {beginAutomaticTriggerOrder} from './effect-runtime.mjs';
 import {effectUsedThisTurn,markEffectUsed} from './effect-usage.mjs';
@@ -10,6 +11,7 @@ import {queueDeathRevival} from './death-revival.mjs';
 // Draft automation: the user requested implementation batches before testing.
 // Automatic monster/integration triggers, not selectable MAIN abilities.
 export const TRIGGER_RULES=Object.freeze({
+ 'COC-21-011':{effectNumber:1,event:'summoned',target:'succubus-enemy'},
  'COC-01-005':{effectNumber:2,event:'integration-attacks-monster'},
  'COC-07-001':{effectNumber:1,event:'enemy-turn-start',sourceZone:'integration'},
  'COC-11-001':{effectNumber:1,event:'own-turn-start',sourceZone:'deck',sourceType:'integration'},
@@ -117,7 +119,7 @@ export function recordDestroyedTrigger(r,id,{sourceId,sourcePlayer},H){
  effect.exception='destroy-trigger';
  (r.deferredMonsterTriggers??=[]).push(effect);
 }
-function triggerTargetChoices(r,p,H){
+function baseTriggerTargetChoices(r,p,H){
  const kind=TRIGGER_RULES[p.cardId]?.target;
  if(kind==='optional-destroy-board')return r.players.flatMap(pp=>[...pp.field,pp.integration].filter(Boolean));
  if(kind==='capture-enemy'&&!r.players[p.who].field.includes(null))return [];
@@ -129,6 +131,10 @@ function triggerTargetChoices(r,p,H){
   });
  }
  return r.players.flatMap((pp,who)=>kind==='return-field'||who!==p.who?pp.field.filter(Boolean):[]);
+}
+function triggerTargetChoices(r,p,H){
+ const choices=baseTriggerTargetChoices(r,p,H);
+ return p.lureTargetId&&choices.includes(p.lureTargetId)?[p.lureTargetId]:choices;
 }
 export function triggerTargetView(r,viewer,H){
  const p=r.pendingTriggerTargetChoice;if(!p)return null;
@@ -146,6 +152,7 @@ export function chooseTriggerTarget(r,who,id,H){
  const sourceZone=TRIGGER_RULES[p.cardId].sourceZone||'field';
  if(!u||u.cardId!==p.cardId||u.effectsNegated||z?.zone!==sourceZone||z.player!==who||((sourceZone==='integration'?u.integrationRevision:sourceZone==='field'?u.fieldRevision:u.zoneRevision)||0)!==p.sourceRevision){H.log(r,'effect','유발 효과의 소스 상태 변경으로 불발');return;}
  const kind=TRIGGER_RULES[p.cardId].target;
+ if(kind==='succubus-enemy'){applySuccubus(r,who,p.sourceId,id,H);return;}
  if(kind==='optional-destroy-board'){H.destroy(r,id,{sourceId:p.sourceId});H.outcome(r);return;}
  if(kind==='destroy-lower-printed'){H.destroy(r,id,{sourceId:p.sourceId});H.outcome(r);return;}
  if(kind==='coin-weaken-enemy'){
@@ -226,10 +233,17 @@ export function integrationTurnTriggers(r,who,H){
  return group;
 }
 export function queueMonsterTriggers(r,effects,H){
+ effects=effects.filter(e=>!actionLocked(r,e.sourceId));
  if(!effects.length)return;
  if(r.pendingMonsterTriggers||r.pendingAbility||r.pendingSpell||r.pendingExtraSummon)throw new Error('another response chain is pending');
+ effects=effects.map(e=>{
+  if(!TRIGGER_RULES[e.payload.cardId].target)return e;
+  const forced=lureTarget(r,e.sourceId,H),choices=baseTriggerTargetChoices(r,{...e.payload,who:e.owner,sourceId:e.sourceId},H);
+  return {...e,payload:{...e.payload,lureTargetId:forced&&choices.includes(forced.id)?forced.id:null}};
+ });
  beginAutomaticTriggerOrder(r,effects.map(e=>({...e,title:`${H.name(r,e.sourceId)} · 효과 ${TRIGGER_RULES[e.payload.cardId].effectNumber}`})),r.turn);
  for(const e of effects){
+  if(TRIGGER_RULES[e.payload.cardId].target)consumeLure(r,e.sourceId);
   if(!TRIGGER_RULES[e.payload.cardId].repeatPerEvent)markEffectUsed(r,e.owner,e.sourceId,TRIGGER_RULES[e.payload.cardId].effectNumber);
   if(['COC-06-001','COC-09-001','COC-10-011'].includes(e.payload.cardId)||e.payload.cardId==='COC-32-015'&&r.players[1-e.owner].grave.length)
    H.graveActivation?.(r,{eventKey:`trigger-grave-${e.key}`,cardId:e.payload.cardId});
@@ -299,7 +313,7 @@ export function resolveMonsterTrigger(r,e,H){
  }
  if(p.cardId==='COC-03-001'){u.atk+=50;H.log(r,'effect','베리아: 묘지 이동 효과의 발동으로 공격력 +50');return;}
  if(TRIGGER_RULES[p.cardId].target){
-  const choice={who:e.owner,sourceId:e.sourceId,cardId:p.cardId,sourceRevision:p.sourceRevision};
+  const choice={who:e.owner,sourceId:e.sourceId,cardId:p.cardId,sourceRevision:p.sourceRevision,lureTargetId:p.lureTargetId||null};
   if(triggerTargetChoices(r,choice,H).length)r.pendingTriggerTargetChoice=choice;
   else H.log(r,'effect','소환 효과: 유효한 대상 또는 빈 필드 소실');
   return;

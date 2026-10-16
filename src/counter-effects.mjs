@@ -1,3 +1,4 @@
+import {actionLocked,consumeLure} from './demon-effects.mjs';
 import {FIELD_EFFECT_RULES} from './field-ability-effects.mjs';
 import {declareEffect} from './effect-runtime.mjs';
 import {TRIGGER_RULES} from './triggered-effects.mjs';
@@ -12,11 +13,12 @@ export const COUNTER_IDS=Object.freeze(Object.keys(COUNTER_RULES));
 export const counterEffectIds=new Set(['storm-spell-counter','storm-summon-counter','card-counter']);
 export function currentCounterTarget(room,pending,kind){
  if(pending.counter)return room.effectStack?.find(e=>e.sequence===pending.counter.sequence);
- if(kind==='ability')return room.effectStack?.find(e=>e.sequence===pending.sequence&&['field-ability-resolution','monster-trigger-resolution','spell-reuse-resolution','grave-ability-resolution'].includes(e.effectId));
+ if(kind==='ability')return room.effectStack?.find(e=>e.sequence===pending.sequence&&['field-ability-resolution','monster-trigger-resolution','spell-reuse-resolution','grave-ability-resolution','original-sin-resolution'].includes(e.effectId));
  if(kind==='spell')return room.effectStack?.find(e=>e.effectId==='auto-spell-resolution'&&e.sourceId===pending.sourceId&&e.owner===pending.who);
  return room.effectStack?.find(e=>e.sequence===pending.sequence&&e.effectId==='extra-summon-resolution')||{owner:pending.who,effectId:'extra-summon-resolution'};
 }
 function targetKind(effect){
+ if(effect?.effectId==='original-sin-resolution')return 'integration-effect';
  if(effect?.effectId==='grave-ability-resolution'&&effect.payload?.cardId==='COC-22-008')return 'spell';
  if(effect?.effectId==='spell-reuse-resolution')return effect.payload?.originCardId==='COC-26-006'?'spell':'integration-effect';
  if(effect?.effectId==='auto-spell-resolution')return 'spell';
@@ -35,7 +37,7 @@ export function availableCounters(room,who,pending,kind){
  const p=room.players[who];
  return [p.integration,...p.field].filter(id=>{
   const u=room.units[id],rule=u&&COUNTER_RULES[u.cardId];
-  return rule&&rule.kinds.includes(type)&&!u.effectsNegated&&!(rule.zone==='field'?u.counterUsedThisStay:u.spellCounterGameUsed)&&
+  return rule&&rule.kinds.includes(type)&&!u.effectsNegated&&!actionLocked(room,id)&&!(rule.zone==='field'?u.counterUsedThisStay:u.spellCounterGameUsed)&&
    (rule.zone==='integration'?p.integration===id:p.field.includes(id));
  });
 }
@@ -47,6 +49,7 @@ export function declareCardCounter(room,who,sourceId,pending,kind){
  const effect=declareEffect(room,{effectId:u.cardId==='COC-14-001'?(targetKind(target)==='spell'?'storm-spell-counter':'storm-summon-counter'):'card-counter',owner:who,
   sourceId,sourceZone:zone,payload:{targetSequence:target.sequence,cardId:u.cardId,sourceRevision:zone==='field'?(u.fieldRevision||0):(u.integrationRevision||0)}});
  if(zone==='field')u.counterUsedThisStay=true;else u.spellCounterGameUsed=true;
+ consumeLure(room,sourceId);
  const previous=pending.counter;
  pending.counter={who,sourceId,sequence:effect.sequence};
  pending.countersDeclared??=previous?[previous]:[];pending.countersDeclared.push(pending.counter);
