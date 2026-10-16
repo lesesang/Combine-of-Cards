@@ -1,4 +1,5 @@
 import {applySharedUnitEffect} from './shared-unit-effects.mjs';
+import {gainUnitStats,gainPlayerStats,scaledStatGain} from './stat-gains.mjs';
 // Draft demon effects. Grants are JSON data, independent of the granting card.
 export function actionLocked(r,id){
  const u=r.units[id];
@@ -33,25 +34,28 @@ export function nobleTarget(r,who,target,H){
 export function grantNoble(r,who,target,H){
  target=nobleTarget(r,who,target,H);
  if(target.type==='player'){
-  const p=r.players[who];p.hp+=30;p.playerAtkBonus=(p.playerAtkBonus||0)+30;
-  if(p.integration){const host=r.units[p.integration];host.atk+=30;host.playerAttackBonusApplied=(host.playerAttackBonusApplied||0)+30;}
+  gainPlayerStats(r,who,{atk:30,hp:30});
  }else{
-  applySharedUnitEffect(r,[target.id],H,(id,u)=>{u.noblePermanent=(u.noblePermanent||0)+30;u.atk+=30;if(Number.isFinite(u.hp))u.hp+=30;});
+  applySharedUnitEffect(r,[target.id],H,(id,u)=>{
+   const applied=gainUnitStats(r,id,{atk:30,hp:30});u.noblePermanentGains??={atk:0,hp:0};
+   u.noblePermanentGains.atk+=applied.atk;u.noblePermanentGains.hp+=applied.hp;
+  });
  }
  H.log(r,'effect','나락의 귀족: 아군 1명에게 게임 종료까지 공격력·체력 +30');
 }
 // Called after printed-stat restoration, including the grave-specific reset.
 // This modifies the physical card, so new copies of its printed card do not inherit it.
 export function restoreNobleStats(u){
- const n=u.noblePermanent||0;
- if(n){u.atk+=n;if(Number.isFinite(u.hp))u.hp+=n;}
+ // Legacy scalar grants and new resolved gains both restore exactly once.
+ const n=u.noblePermanent||0,atk=n+(u.noblePermanentGains?.atk||0),hp=n+(u.noblePermanentGains?.hp||0);
+ u.atk+=atk;if(Number.isFinite(u.hp))u.hp+=hp;
 }
 export function demonAura(r,u){
  if(!u?.demonAttribute)return 0;
  const onBoard=r.players.some(p=>p.integration===u.id||p.field.includes(u.id));
  if(!onBoard)return 0;
  // The printed text has no allied restriction: both sides' demons benefit.
- return r.players.reduce((n,p)=>n+p.field.filter(id=>id&&r.units[id]?.cardId==='COC-21-012'&&!r.units[id].effectsNegated).length*30,0);
+ return r.players.reduce((n,p)=>n+p.field.filter(id=>id&&r.units[id]?.cardId==='COC-21-012'&&!r.units[id].effectsNegated).length*scaledStatGain(r,{id:u.id},30),0);
 }
 export function refreshDemonAttributes(r,cards){
  for(const u of Object.values(r.units))u.demonAttribute=Boolean((cards.get(u.cardId)||u.tokenCard)?.attribute?.includes('악마'));

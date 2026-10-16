@@ -1,4 +1,5 @@
 import {demonAura,refreshDemonAttributes} from './demon-effects.mjs';
+import {refreshStatAttributes,scaledStatGain,gainPlayerStats} from './stat-gains.mjs';
 // Independent spell grants are serialized separately from printed abilities.
 // HP payment, absorption, HP setting and reload never call this damage guard.
 export function damageProtected(r,target){
@@ -15,7 +16,7 @@ export function grantSpirit(r,who,sourceId){
 export function grantPeace(r,who,H){
  for(const [player,p] of r.players.entries()){
   const host=p.integration&&r.units[p.integration];
-  p.hp+=100+(host&&/용|드래곤/.test(H.attribute(r,host.id))?100:0);
+  gainPlayerStats(r,player,{hp:100+(host&&/용|드래곤/.test(H.attribute(r,host.id))?100:0)});
   (p.protectionGrants??=[]).push({kind:'peace',appliedTurn:r.turnNumber});
   for(const id of p.field.filter(Boolean)){
    H.healUnit(r,id,100+(/용|드래곤/.test(H.attribute(r,id))?100:0));
@@ -45,21 +46,22 @@ export function continuousAttackBonus(r,unit){
  if(!unit)return 0;
  const p=r.players.find(p=>p.integration===unit.id||p.field.includes(unit.id));
  if(!p)return 0;
- let bonus=demonAura(r,unit)+p.field.filter(id=>id&&r.units[id]?.cardId==='COC-17-008'&&!r.units[id].effectsNegated).length*50;
+ let bonus=demonAura(r,unit)+p.field.filter(id=>id&&r.units[id]?.cardId==='COC-17-008'&&!r.units[id].effectsNegated).length*scaledStatGain(r,{id:unit.id},50);
  if(p.integration===unit.id)for(const id of p.field.filter(Boolean)){
   const u=r.units[id];if(u.effectsNegated)continue;
-  if(u.gToolBody&&['COC-01-004','COC-01-005'].includes(u.cardId))bonus+=100;
-  if(u.cardId==='COC-01-006')bonus+=300;
+  if(u.gToolBody&&['COC-01-004','COC-01-005'].includes(u.cardId))bonus+=scaledStatGain(r,{id:unit.id},100);
+  if(u.cardId==='COC-01-006')bonus+=scaledStatGain(r,{id:unit.id},300);
  }
  return bonus;
 }
 export function refreshContinuousAuras(r,cards){
+ refreshStatAttributes(r,cards);
  refreshDemonAttributes(r,cards);
  for(const u of Object.values(r.units)){delete u.continuousAttackBonus;delete u.gatlingDoubleAttack;delete u.gToolDiceMin;}
  for(const p of r.players){
-  const hp=Object.keys(p.pyramidSources||{}).length*50;
   for(const id of p.field.filter(Boolean)){
    const u=r.units[id];if(!Number.isFinite(u.hp))continue;
+   const hp=Object.keys(p.pyramidSources||{}).length*scaledStatGain(r,{id},50);
    u.hp+=hp-(u.pyramidHpBonus||0);u.pyramidHpBonus=hp;
   }
   for(const id of [...p.field,p.integration].filter(Boolean))r.units[id].continuousAttackBonus=continuousAttackBonus(r,r.units[id]);

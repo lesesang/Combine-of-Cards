@@ -1,5 +1,6 @@
 import {weaponAttackBonus,hasWeaponAbility} from './weapon-equipment.mjs';
 import {refreshContinuousAuras} from './protection-auras.mjs';
+import {scaledStatGain} from './stat-gains.mjs';
 // Physical cards actually used/summoned during this game. Never reconstruct
 // missing history from today's grave/field or from a truncated public log.
 const EVOLVED_HISTORY=Object.freeze({
@@ -32,7 +33,7 @@ export function refreshHistoryAttack(r,cards){
  const clayIds=Object.keys(r.claySummonedCards||{});
  for(const p of r.players)for(const id of p.field.filter(Boolean)){
   const u=r.units[id];if(u.cardId!=='COC-19-001')continue;
-  const bonus=u.effectsNegated?0:clayIds.filter(uid=>uid!==id).length*50;
+  const bonus=u.effectsNegated?0:scaledStatGain(r,{id},clayIds.filter(uid=>uid!==id).length*50);
   // Change the continuous HP layer only by its delta, preserving damage.
   u.hp+=bonus-(u.clayHpBonus||0);u.clayHpBonus=bonus;u.clayAttackBonus=bonus;
  }
@@ -47,7 +48,7 @@ export function refreshHistoryAttack(r,cards){
   const source=p.integration&&r.units[p.integration];
   if(source?.cardId==='COC-08-004'&&!source.effectsNegated){
    for(const id of p.field.filter(Boolean))if(cards.get(r.units[id].cardId)?.attribute==='요괴')
-    r.units[id].fieldAura={sourceId:p.integration,sourceRevision:source.integrationRevision||0,amount:100};
+    r.units[id].fieldAura={sourceId:p.integration,sourceRevision:source.integrationRevision||0,amount:scaledStatGain(r,{id},100)};
   }
   const u=p.integration&&r.units[p.integration],rule=u&&EVOLVED_HISTORY[u.cardId];if(!rule)continue;
   const count=Object.values(p.usedCardsGame||{}).filter(e=>{
@@ -56,6 +57,6 @@ export function refreshHistoryAttack(r,cards){
   }).length;
   // A separate continuous layer preserves the user's base-replacement and
   // existing-buffs evolution rule; negation suppresses it in actualAttack.
-  u.historyAttackBonus=count*rule.amount;
+  u.historyAttackBonus=scaledStatGain(r,{id:u.id},count*rule.amount);
  }
 }

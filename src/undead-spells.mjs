@@ -1,3 +1,4 @@
+import {gainUnitStats} from './stat-gains.mjs';
 import {queueCardRevival} from './death-revival.mjs';
 export function recordFramDeath(r,controller){
  const id=r.players[controller].integration,u=id&&r.units[id];
@@ -36,7 +37,7 @@ export function drawLantern(r,who,H){
  if(r.status!=='active')return;
  if(emptied)for(const id of drawn){
   const u=r.units[id],z=u&&H.zone(r,id);
-  if(z?.zone==='hand'&&z.player===who){u.atk+=100;u.hp=(u.hp??0)+100;}
+  if(z?.zone==='hand'&&z.player===who){if(u.hp===null)u.hp=0;gainUnitStats(r,id,{atk:100,hp:100});}
  }
  if(emptied)H.log(r,'effect','망령의 등불: 이 효과로 덱을 비워 가져온 몬스터 +100/+100');
 }

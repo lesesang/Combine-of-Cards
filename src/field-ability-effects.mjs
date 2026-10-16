@@ -1,3 +1,4 @@
+import {gainUnitStats} from './stat-gains.mjs';
 import {applySharedUnitEffect,destroySharedUnits,moveSharedUnits,captureSharedUnits} from './shared-unit-effects.mjs';
 import {actionLocked,nobleTarget,grantNoble,lureTarget,consumeLure} from './demon-effects.mjs';
 import {damagePlayer} from './weapon-equipment.mjs';
@@ -161,10 +162,10 @@ export function resolveFieldEffect(r,who,plan,H){
  case 'COC-20-008':{
   const count=Math.min(plan.discardCount,p.deck.length);
   for(let i=0;i<count;i++)H.move(r,p.deck[0],'grave',who);
-  u.atk+=count*50;H.log(r,'effect',`워리어 드라고닉: 덱 위 ${count}장 묘지 이동, 공격력 +${count*50}`);break;
+  gainUnitStats(r,u.id,{atk:count*50});H.log(r,'effect',`워리어 드라고닉: 덱 위 ${count}장 묘지 이동, 공격력 +${count*50}`);break;
  }
  case 'COC-26-001':
-  applySharedUnitEffect(r,r.players.flatMap(pp=>pp.field.filter(id=>id&&H.name(r,id).includes('매치'))),H,(id,u)=>{u.atk+=50;});
+  applySharedUnitEffect(r,r.players.flatMap(pp=>pp.field.filter(id=>id&&H.name(r,id).includes('매치'))),H,(id,u)=>{gainUnitStats(r,id,{atk:50});});
   break;
  case 'COC-32-012':
   if(!(r.units[t].hp>swordActualAttack(r,plan.sourceId,{getZone:(room,id)=>H.zone(room,id)})))return fizzle('대상 체력이 현재 실제 공격력 이하');
@@ -177,7 +178,7 @@ export function resolveFieldEffect(r,who,plan,H){
  case 'COC-23-002':{
   const iz=H.zone(r,plan.integrationId),iu=r.units[plan.integrationId];
   if(iz?.zone!=='integration'||iz.player!==who||iu.cardId!=='COC-23-001'||(iu.integrationRevision||0)!==plan.integrationRevision)return fizzle('라이드 위저드 이탈/진화/재진입');
-  iu.atk+=50;break;
+  gainUnitStats(r,iu.id,{atk:50});break;
  }
  case 'COC-24-003':case 'COC-26-003':{
   const target=r.units[t];if(!Number.isFinite(target.hp))return fizzle('현재 체력 소실');

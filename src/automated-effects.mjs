@@ -1,3 +1,4 @@
+import {gainUnitStats,gainPlayerStats} from './stat-gains.mjs';
 import {sharedEffectRecipients,applySharedUnitEffect,destroySharedUnits,hurtSharedUnits,moveSharedUnits,captureSharedUnits} from './shared-unit-effects.mjs';
 import {beginTempering} from './attack-sequences.mjs';
 import {grantSpirit,grantPeace,grantPyramid,horusSpellDiceBonus} from './protection-auras.mjs';
@@ -43,7 +44,7 @@ register('COC-09-005 COC-09-006',ctx=>beginWeaponSelection(ctx.r,ctx.who,ctx.c.i
 register('COC-20-010 COC-23-010 COC-24-007',ctx=>{beginSummonBatch(ctx.r,ctx.who,ctx.c.id,ctx.H);});
 register('COC-08-009',ctx=>{
  const ids=ctx.r.players[ctx.who].field.filter(id=>id&&ctx.H.attribute(ctx.r,id)==='요괴');
- applySharedUnitEffect(ctx.r,ids,ctx.H,(id,u)=>{u.atk+=50;});
+ applySharedUnitEffect(ctx.r,ids,ctx.H,(id,u)=>{gainUnitStats(ctx.r,id,{atk:50});});
 });
 function checkSpellPlayerTarget(ctx,player){
  if(player===ctx.who)return;
@@ -72,7 +73,7 @@ const destroyTogether=(ctx,ids)=>{
  return destroySharedUnits(ctx.r,ids,ctx.H);
 };
 const hit=(ctx,target,amount)=>{if(!Number.isFinite(amount))throw Error('잘못된 피해 수치');amount=Math.max(0,Math.floor(amount));if(target.id)return hurtSharedUnits(ctx.r,[target.id],amount,ctx.H).get(target.id);else{damagePlayer(ctx.r,target.player,amount);ctx.H.outcome(ctx.r)}};
-const heal=(ctx,target,amount)=>{amount=Math.max(0,Math.floor(amount));if(target.id)applySharedUnitEffect(ctx.r,[target.id],ctx.H,id=>ctx.H.healUnit(ctx.r,id,amount));else ctx.r.players[target.player].hp+=amount;};
+const heal=(ctx,target,amount)=>{amount=Math.max(0,Math.floor(amount));if(target.id)applySharedUnitEffect(ctx.r,[target.id],ctx.H,id=>ctx.H.healUnit(ctx.r,id,amount));else gainPlayerStats(ctx.r,target.player,{hp:amount});};
 const charge=(ctx,amount)=>{const p=ctx.r.players[ctx.who];if(p.hp<=amount)ctx.H.fail(409,'필요한 체력을 지불할 수 없습니다.');p.hp-=amount;};
 const enemy=(ctx)=>getTarget(ctx,'enemy');
 const own=(ctx)=>getTarget(ctx,'own');
@@ -137,15 +138,15 @@ register('COC-08-005',ctx=>{const target=enemy(ctx);ctx.r.effects??=[];const tar
 register('COC-08-006',ctx=>{if(!ctx.activationValidated&&ctx.r.players[ctx.who].field.filter(id=>id&&ctx.H.attribute(ctx.r,id)==='요괴').length!==2)ctx.H.fail(409,'요괴 2장이 필요합니다.');const t=enemy(ctx);if(!t.id)ctx.H.fail(409,'파괴할 몬스터가 없습니다.');destroyTogether(ctx,[t.id])});
 register('COC-08-007',ctx=>{const n=ctx.r.players[ctx.who].field.filter(id=>id&&ctx.H.attribute(ctx.r,id)==='요괴').length;heal(ctx,{player:ctx.who},n*100)});
 register('COC-10-009',ctx=>{ctx.r.effects??=[];ctx.r.effects.push({type:'firstDestroyHeal',player:ctx.who,turn:ctx.r.turnNumber});});
-register('COC-13-007',ctx=>{const p=ctx.r.players[1-ctx.who],n=Math.floor(p.hp/10);p.hp-=n;ctx.r.players[ctx.who].hp+=n;ctx.H.outcome(ctx.r)});
+register('COC-13-007',ctx=>{const p=ctx.r.players[1-ctx.who],n=Math.floor(p.hp/10);p.hp-=n;gainPlayerStats(ctx.r,ctx.who,{hp:n});ctx.H.outcome(ctx.r)});
 register('COC-13-008',ctx=>{const op=ctx.r.players[1-ctx.who];if(!op.hand.length)return;const picked=(ctx.body.target?.id&&op.hand.includes(ctx.body.target.id))?ctx.body.target.id:null;if(!picked)ctx.H.fail(409,'상대 손패 중 버릴 카드를 직접 선택해 주세요.');ctx.H.move(ctx.r,picked,'grave',1-ctx.who)});
 register('COC-14-003',ctx=>{if(!ctx.activationValidated&&!ctx.r.players[ctx.who].integration)ctx.H.fail(409,'일체화가 필요합니다.');const t=getTarget(ctx,'any');if(!t.id)ctx.H.fail(409,'제거할 몬스터가 없습니다.');moveSharedUnits(ctx.r,[t.id],'banished',ctx.H);});
 register('COC-14-006',ctx=>{if(!ctx.activationValidated&&!ctx.r.players[1-ctx.who].field.some(id=>id&&ctx.r.units[id].atk>=350))ctx.H.fail(409,'공격력 350 이상인 상대 몬스터가 필요합니다.');ctx.r.players[1-ctx.who].noAttackUntil=(ctx.r.players[1-ctx.who].turnsTaken||0)+1;});
-register('COC-17-003',ctx=>{const p=ctx.r.players[ctx.who];p.hp+=150;applySharedUnitEffect(ctx.r,p.field.filter(Boolean),ctx.H,id=>ctx.H.healUnit(ctx.r,id,150));});
+register('COC-17-003',ctx=>{const p=ctx.r.players[ctx.who];gainPlayerStats(ctx.r,ctx.who,{hp:150});applySharedUnitEffect(ctx.r,p.field.filter(Boolean),ctx.H,id=>ctx.H.healUnit(ctx.r,id,150));});
 register('COC-17-005',ctx=>{if(!ctx.activationValidated&&!ctx.r.players[ctx.who].integration)ctx.H.fail(409,'일체화가 필요합니다.');hit(ctx,enemy(ctx),ctx.rollValue(400))});
 register('COC-17-006',ctx=>{if(!ctx.activationValidated&&!ctx.r.players[ctx.who].integration)ctx.H.fail(409,'일체화가 필요합니다.');const n=ctx.rollValue(200);hit(ctx,{player:1-ctx.who},n);hurtSharedUnits(ctx.r,ctx.r.players[1-ctx.who].field.filter(Boolean),n,ctx.H);});
 register('COC-20-005',ctx=>{const n=ctx.rollValue(200);damagePlayer(ctx.r,0,n);damagePlayer(ctx.r,1,n);ctx.H.outcome(ctx.r)});
-register('COC-21-005',ctx=>{const t=own(ctx);if(!t.id)ctx.H.fail(409,'자신의 몬스터를 선택하세요.');const hp=ctx.r.units[t.id].hp||0;destroySharedUnits(ctx.r,[t.id],ctx.H,{bypassEffectImmunity:true});ctx.r.players[ctx.who].hp+=hp});
+register('COC-21-005',ctx=>{const t=own(ctx);if(!t.id)ctx.H.fail(409,'자신의 몬스터를 선택하세요.');const hp=ctx.r.units[t.id].hp||0;destroySharedUnits(ctx.r,[t.id],ctx.H,{bypassEffectImmunity:true});gainPlayerStats(ctx.r,ctx.who,{hp})});
 register('COC-27-006',ctx=>{hit(ctx,getTarget(ctx,'any'),100)});
 register('COC-30-001',ctx=>{destroyTogether(ctx,ctx.r.players[1-ctx.who].field.filter(id=>id&&ctx.r.units[id].atk<=100))});
 register('COC-30-003',ctx=>{
@@ -158,7 +159,7 @@ register('COC-30-003',ctx=>{
  }
 });
 register('COC-30-006',ctx=>{const t=enemy(ctx);if(!t.id)ctx.H.fail(409,'대상 몬스터가 없습니다.');applySharedUnitEffect(ctx.r,[t.id],ctx.H,(id,u)=>{u.diceMax=10;});});
-register('COC-30-007',ctx=>{ctx.r.players[ctx.who].hp+=B.forestHeal});
+register('COC-30-007',ctx=>{gainPlayerStats(ctx.r,ctx.who,{hp:B.forestHeal})});
 // COC-30-011: prior-two-turn natural spell history is not yet implemented; do not misrepresent as automated.
 
 register('COC-32-005',ctx=>{requireField(ctx,'플레임',true);hit(ctx,{player:1-ctx.who},ctx.rollValue(200))});
@@ -167,7 +168,7 @@ register('COC-32-008',ctx=>{requireField(ctx,'랜드',true);destroyTogether(ctx,
 // More precisely scoped automatic spells with explicit prerequisites.
 register('COC-06-002',ctx=>{const count=ctx.r.players[ctx.who].roundElementUses||0;const atk=count*50,hp=50+count*50;ctx.H.summonToken(ctx.r,ctx.who,'인조 생물',atk,hp)});
 register('COC-07-004',ctx=>{if(!ctx.activationValidated)ctx.H.draw(ctx.r,1-ctx.who);return {deckSearch:true};});
-register('COC-07-011',ctx=>{ctx.H.draw(ctx.r,1-ctx.who);if(ctx.r.status==='finished')return;ctx.H.mill(ctx.r,1-ctx.who,3);if(ctx.r.status==='finished')return;ctx.r.players[ctx.who].hp+=B.selfDevourHeal;const id=ctx.r.players[ctx.who].integration;if(id){ctx.r.units[id].atk+=B.selfDevourAttack;const token=ctx.r.units[id].selfDevourBuffToken||`${id}:${ctx.r.selfDevourSequence=(ctx.r.selfDevourSequence||0)+1}`;ctx.r.units[id].selfDevourBuffToken=token;const prior=ctx.r.effects.find(e=>e.type==='selfDevourBuff'&&e.token===token);if(prior)prior.amount+=B.selfDevourAttack;else ctx.r.effects.push({type:'selfDevourBuff',unitId:id,player:ctx.who,turn:ctx.r.turnNumber,token,amount:B.selfDevourAttack})}});
+register('COC-07-011',ctx=>{ctx.H.draw(ctx.r,1-ctx.who);if(ctx.r.status==='finished')return;ctx.H.mill(ctx.r,1-ctx.who,3);if(ctx.r.status==='finished')return;gainPlayerStats(ctx.r,ctx.who,{hp:B.selfDevourHeal});const id=ctx.r.players[ctx.who].integration;if(id){const gained=gainUnitStats(ctx.r,id,{atk:B.selfDevourAttack}).atk;const token=ctx.r.units[id].selfDevourBuffToken||`${id}:${ctx.r.selfDevourSequence=(ctx.r.selfDevourSequence||0)+1}`;ctx.r.units[id].selfDevourBuffToken=token;const prior=ctx.r.effects.find(e=>e.type==='selfDevourBuff'&&e.token===token);if(prior)prior.amount+=gained;else ctx.r.effects.push({type:'selfDevourBuff',unitId:id,player:ctx.who,turn:ctx.r.turnNumber,token,amount:gained})}});
 register('COC-14-002',ctx=>{if(!ctx.activationValidated)ctx.H.mill(ctx.r,ctx.who,1);for(let i=0;i<2;i++)ctx.H.summonToken(ctx.r,ctx.who,'스톰 토큰',0,50)});
 register('COC-14-009',ctx=>{if(ctx.body.option===2){ctx.H.summonToken(ctx.r,ctx.who,'스톰 토큰',0,50)}else{hit(ctx,{player:1-ctx.who},50);hurtSharedUnits(ctx.r,ctx.r.players[1-ctx.who].field.filter(Boolean),50,ctx.H);}});
 register('COC-17-004',ctx=>{for(let i=0;i<3;i++)if(!ctx.H.summonToken(ctx.r,ctx.who,'미라 병사',B.mummyAttack,B.mummyHp))break});
@@ -175,7 +176,7 @@ register('COC-19-004',()=>({deckSearch:true}));
 register('COC-19-005',ctx=>{const t=getTarget(ctx,'any');if(!t.id)ctx.H.fail(409,'필드의 몬스터가 필요합니다.');applySharedUnitEffect(ctx.r,[t.id],ctx.H,(id,u)=>{u.frozen=true;u.battleInvulnerable=true;u.damageInvulnerable=true;});});
 register('COC-20-003',ctx=>{if(!ctx.activationValidated&&ctx.r.players[ctx.who].hp>600)ctx.H.fail(409,'체력 600 이하일 때만 사용 가능합니다.');return {deckSearch:true};});
 register('COC-23-009',ctx=>{if(!ctx.activationValidated&&!ctx.r.players[ctx.who].integration)ctx.H.fail(409,'일체화가 필요합니다.');const t=getTarget(ctx,ctx.body.option===1?'enemy':'any');if(ctx.body.option===1){if(!t.id)ctx.H.fail(409,'파괴할 몬스터가 없습니다.');destroyTogether(ctx,[t.id])}else hit(ctx,t,200)});
-register('COC-24-006',ctx=>{const id=ctx.r.players[ctx.who].integration;if(!id)ctx.H.fail(409,'일체화가 필요합니다.');destroyTogether(ctx,ctx.r.players[ctx.who].field.filter(Boolean));ctx.r.units[id].atk+=60});
+register('COC-24-006',ctx=>{const id=ctx.r.players[ctx.who].integration;if(!id)ctx.H.fail(409,'일체화가 필요합니다.');destroyTogether(ctx,ctx.r.players[ctx.who].field.filter(Boolean));gainUnitStats(ctx.r,id,{atk:60})});
 register('COC-24-008 COC-26-008',ctx=>{if(!ctx.activationValidated&&ctx.r.players[ctx.who].field.filter(id=>id&&ctx.H.name(ctx.r,id).includes('매치')).length>1)ctx.H.fail(409,'필드의 매치는 최대 1장이어야 합니다.');return {deckSearch:true};});
 register('COC-31-005',ctx=>{ctx.H.draw(ctx.r,ctx.who);if(ctx.H.roll(2)===1){const p=ctx.r.players[1-ctx.who];if(p.hand.length)ctx.H.move(ctx.r,p.hand[ctx.H.randomInt(p.hand.length)],'grave',1-ctx.who)}});
 register('COC-31-007',ctx=>{if(!ctx.activationValidated)charge(ctx,B.flashHpCost);const t=enemy(ctx);if(!t.id)ctx.H.fail(409,'탈취할 몬스터가 없습니다.');captureSharedUnits(ctx.r,[t.id],ctx.who,ctx.H)});
@@ -191,7 +192,7 @@ register('COC-30-005',ctx=>{
  p.bonusDrawsByOwnTurn??={};p.bonusDrawsByOwnTurn[turn]=(p.bonusDrawsByOwnTurn[turn]||0)+1;
 });
 // Mixed heads/tails resolve together; each of five coin flips contributes to exactly one count.
-register('COC-31-010',ctx=>{const p=ctx.r.players[ctx.who];if(!ctx.activationValidated&&(!p.integration||ctx.r.units[p.integration]?.cardId!=='COC-31-004'))ctx.H.fail(409,'최광의 대마법사 슈와 일체화해야 합니다.');let heads=0,tails=0;for(let i=0;i<5;i++){if(ctx.H.roll(2)===1)heads++;else tails++;}applySharedUnitEffect(ctx.r,p.field.filter(Boolean),ctx.H,(id,u)=>{u.atk+=heads*B.royalAttackPerHead;});if(tails>0)hurtSharedUnits(ctx.r,ctx.r.players[1-ctx.who].field.filter(Boolean),tails*B.royalDamagePerTail,ctx.H)});
+register('COC-31-010',ctx=>{const p=ctx.r.players[ctx.who];if(!ctx.activationValidated&&(!p.integration||ctx.r.units[p.integration]?.cardId!=='COC-31-004'))ctx.H.fail(409,'최광의 대마법사 슈와 일체화해야 합니다.');let heads=0,tails=0;for(let i=0;i<5;i++){if(ctx.H.roll(2)===1)heads++;else tails++;}applySharedUnitEffect(ctx.r,p.field.filter(Boolean),ctx.H,(id,u)=>{gainUnitStats(ctx.r,id,{atk:heads*B.royalAttackPerHead});});if(tails>0)hurtSharedUnits(ctx.r,ctx.r.players[1-ctx.who].field.filter(Boolean),tails*B.royalDamagePerTail,ctx.H)});
 // G-deck integration attack becomes a two-sided effect, then its present attack becomes zero.
 register('COC-01-008',ctx=>{const id=ctx.r.players[ctx.who].integration;if(!id)ctx.H.fail(409,'일체화 중이어야 합니다.');const n=Math.max(0,ctx.r.units[id].atk);const t=enemy(ctx);damagePlayer(ctx.r,ctx.who,n);hit(ctx,t,n);ctx.r.units[id].atk=0;ctx.H.outcome(ctx.r)});
 // Evolution resolves through a declared physical source snapshot in the server.
@@ -319,7 +320,7 @@ register('COC-20-004',ctx=>{
   ctx.H.fail(409,'자신 필드의 버닝데몬즈 몬스터를 1장 선택해야 합니다.');
  const bonus=ctx.H.roll(5)*100;
  ctx.r.players[ctx.who].hp-=bonus;
- applySharedUnitEffect(ctx.r,[id],ctx.H,(uid,u)=>{u.atk+=bonus;});
+ applySharedUnitEffect(ctx.r,[id],ctx.H,(uid,u)=>{gainUnitStats(ctx.r,uid,{atk:bonus});});
  ctx.H.outcome(ctx.r);
 });
 // Two previous own turns must each contain at least one Nature-attribute spell.
@@ -335,13 +336,10 @@ register('COC-30-011',ctx=>{
  hit(ctx,enemy(ctx),200);
 });
 
-// Dragon Lair: current allied dragons only. Dragon King's multiplier is applied
-// here to this explicit stat increase; other Dragon King clauses remain partial.
+// One common recipient-based gain path, also used by copies and shared effects.
 register('COC-11-011',ctx=>{
- const p=ctx.r.players[ctx.who],king=p.integration&&ctx.r.units[p.integration];
- const scale=king?.cardId==='COC-11-003'&&!king.effectsNegated?1.5:1;
- const ids=p.field.filter(id=>id&&/용|드래곤/.test(ctx.H.attribute(ctx.r,id)));
- applySharedUnitEffect(ctx.r,ids,ctx.H,(id,u)=>{u.atk+=Math.floor(B.dragonLairAttack*scale);u.hp+=Math.floor(B.dragonLairHp*scale);});
+ const ids=ctx.r.players[ctx.who].field.filter(id=>id&&/용|드래곤/.test(ctx.H.attribute(ctx.r,id)));
+ applySharedUnitEffect(ctx.r,ids,ctx.H,id=>gainUnitStats(ctx.r,id,{atk:B.dragonLairAttack,hp:B.dragonLairHp}));
 });
 
 export function hasAutoSpell(cardId){return Object.hasOwn(aliases,cardId)}

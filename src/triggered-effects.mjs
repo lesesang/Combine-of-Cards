@@ -1,3 +1,4 @@
+import {gainUnitStats} from './stat-gains.mjs';
 import {linkStraw,applySharedUnitEffect,destroySharedUnits,hurtSharedUnits,moveSharedUnits,captureSharedUnits} from './shared-unit-effects.mjs';
 import {actionLocked,applySuccubus,lureTarget,consumeLure} from './demon-effects.mjs';
 import {damagePlayer} from './weapon-equipment.mjs';
@@ -17,6 +18,8 @@ export const TRIGGER_RULES=Object.freeze({
  'COC-01-005':{effectNumber:2,event:'integration-attacks-monster'},
  'COC-07-001':{effectNumber:1,event:'enemy-turn-start',sourceZone:'integration'},
  'COC-11-001':{effectNumber:1,event:'own-turn-start',sourceZone:'deck',sourceType:'integration'},
+ 'COC-11-003':{effectNumber:1,event:'own-attack-start',sourceZone:'integration'},
+ 'COC-11-006':{effectNumber:1,event:'own-attack-start'},
  'COC-19-003':{effectNumber:1,event:'own-turn-start'},
  'COC-09-001':{effectNumber:1,event:'own-monster-destroyed',sourceZone:'integration',repeatPerEvent:true},
  'COC-10-011':{effectNumber:1,event:'destroyed',repeatPerEvent:true},
@@ -237,6 +240,23 @@ export function integrationTurnTriggers(r,who,H){
  }
  return group;
 }
+export function attackPhaseTriggers(r,who){
+ const p=r.players[who],group=[];
+ for(const id of [p.integration,...p.field].filter(Boolean)){
+  const u=r.units[id],king=p.integration===id&&u.cardId==='COC-11-003';
+  const orochi=p.field.includes(id)&&u.cardId==='COC-11-006';
+  if((!king&&!orochi)||u.effectsNegated||effectUsedThisTurn(r,who,id,1))continue;
+  group.push(trigger(r,who,id,{eventTurn:r.turnNumber,amount:king?50:(u.orochiAttacks||0)*80,attackCount:king?null:(u.orochiAttacks||0)}));
+ }
+ return group;
+}
+export function recordDragonAttack(r,id){
+ const u=r.units[id];
+ // Record an executed attack, even when its damage is zero or prevented.
+ // A cancelled declaration/retarget does not reach this point.
+ if(u?.cardId==='COC-11-006'&&r.players.some(p=>p.field.includes(id)))
+  u.orochiAttacks=(u.orochiAttacks||0)+1;
+}
 export function queueMonsterTriggers(r,effects,H){
  effects=effects.filter(e=>!actionLocked(r,e.sourceId));
  if(!effects.length)return;
@@ -294,6 +314,14 @@ export function resolveMonsterTrigger(r,e,H){
  }
  const sourceZone=TRIGGER_RULES[p.cardId].sourceZone||'field';
  if(!u||u.cardId!==p.cardId||u.effectsNegated||z?.zone!==sourceZone||z.player!==e.owner||((sourceZone==='integration'?u.integrationRevision:sourceZone==='field'?u.fieldRevision:u.zoneRevision)||0)!==p.sourceRevision){H.log(r,'effect','유발 소스 이탈/재진입·조종권/무효 상태로 불발');return;}
+ if(p.cardId==='COC-11-003'||p.cardId==='COC-11-006'){
+  if(p.eventTurn!==r.turnNumber||r.turn!==e.owner||r.phase!=='ATTACK')return;
+  const enemy=1-e.owner;
+  damagePlayer(r,enemy,p.amount);
+  if(p.amount>0)hurtSharedUnits(r,r.players[enemy].field.filter(Boolean),p.amount,H,{sourceId:e.sourceId});
+  H.log(r,'effect',`${H.name(r,e.sourceId)}: 어택 시작, 상대 전체에게 ${p.amount} 피해${p.attackCount===null?'':` (실행한 공격 ${p.attackCount}회 × 80)`}`);
+  H.outcome(r);return;
+ }
  if(p.cardId==='COC-07-001'){H.mill(r,1-e.owner,2);return;}
  if(p.cardId==='COC-01-005'){
   const target=r.units[p.targetId],tz=target&&H.zone(r,p.targetId);
@@ -316,7 +344,7 @@ export function resolveMonsterTrigger(r,e,H){
   else H.log(r,'equipment','파괴된 무기의 묘지 이탈/재진입으로 장착 불발');
   return;
  }
- if(p.cardId==='COC-03-001'){u.atk+=50;H.log(r,'effect','베리아: 묘지 이동 효과의 발동으로 공격력 +50');return;}
+ if(p.cardId==='COC-03-001'){gainUnitStats(r,u.id,{atk:50});H.log(r,'effect','베리아: 묘지 이동 효과의 발동으로 공격력 +50');return;}
  if(TRIGGER_RULES[p.cardId].target){
   const choice={who:e.owner,sourceId:e.sourceId,cardId:p.cardId,sourceRevision:p.sourceRevision,lureTargetId:p.lureTargetId||null};
   if(triggerTargetChoices(r,choice,H).length)r.pendingTriggerTargetChoice=choice;
@@ -325,8 +353,8 @@ export function resolveMonsterTrigger(r,e,H){
  }
  if(resolveSummonTrigger(r,e,H))return;
  if(p.cardId==='COC-23-008'){
-  u.atk+=55;
-  const integration=r.players[e.owner].integration;if(integration)r.units[integration].atk+=55;
+  gainUnitStats(r,u.id,{atk:55});
+  const integration=r.players[e.owner].integration;if(integration)gainUnitStats(r,integration,{atk:55});
   r.players[e.owner].rideMachineLock=true;
   H.log(r,'effect','어나더: 자신과 일체화 공격력 +55, 이 게임의 다른 라이드머신 사용 금지');
   return;

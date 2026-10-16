@@ -1,3 +1,4 @@
+import {gainUnitStats,gainPlayerStats} from './stat-gains.mjs';
 import {applySharedUnitEffect,destroySharedUnits,moveSharedUnits,captureSharedUnits} from './shared-unit-effects.mjs';
 import {declareEffect} from './effect-runtime.mjs';
 import {effectUsedThisTurn,markEffectUsed} from './effect-usage.mjs';
@@ -113,10 +114,10 @@ export function resolveOriginalSin(r,e,H){
   else{player.bonusDrawsByOwnTurn??={};const next=(player.turnsTaken||0)+1;player.bonusDrawsByOwnTurn[next]=(player.bonusDrawsByOwnTurn[next]||0)+1;}
  }else if(cid==='COC-07-011'){
   // Even its resolution-time draw/mill is printed in CONDITIONS, hence waived.
-  player.hp+=B.selfDevourHeal;u.atk+=B.selfDevourAttack;
+  gainPlayerStats(r,who,{hp:B.selfDevourHeal});const gained=gainUnitStats(r,u.id,{atk:B.selfDevourAttack}).atk;
   const token=u.selfDevourBuffToken||`${u.id}:${r.selfDevourSequence=(r.selfDevourSequence||0)+1}`;u.selfDevourBuffToken=token;
   r.effects??=[];const existing=r.effects.find(e=>e.type==='selfDevourBuff'&&e.token===token);
-  if(existing)existing.amount+=B.selfDevourAttack;else r.effects.push({type:'selfDevourBuff',unitId:u.id,player:who,turn:r.turnNumber,token,amount:B.selfDevourAttack});
+  if(existing)existing.amount+=gained;else r.effects.push({type:'selfDevourBuff',unitId:u.id,player:who,turn:r.turnNumber,token,amount:gained});
  }else if(spells.has(cid)){
   try{prepareCopiedSpellBody(r,who,cid,p.body,H);}catch(error){if(error.status!==409)throw error;H.log(r,'effect','복사 효과의 대상 상태 변경으로 불발');return;}
   if(!responseTargetStillValid(r,who,cid,p.body,H)){H.log(r,'effect','복사 효과 대상 조건 변경으로 불발');return;}

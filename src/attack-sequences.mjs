@@ -1,3 +1,4 @@
+import {scaledStatGain} from './stat-gains.mjs';
 // An effect attack uses the ordinary battle resolver but does not spend a
 // normal attack opportunity. Targets and field stays are saved, never closures.
 const blocked=r=>r.suspendedResponses?.length||r.deferredMonsterTriggers?.length||r.destroyHealGroups?.length||r.effectStack?.length||
@@ -5,7 +6,7 @@ const blocked=r=>r.suspendedResponses?.length||r.deferredMonsterTriggers?.length
 export function beginTempering(r,who,body,H){
  const id=r.players[who].integration,u=id&&r.units[id];
  if(!u||id!==body.temperingSourceId||(u.integrationRevision||0)!==body.temperingRevision){H.log(r,'effect','뜨임질: 선언한 일체화 이탈/재진입으로 불발');return;}
- (u.temperingBonuses??=[]).push({turn:r.turnNumber,amount:100});
+ (u.temperingBonuses??=[]).push({turn:r.turnNumber,amount:scaledStatGain(r,{id},100)});
  if(r.pendingAttackSequence)throw new Error('effect attack sequence already pending');
  r.pendingAttackSequence={who,sourceId:id,sourceRevision:u.integrationRevision||0,turnNumber:r.turnNumber,stage:'waiting',
   remaining:[...r.players[1-who].field.filter(Boolean).map(id=>({type:'unit',id,revision:r.units[id].fieldRevision||0})),{type:'player',player:1-who}]};

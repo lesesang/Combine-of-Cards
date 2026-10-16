@@ -1,3 +1,4 @@
+import {gainUnitStats,gainPlayerStats} from './stat-gains.mjs';
 import {actualAttack} from './combat-stats.mjs';
 /**
  * COC-21-002: Life-Eating Sword is a graveyard spell granting a serializable
@@ -116,19 +117,14 @@ export function processSwordAttackPhase(room,who,{getZone,destroy,outcome,log}={
    outcome?.(room);
    continue;
   }
+  let gained;
   if(unit){
    unit.hp-=30;
-   unit.atk+=100;
+   gained=gainUnitStats(room,unit.id,{atk:100}).atk;
   }else{
    room.players[who].hp-=30;
-   const p=room.players[who];
-   p.playerAtkBonus=(p.playerAtkBonus||0)+100;
-   if(p.integration){
-    const u=room.units[p.integration];
-    u.atk+=100;
-    u.playerAttackBonusApplied=(u.playerAttackBonusApplied||0)+100;
-   }
+   gained=gainPlayerStats(room,who,{atk:100}).atk;
   }
-  log?.(room,'effect','생명을 먹는 마검: 공격 페이즈 시작에 체력 30 지불 / 공격력 +100');
+  log?.(room,'effect',`생명을 먹는 마검: 공격 페이즈 시작에 체력 30 지불 / 기본 공격력 +100 (적용 +${gained})`);
  }
 }

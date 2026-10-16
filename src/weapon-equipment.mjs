@@ -1,12 +1,13 @@
 // Physical equipment from the smith deck. Sword21-002 is NOT equipment.
 import {damageProtected} from './protection-auras.mjs';
+import {scaledStatGain} from './stat-gains.mjs';
 export const WEAPON_MONSTERS=Object.freeze(['COC-09-002','COC-09-003','COC-09-004']);
 export const WEAPON_SPELLS=Object.freeze(['COC-09-005','COC-09-006']);
 export function activeWeapons(r,host){
  if(!host||host.effectsNegated)return [];
  return (host.attachments||[]).map(id=>r.units[id]).filter(u=>u&&u.attachmentHostId===host.id&&u.weaponGrant&&!u.effectsNegated);
 }
-export function weaponAttackBonus(r,host){return activeWeapons(r,host).reduce((n,u)=>n+u.weaponGrant.attack,0);}
+export function weaponAttackBonus(r,host){return activeWeapons(r,host).reduce((n,u)=>n+scaledStatGain(r,{id:host.id},u.weaponGrant.attack),0);}
 export function hasWeaponAbility(r,host,cardId){return activeWeapons(r,host).some(u=>u.cardId===cardId);}
 // HP payment, HP setting, absorption and reload are separate from incoming
 // attack/effect damage. Callers settle outcome after simultaneous damage.

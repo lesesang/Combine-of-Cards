@@ -1,3 +1,4 @@
+import {gainUnitStats,gainPlayerStats} from './stat-gains.mjs';
 import {applySharedUnitEffect,destroySharedUnits,moveSharedUnits} from './shared-unit-effects.mjs';
 import {queueCardRevival} from './death-revival.mjs';
 import {damagePlayer} from './weapon-equipment.mjs';
@@ -47,8 +48,8 @@ export function resolveSummonTrigger(r,e,H){
   H.log(r,'effect','골과 몰: 기본 상태의 복사본을 패에 생성하고 소환 예약 (복사본의 증식 효과는 발동하지 않음)');break;
  }
  case 'pharaoh-buff':
-  applySharedUnitEffect(r,r.players.flatMap(pp=>pp.field.filter(Boolean)),H,(id,u)=>{u.atk+=50;u.hp=(u.hp??0)+50;});break;
- case 'yurika-heal':p.hp+=B.yurikaHeal;break;
+  applySharedUnitEffect(r,r.players.flatMap(pp=>pp.field.filter(Boolean)),H,(id,u)=>{if(u.hp===null)u.hp=0;gainUnitStats(r,id,{atk:50,hp:50});});break;
+ case 'yurika-heal':gainPlayerStats(r,who,{hp:B.yurikaHeal});break;
  case 'restore-battlefield':{
   const targets=[r.turn,1-r.turn].flatMap(controller=>r.players[controller].field.filter(Boolean).map(id=>({id,controller,revision:r.units[id].zoneRevision||0})));
   destroySharedUnits(r,targets.map(t=>t.id),H,{sourceId:e.sourceId});
@@ -69,7 +70,7 @@ export function resolveSummonTrigger(r,e,H){
  case 'both-draw':H.draw(r,who);if(r.status==='active')H.draw(r,1-who);break;
  case 'draw-two':for(let i=0;i<2&&r.status==='active;i++)H.draw(r,who);break;
  case 'enemy-mill':H.mill(r,1-who,2);break;
- case 'heal':p.hp+=B.rideWaterHeal;break;
+ case 'heal':gainPlayerStats(r,who,{hp:B.rideWaterHeal});break;
  case 'create-remnant':{
   // This is the catalog's generated card, not an invented source record.
   const id=H.instantiate(r,'COC-10-002',who);
@@ -94,7 +95,7 @@ export function resolveSummonTrigger(r,e,H){
    H.move(r,id,'grave',r.units[id].owner);count++;
    if(count===1&&(!card?.type.includes('몬스터')||isToken))break;
   }
-  u.atk+=count*50;u.hp=(u.hp??0)+count*50;
+  if(u.hp===null)u.hp=0;gainUnitStats(r,u.id,{atk:count*50,hp:count*50});
   H.log(r,'effect',`분쇄차 티라노: 덱 위 ${count}장 묘지 이동, 공격력·체력 +${count*50}`);break;
  }
  case 'coin-draw':{

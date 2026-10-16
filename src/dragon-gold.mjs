@@ -1,3 +1,4 @@
+import {gainUnitStats,gainPlayerStats} from './stat-gains.mjs';
 import {
   declareAutomaticGroup, resolveEffectStack, registerPersistent, endPersistent
 } from './effect-runtime.mjs';
@@ -25,8 +26,7 @@ function addTreasure(room, gold, n, { log } = {}) {
     id => id && id === gold.anchorId && room.units[id]?.cardId === DRAGON_CARDS.fafnir
   );
   if (active) {
-    room.units[active].atk += 10 * n;
-    room.units[active].hp += 10 * n;
+    if(!room.units[active].effectsNegated)gainUnitStats(room,active,{atk:10*n,hp:10*n});
   }
   log?.(room, 'effect', `라인의 황금: 보물 ${n}개 추가 (총 ${gold.counters}개)`);
 }
@@ -118,16 +118,9 @@ export function onFafnirDestroyed(room, fafnirId, controller, H) {
     execute:e => {
       if (e.effectId === 'dragon-ring') {
         const n = Math.max(0,Math.floor(e.payload.treasureCount)) * 10;
-        const p = room.players[controller];
-        p.hp += n;
-        p.playerAtkBonus = (p.playerAtkBonus || 0) + n;
-        if (p.integration) {
-          room.units[p.integration].atk += n;
-          room.units[p.integration].playerAttackBonusApplied =
-            (room.units[p.integration].playerAttackBonusApplied || 0) + n;
-        }
+        const gained=gainPlayerStats(room,controller,{atk:n,hp:n});
         if (H.zone(room, ringId)) H.move(room, ringId, 'banished', controller);
-        H.log(room,'effect',`니벨룽겐의 반지: 보물 ${e.payload.treasureCount}개 × 10 = ${n} 플레이어 체력·공격력 증가`);
+        H.log(room,'effect',`니벨룽겐의 반지: 보물 ${e.payload.treasureCount}개 × 10 = ${n} 기본 강화 (적용 ATK+${gained.atk}/HP+${gained.hp})`);
       }
       if (e.effectId === 'dragon-gold-expire') {
         endPersistent(room, item => item.id === e.payload.goldEffectId);
