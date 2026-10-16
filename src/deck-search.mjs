@@ -1,3 +1,4 @@
+import {WEAPON_SPELLS,weaponCandidates,chooseWeapons} from './weapon-equipment.mjs';
 // Selection opens only after the effect survives the opponent response.
 export const deckSearchSpellIds=Object.freeze(['COC-07-004','COC-19-004','COC-20-003','COC-24-008','COC-26-008']);
 const SEARCH_NAMES=Object.freeze({
@@ -10,6 +11,7 @@ const SEARCH_NAMES=Object.freeze({
 });
 const sourceZone=cardId=>cardId==='COC-06-001'?'grave':'deck';
 export function eligibleSearchIds(room,who,cardId,cards){
+ if(WEAPON_SPELLS.includes(cardId))return weaponCandidates(room,who,cardId,cards);
  if(!deckSearchSpellIds.includes(cardId)&&!SEARCH_NAMES[cardId]&&cardId!=='COC-06-001')return [];
  return room.players[who][sourceZone(cardId)].filter(id=>{
   const c=cards.get(room.units[id]?.cardId);if(!c)return false;
@@ -29,10 +31,13 @@ export function beginDeckSearch(room,who,cardId,cards,H,source={}){
 }
 export function deckSearchView(room,viewer,cards){
  const p=room.pendingDeckSearch;if(!p)return null;
+ if(p.weapon)return {who:p.who,cardId:p.cardId,weapon:true,zone:p.cardId==='COC-09-006'?'grave':'deck',maxCount:2,
+  ...(viewer===p.who?{choices:weaponCandidates(room,p.who,p.cardId,cards).filter(id=>p.choices.includes(id)).map(id=>({id,card:cards.get(room.units[id].cardId)}))}:{})};
  return {who:p.who,cardId:p.cardId,zone:sourceZone(p.cardId),...(viewer===p.who?{choices:p.choices.filter(id=>eligibleSearchIds(room,p.who,p.cardId,cards).includes(id)).map(id=>({id,card:cards.get(room.units[id].cardId)}))}:{})};
 }
 export function finishDeckSearch(room,who,id,cards,H){
  const p=room.pendingDeckSearch;
+ if(p?.weapon)return chooseWeapons(room,who,id,H);
  if(room.status!=='active'||!p||p.who!==who)H.fail(403,'카드 검색 효과의 선택권자가 아닙니다.');
  if(p.sourceId){
   const u=room.units[p.sourceId],z=H.zone(room,p.sourceId),revision=p.sourceZone==='integration'?u?.integrationRevision:u?.fieldRevision;

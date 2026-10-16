@@ -1,3 +1,4 @@
+import {damagePlayer} from './weapon-equipment.mjs';
 import {beginDeckSearch} from './deck-search.mjs';
 import {balanceValues as B} from './balance-values.mjs';
 import {swordActualAttack} from './life-eating-sword.mjs';
@@ -44,7 +45,7 @@ export function resolveSummonTrigger(r,e,H){
   H.log(r,'effect','디트리히: 현재 공격력·체력을 복사한 찌꺼기를 패에 생성');break;
  }
  case 'share-excess-hp':{
-  const loss=Math.max(0,p.hp-500);p.hp-=loss;foe.hp-=loss;
+  const loss=Math.max(0,p.hp-500);damagePlayer(r,who,loss);damagePlayer(r,1-who,loss);
   H.log(r,'effect',`프란츠: 양쪽 플레이어에게 ${loss} 피해`);break;
  }
  case 'freeze-enemy-turn':foe.noAttackUntil=(foe.turnsTaken||0)+(r.turn===who?1:0);break;
@@ -68,7 +69,7 @@ export function resolveSummonTrigger(r,e,H){
  }
  case 'coin-damage':{
   const faces=Array.from({length:5},()=>H.roll(2)),damage=faces.filter(x=>x===1).length*100;
-  foe.hp-=damage;H.log(r,'dice',`베이플: 코인 ${faces.join(', ')} → 상대 ${damage} 피해`);break;
+  damagePlayer(r,1-who,damage);H.log(r,'dice',`베이플: 코인 ${faces.join(', ')} → 상대 ${damage} 피해`);break;
  }
  default:throw new Error('unknown summon trigger action');
  }

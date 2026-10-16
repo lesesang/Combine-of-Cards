@@ -1,3 +1,4 @@
+import {weaponAttackBonus,hasWeaponAbility} from './weapon-equipment.mjs';
 // Physical cards actually used/summoned during this game. Never reconstruct
 // missing history from today's grave/field or from a truncated public log.
 const EVOLVED_HISTORY=Object.freeze({
@@ -21,7 +22,12 @@ export function recordCardUse(r,who,id,cards){
 }
 export function refreshHistoryAttack(r,cards){
  for(const u of Object.values(r.units)){delete u.historyAttackBonus;delete u.fieldAura;}
+ for(const u of Object.values(r.units)){
+  delete u.weaponAttackBonus;delete u.weaponDoubleAttack;
+ }
  for(const p of r.players){
+  const host=p.integration&&r.units[p.integration];
+  if(host){host.weaponAttackBonus=weaponAttackBonus(r,host);host.weaponDoubleAttack=hasWeaponAbility(r,host,'COC-09-003');}
   const source=p.integration&&r.units[p.integration];
   if(source?.cardId==='COC-08-004'&&!source.effectsNegated){
    for(const id of p.field.filter(Boolean))if(cards.get(r.units[id].cardId)?.attribute==='요괴')

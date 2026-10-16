@@ -2,10 +2,12 @@ import {balanceValues as B} from './balance-values.mjs';
 import {evolutionSpellIds} from './evolution.mjs';
 import {isNonToonField} from './spell-choice-batch.mjs';
 import {beginSummonBatch} from './effect-summon-batches.mjs';
+import {beginWeaponSelection,damagePlayer} from './weapon-equipment.mjs';
 // Audited, deterministic card-effect handlers. No free-form text execution.
 // A handler must be backed by a particular v1.3 card wording.
 const aliases={};
 const register=(ids,handler)=>{for(const id of ids.split(' '))aliases[id]=handler;};
+register('COC-09-005 COC-09-006',ctx=>beginWeaponSelection(ctx.r,ctx.who,ctx.c.id,ctx.H));
 register('COC-20-010 COC-23-010 COC-24-007',ctx=>{beginSummonBatch(ctx.r,ctx.who,ctx.c.id,ctx.H);});
 register('COC-08-009',ctx=>{
  for(const id of ctx.r.players[ctx.who].field.filter(Boolean))if(ctx.H.attribute(ctx.r,id)==='요괴')ctx.r.units[id].atk+=50;
@@ -37,7 +39,7 @@ const destroyTogether=(ctx,ids)=>{
  if(typeof ctx.H.destroyBatch==='function')return ctx.H.destroyBatch(ctx.r,ids);
  for(const id of [...new Set(ids)])ctx.H.destroy(ctx.r,id);
 };
-const hit=(ctx,target,amount)=>{if(!Number.isFinite(amount))throw Error('잘못된 피해 수치');amount=Math.max(0,Math.floor(amount));if(target.id)return ctx.H.hurt(ctx.r,target.id,amount);else{ctx.r.players[target.player].hp-=amount;ctx.H.outcome(ctx.r)}};
+const hit=(ctx,target,amount)=>{if(!Number.isFinite(amount))throw Error('잘못된 피해 수치');amount=Math.max(0,Math.floor(amount));if(target.id)return ctx.H.hurt(ctx.r,target.id,amount);else{damagePlayer(ctx.r,target.player,amount);ctx.H.outcome(ctx.r)}};
 const heal=(ctx,target,amount)=>{amount=Math.max(0,Math.floor(amount));if(target.id)ctx.H.healUnit(ctx.r,target.id,amount);else ctx.r.players[target.player].hp+=amount;};
 const charge=(ctx,amount)=>{const p=ctx.r.players[ctx.who];if(p.hp<=amount)ctx.H.fail(409,'필요한 체력을 지불할 수 없습니다.');p.hp-=amount;};
 const enemy=(ctx)=>getTarget(ctx,'enemy');
@@ -96,7 +98,7 @@ register('COC-14-006',ctx=>{if(!ctx.activationValidated&&!ctx.r.players[1-ctx.wh
 register('COC-17-003',ctx=>{const p=ctx.r.players[ctx.who];p.hp+=150;for(const id of p.field.filter(Boolean))heal(ctx,{id},150)});
 register('COC-17-005',ctx=>{if(!ctx.activationValidated&&!ctx.r.players[ctx.who].integration)ctx.H.fail(409,'일체화가 필요합니다.');hit(ctx,enemy(ctx),ctx.rollValue(400))});
 register('COC-17-006',ctx=>{if(!ctx.activationValidated&&!ctx.r.players[ctx.who].integration)ctx.H.fail(409,'일체화가 필요합니다.');const n=ctx.rollValue(200);hit(ctx,{player:1-ctx.who},n);for(const id of [...ctx.r.players[1-ctx.who].field].filter(Boolean))hit(ctx,{id},n)});
-register('COC-20-005',ctx=>{const n=ctx.rollValue(200);ctx.r.players[0].hp-=n;ctx.r.players[1].hp-=n;ctx.H.outcome(ctx.r)});
+register('COC-20-005',ctx=>{const n=ctx.rollValue(200);damagePlayer(ctx.r,0,n);damagePlayer(ctx.r,1,n);ctx.H.outcome(ctx.r)});
 register('COC-21-005',ctx=>{const t=own(ctx);if(!t.id)ctx.H.fail(409,'자신의 몬스터를 선택하세요.');const hp=ctx.r.units[t.id].hp||0;ctx.H.destroy(ctx.r,t.id,{bypassEffectImmunity:true});ctx.r.players[ctx.who].hp+=hp});
 register('COC-27-006',ctx=>{hit(ctx,getTarget(ctx,'any'),100)});
 register('COC-30-001',ctx=>{destroyTogether(ctx,ctx.r.players[1-ctx.who].field.filter(id=>id&&ctx.r.units[id].atk<=100))});
@@ -146,7 +148,7 @@ register('COC-30-005',ctx=>{
 // Mixed heads/tails resolve together; each of five coin flips contributes to exactly one count.
 register('COC-31-010',ctx=>{const p=ctx.r.players[ctx.who];if(!ctx.activationValidated&&(!p.integration||ctx.r.units[p.integration]?.cardId!=='COC-31-004'))ctx.H.fail(409,'최광의 대마법사 슈와 일체화해야 합니다.');let heads=0,tails=0;for(let i=0;i<5;i++){if(ctx.H.roll(2)===1)heads++;else tails++;}for(const id of p.field.filter(Boolean))ctx.r.units[id].atk+=heads*B.royalAttackPerHead;for(const id of [...ctx.r.players[1-ctx.who].field].filter(Boolean))if(tails>0)ctx.H.hurt(ctx.r,id,tails*B.royalDamagePerTail)});
 // G-deck integration attack becomes a two-sided effect, then its present attack becomes zero.
-register('COC-01-008',ctx=>{const id=ctx.r.players[ctx.who].integration;if(!id)ctx.H.fail(409,'일체화 중이어야 합니다.');const n=Math.max(0,ctx.r.units[id].atk);const t=enemy(ctx);ctx.r.players[ctx.who].hp-=n;if(t.id)ctx.H.hurt(ctx.r,t.id,n);else ctx.r.players[t.player].hp-=n;ctx.r.units[id].atk=0;ctx.H.outcome(ctx.r)});
+register('COC-01-008',ctx=>{const id=ctx.r.players[ctx.who].integration;if(!id)ctx.H.fail(409,'일체화 중이어야 합니다.');const n=Math.max(0,ctx.r.units[id].atk);const t=enemy(ctx);damagePlayer(ctx.r,ctx.who,n);if(t.id)ctx.H.hurt(ctx.r,t.id,n);else damagePlayer(ctx.r,t.player,n);ctx.r.units[id].atk=0;ctx.H.outcome(ctx.r)});
 // Evolution resolves through a declared physical source snapshot in the server.
 for(const id of evolutionSpellIds)register(id,()=>({evolution:true}));
 // Curse deck: source monster is sacrificed by the audited activation preflight.

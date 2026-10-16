@@ -1,6 +1,6 @@
 # Combine of Cards — 컴바인 오브 카드즈
 
-> 구현 우선 단계: draft PR #75에 원소·진화·소환 연계에 이어 [소환 유발·검색22종 경로](docs/SUMMON_TRIGGER_BATCH_DRAFT.md), [주문 재사용·묘지 발동 사건](docs/SPELL_REUSE_AND_GRAVE_EVENTS_DRAFT.md), [재사용 기본 주문53종·비용/검색 확장](docs/SPELL_REUSE_COSTS_DRAFT.md)을 누적했습니다. 사용자 요청으로 테스트·CI는 후속 일괄 검증 때 실행합니다. 아래 검증 집계는 main PR #74 기준선이며 새 초안의 통과 결과가 아닙니다.
+> 구현 우선 단계: draft PR #75에 원소·진화·소환 연계에 이어 [소환 유발·검색22종 경로](docs/SUMMON_TRIGGER_BATCH_DRAFT.md), [주문 재사용·묘지 발동 사건](docs/SPELL_REUSE_AND_GRAVE_EVENTS_DRAFT.md), [재사용 기본 주문53종·비용/검색 확장](docs/SPELL_REUSE_COSTS_DRAFT.md), [무기·사망 부활7종](docs/WEAPON_AND_REVIVAL_DRAFT.md)을 누적했습니다. 사용자 요청으로 테스트·CI는 후속 일괄 검증 때 실행합니다. 아래 검증 집계는 main PR #74 기준선이며 새 초안의 통과 결과가 아닙니다.
 
 
 동호회 자작 TCG 《컴바인 오브 카드즈》를 플레이 가능한 온라인 대전 웹 서비스로 만드는 저장소다. **현재 v1.3 규칙 기반 개발 베타**이며 **254개 카드 모든 효과의 완전 자동화·정식 운영 배포는 아직 미완료**다.

@@ -1,12 +1,17 @@
+import {damagePlayer} from './weapon-equipment.mjs';
 import {beginAutomaticTriggerOrder} from './effect-runtime.mjs';
 import {effectUsedThisTurn,markEffectUsed} from './effect-usage.mjs';
 import {swordActualAttack} from './life-eating-sword.mjs';
 import {SUMMON_TRIGGER_RULES,resolveSummonTrigger,settleSummonTrigger} from './summon-trigger-effects.mjs';
 import {beginDeckSearch,eligibleSearchIds} from './deck-search.mjs';
+import {WEAPON_MONSTERS,equipWeapon} from './weapon-equipment.mjs';
+import {queueDeathRevival} from './death-revival.mjs';
 
 // Draft automation: the user requested implementation batches before testing.
 // Automatic monster/integration triggers, not selectable MAIN abilities.
 export const TRIGGER_RULES=Object.freeze({
+ 'COC-09-001':{effectNumber:1,event:'own-monster-destroyed',sourceZone:'integration',repeatPerEvent:true},
+ 'COC-10-011':{effectNumber:1,event:'destroyed',repeatPerEvent:true},
  ...Object.fromEntries(Object.entries(SUMMON_TRIGGER_RULES).map(([id,rule])=>[id,{effectNumber:1,event:'summoned',...rule}])),
  'COC-06-001':{effectNumber:1,event:'own-turn-start',sourceZone:'integration'},
  'COC-03-001':{effectNumber:1,event:'grave-effect-activation',sourceZone:'integration',repeatPerEvent:true},
@@ -81,6 +86,21 @@ export function resumeSuspendedResponse(r){
 }
 export function recordDestroyedTrigger(r,id,{sourceId,sourcePlayer},H){
  const u=r.units[id],z=H.zone(r,id);
+ if(u?.cardId==='COC-10-011'&&z?.zone==='field'&&!u.effectsNegated&&!u.revivedOnce){
+  u.revivedOnce=true;
+  const effect=trigger(r,z.player,id,{eventTurn:r.turnNumber,graveRevision:(u.zoneRevision||0)+1});
+  effect.exception='destroy-trigger';effect.key=`revive-${id}-${u.zoneRevision||0}`;
+  (r.deferredMonsterTriggers??=[]).push(effect);
+ }
+ if(u&&z?.zone==='field'&&!u.created&&WEAPON_MONSTERS.includes(u.cardId)&&u.owner===z.player&&r.players[z.player].usedCardsGame?.[id]){
+  const hostId=r.players[z.player].integration,host=hostId&&r.units[hostId];
+  if(host?.cardId==='COC-09-001'&&!host.effectsNegated){
+   const effect=trigger(r,z.player,hostId,{eventTurn:r.turnNumber,victimId:id,victimRevision:(u.zoneRevision||0)+1,
+    victimAttack:swordActualAttack(r,id,{getZone:(room,uid)=>H.zone(room,uid)})});
+   effect.key=`smith-${id}-${u.zoneRevision||0}`;
+   if(!(r.deferredMonsterTriggers||[]).some(e=>e.key===effect.key))(r.deferredMonsterTriggers??=[]).push(effect);
+  }
+ }
  if(u?.cardId!=='COC-26-004'||u.effectsNegated||z?.zone!=='field'||effectUsedThisTurn(r,z.player,id,1))return;
  const killer=sourceId&&r.units[sourceId],kz=killer&&H.zone(r,sourceId);
  let target;
@@ -192,7 +212,7 @@ export function queueMonsterTriggers(r,effects,H){
  beginAutomaticTriggerOrder(r,effects.map(e=>({...e,title:`${H.name(r,e.sourceId)} · 효과 ${TRIGGER_RULES[e.payload.cardId].effectNumber}`})),r.turn);
  for(const e of effects){
   if(!TRIGGER_RULES[e.payload.cardId].repeatPerEvent)markEffectUsed(r,e.owner,e.sourceId,TRIGGER_RULES[e.payload.cardId].effectNumber);
-  if(e.payload.cardId==='COC-06-001'||e.payload.cardId==='COC-32-015'&&r.players[1-e.owner].grave.length)
+  if(['COC-06-001','COC-09-001','COC-10-011'].includes(e.payload.cardId)||e.payload.cardId==='COC-32-015'&&r.players[1-e.owner].grave.length)
    H.graveActivation?.(r,{eventKey:`trigger-grave-${e.key}`,cardId:e.payload.cardId});
  }
  r.pendingMonsterTriggers={stage:'ordering',queue:[]};
@@ -217,17 +237,25 @@ export function resumeMonsterTriggers(r,H){
 }
 export function resolveMonsterTrigger(r,e,H){
  const u=r.units[e.sourceId],z=H.zone(r,e.sourceId),p=e.payload;
+ if(p.cardId==='COC-10-011'){queueDeathRevival(r,e,H);return;}
  if(p.cardId==='COC-26-004'){
   // This declared destruction trigger deliberately survives its own death.
   const t=p.target;
   if(t.id){const target=r.units[t.id],tz=H.zone(r,t.id);if(target&&tz?.zone==='field'&&tz.player===t.controller&&(target.fieldRevision||0)===t.revision)H.hurt(r,t.id,p.amount,{sourceId:e.sourceId});}
-  else r.players[t.player].hp-=p.amount;
+  else damagePlayer(r,t.player,p.amount);
   H.log(r,'effect',`저지먼트 매치: 파괴 직전 공격력 ${p.amount} 반사 피해`);H.outcome(r);return;
  }
  const sourceZone=TRIGGER_RULES[p.cardId].sourceZone||'field';
  if(!u||u.cardId!==p.cardId||u.effectsNegated||z?.zone!==sourceZone||z.player!==e.owner||((sourceZone==='integration'?u.integrationRevision:u.fieldRevision)||0)!==p.sourceRevision){H.log(r,'effect','유발 소스 이탈/재진입·조종권/무효 상태로 불발');return;}
  if(p.cardId==='COC-06-001'){
   beginDeckSearch(r,e.owner,p.cardId,H.cards,H,{sourceId:e.sourceId,sourceZone,sourceRevision:p.sourceRevision});return;
+ }
+ if(p.cardId==='COC-09-001'){
+  const victim=r.units[p.victimId],vz=victim&&H.zone(r,p.victimId);
+  if(vz?.zone==='grave'&&vz.player===e.owner&&(victim.zoneRevision||0)===p.victimRevision)
+   equipWeapon(r,e.owner,p.victimId,e.sourceId,p.victimAttack,H);
+  else H.log(r,'equipment','파괴된 무기의 묘지 이탈/재진입으로 장착 불발');
+  return;
  }
  if(p.cardId==='COC-03-001'){u.atk+=50;H.log(r,'effect','베리아: 묘지 이동 효과의 발동으로 공격력 +50');return;}
  if(TRIGGER_RULES[p.cardId].target){

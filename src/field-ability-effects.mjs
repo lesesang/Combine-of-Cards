@@ -1,3 +1,4 @@
+import {damagePlayer} from './weapon-equipment.mjs';
 import {recruitChoices,beginRecruitChoice} from './recruit-summons.mjs';
 import {balanceValues as B} from './balance-values.mjs';
 import {ELEMENTAL_MAGICIAN_IDS} from './effect-usage.mjs';
@@ -148,7 +149,7 @@ export function resolveFieldEffect(r,who,plan,H){
   H.destroy(r,t,{sourceId:plan.sourceId});break;
  case 'COC-32-014':
   if(!terraReady(u)||!Number.isFinite(u.hp)||u.hp<=0)return fizzle('체류 조건 또는 현재 체력 소실');
-  r.players[1-who].hp-=Math.floor(u.hp/2);H.outcome(r);break;
+  damagePlayer(r,1-who,Math.floor(u.hp/2));H.outcome(r);break;
  case 'COC-08-003':H.draw(r,who);break;
  case 'COC-10-005':H.destroy(r,t,{sourceId:plan.sourceId});break;
  case 'COC-23-002':{
@@ -170,7 +171,7 @@ export function resolveFieldEffect(r,who,plan,H){
  case 'COC-13-001':case 'COC-13-002':case 'COC-13-005':{
   if(c==='COC-13-002'){const result=H.roll(2);H.log(r,'dice',`사랑 도둑: 1d2 = ${result}`);if(result!==1)break;}
   const attack=swordActualAttack(r,t,{getZone:(room,id)=>H.zone(room,id)});
-  H.capture(r,who,t);if(c==='COC-13-005'){r.players[1-who].hp-=Math.floor(attack/B.thiefDamageDivisor);H.outcome(r);}break;
+  H.capture(r,who,t);if(c==='COC-13-005'){damagePlayer(r,1-who,Math.floor(attack/B.thiefDamageDivisor));H.outcome(r);}break;
  }
  case 'COC-22-010':{
   const target=r.units[t];if(target.bonusAttackTurn!==r.turnNumber){target.bonusAttackTurn=r.turnNumber;target.bonusAttackCount=0;}target.bonusAttackCount++;break;

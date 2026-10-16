@@ -1,4 +1,5 @@
 import {cardUseForbidden,isRideMachine} from './card-game-history.mjs';
+import {resumeWeaponRevival} from './weapon-equipment.mjs';
 
 // Chosen physical cards only. No fabricated copies, no access to exile/extra.
 export const SUMMON_BATCH_RULES=Object.freeze({
@@ -42,6 +43,7 @@ export function resumeSummonBatch(r,H){
  const p=r.pendingSummonBatch;if(!p||p.stage==='choice')return;
  if(r.status!=='active'){r.pendingSummonBatch=null;return;}
  if(r.pendingExtraSummon||r.pendingAbility||r.pendingSpell||r.pendingTriggerOrder||r.pendingMonsterTriggers||r.pendingTriggerTargetChoice||r.pendingInfinityChoice||r.pendingDeckSearch||r.pendingRecruitChoice||r.pendingElementalChoice||r.effectStack?.length)return;
+ if(p.kind==='weapon')return resumeWeaponRevival(r,p,H);
  while(p.queue.length){
   const next=p.queue.shift();
   if(!r.players[p.who].field.includes(null)){p.queue=[];break;}

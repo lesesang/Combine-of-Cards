@@ -3,6 +3,7 @@
  * In particular, Black Metal Magician's 250 value is solely a condition value,
  * never the amount rolled for a normal attack.
  */
+import {weaponAttackBonus} from './weapon-equipment.mjs';
 export const BLACK_METAL_MAGICIAN_ID='COC-22-015';
 
 export function actualAttack(unit,{room,getZone}={}) {
@@ -11,7 +12,8 @@ export function actualAttack(unit,{room,getZone}={}) {
   const source=room.units[unit.fieldAura.sourceId],z=getZone?.(room,unit.id);
   if(!source||source.effectsNegated||source.cardId!=='COC-08-004'||(source.integrationRevision||0)!==unit.fieldAura.sourceRevision||z?.zone!=='field'||room.players[z.player].integration!==source.id)aura=0;
  }
- const raw=Number(unit?.atk)+(unit?.effectsNegated?0:Number(unit?.historyAttackBonus||0))+aura;
+ const equipment=room?weaponAttackBonus(room,unit):Number(unit?.weaponAttackBonus||0);
+ const raw=Number(unit?.atk)+(unit?.effectsNegated?0:Number(unit?.historyAttackBonus||0)+equipment)+aura;
  return Number.isFinite(raw)?Math.max(0,Math.floor(raw)):0;
 }
 
