@@ -1,3 +1,5 @@
+import {effectUsedThisTurn,markEffectUsed} from './effect-usage.mjs';
+import {declareEffect} from './effect-runtime.mjs';
 import {gainUnitStats,gainPlayerStats} from './stat-gains.mjs';
 import {
   registerPersistent, endPersistent
@@ -28,58 +30,80 @@ function addTreasure(room, gold, n, { log } = {}) {
   log?.(room, 'effect', `라인의 황금: 보물 ${n}개 추가 (총 ${gold.counters}개)`);
 }
 
-function findFafnir(room, who) {
-  const p = room.players[who];
-  return [...p.hand, ...p.deck].find(id => room.units[id]?.cardId === DRAGON_CARDS.fafnir);
-}
-
+// Queues contain JSON snapshots only. No nested effect-stack resolution is
+// allowed in a movement hook or in the middle of a token-producing effect.
 export function createDragonTreasures(room,who,anchorId,H){
  const goldId=H.instantiate(room,DRAGON_CARDS.gold,who),ringId=H.instantiate(room,DRAGON_CARDS.ring,who);
+ room.units[goldId].dragonGoldBinding={anchorId,anchorRevision:room.units[anchorId].fieldRevision||0,ringId,owner:who};
  H.move(room,goldId,'hand',who);H.move(room,ringId,'hand',who);
- // Gold's original automatic use remains immediate; its ATTACK trigger and
- // Ring's later death trigger now use the common response engine.
- H.move(room,goldId,'grave',who);
- registerPersistent(room,{kind:'dragon-gold',owner:who,sourceId:goldId,anchorId,expires:'anchor-destroyed',counters:0,data:{ringId}});
- H.log(room,'effect',`${room.players[who].label}: 라인의 황금 자동 발동, 니벨룽겐의 반지 생성`);
+ H.log(room,'effect',`${room.players[who].label}: 연결된 황금·반지 생성, 황금 자동 사용 대기`);
 }
-
-/**
- * Called after a token is successfully created on the field.
- * 1) Fafnir auto-summon; 2) create both cards and activate Gold immediately;
- * 3) convert the created token to treasure instead of retaining it on field.
- */
-export function onTokenCreation(room, tokenId, controller, H) {
-  if (!room.units[tokenId] || !room.units[tokenId].created) return;
-  onTokenActivity(room, '생성', controller, H, tokenId);
+export function queueGoldHandArrival(room,id,who){
+ const unit=room.units[id];if(room.status!=='active'||unit?.cardId!==DRAGON_CARDS.gold)return;
+ const old=(room.persistentEffects||[]).find(g=>g.kind==='dragon-gold'&&g.sourceId===id&&!g.closing);
+ const binding=unit.dragonGoldBinding||(old?{anchorId:old.anchorId,anchorRevision:room.units[old.anchorId]?.fieldRevision||0,ringId:old.data?.ringId,owner:old.owner}:null);
+ if(!binding||binding.ended)return;
+ const revision=unit.zoneRevision||0;
+ if((room.goldCastQueue||[]).some(j=>j.sourceId===id&&j.sourceRevision===revision))return;
+ (room.goldCastQueue??=[]).push({sourceId:id,who,sourceRevision:revision,binding:{...binding}});
 }
-
-// Creation/summon is one successful placement action. Independent uses and
-// releases create new events; never re-trigger release on treasure conversion.
-export function onTokenActivity(room, eventType, controller, H, tokenId=null) {
-  if (!['생성','소환','사용','릴리스'].includes(eventType)) return;
-  if (!Number.isInteger(controller) || controller < 0 || controller > 1) return;
-  const active = room.turn === 0 || room.turn === 1 ? room.turn : controller;
-  const order = [active, 1 - active];
-  for (const who of order) {
-    if (dragonGoldEffects(room).some(e => e.owner === who)) continue;
-    const candidate = findFafnir(room, who);
-    if (!candidate || !room.players[who].field.includes(null)) continue;
-    H.move(room, candidate, 'field', who);
-    H.log(room, 'summon', `${room.players[who].label}: 토큰 ${eventType}으로 파프니르 자동 소환`);
-    createDragonTreasures(room,who,candidate,H);
-  }
-  const golds = dragonGoldEffects(room);
-  if (!golds.length) return;
-  // One token event can count for only one Gold. Controller wins ties.
-  const receiver = golds.find(gold => gold.owner === controller) || golds[0];
-  addTreasure(room, receiver, 1, H);
-  // A released/used token has already left the field. Never convert it again.
-  if (eventType !== '생성' && eventType !== '소환') return;
-  const where = tokenId && H.zone(room, tokenId);
-  if (where?.zone === 'field') {
-    H.move(room, tokenId, 'banished', controller);
-    H.log(room, 'effect', '생성된 토큰을 보물로 전환했습니다.');
-  }
+export function declareGoldCast(room,job,H){
+ const u=room.units[job.sourceId],z=u&&H.zone(room,u.id),p=room.players[job.who];
+ if(!u||u.cardId!==DRAGON_CARDS.gold||z?.zone!=='hand'||z.player!==job.who||(u.zoneRevision||0)!==job.sourceRevision||u.dragonGoldBinding?.ended)return false;
+ if((p.turnsTaken>0&&(p.spellForbiddenUntil||0)>=p.turnsTaken)||effectUsedThisTurn(room,job.who,u.id,1)){
+  H.log(room,'effect','라인의 황금: 주문 금지/실물별 이번 턴 사용 제한으로 자동 사용 불가');return false;
+ }
+ markEffectUsed(room,job.who,u.id,1);H.move(room,u.id,'grave',u.owner);H.recordUse?.(room,job.who,u.id);
+ p.roundPlays=(p.roundPlays||0)+1;p.spellsThisTurn=(p.spellsThisTurn||0)+1;
+ const e=declareEffect(room,{effectId:'dragon-gold-cast-resolution',owner:job.who,sourceId:u.id,sourceZone:'grave',exception:'independent',
+  payload:{cardId:DRAGON_CARDS.gold,sourceRevision:u.zoneRevision||0,binding:job.binding}});
+ room.pendingAbility={who:job.who,sourceId:u.id,cardId:u.cardId,kind:'gold-cast',effectNumber:1,sequence:e.sequence,stage:'response'};
+ H.log(room,'effect','라인의 황금: 패 진입 자동 주문 사용, 상대 대응 대기');return true;
+}
+export function resolveGoldCast(room,e,H){
+ const u=room.units[e.sourceId],z=u&&H.zone(room,u.id),b=e.payload.binding;
+ if(!u||u.cardId!==DRAGON_CARDS.gold||z?.zone!=='grave'||z.player!==u.owner||(u.zoneRevision||0)!==e.payload.sourceRevision||u.dragonGoldBinding?.ended){
+  H.log(room,'effect','라인의 황금: 사용 원본 이탈/재진입으로 불발');return;
+ }
+ // Reusing the same physical Gold does not duplicate its independent grant
+ // or reset already earned treasure. A different physical Gold is separate.
+ if((room.persistentEffects||[]).some(g=>g.kind==='dragon-gold'&&g.sourceId===u.id))return;
+ const anchor=room.units[b.anchorId],az=anchor&&H.zone(room,anchor.id);
+ if(!anchor||anchor.cardId!==DRAGON_CARDS.fafnir||az?.zone!=='field'||(anchor.fieldRevision||0)!==b.anchorRevision){
+  H.log(room,'effect','라인의 황금: 생성 당시 파프니르의 필드 체류 소실로 지속 효과 불발');return;
+ }
+ registerPersistent(room,{kind:'dragon-gold',owner:b.owner,sourceId:u.id,anchorId:b.anchorId,expires:'anchor-destroyed',counters:0,data:{ringId:b.ringId}});
+ H.log(room,'effect','라인의 황금: 보물 지속 효과 적용');
+}
+export function onTokenCreation(room,tokenId,controller,H){
+ if(room.units[tokenId]?.created)onTokenActivity(room,'생성',controller,H,tokenId);
+}
+export function onTokenActivity(room,eventType,controller,H,tokenId=null){
+ if(room.status!=='active'||!['생성','소환','사용','릴리스'].includes(eventType)||![0,1].includes(controller))return;
+ const candidates=[];
+ for(const [who,p] of room.players.entries())for(const originZone of ['hand','deck'])for(const id of [...p[originZone]].sort()){
+  const u=room.units[id];if(u?.cardId===DRAGON_CARDS.fafnir)candidates.push({who,extraUnitId:id,originZone,originRevision:u.zoneRevision||0});
+ }
+ const event={kind:'event',id:`token-event-${room.tokenWorkSequence=(room.tokenWorkSequence||0)+1}`,eventType,controller,tokenId,
+  tokenRevision:tokenId?(room.units[tokenId]?.fieldRevision||0):null,candidates,stage:'order'};
+ // A successful placement must finish its complete dragon chain before the
+ // next queued placement can consume the last field slot (R07).
+ const queue=room.tokenWorkQueue??=[];
+ const firstGeneration=queue.findIndex(j=>j.kind==='token');
+ if(firstGeneration<0)queue.push(event);else queue.splice(firstGeneration,0,event);
+}
+export function settleTokenEvent(room,event,H){
+ const golds=dragonGoldEffects(room);
+ // R06: controller's side first; multiple Golds on that side use the oldest
+ // still active registration. Never give two credits for one actual event.
+ const receiver=golds.find(g=>g.owner===event.controller)||golds[0];if(!receiver)return;
+ addTreasure(room,receiver,1,H);
+ if(!['생성','소환'].includes(event.eventType))return;
+ const token=room.units[event.tokenId],where=token&&H.zone(room,token.id);
+ if(token?.created&&where?.zone==='field'&&where.player===event.controller&&(token.fieldRevision||0)===event.tokenRevision){
+  H.move(room,token.id,'banished',event.controller,{treasureConversion:true});
+  H.log(room,'effect','성공한 토큰 생성/소환 사건: 황금 보물로 전환 (파괴 아님)');
+ }
 }
 
 // These entries join the same ordering/response group as King and Orochi.
@@ -95,6 +119,7 @@ export function pendingDragonDeath(room){
 }
 function expireGold(room,gold,H){
  endPersistent(room,item=>item.id===gold.id);
+ if(room.units[gold.sourceId]?.dragonGoldBinding)room.units[gold.sourceId].dragonGoldBinding.ended=true;
  if(H.zone(room,gold.sourceId))H.move(room,gold.sourceId,'banished',room.units[gold.sourceId].owner);
  H.log(room,'effect','라인의 황금: 반지 처리 종료 후 지속 효과 종료');
 }

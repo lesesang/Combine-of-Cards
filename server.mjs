@@ -40,7 +40,8 @@ import {legalSpellCounters,declareSpellCounter,spellResponsePlayer} from './src/
 import {planActivation,commitActivationCosts,PRECHECKED_ACTIVATION_IDS} from './src/activation-rules.mjs';
 import {validateExtraSummon, EXTRA_RECIPES, UNDEAD_FUSION_IDS} from './src/extra-summons.mjs';
 import {applyFieldAbility,FIELD_ABILITY_IDS} from './src/field-abilities.mjs';
-import {onTokenCreation,onTokenActivity,onFafnirDestroyed,pendingDragonDeath} from './src/dragon-gold.mjs';
+import {hasTokenWork,queueTokenGeneration,clearTokenWork,beginTokenWork,resumeTokenWork,tokenOrderPending,negateTokenSummon,finishTokenSummon,finishFafnirSummon} from './src/token-pipeline.mjs';
+import {queueGoldHandArrival,onTokenActivity,onFafnirDestroyed,pendingDragonDeath} from './src/dragon-gold.mjs';
 import {onCartoonLandDestroyed} from './src/cartoon-land.mjs';
 import {applyGraveAbility,legalGraveAbilities,GRAVE_ABILITY_IDS} from './src/grave-abilities.mjs';
 import {TIMED_SPELL_IDS,FUSION_UP_ID,markEffectUsed,effectUsedThisTurn,migrateLegacyEffectUsage} from './src/effect-usage.mjs';
@@ -52,7 +53,7 @@ const ROOT=path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC=path.join(ROOT,'public');
 const DATA_DIR=process.env.DATA_DIR || path.join(ROOT,'.data');
 const STORAGE=path.join(DATA_DIR,'rooms.json');
-const RULES='1.3-ai-beta.26-draft';
+const RULES='1.3-ai-beta.27-draft';
 // Add a spell only after auditing declaration-time conditions, target choices,
 // costs and retention. This shared registry also drives coverage reporting.
 const REACTIVE_SPELL_IDS=new Set(responseSpellIds);
@@ -85,7 +86,7 @@ function getRoom(code){const r=rooms[requireStr(code,8).toUpperCase()];if(!r)fai
 function indexFor(r,token){if(typeof token!=='string'||!/^[a-f0-9]{64}$/.test(token))fail(401,'플레이어 인증이 필요합니다.');const h=hash(token);const idx=r.players.findIndex(p=>p.authHash&&crypto.timingSafeEqual(Buffer.from(p.authHash,'hex'),Buffer.from(h,'hex')));if(idx<0)fail(403,'이 방에 접근할 권한이 없습니다.');return idx}
 function requireTurn(r,p){if(r.status!=='active')fail(409,'진행 중인 대전이 아닙니다.');if(r.turn!==p)fail(403,'상대방의 턴입니다.');}
 function log(r,type,text){r.logs.push({id:uid(),at:new Date().toISOString(),turn:r.turnNumber,type,text});if(r.logs.length>500)r.logs.shift()}
-function setOutcome(r){if(!r.forcedLosers?.some(Boolean)&&(r.pendingTriggerOrder||r.destroyHealGroups?.length||pendingDragonDeath(r)))return;const lost=r.players.map((p,i)=>p.hp<=0||r.forcedLosers?.[i]===true);if(lost[0]||lost[1]){r.status='finished';r.winner=lost[0]&&lost[1]?'draw':lost[0]?1:0;r.pendingAttack=null;r.pendingAttackSequence=null;r.pendingManual=null;r.pendingExtraSummon=null;r.pendingSpell=null;r.pendingAbility=null;r.pendingDeckSearch=null;r.pendingElementalChoice=null;r.pendingRecruitChoice=null;r.pendingInfinityChoice=null;r.pendingTriggerTargetChoice=null;r.pendingSummonBatch=null;r.pendingMonsterTriggers=null;r.deferredMonsterTriggers=[];r.pendingTurnStart=null;r.pendingTurnEnd=null;r.forcedEndTurn=null;r.suspendedResponses=[];r.revivalQueue=[];r.destroyHealGroups=[];r.effectStack=[];log(r,'result',r.winner==='draw'?'두 플레이어가 동시에 패배하여 무승부입니다.':`${r.players[r.winner].label} 승리`);}}
+function setOutcome(r){if(!r.forcedLosers?.some(Boolean)&&(r.pendingTriggerOrder||r.destroyHealGroups?.length||pendingDragonDeath(r)))return;const lost=r.players.map((p,i)=>p.hp<=0||r.forcedLosers?.[i]===true);if(lost[0]||lost[1]){r.status='finished';clearTokenWork(r);r.winner=lost[0]&&lost[1]?'draw':lost[0]?1:0;r.pendingAttack=null;r.pendingAttackSequence=null;r.pendingManual=null;r.pendingExtraSummon=null;r.pendingSpell=null;r.pendingAbility=null;r.pendingDeckSearch=null;r.pendingElementalChoice=null;r.pendingRecruitChoice=null;r.pendingInfinityChoice=null;r.pendingTriggerTargetChoice=null;r.pendingSummonBatch=null;r.pendingMonsterTriggers=null;r.deferredMonsterTriggers=[];r.pendingTurnStart=null;r.pendingTurnEnd=null;r.forcedEndTurn=null;r.suspendedResponses=[];r.revivalQueue=[];r.destroyHealGroups=[];r.effectStack=[];log(r,'result',r.winner==='draw'?'두 플레이어가 동시에 패배하여 무승부입니다.':`${r.players[r.winner].label} 승리`);}}
 function instantiate(r,cardId,owner){const c=cards.get(cardId);if(!c)fail(400,'존재하지 않는 카드입니다.');const id=uid();r.units[id]={id,cardId,owner,statAttribute:c.attribute,statAttributeCardId:cardId,atk:Number.isFinite(+c.atk)?Math.max(0,Math.floor(+c.atk)):0,hp:Number.isFinite(+c.hp)?Math.floor(+c.hp):null,attackTurn:-1,created:false,baseAtk:Number.isFinite(+c.atk)?Math.max(0,Math.floor(+c.atk)):0};return id}
 function createPlayer(r,deckId,label,auth){const d=decks.get(deckId);if(!d)fail(400,'유효하지 않은 덱입니다.');const i=r.players.length;const p={label:requireStr(label??'',24)||`플레이어 ${i+1}`,authHash:hash(auth),deckId,hp:1000,reloads:0,deck:[],hand:[],grave:[],banished:[],extra:[],field:[null,null,null],integration:null,turnsTaken:0,roundPlays:0,lastRoundPlays:0,roundElementUses:0,naturalStreak:0,metalElementUsedGame:0,natureSpellsUsedGame:0,elementSpellPlaysThisTurn:0,spellsThisTurn:0};r.players.push(p);for(const id of d.main)p.deck.push(instantiate(r,id,i));for(const id of d.extra)p.extra.push(instantiate(r,id,i));return p}
 function reloadDeck(r,who){
@@ -102,7 +103,7 @@ function drawFailure(r,who){
 function draw(r,who){
  const p=r.players[who];
  if(!p.deck.length){reloadDeck(r,who);if(r.status==='finished')return;if(!p.deck.length){drawFailure(r,who);return;}}
- const id=p.deck.shift();r.units[id].zoneRevision=(r.units[id].zoneRevision||0)+1;p.hand.push(id);log(r,'draw',`${p.label}가 카드를 1장 뽑았습니다.`);
+ const id=p.deck.shift();r.units[id].zoneRevision=(r.units[id].zoneRevision||0)+1;p.hand.push(id);queueGoldHandArrival(r,id,who);log(r,'draw',`${p.label}가 카드를 1장 뽑았습니다.`);
 }
 function unlinkPhysical(r,id){for(const p of r.players){for(let i=0;i<p.field.length;i++)if(p.field[i]===id)p.field[i]=null;if(p.integration===id)p.integration=null;for(const area of ['deck','hand','grave','banished','extra'])p[area]=p[area].filter(x=>x!==id)}}
 function attachOverlayMaterials(r,hostId,materialIds){
@@ -204,7 +205,7 @@ function move(r,id,to,owner,options={}){const u=r.units[id];if(!u)fail(400,'카�
  const equipped=Array.isArray(u.attachments)&&!['field','integration'].includes(to)?[...u.attachments]:[];
  if(!['field','integration'].includes(to))validateLeavingLinks(r,id);
 if(originZone?.zone==='deck'&&to==='grave'&&r.players[originZone.player].deck[0]===id)recordTopToGrave(r,originZone.player);
- if(originZone?.zone==='field'&&to==='banished'&&!options.monsterLossRecorded)recordMonsterLoss(r,id,{kind:'banish',sourceId:options.sourceId,sourcePlayer:options.sourcePlayer},H);
+ if(originZone?.zone==='field'&&to==='banished'&&!options.monsterLossRecorded&&!options.treasureConversion)recordMonsterLoss(r,id,{kind:'banish',sourceId:options.sourceId,sourcePlayer:options.sourcePlayer},H);
 const previousZone=options.tokenAction&&u.created?zoneOwner(r,id):null;if(to==='field'&&!r.players[owner??u.owner].field.includes(null))fail(409,'필드 세 칸이 모두 차 있습니다.');if(to==='integration'&&r.players[owner??u.owner].integration)fail(409,'이미 일체화 중입니다.');u.zoneRevision=(u.zoneRevision||0)+1;if(originZone?.zone==='field'&&to!=='field')u.hasLeftField=true;moveDragonResidence(u,zoneOwner(r,id),to);resetFieldCounterOnSummon(u,zoneOwner(r,id),to);if(to==='field'||zoneOwner(r,id)?.zone==='field')u.fieldRevision=(u.fieldRevision||0)+1;if(to==='integration'||zoneOwner(r,id)?.zone==='integration')u.integrationRevision=(u.integrationRevision||0)+1;unlinkPhysical(r,id);
  restoreEvolutionCard(u,to);
  if(to!=='field')delete u.orochiAttacks;
@@ -213,6 +214,7 @@ const previousZone=options.tokenAction&&u.created?zoneOwner(r,id):null;if(to==='
  if(!['field','integration'].includes(to)&&r.effects?.length)
   r.effects=r.effects.filter(e=>e.type!=='lifeEatingSword'||e.target?.kind!=='unit'||e.target.id!==id);
  const p=r.players[owner??u.owner];if(!['field','integration'].includes(to)){u.frozen=false;u.battleInvulnerable=false;u.effectsNegated=false;u.diceMax=undefined;u.diceMin=undefined;u.cannotAttack=false;u.attackTurn=-1;u.attackCount=0;u.attackCountTurn=-1;delete u.bonusAttackCount;delete u.bonusAttackTurn;const original=cards.get(u.cardId);if(original){u.atk=Number.isFinite(+original.atk)?Math.max(0,Math.floor(+original.atk)):0;u.hp=Number.isFinite(+original.hp)?Math.floor(+original.hp):null;u.baseAtk=u.atk;}delete u.selfDevourBuffToken;delete u.temporaryBuff;delete u.buffExpiresAt;delete u.treatedAsToon;delete u.superiorClaw;delete u.effectDestructionImmune;delete u.damageInvulnerable;delete u.playerAttackBonusApplied;delete u.historyAttackBonus;delete u.clayAttackBonus;delete u.clayHpBonus;delete u.temperingBonuses;delete u.protectionGrants;delete u.pyramidHpBonus;delete u.peakAttack;delete u.gatlingDoubleAttack;delete u.gToolBody;delete u.gToolDiceMin;delete u.altarBody;delete u.cannotAttackThroughTurn;delete u.weaponGrant;delete u.weaponAttackBonus;delete u.weaponDoubleAttack;}if(u.created&&to!=='field'&&to!=='integration'){delete r.units[id];if(previousZone?.zone==='field'&&['사용','릴리스'].includes(options.tokenAction))onTokenActivity(r,options.tokenAction,previousZone.player,{zone:zoneOwner,move,instantiate,log});return}if(to==='field'){const slot=p.field.findIndex(x=>x===null);if(slot<0)fail(409,'필드 세 칸이 모두 차 있습니다.');p.field[slot]=id;u.owner=u.owner??owner;u.attackTurn=-1;}else if(to==='integration'){if(p.integration)fail(409,'이미 일체화 중입니다.');p.integration=id;const bonus=Math.max(0,(p.playerAtkBonus||0)-(u.playerAttackBonusApplied||0));if(bonus){u.atk+=bonus;u.playerAttackBonusApplied=(u.playerAttackBonusApplied||0)+bonus;}}else if(to==='extra')p.extra.push(id);else if(to==='banished')p.banished.push(id);else if(to==='deck'){p.deck.splice(crypto.randomInt(p.deck.length+1),0,id);}else if(to==='hand')p.hand.push(id);else if(to==='grave'){p.grave.push(id);u.atk=Math.max(0,Number(cards.get(u.cardId)?.atk)||0);u.hp=Number.isFinite(+cards.get(u.cardId)?.hp)?+cards.get(u.cardId).hp:null;u.attackTurn=-1;}else fail(400,'이동 위치가 유효하지 않습니다.');
+ if(to==='hand')queueGoldHandArrival(r,id,recipient);
  if(!['field','integration'].includes(to)){restoreNobleStats(u);delete u.succubusLocks;delete u.succubusLure;delete u.strawLink;}
  refreshHistoryAttack(r,cards);
  observeFieldOccupancy(r,cards);
@@ -233,7 +235,7 @@ const previousZone=options.tokenAction&&u.created?zoneOwner(r,id):null;if(to==='
  }
  if(altarDeletion){unlinkPhysical(r,id);delete r.units[id];log(r,'effect','사바스의 재단: 자신의 필드를 떠난 소환체를 이번 게임에서 삭제');}
 }
-function zoneOwner(r,id){if(r.units[id]?.attachmentHostId){const hostId=r.units[id].attachmentHostId,z=zoneOwner(r,hostId);return z?{player:z.player,zone:'attachment',hostId}:null;}if(r.units[id]?.overlayHostId){const hostId=r.units[id].overlayHostId,z=zoneOwner(r,hostId);return z?{player:z.player,zone:'overlay',hostId}:null;}for(let i=0;i<r.players.length;i++){const p=r.players[i];for(const z of ['deck','hand','grave','extra','banished'])if(p[z].includes(id))return {player:i,zone:z};if(p.field.includes(id))return {player:i,zone:'field'};if(p.integration===id)return {player:i,zone:'integration'};}return null}
+function zoneOwner(r,id){if(r.units[id]?.tokenPending)return {player:r.units[id].owner,zone:'pending-token'};if(r.units[id]?.attachmentHostId){const hostId=r.units[id].attachmentHostId,z=zoneOwner(r,hostId);return z?{player:z.player,zone:'attachment',hostId}:null;}if(r.units[id]?.overlayHostId){const hostId=r.units[id].overlayHostId,z=zoneOwner(r,hostId);return z?{player:z.player,zone:'overlay',hostId}:null;}for(let i=0;i<r.players.length;i++){const p=r.players[i];for(const z of ['deck','hand','grave','extra','banished'])if(p[z].includes(id))return {player:i,zone:z};if(p.field.includes(id))return {player:i,zone:'field'};if(p.integration===id)return {player:i,zone:'integration'};}return null}
 function damageUnit(r,id,value,{battle=false,sourceId=null,sourcePlayer=null,sourceCardId=null}={}){const u=r.units[id];if(!u||u.hp===null)fail(409,'체력이 없는 카드입니다.');if(value<0&&(u.damageInvulnerable||damageProtected(r,{type:'unit',id}))){log(r,'effect',`${unitName(r,id)}: 피해 면역으로 피해를 받지 않음`);return false;}if(value<0&&!u.effectsNegated&&u.cardId==='COC-09-002')value=Math.max(-1,value);u.preDamageHp=u.hp;u.hp+=value;if(u.hp<=0){if(battle&&(u.cardId==='COC-26-011'||u.cardId==='COC-05-002'||u.altarBody&&!u.effectsNegated)){u.hp=1;return false}H.destroy(r,id,{cause:'lethal',sourceId,sourcePlayer,sourceCardId});return true}return false}
 function dropFromDeck(r,who,count){
  const p=r.players[who];for(let i=0;i<count&&p.deck.length;i++){const id=p.deck[0];move(r,id,'grave',r.units[id].owner);log(r,'mill',`${p.label}가 덱 맨 위의 카드 1장을 묘지로 보냈습니다.`)}
@@ -242,11 +244,11 @@ function findCardInDeck(r,who,name){const p=r.players[who];const id=p.deck.find(
 function die(n,min=1){const maximum=Math.min(Math.max(1,Math.floor(n)),100_000_000);const minimum=Math.max(1,Math.min(maximum,Math.floor(min)));return crypto.randomInt(minimum,maximum+1)}
 function hurt(r,id,n,attribution={}){return damageUnit(r,id,-n,attribution)}
 function healUnit(r,id,n){damageUnit(r,id,scaledStatGain(r,{id},n))}
-function summonToken(r,who,name,atk,hp){
- const p=r.players[who];if(!p.field.includes(null))return null;
- const id=uid(),cardId='TOKEN:'+name;
- r.units[id]={id,cardId,owner:who,atk,hp,baseAtk:atk,attackTurn:-1,created:true,tokenCard:{id:cardId,name,type:'몬스터',zone:'created',attribute:'토큰',atk:String(atk),hp:String(hp),conditions:[],effects:[],notes:[]}};
- p.field[p.field.indexOf(null)]=id;observeFieldOccupancy(r,cards);log(r,'token',`${p.label}: ${name} 토큰 소환`);onTokenCreation(r,id,who,{zone:zoneOwner,move,instantiate,log});return id
+function summonToken(r,who,name,atk,hp){return queueTokenGeneration(r,who,name,atk,hp);}
+function prepareToken(r,work){
+ const {who,name,atk,hp}=work,id=uid(),cardId='TOKEN:'+name;
+ r.units[id]={id,cardId,owner:who,atk,hp,baseAtk:atk,attackTurn:-1,created:true,tokenPending:true,tokenCard:{id:cardId,name,type:'몬스터',zone:'created',attribute:'토큰',atk:String(atk),hp:String(hp),conditions:[],effects:[],notes:[]}};
+ return id;
 }
 function resolveQueuedDestroyHeals(r){
  if(r.pendingTriggerOrder)return;
@@ -329,7 +331,7 @@ const H={
   queueMonsterTriggers(r,attackDeclarationTriggers(r,sequence.sourceId,r.pendingAttack.target,H),H);
  },
  attachCard,detachCard,refreshStats:r=>refreshHistoryAttack(r,cards),
- cards,instantiate,graveActivation:(r,event)=>recordGraveEffectActivation(r,event,H),recordUse:(r,who,id)=>recordCardUse(r,who,id,cards),queueEffectSummon:(r,pending)=>{queueSummonEffect(r,pending);r.pendingExtraSummon=pending;log(r,'summon',`${r.players[pending.who].label}: ${unitName(r,pending.extraUnitId)} ${pending.recipe.method==='normal'?'일반':['recruit','batch'].includes(pending.recipe.method)?'효과':'교체'} 소환 선언 (상대 대응 대기)`);},
+ cards,instantiate,prepareToken,graveActivation:(r,event)=>recordGraveEffectActivation(r,event,H),recordUse:(r,who,id)=>recordCardUse(r,who,id,cards),queueEffectSummon:(r,pending)=>{queueSummonEffect(r,pending);r.pendingExtraSummon=pending;log(r,'summon',`${r.players[pending.who].label}: ${unitName(r,pending.extraUnitId)} ${pending.recipe.method==='token'?'토큰':pending.recipe.method==='fafnir-auto'?'자동':pending.recipe.method==='normal'?'일반':['recruit','batch'].includes(pending.recipe.method)?'효과':'교체'} 소환 선언 (상대 대응 대기)`);},
  zone:zoneOwner,move,draw,fail,log,attackAvailable,roll:die,randomInt:n=>crypto.randomInt(n),hurt,healUnit,outcome:setOutcome,shuffle,onSummon:runSummonEffects,
  mill:dropFromDeck,summonToken,search:findCardInDeck,destroy:(r,id,{cause='effect',sourceId=null,sourcePlayer=null,sourceCardId=null,bypassEffectImmunity=false}={})=>{const u=r.units[id];if(u&&zoneOwner(r,id)){if((cause==='effect'||cause==='cost')&&(u.effectDestructionImmune||destructionProtected(r,id))&&!bypassEffectImmunity){log(r,'effect',`${unitName(r,id)}: 주문·효과에 의한 직접 파괴를 방지했습니다.`);return false;}
  recordCurseDestruction(r,id,{sourceId,sourcePlayer,sourceCardId},H);
@@ -447,7 +449,7 @@ function processEndOfTurn(r){
  setOutcome(r);
 }
 function resumeAltarOpening(r){
- if(r.status!=='active'||r.phase!=='DRAW'||r.effectStack?.length||r.suspendedResponses?.length||r.deferredMonsterTriggers?.length||r.revivalQueue?.length||r.destroyHealGroups?.length||['pendingTurnStart','pendingAbility','pendingSpell','pendingExtraSummon','pendingMonsterTriggers','pendingTriggerOrder','pendingTriggerTargetChoice','pendingDeckSearch','pendingInfinityChoice','pendingElementalChoice','pendingRecruitChoice','pendingSummonBatch'].some(key=>r[key]))return;
+ if(r.status!=='active'||hasTokenWork(r)||r.phase!=='DRAW'||r.effectStack?.length||r.suspendedResponses?.length||r.deferredMonsterTriggers?.length||r.revivalQueue?.length||r.destroyHealGroups?.length||['pendingTurnStart','pendingAbility','pendingSpell','pendingExtraSummon','pendingMonsterTriggers','pendingTriggerOrder','pendingTriggerTargetChoice','pendingDeckSearch','pendingInfinityChoice','pendingElementalChoice','pendingRecruitChoice','pendingSummonBatch'].some(key=>r[key]))return;
  const who=r.turn,p=r.players[who];if(p.turnsTaken!==1||p.altarOpeningChecked)return;p.altarOpeningChecked=true;
  const id=[...p.hand,...p.deck].find(id=>r.units[id]?.cardId==='COC-21-003');
  if(!id||!p.field.includes(null)||p.deck.filter(id=>cards.get(r.units[id].cardId)?.attribute.includes('저주')).length<2||p.spellForbiddenUntil>=p.turnsTaken)return;
@@ -493,13 +495,16 @@ function performExtraSummon(r,who,body,{defer=false}={}){
  return finishExtraSummon(r,{who,extraUnitId,recipe,targetId:body.target?.id||null});
 }
 function negateExtraSummon(r,pending){
+ if(pending.recipe.method==='token'){negateTokenSummon(r,pending,H);setOutcome(r);return;}
  const u=r.units[pending.extraUnitId];if(pending.revivalKind==='altar-recruit'&&u?.altarGenerated){unlinkPhysical(r,u.id);delete r.units[u.id];log(r,'summon','재단 생성 소환 무효: 아직 필드에 존재하지 않은 생성체 폐기');}
  // User confirmed 2026-10-14: the negated monster stays in the extra deck.
- log(r,'summon',`${r.players[pending.who].label}: 소환 무효 (${['normal','elemental','recruit','batch','weapon','revival'].includes(pending.recipe.method)?'원래 영역':'엑스트라 덱'} 유지, 비용 반환 없음)`);
+ log(r,'summon',`${r.players[pending.who].label}: 소환 무효 (${['normal','elemental','recruit','batch','weapon','revival','fafnir-auto'].includes(pending.recipe.method)?'원래 영역':'엑스트라 덱'} 유지, 비용 반환 없음)`);
  setOutcome(r);
 }
 function finishExtraSummon(r,pending){
  const {who,extraUnitId,recipe,targetId}=pending,p=r.players[who];
+ if(recipe.method==='token')return finishTokenSummon(r,pending,H);
+ if(recipe.method==='fafnir-auto')return finishFafnirSummon(r,pending,H);
  if(recipe.method==='weapon')return finishWeaponRevival(r,pending,H);
  if(recipe.method==='revival')return finishDeathRevival(r,pending,H);
  if(recipe.method==='normal'){
@@ -615,6 +620,7 @@ function publicState(r,viewer){const mapId=id=>id?{...r.units[id],actionLocked:a
   .map(e=>({key:e.key,title:e.title||e.effectId,priority:e.priority||0}))
  }:null,elementalAbilities:legalElementalAbilities(r,viewer,H),pendingElementalChoice:elementalChoiceView(r,viewer,H),pendingRecruitChoice:recruitChoiceView(r,viewer,H),pendingInfinityChoice:infinityChoiceView(r,viewer,H),pendingTriggerTargetChoice:triggerTargetView(r,viewer,H),pendingSummonBatch:summonBatchView(r,viewer,H),pendingDeckSearch:deckSearchView(r,viewer,cards),pendingAbility:r.pendingAbility?{preventedBySphinx:!!r.effectStack?.find(e=>e.sequence===r.pendingAbility.sequence)?.preventedBy,who:r.pendingAbility.who,card:{id:r.pendingAbility.cardId,name:cards.get(r.pendingAbility.cardId)?.name},stage:r.pendingAbility.stage||'response',kind:r.pendingAbility.kind||'activated',copyCard:r.pendingAbility.copyCardId?{id:r.pendingAbility.copyCardId,name:cards.get(r.pendingAbility.copyCardId)?.name}:null,effectNumber:r.pendingAbility.effectNumber||fieldEffectNumber(r.pendingAbility.cardId),awaiting:abilityResponsePlayer(r),counter:r.pendingAbility.counter?{who:r.pendingAbility.counter.who,name:unitName(r,r.pendingAbility.counter.sourceId)}:null,counters:legalAbilityCounters(r,viewer).map(id=>({sourceUnitId:id,name:unitName(r,id),limitText:counterLimitLabel(r.units[id].cardId)}))}:null,pendingSpell:r.pendingSpell?{preventedBySphinx:!!r.effectStack?.find(e=>e.effectId==='auto-spell-resolution'&&e.sourceId===r.pendingSpell.sourceId)?.preventedBy,who:r.pendingSpell.who,card:{id:r.pendingSpell.cardId,name:cards.get(r.pendingSpell.cardId)?.name},stage:'response',awaiting:spellResponsePlayer(r),counter:r.pendingSpell.counter?{who:r.pendingSpell.counter.who,name:unitName(r,r.pendingSpell.counter.sourceId)}:null,counters:legalSpellCounters(r,viewer).map(id=>({sourceUnitId:id,name:unitName(r,id),limitText:counterLimitLabel(r.units[id].cardId)}))}:null,pendingExtraSummon:r.pendingExtraSummon?{who:r.pendingExtraSummon.who,card:{id:r.units[r.pendingExtraSummon.extraUnitId].cardId,name:unitName(r,r.pendingExtraSummon.extraUnitId)},method:r.pendingExtraSummon.recipe.method,materialCount:r.pendingExtraSummon.recipe.materials.length,stage:r.pendingExtraSummon.stage||'response',awaiting:extraResponsePlayer(r),counter:r.pendingExtraSummon.counter?{who:r.pendingExtraSummon.counter.who,name:unitName(r,r.pendingExtraSummon.counter.sourceId)}:null,counters:legalSummonCounters(r,viewer).map(id=>({sourceUnitId:id,name:unitName(r,id),limitText:counterLimitLabel(r.units[id].cardId)}))}:null,pendingManual:r.pendingManual?{...r.pendingManual}:null,persistentEffects:(r.persistentEffects||[]).map(e=>({kind:e.kind,owner:e.owner,counters:e.counters})),logs:r.logs.slice(-80),you:viewer,players:r.players.map((p,i)=>({index:i,label:p.label,deckId:p.deckId,deckName:decks.get(p.deckId)?.name,hp:p.hp,gainFactor:statGainFactor(r,{player:i}),playerAtkBonus:p.playerAtkBonus||0,damageProtected:damageProtected(r,{type:'player',player:i}),pyramidHpBonus:Object.keys(p.pyramidSources||{}).length*50,integrationHistory:{framDeaths:r.units[p.integration]?.cardId==='COC-10-005'&&r.units[p.integration]?.framDeaths?.controller===i&&r.units[p.integration].framDeaths.revision===(r.units[p.integration].integrationRevision||0)?r.units[p.integration].framDeaths.count:0,wandererDeaths:[...(p.wandererDeaths||[])],opponentEmptyTurns:r.players[1-i]?.emptyFieldTurns||0},reloads:p.reloads,deckCount:p.deck.length,handCount:p.hand.length,grave:p.grave.map(mapId),banishedCount:p.banished.length,extraCount:p.extra.length,field:p.field.map(mapId),integration:mapId(p.integration),hand:i===viewer?p.hand.map(mapId):null,extra:i===viewer?p.extra.map(mapId):null}))}}
 function apply(r,who,type,body){const p=r.players[who];let changed=true;
+ if(hasTokenWork(r)&&!['abilityResponse','spellResponse','extraResponse','triggerOrder','triggerTargetChoice','infinityGraveChoice','recruitChoice','elementalChoice','deckSearch','summonBatchChoice','manualDecision','concede'].includes(type))fail(409,'토큰·황금 자동 처리가 끝난 뒤 다음 행동을 할 수 있습니다.');
  if(r.pendingAttackSequence?.stage==='choice'&&!['attackSequenceChoice','concede'].includes(type))fail(409,'전체 공격의 다음 대상을 선택해야 합니다.');
  if(r.pendingSummonBatch?.stage==='choice'&&!['summonBatchChoice','concede'].includes(type))fail(409,'효과로 소환할 카드를 선택해야 합니다.');
  if(r.pendingTriggerTargetChoice&&!['triggerTargetChoice','concede'].includes(type))fail(409,'소환 효과의 대상을 선택해야 합니다.');
@@ -701,7 +707,7 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
   if(r.status!=='active'||!r.pendingTriggerOrder)fail(409,'선언 순서를 정할 자동 효과가 없습니다.');
   if(r.pendingTriggerOrder.awaiting[0]!==who)fail(403,'현재 선언 순서를 지정할 플레이어가 아닙니다.');
   try{chooseAutomaticTriggerOrder(r,who,body.orderedKeys)}catch(e){fail(409,e.message)}
-  if(!r.pendingTriggerOrder){if(r.pendingMonsterTriggers?.stage==='ordering')resumeMonsterTriggers(r,H);else{resolveQueuedDestroyHeals(r);resumeFieldAbility(r,H);}}
+  if(!r.pendingTriggerOrder){if(tokenOrderPending(r))resumeTokenWork(r,H);else if(r.pendingMonsterTriggers?.stage==='ordering')resumeMonsterTriggers(r,H);else{resolveQueuedDestroyHeals(r);resumeFieldAbility(r,H);}}
   break;
  }
  case 'infinityGraveChoice':{chooseInfinityGrave(r,who,body.unitIds,H);break;}
@@ -760,36 +766,39 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
  case 'retarget':{requireTurn(r,who);if(r.pendingAttack?.stage!=='retarget'||r.pendingManual)fail(409,'대상 재선택을 할 수 없습니다.');const target=body.target;if(target===null){const blocked=(p.noDirectAttackUntil||0)>0&&p.noDirectAttackUntil>=p.turnsTaken;const candidates=[...r.players[1-who].field.filter(Boolean).map(id=>({type:'unit',id})),...(!blocked?[{type:'player',player:1-who}]:[])];if(candidates.some(t=>{try{validateAggro(r,who,t);return true;}catch(error){if(error.status!==409)throw error;return false;}}))fail(409,'선택 가능한 공격 대상이 남아 있습니다.');r.pendingAttack=null;log(r,'attack','합법적인 재선택 대상이 없어 공격이 종료되었습니다.');break;}if(!target||!['player','unit'].includes(target.type))fail(400,'대상 오류');if(target.type==='player'&&target.player!==undefined&&target.player!==1-who)fail(409,'상대 플레이어만 재선택할 수 있습니다.');if(target.type==='player'&&(p.noDirectAttackUntil||0)>0&&p.noDirectAttackUntil>=p.turnsTaken)fail(409,'보호막 효과로 직접 공격 대상을 선택할 수 없습니다.');if(target.type==='unit'){const z=zoneOwner(r,target.id);if(!z||z.player===who||z.zone!=='field')fail(409,'재선택 대상 오류')}validateAggro(r,who,target);r.pendingAttack.target=target.type==='player'?{type:'player',player:1-who}:{type:'unit',id:target.id};r.pendingAttack.stage='response';log(r,'attack','공격 대상 재선택');queueMonsterTriggers(r,attackDeclarationTriggers(r,r.pendingAttack.attackerId,r.pendingAttack.target,H,{retarget:true}),H);break}
  case 'manual':{if(r.mode==='ai')fail(409,'AI 대전에서는 합의 판정을 사용할 수 없습니다.');if(r.status!=='active'||r.pendingManual)fail(409,'지금은 효과 협의를 요청할 수 없습니다.');if(!['hp','unitHp','unitAtk','move','draw','extra','note'].includes(body.kind))fail(400,'효과 유형 오류');const payload=body.payload;if(!payload||typeof payload!=='object'||Array.isArray(payload))fail(400,'효과 입력 오류');const explanation=requireStr(body.explanation,240);if(explanation.length<3)fail(400,'효과 근거를 구체적으로 적어 주세요.');r.pendingManual={by:who,kind:body.kind,payload,explanation};log(r,'manual',`${p.label}: 수동 판정 제안 — ${explanation}`);break}
  case 'manualDecision':{if(r.mode==='ai')fail(409,'AI 대전에서는 합의 판정을 사용할 수 없습니다.');if(r.status!=='active'||!r.pendingManual||r.pendingManual.by===who)fail(403,'상대의 제안만 승인할 수 있습니다.');const m=r.pendingManual;if(body.approve===true){runManual(r,m);log(r,'manual',`${p.label}: 효과 승인 — ${m.explanation}`)}else{log(r,'manual',`${p.label}: 효과 거절 — ${m.explanation}`)}r.pendingManual=null;break}
- case 'concede':{if(r.status!=='active')fail(409,'진행 중인 대전이 아닙니다.');r.status='finished';r.winner=1-who;r.pendingAttack=null;r.pendingAttackSequence=null;r.pendingManual=null;r.pendingExtraSummon=null;r.pendingTriggerOrder=null;r.pendingSpell=null;r.pendingAbility=null;r.pendingDeckSearch=null;r.pendingElementalChoice=null;r.pendingRecruitChoice=null;r.pendingInfinityChoice=null;r.pendingTriggerTargetChoice=null;r.pendingSummonBatch=null;r.pendingMonsterTriggers=null;r.deferredMonsterTriggers=[];r.pendingTurnStart=null;r.pendingTurnEnd=null;r.forcedEndTurn=null;r.suspendedResponses=[];r.revivalQueue=[];r.destroyHealGroups=[];r.effectStack=[];log(r,'result',`${p.label} 항복`);break}
+ case 'concede':{if(r.status!=='active')fail(409,'진행 중인 대전이 아닙니다.');r.status='finished';clearTokenWork(r);r.winner=1-who;r.pendingAttack=null;r.pendingAttackSequence=null;r.pendingManual=null;r.pendingExtraSummon=null;r.pendingTriggerOrder=null;r.pendingSpell=null;r.pendingAbility=null;r.pendingDeckSearch=null;r.pendingElementalChoice=null;r.pendingRecruitChoice=null;r.pendingInfinityChoice=null;r.pendingTriggerTargetChoice=null;r.pendingSummonBatch=null;r.pendingMonsterTriggers=null;r.deferredMonsterTriggers=[];r.pendingTurnStart=null;r.pendingTurnEnd=null;r.forcedEndTurn=null;r.suspendedResponses=[];r.revivalQueue=[];r.destroyHealGroups=[];r.effectStack=[];log(r,'result',`${p.label} 항복`);break}
  default:fail(404,'알 수 없는 행동입니다.');
  }
  refreshHistoryAttack(r,cards);refreshPeakAttack(r,H);
  for(const id of r.players.flatMap(pp=>pp.field.filter(Boolean)))if(Number.isFinite(r.units[id]?.hp)&&r.units[id].hp<=0)H.destroy(r,id,{cause:'lethal'});
  observeFieldOccupancy(r,cards);
+ beginTokenWork(r);
  resumeSummonDeclaration(r);
  suspendResponseForGraveTriggers(r,H);
  resumeDestroyHeals(r);
  resumeMonsterTriggers(r,H);
  drainDeferredMonsterTriggers(r,H);
  suspendResponseForGraveTriggers(r,H);
+ resumeTokenWork(r,H);
  resumeSuspendedResponse(r);
- if(r.pendingTurnStart&&!r.destroyHealGroups?.length&&!r.revivalQueue?.length&&!r.pendingExtraSummon&&!r.pendingSummonBatch&&!r.suspendedResponses?.length&&!r.pendingMonsterTriggers&&!r.pendingAbility&&!r.pendingTriggerOrder&&!r.pendingInfinityChoice&&!r.pendingDeckSearch&&!r.pendingTriggerTargetChoice){
+ resumeMonsterTriggers(r,H);
+ resumeSummonDeclaration(r);
+ if(r.pendingTurnStart&&!hasTokenWork(r)&&!r.destroyHealGroups?.length&&!r.revivalQueue?.length&&!r.pendingExtraSummon&&!r.pendingSummonBatch&&!r.suspendedResponses?.length&&!r.pendingMonsterTriggers&&!r.pendingAbility&&!r.pendingTriggerOrder&&!r.pendingInfinityChoice&&!r.pendingDeckSearch&&!r.pendingTriggerTargetChoice){
   const next=r.pendingTurnStart;r.pendingTurnStart=null;
   if(r.status==='active'&&r.turn===next.who&&r.turnNumber===next.turnNumber)processTurnStartPassives(r);
  }
  drainDeferredMonsterTriggers(r,H);
- resumeSummonBatch(r,H);
- resumeDeathRevivals(r,H);
- if(r.pendingTurnStart&&!r.destroyHealGroups?.length&&!r.revivalQueue?.length&&!r.effectStack?.length&&!r.deferredMonsterTriggers?.length&&!r.suspendedResponses?.length&&!['pendingExtraSummon','pendingSummonBatch','pendingMonsterTriggers','pendingAbility','pendingSpell','pendingTriggerOrder','pendingInfinityChoice','pendingDeckSearch','pendingTriggerTargetChoice','pendingElementalChoice','pendingRecruitChoice'].some(key=>r[key])){
+ if(!hasTokenWork(r)){resumeSummonBatch(r,H);resumeDeathRevivals(r,H);}
+ if(r.pendingTurnStart&&!hasTokenWork(r)&&!r.destroyHealGroups?.length&&!r.revivalQueue?.length&&!r.effectStack?.length&&!r.deferredMonsterTriggers?.length&&!r.suspendedResponses?.length&&!['pendingExtraSummon','pendingSummonBatch','pendingMonsterTriggers','pendingAbility','pendingSpell','pendingTriggerOrder','pendingInfinityChoice','pendingDeckSearch','pendingTriggerTargetChoice','pendingElementalChoice','pendingRecruitChoice'].some(key=>r[key])){
   const next=r.pendingTurnStart;r.pendingTurnStart=null;
   if(r.status==='active'&&r.turn===next.who&&r.turnNumber===next.turnNumber)processTurnStartPassives(r);
   drainDeferredMonsterTriggers(r,H);
  }
- if(r.forcedEndTurn&&!r.effectStack?.length&&!r.suspendedResponses?.length&&!r.deferredMonsterTriggers?.length&&!r.revivalQueue?.length&&!r.destroyHealGroups?.length&&!['pendingAbility','pendingSpell','pendingExtraSummon','pendingMonsterTriggers','pendingTriggerOrder','pendingTriggerTargetChoice','pendingDeckSearch','pendingInfinityChoice','pendingElementalChoice','pendingRecruitChoice','pendingSummonBatch'].some(key=>r[key])){
+ if(r.forcedEndTurn&&!hasTokenWork(r)&&!r.effectStack?.length&&!r.suspendedResponses?.length&&!r.deferredMonsterTriggers?.length&&!r.revivalQueue?.length&&!r.destroyHealGroups?.length&&!['pendingAbility','pendingSpell','pendingExtraSummon','pendingMonsterTriggers','pendingTriggerOrder','pendingTriggerTargetChoice','pendingDeckSearch','pendingInfinityChoice','pendingElementalChoice','pendingRecruitChoice','pendingSummonBatch'].some(key=>r[key])){
   const ending=r.forcedEndTurn;r.forcedEndTurn=null;
   if(r.status==='active'&&r.turn===ending.who&&r.turnNumber===ending.turnNumber){r.phase='END';processEndOfTurn(r);if(r.status==='active')r.pendingTurnEnd=ending;}
  }
- if(r.pendingTurnEnd&&!r.pendingAttackSequence&&!r.destroyHealGroups?.length&&!r.revivalQueue?.length&&!r.suspendedResponses?.length&&!['pendingAbility','pendingSpell','pendingExtraSummon','pendingMonsterTriggers','pendingTriggerOrder','pendingTriggerTargetChoice','pendingDeckSearch','pendingInfinityChoice','pendingElementalChoice','pendingRecruitChoice','pendingSummonBatch'].some(key=>r[key])&&!r.effectStack?.length&&!r.deferredMonsterTriggers?.length){
+ if(r.pendingTurnEnd&&!hasTokenWork(r)&&!r.pendingAttackSequence&&!r.destroyHealGroups?.length&&!r.revivalQueue?.length&&!r.suspendedResponses?.length&&!['pendingAbility','pendingSpell','pendingExtraSummon','pendingMonsterTriggers','pendingTriggerOrder','pendingTriggerTargetChoice','pendingDeckSearch','pendingInfinityChoice','pendingElementalChoice','pendingRecruitChoice','pendingSummonBatch'].some(key=>r[key])&&!r.effectStack?.length&&!r.deferredMonsterTriggers?.length){
   const ending=r.pendingTurnEnd;r.pendingTurnEnd=null;
   if(r.status==='active'&&r.turn===ending.who&&r.turnNumber===ending.turnNumber){
    finishFieldHistoryTurn(r,cards);endSwordTurn(r,r.turn);expireProtectionEnd(r);setOutcome(r);
@@ -797,8 +806,8 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
   }
  }
  if(r.pendingAttack&&!pendingAttackerValid(r)){r.pendingAttack=null;log(r,'attack','공격자의 필드 이탈/재진입으로 공격 종료');}
- resumeAttackSequence(r,H);
- resumeAltarOpening(r);
+ beginTokenWork(r);resumeTokenWork(r,H);resumeSuspendedResponse(r);resumeMonsterTriggers(r,H);resumeSummonDeclaration(r);
+ if(!hasTokenWork(r)){resumeAttackSequence(r,H);resumeAltarOpening(r);}
  if(changed){r.version++;r.updatedAt=Date.now();save();}return publicState(r,who)
 }
 function chooseAIFieldAbility(r){

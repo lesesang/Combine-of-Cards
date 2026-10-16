@@ -95,6 +95,7 @@ export function suspendResponseForGraveTriggers(r,H){
 export function resumeSuspendedResponse(r){
  if(r.status!=='active'){r.suspendedResponses=[];return;}
  if(!r.suspendedResponses?.length||RESPONSE_FRAME_KEYS.some(key=>r[key])||responseChoices(r)||r.effectStack?.length||r.deferredMonsterTriggers?.length)return;
+ if(r.suspendedResponses.at(-1).tokenPipeline&&(r.tokenPipeline||r.tokenWorkQueue?.length||r.goldCastQueue?.length))return;
  const frame=r.suspendedResponses.pop();
  for(const key of RESPONSE_FRAME_KEYS)r[key]=frame[key];
  r.effectStack=frame.effectStack;

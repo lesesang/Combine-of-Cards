@@ -1,3 +1,4 @@
+import {resolveGoldCast} from './dragon-gold.mjs';
 import {resolveOriginalSin} from './original-sin.mjs';
 import {declareEffect,resolveEffectStack} from './effect-runtime.mjs';
 import {FIELD_EFFECT_RULES,prepareFieldEffect,payFieldEffect,resolveFieldEffect} from './field-ability-effects.mjs';
@@ -40,6 +41,10 @@ export function finishFieldAbility(r,H){
   const pending=r.pendingAbility;r.pendingAbility=null;
   const results=resolveEffectStack(r,{getZone:id=>H.zone(r,id),execute:effect=>{
    if(counterEffectIds.has(effect.effectId)){resolveCardCounter(r,pending,effect,H);return;}
+   if(pending.kind==='gold-cast'){
+    if(effect.effectId!=='dragon-gold-cast-resolution'||effect.sequence!==pending.sequence||effect.sourceId!==pending.sourceId||effect.owner!==pending.who)throw new Error('unexpected Gold cast');
+    resolveGoldCast(r,effect,H);return;
+   }
    if(pending.kind==='zone'){
     if(effect.effectId!=='zone-ability-resolution'||effect.sequence!==pending.sequence||effect.sourceId!==pending.sourceId||effect.owner!==pending.who)throw new Error('unexpected zone ability');
     resolveZoneAbility(r,effect,H);return;

@@ -1,7 +1,7 @@
 import {scaledStatGain} from './stat-gains.mjs';
 // An effect attack uses the ordinary battle resolver but does not spend a
 // normal attack opportunity. Targets and field stays are saved, never closures.
-const blocked=r=>r.suspendedResponses?.length||r.deferredMonsterTriggers?.length||r.destroyHealGroups?.length||r.effectStack?.length||
+const blocked=r=>r.tokenPipeline||r.tokenWorkQueue?.length||r.goldCastQueue?.length||r.suspendedResponses?.length||r.deferredMonsterTriggers?.length||r.destroyHealGroups?.length||r.effectStack?.length||
  ['pendingAttack','pendingManual','pendingAbility','pendingSpell','pendingExtraSummon','pendingMonsterTriggers','pendingTriggerOrder','pendingTriggerTargetChoice','pendingDeckSearch','pendingInfinityChoice','pendingSummonBatch','pendingRecruitChoice','pendingElementalChoice'].some(k=>r[k]);
 export function beginTempering(r,who,body,H){
  const id=r.players[who].integration,u=id&&r.units[id];
