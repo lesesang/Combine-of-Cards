@@ -1,4 +1,4 @@
-export const TIMED_SPELL_IDS=Object.freeze(['COC-09-007','COC-10-008','COC-10-010','COC-07-006','COC-11-002']);
+export const TIMED_SPELL_IDS=Object.freeze(['COC-03-006','COC-05-005','COC-06-008','COC-07-008','COC-11-010','COC-14-007','COC-14-008','COC-17-002','COC-21-006','COC-22-007','COC-27-005','COC-09-007','COC-10-008','COC-10-010','COC-07-006','COC-11-002']);
 // Limits belong to a physical card UID and its individual effect, never to a
 // card name, effect text, or every card with the same catalog ID.
 export const FUSION_UP_ID='COC-22-008';

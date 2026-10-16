@@ -1,4 +1,9 @@
 import {beginTempering} from './attack-sequences.mjs';
+import {grantSpirit,grantPeace,grantPyramid} from './protection-auras.mjs';
+import {beginCartoonSchedule,resolvePredatorJudgment,resolveWrath} from './history-spells.mjs';
+import {beginTrade,resolveSeparation} from './trade-separation.mjs';
+import {beginBlackMetal} from './black-metal-change.mjs';
+import {queueMonsterizedSpell} from './monsterized-spells.mjs';
 import {drawLantern,summonCovenant} from './undead-spells.mjs';
 import {beginClayCopies} from './clay-copies.mjs';
 import {balanceValues as B} from './balance-values.mjs';
@@ -10,6 +15,17 @@ import {beginWeaponSelection,damagePlayer} from './weapon-equipment.mjs';
 // A handler must be backed by a particular v1.3 card wording.
 const aliases={};
 const register=(ids,handler)=>{for(const id of ids.split(' '))aliases[id]=handler;};
+register('COC-03-006',ctx=>grantSpirit(ctx.r,ctx.who,ctx.body.unitId));
+register('COC-05-005',ctx=>beginCartoonSchedule(ctx.r,ctx.who,ctx.H));
+register('COC-06-008',ctx=>{ctx.r.units[ctx.body.target.id].effectsNegated=true;ctx.H.refreshStats(ctx.r);});
+register('COC-07-008',resolvePredatorJudgment);
+register('COC-11-010',ctx=>grantPeace(ctx.r,ctx.who,ctx.H));
+register('COC-14-007',ctx=>beginTrade(ctx.r,ctx.who,ctx.body,ctx.H));
+register('COC-14-008 COC-27-005',ctx=>resolveSeparation(ctx.r,ctx.H));
+register('COC-17-002',ctx=>grantPyramid(ctx.r,ctx.who,ctx.body.unitId,ctx.H));
+register('COC-21-006',resolveWrath);
+register('COC-22-007',ctx=>beginBlackMetal(ctx.r,ctx.who,ctx.body,ctx.H));
+register('COC-21-003',ctx=>queueMonsterizedSpell(ctx.r,ctx.who,ctx.body.unitId,ctx.H));
 register('COC-09-007',ctx=>beginTempering(ctx.r,ctx.who,ctx.body,ctx.H));
 register('COC-10-008',ctx=>drawLantern(ctx.r,ctx.who,ctx.H));
 register('COC-10-010',ctx=>summonCovenant(ctx.r,ctx.who,ctx.H));
@@ -324,6 +340,7 @@ export function castAutomatedSpell(r,who,c,body,H,{activationValidated=false,bas
  // double by destroying an opposing monster with an effect. Do not attribute
  // a physical unit's kill to unrelated equipped/enhanced monsters.
  const attributedH={...H};
+ if(typeof H.move==='function')attributedH.move=(room,id,to,owner,options={})=>H.move(room,id,to,owner,{...options,sourcePlayer:who});
  // Preserve optional helper detection: unit-test/third-party handlers may
  // only implement destroy, without a batch variant.
  if(typeof H.hurt==='function')

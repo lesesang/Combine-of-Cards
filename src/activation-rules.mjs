@@ -1,4 +1,5 @@
 import {TIMED_SPELL_IDS,requireUnusedEffect} from './effect-usage.mjs';
+import {destructionProtected} from './protection-auras.mjs';
 import {covenantReady} from './undead-spells.mjs';
 import {clayRevivalReady,clayCopyCandidates} from './clay-copies.mjs';
 import {damagePlayer} from './weapon-equipment.mjs';
@@ -40,7 +41,20 @@ function context(room, who, unitId, catalog, body, copiedCardId=null) {
 }
 
 register('COC-01-009',c=>require_(Boolean(c.player.integration),'이 주문은 일체화 상태에서만 사용할 수 있습니다.'));
-register('COC-05-005',c=>require_(!c.player.roundPlays,'이번 턴에 처음 사용하는 카드여야 합니다.'));
+register('COC-01-002',c=>{
+ const ids=c.body.costUnitIds;
+ require_(Array.isArray(ids)&&ids.length===1&&c.player.field.includes(ids[0])&&c.room.units[ids[0]].cardId==='COC-01-001','자신 필드의 그란레오 1장을 릴리스해야 합니다.');
+ return {costs:[{unitId:ids[0],to:'grave'}]};
+});
+register('COC-21-003',c=>require_(c.room.phase==='DRAW'&&c.player.turnsTaken===1&&c.player.deck.filter(id=>c.attribute(id).includes('저주')).length>=2,'재단은 첫 자신의 드로우 페이즈에 덱의 저주 카드 2장 조건으로 자동 발동합니다.'));
+register('COC-03-006',c=>{
+ const id=c.body.costCardId;
+ require_(id!==c.unitId&&c.player.hand.includes(id)&&c.attribute(id).includes('영매'),'다른 영매 속성 패 1장을 버려야 합니다.');
+ return {costs:[{unitId:id,to:'grave'}]};
+});
+register('COC-17-007',c=>require_(Object.keys(c.player.pyramidSources||{}).length>0,'피라미드의 필드 효과가 적용 중이어야 합니다.'));
+register('COC-21-006',c=>require_((c.player.monsterLossCount||0)>=3&&(c.player.recentMonsterLosses||[]).length===3,'자신의 몬스터 3장 이상 파괴/삭제 이력이 필요합니다.'));
+register('COC-05-005',c=>require_(!c.player.roundPlays&&c.player.lastCardUseTurn!==c.room.turnNumber,'이번 턴에 처음 사용하는 카드여야 합니다.'));
 register('COC-05-007',c=>{require_(c.hasField('카툰 랜드'),'카툰 랜드가 필드에 있어야 합니다.');return require_(c.player.field.includes(null),'카드를 가져올 빈 필드 칸이 없습니다.');});
 register('COC-05-010',c=>require_(!c.hasField('카툰 랜드'),'카툰 랜드가 필드에 없어야 합니다.'));
 register('COC-06-001',c=>require_((c.player.metalElementUsedGame||0)>=5,'금속 또는 원소 카드 5장 사용 기록이 필요합니다.'));
@@ -119,7 +133,7 @@ register('COC-32-009',c=>require_(['COC-32-001','COC-32-002','COC-32-003','COC-3
 register('COC-32-010',c=>require_((c.player.spellsThisTurn||0)>=1,'이번 턴에 주문을 사용한 기록이 있어야 합니다.'));
 
 register('COC-03-003',c=>{validateEvolution(c.room,c.who,c.card.id,c.catalog);return ok();});
-register('COC-07-003 COC-07-004 COC-07-010',c=>({costs:[{player:1-c.who,draw:1}]}));
+register('COC-07-003 COC-07-004 COC-07-008 COC-07-010',c=>({costs:[{player:1-c.who,draw:1}]}));
 
 // Paid before the opponent responds. Resolution never charges these again.
 register('COC-05-002 COC-31-007',c=>{
@@ -223,7 +237,7 @@ export function commitActivationCosts(room,plan,{move,destroy,draw}){
   }
   const unit=room.units[cost.unitId];
   if(!unit)deny('소재나 비용으로 지정한 카드가 존재하지 않습니다.');
-  if(cost.to==='destroy'&&unit.effectDestructionImmune)
+  if(cost.to==='destroy'&&(unit.effectDestructionImmune||destructionProtected(room,cost.unitId)))
    deny('파괴할 수 없는 몬스터는 파괴 비용으로 지불할 수 없습니다.');
  }
  for(const cost of plan.costs){

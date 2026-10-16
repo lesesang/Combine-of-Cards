@@ -10,6 +10,7 @@ import {queueDeathRevival} from './death-revival.mjs';
 // Draft automation: the user requested implementation batches before testing.
 // Automatic monster/integration triggers, not selectable MAIN abilities.
 export const TRIGGER_RULES=Object.freeze({
+ 'COC-01-005':{effectNumber:2,event:'integration-attacks-monster'},
  'COC-07-001':{effectNumber:1,event:'enemy-turn-start',sourceZone:'integration'},
  'COC-11-001':{effectNumber:1,event:'own-turn-start',sourceZone:'deck',sourceType:'integration'},
  'COC-19-003':{effectNumber:1,event:'own-turn-start'},
@@ -154,7 +155,7 @@ export function chooseTriggerTarget(r,who,id,H){
   if(faces.filter(x=>x===1).length===2){r.units[id].atk=Math.max(0,r.units[id].atk-100);if(r.units[id].atk===0)H.destroy(r,id,{sourceId:p.sourceId});}
   H.outcome(r);return;
  }
- H.move(r,id,kind==='return-field'?'hand':kind==='capture-enemy'?'field':'banished',kind==='capture-enemy'?who:r.units[id].owner);
+ H.move(r,id,kind==='return-field'?'hand':kind==='capture-enemy'?'field':'banished',kind==='capture-enemy'?who:r.units[id].owner,{sourceId:p.sourceId});
  H.log(r,'effect',`${H.cards.get(p.cardId).name}: 선택한 몬스터 ${kind==='return-field'?'패 복귀':kind==='capture-enemy'?'조종권 획득':'제외'}`);
 }
 function deferAttackBonus(r,id,H,extra){
@@ -187,6 +188,9 @@ export function drainDeferredMonsterTriggers(r,H){
 export function attackDeclarationTriggers(r,attackerId,target,H,{retarget=false}={}){
  const source=r.units[attackerId],who=r.turn,group=[];
  if(!source)return group;
+ if(!retarget&&r.players[who].integration===attackerId&&target.type==='unit')for(const id of r.players[who].field.filter(Boolean)){
+  const tool=r.units[id];if(tool.cardId==='COC-01-005'&&tool.gToolBody&&!tool.effectsNegated&&!effectUsedThisTurn(r,who,id,2))group.push(trigger(r,who,id,{targetId:target.id,targetRevision:r.units[target.id].fieldRevision||0,targetController:1-who}));
+ }
  if(!retarget&&source.cardId==='COC-32-015'&&!source.effectsNegated&&!effectUsedThisTurn(r,who,attackerId,1))group.push(trigger(r,who,attackerId));
  const defender=target.type==='unit'&&r.units[target.id];
  if(defender?.cardId==='COC-32-002'&&!defender.effectsNegated&&((H.type(r,attackerId)||source.tokenCard?.type||'').includes('몬스터')||Number.isFinite(source.hp))&&!effectUsedThisTurn(r,1-who,target.id,2)){
@@ -272,6 +276,11 @@ export function resolveMonsterTrigger(r,e,H){
  const sourceZone=TRIGGER_RULES[p.cardId].sourceZone||'field';
  if(!u||u.cardId!==p.cardId||u.effectsNegated||z?.zone!==sourceZone||z.player!==e.owner||((sourceZone==='integration'?u.integrationRevision:sourceZone==='field'?u.fieldRevision:u.zoneRevision)||0)!==p.sourceRevision){H.log(r,'effect','유발 소스 이탈/재진입·조종권/무효 상태로 불발');return;}
  if(p.cardId==='COC-07-001'){H.mill(r,1-e.owner,2);return;}
+ if(p.cardId==='COC-01-005'){
+  const target=r.units[p.targetId],tz=target&&H.zone(r,p.targetId);
+  if(u.gToolBody&&tz?.zone==='field'&&tz.player===p.targetController&&(target.fieldRevision||0)===p.targetRevision)H.move(r,p.targetId,'deck',target.owner);
+  return;
+ }
  if(p.cardId==='COC-11-001'){
   if(!r.players[e.owner].field.some(id=>id&&/용|드래곤/.test(H.attribute(r,id)))){
    H.move(r,e.sourceId,'hand',e.owner);H.log(r,'search','낙동강 이무기 공개 후 드로우와 별개로 패에 넣음');

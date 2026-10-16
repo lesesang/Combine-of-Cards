@@ -1,4 +1,5 @@
 // Physical equipment from the smith deck. Sword21-002 is NOT equipment.
+import {damageProtected} from './protection-auras.mjs';
 export const WEAPON_MONSTERS=Object.freeze(['COC-09-002','COC-09-003','COC-09-004']);
 export const WEAPON_SPELLS=Object.freeze(['COC-09-005','COC-09-006']);
 export function activeWeapons(r,host){
@@ -12,6 +13,7 @@ export function hasWeaponAbility(r,host,cardId){return activeWeapons(r,host).som
 export function damagePlayer(r,who,amount){
  if(!Number.isFinite(amount))throw new Error('invalid player damage');
  amount=Math.max(0,Math.floor(amount));
+ if(damageProtected(r,{type:'player',player:who}))return 0;
  const p=r.players[who],host=p.integration&&r.units[p.integration];
  const dealt=amount>0&&hasWeaponAbility(r,host,'COC-09-002')?1:amount;
  p.hp-=dealt;return dealt;

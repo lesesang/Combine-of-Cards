@@ -1,4 +1,5 @@
 import {weaponAttackBonus,hasWeaponAbility} from './weapon-equipment.mjs';
+import {refreshContinuousAuras} from './protection-auras.mjs';
 // Physical cards actually used/summoned during this game. Never reconstruct
 // missing history from today's grave/field or from a truncated public log.
 const EVOLVED_HISTORY=Object.freeze({
@@ -15,6 +16,7 @@ export function cardUseForbidden(r,who,card){
 export function recordCardUse(r,who,id,cards){
  const unit=r.units[id],card=unit&&cards.get(unit.cardId);if(!card)return;
  const p=r.players[who];p.usedCardsGame??={};
+ p.lastCardUseTurn=r.turnNumber;
  // A recycled UID is still one card, not a new copy for scaling effects.
  p.usedCardsGame[id]??={cardId:card.id};
  if(['COC-20-006','COC-20-008'].includes(card.id))p.usedBurningIntegration=true;
@@ -26,6 +28,7 @@ export function recordSummonedCard(r,who,id,cards){
  refreshHistoryAttack(r,cards);
 }
 export function refreshHistoryAttack(r,cards){
+ refreshContinuousAuras(r,cards);
  const clayIds=Object.keys(r.claySummonedCards||{});
  for(const p of r.players)for(const id of p.field.filter(Boolean)){
   const u=r.units[id];if(u.cardId!=='COC-19-001')continue;

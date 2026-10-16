@@ -14,7 +14,7 @@ export function queueCardRevival(r,who,id,H,{kind,originZone='grave',cannotAttac
 }
 function eligible(r,p,H){
  const u=r.units[p.extraUnitId],z=u&&H.zone(r,u.id);
- return !!u&&['grave','hand'].includes(p.originZone)&&z?.zone===p.originZone&&z.player===p.originPlayer&&
+ return !!u&&['grave','hand','deck','extra'].includes(p.originZone)&&z?.zone===p.originZone&&z.player===p.originPlayer&&
   (u.zoneRevision||0)===p.originRevision&&r.players[p.who].field.includes(null)&&
   !cardUseForbidden(r,p.who,H.cards.get(u.cardId));
 }
@@ -34,6 +34,7 @@ export function finishDeathRevival(r,p,H){
  const kind=p.revivalKind||'wilhelm',u=r.units[p.extraUnitId];
  if(!eligible(r,p,H)||(kind==='wilhelm'&&u.cardId!=='COC-10-011')){H.log(r,'revive','부활 대상/빈 자리/사용 금지 변경으로 불발');return;}
  H.move(r,u.id,'field',p.who);
+ H.prepareMonsterizedUnit?.(r,p,H);
  if(kind==='wilhelm')u.revivedOnce=true;
  if(p.cannotAttackUntil!==null&&p.cannotAttackUntil!==undefined)u.cannotAttackUntil=p.cannotAttackUntil;
  H.onSummon(r,p.who,u.id);

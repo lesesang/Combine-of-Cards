@@ -1,4 +1,8 @@
 import {choiceResponseTargets,prepareChoiceDeclaration,isNonToonField} from './spell-choice-batch.mjs';
+import {prepareTrade} from './trade-separation.mjs';
+import {prepareBlackMetal} from './black-metal-change.mjs';
+import {validWrathTarget} from './history-spells.mjs';
+const extendedTargets=Object.freeze({'COC-06-008':'board','COC-07-008':'any','COC-14-007':'own-field','COC-21-006':'any','COC-22-007':'own-field'});
 // Audited normal spell clauses. Other clauses of these cards remain partial.
 export const batchResponseTargets=Object.freeze({
  'COC-01-004':'field','COC-01-005':'field','COC-01-009':null,
@@ -17,6 +21,16 @@ export const batchResponseSpellIds=Object.freeze(Object.keys(batchResponseTarget
 // Pure preflight: freeze the existing default target at declaration so a
 // later missing target can never silently redirect the spell to another unit.
 export function prepareResponseTargets(room,who,cardId,body,H){
+ if(cardId==='COC-14-007')body=prepareTrade(room,who,body,H);
+ if(cardId==='COC-22-007')body=prepareBlackMetal(room,who,body,H);
+ if(cardId==='COC-21-006'&&!validWrathTarget(room,who,body.target,H))H.fail(409,'자신의 몬스터 3장 파괴/삭제 이력과 그 몬스터를 파괴/삭제한 적 있는 대상이 필요합니다.');
+ if(extendedTargets[cardId]&&body.target?.type==='unit'){
+  const id=body.target.id,u=room.units[id],z=u&&H.zone(room,id);
+  if(!u||!['field','integration'].includes(z?.zone))H.fail(409,'필드의 카드가 필요합니다.');
+  const revision=z.zone==='field'?(u.fieldRevision||0):(u.integrationRevision||0);
+  if(body.effectTargetRevision!==undefined&&(body.effectTargetRevision!==revision||body.effectTargetZone!==z.zone||body.effectTargetPlayer!==z.player))H.fail(409,'선언 대상이 이탈하거나 조종권이 변경되었습니다.');
+  body={...body,effectTargetRevision:revision,effectTargetZone:z.zone,effectTargetPlayer:z.player};
+ }
  if(cardId==='COC-09-007'){
   const id=room.players[who].integration,u=id&&room.units[id];
   if(!u)H.fail(409,'뜨임질을 사용할 일체화가 필요합니다.');
@@ -24,7 +38,7 @@ export function prepareResponseTargets(room,who,cardId,body,H){
   body={...body,temperingSourceId:id,temperingRevision:u.integrationRevision||0};
  }
  body=prepareChoiceDeclaration(room,who,cardId,body,H);
- let kind=batchResponseTargets[cardId]??choiceResponseTargets[cardId]??balanceResponseTargets[cardId];
+ let kind=extendedTargets[cardId]??batchResponseTargets[cardId]??choiceResponseTargets[cardId]??balanceResponseTargets[cardId];
  if(kind==='two-non-toon')return body;
  if(kind==='option')kind=body.option===1?'enemy-field':'any';
  if(!kind)return body;
@@ -50,6 +64,7 @@ export function prepareResponseTargets(room,who,cardId,body,H){
  }
  const id=target?.type==='unit'?target.id:null,z=typeof id==='string'&&H.zone(room,id);
  if(kind==='enemy-player')H.fail(409,'상대 플레이어 본체를 대상으로 선택해야 합니다.');
+ if(kind==='board'&&z&&['field','integration'].includes(z.zone))return {...body,target:{type:'unit',id}};
  if(!z||z.zone!=='field')
   H.fail(409,'유효한 필드 몬스터 대상을 선택해야 합니다.');
  if(kind.startsWith('enemy')&&z.player!==1-who)
@@ -74,9 +89,9 @@ export function responseTargetStillValid(room,who,cardId,body,H){
 // Enumerate public battlefield choices only; never inspect either deck/hand.
 // The same validator is used by action preflight and AI candidate selection.
 export function responseTargetChoices(room,who,cardId,H,body={}){
- const kind=batchResponseTargets[cardId]??choiceResponseTargets[cardId]??balanceResponseTargets[cardId];
+ const kind=extendedTargets[cardId]??batchResponseTargets[cardId]??choiceResponseTargets[cardId]??balanceResponseTargets[cardId];
  if(!kind||kind==='two-non-toon')return null;
- const candidates=[...room.players.flatMap(p=>p.field.filter(Boolean).map(id=>({type:'unit',id}))),
+ const candidates=[...room.players.flatMap(p=>[...p.field,...(kind==='board'?[p.integration]:[])].filter(Boolean).map(id=>({type:'unit',id}))),
   {type:'player',player:1-who},{type:'player',player:who}];
  return candidates.filter(target=>responseTargetStillValid(room,who,cardId,{...body,target},H));
 }

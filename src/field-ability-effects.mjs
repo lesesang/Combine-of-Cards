@@ -1,4 +1,6 @@
 import {damagePlayer} from './weapon-equipment.mjs';
+import {prepareGTool,summonGTool,prepareAltar,summonAltar} from './monsterized-spells.mjs';
+import {destructionProtected} from './protection-auras.mjs';
 import {recruitChoices,beginRecruitChoice} from './recruit-summons.mjs';
 import {balanceValues as B} from './balance-values.mjs';
 import {ELEMENTAL_MAGICIAN_IDS} from './effect-usage.mjs';
@@ -10,6 +12,8 @@ import {batchSummonCount,beginSummonBatch} from './effect-summon-batches.mjs';
 
 // Audited activated effects only; unrelated summon/death triggers remain partial.
 export const FIELD_EFFECT_RULES=Object.freeze({
+ 'COC-01-003':{zone:'integration',sourceType:'integration',oncePerTurn:true},
+ 'COC-21-003':{zone:'field',sourceType:'monster',oncePerTurn:true,effectNumber:2},
  'COC-08-011':{zone:'integration',sourceType:'integration',oncePerTurn:true},
  'COC-20-008':{zone:'integration',sourceType:'integration',oncePerTurn:true},
  'COC-26-001':{zone:'integration',sourceType:'integration',oncePerTurn:true},
@@ -44,6 +48,8 @@ export function prepareFieldEffect(r,who,body,H){
  if(!rule||!z||z.player!==who||z.zone!==rule.zone||u.effectsNegated)invalid(H,'효과가 유효한 자신의 필드 또는 일체화 카드가 필요합니다.');
  if(rule.oncePerTurn)requireUnusedEffect(r,who,sourceId,fieldEffectNumber(u.cardId));
  const plan={cardId:u.cardId,sourceId,sourceZone:z.zone,sourceRevision:revision(u,z.zone)};
+ if(u.cardId==='COC-01-003')return {...plan,...prepareGTool(r,who,body,H)};
+ if(u.cardId==='COC-21-003')return {...plan,...prepareAltar(r,who,body,H)};
  if(isElemental(u.cardId)){prepareElemental(r,who,sourceId,H);return plan;}
  if(u.cardId==='COC-08-011'){
   if(!batchSummonCount(r,who,u.cardId,H))invalid(H,'부활 가능한 파괴된 츠쿠모가미와 빈 필드가 필요합니다.');
@@ -78,7 +84,7 @@ export function prepareFieldEffect(r,who,body,H){
  if(u.cardId==='COC-10-005'){
   if((u.abilityGameCount||0)>=3)invalid(H,'이번 게임의 최대 3회 사용 한도를 초과했습니다.');
   const costId=body.costTarget?.id,cz=costId&&H.zone(r,costId);
-  if(cz?.zone!=='field'||cz.player!==who||r.units[costId].effectDestructionImmune)invalid(H,'파괴 가능한 자신의 필드 몬스터를 비용으로 선택하세요.');
+  if(cz?.zone!=='field'||cz.player!==who||r.units[costId].effectDestructionImmune||destructionProtected(r,costId))invalid(H,'파괴 가능한 자신의 필드 몬스터를 비용으로 선택하세요.');
   plan.costUnitId=costId;
  }
  if(u.cardId==='COC-03-002'){
@@ -103,6 +109,7 @@ export function prepareFieldEffect(r,who,body,H){
 }
 export function payFieldEffect(r,who,plan,H){
  const p=r.players[who],u=r.units[plan.sourceId];
+ if(plan.cardId==='COC-21-003')p.hp-=plan.altarHpCost;
  if(plan.cardId==='COC-26-001')p.hp-=100;
  if(isElemental(plan.cardId)){
   H.destroy(r,plan.sourceId,{cause:'cost',sourceId:plan.sourceId});
@@ -135,6 +142,8 @@ export function resolveFieldEffect(r,who,plan,H){
  const p=r.players[who],c=plan.cardId,t=plan.targetId;
  if(captureIds.has(c)&&!p.field.includes(null))return fizzle('필드 빈 자리 소실');
  switch(c){
+ case 'COC-01-003':return summonGTool(r,who,plan,H);
+ case 'COC-21-003':return summonAltar(r,who,plan,H);
  case 'COC-08-011':return beginSummonBatch(r,who,c,H);
  case 'COC-20-008':{
   const count=Math.min(plan.discardCount,p.deck.length);

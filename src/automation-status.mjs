@@ -13,6 +13,7 @@ export const summonAutomations = new Set([
  'COC-26-002','COC-23-004','COC-20-009','COC-10-001','COC-10-007'
 ]);
 export const passiveAutomations = new Set([
+ 'COC-01-006','COC-01-007','COC-17-007','COC-17-008',
  'COC-19-001','COC-19-003','COC-01-001','COC-09-001','COC-11-001','COC-07-001','COC-07-007',
  'COC-09-002','COC-09-003','COC-10-011','COC-05-001','COC-12-006',
  'COC-12-008','COC-10-006','COC-21-007','COC-08-002','COC-09-004',
@@ -23,14 +24,17 @@ export const combatAutomations = new Set([
  'COC-32-003','COC-32-011','COC-32-013'
 ]);
 export const integrationAutomations = new Set([
+ 'COC-01-002',
  'COC-05-009','COC-17-001','COC-19-006','COC-30-010'
 ]);
 export const dragonAutomations = new Set(['COC-11-007','COC-11-008','COC-11-009']);
 export const cartoonTriggerAutomations = new Set(['COC-05-008']);
+export const dedicatedSpellAutomations = new Set(['COC-22-006','COC-27-002','COC-22-008','COC-22-009','COC-26-007','COC-27-009','COC-32-009','COC-26-006']);
 export function automationStatus(card){
  if(SPELL_COUNTER_IDS.includes(card.id))return 'partial';
  if(GRAVE_ABILITY_IDS.includes(card.id))return 'partial';
  if(card.type==='주문'&&hasAutoSpell(card.id))return 'partial';
+ if(dedicatedSpellAutomations.has(card.id))return 'partial';
  if(summonAutomations.has(card.id)||passiveAutomations.has(card.id)||integrationAutomations.has(card.id)||combatAutomations.has(card.id)||FIELD_ABILITY_IDS.includes(card.id)||SUPPORTED_EXTRA_IDS.includes(card.id)||dragonAutomations.has(card.id)||cartoonTriggerAutomations.has(card.id))return 'partial';
  if(!card.effects?.length&&!card.conditions?.length)return 'basic';
  return 'manual';

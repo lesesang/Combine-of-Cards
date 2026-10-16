@@ -1,4 +1,7 @@
 import {legalClayCopies,chooseClayCopies} from './clay-copies.mjs';
+import {cartoonChoices,chooseCartoonSchedule} from './history-spells.mjs';
+import {tradeChoices,chooseTrade} from './trade-separation.mjs';
+import {blackMetalChoices,chooseBlackMetal} from './black-metal-change.mjs';
 import {WEAPON_SPELLS,weaponCandidates,chooseWeapons} from './weapon-equipment.mjs';
 // Selection opens only after the effect survives the opponent response.
 export const deckSearchSpellIds=Object.freeze(['COC-07-004','COC-19-004','COC-20-003','COC-24-008','COC-26-008']);
@@ -33,6 +36,11 @@ export function beginDeckSearch(room,who,cardId,cards,H,source={}){
 }
 export function deckSearchView(room,viewer,cards){
  const p=room.pendingDeckSearch;if(!p)return null;
+ if(p.cartoonSchedule||p.trade||p.blackMetal){
+  const choices=p.cartoonSchedule?cartoonChoices(room,p,cards):p.trade?tradeChoices(room,p):blackMetalChoices(room,p,cards);
+  return {who:p.who,cardId:p.cardId,zone:p.trade?'field':'deck',cartoonSchedule:!!p.cartoonSchedule,remaining:p.remaining,trade:!!p.trade,blackMetal:!!p.blackMetal,
+   ...(viewer===p.who?{choices:choices.map(id=>({id,card:cards.get(room.units[id].cardId)||room.units[id].tokenCard}))}:{})};
+ }
  if(p.clayCopies)return {who:p.who,cardId:p.cardId,zone:'grave',clayCopies:true,...(viewer===p.who?{choices:legalClayCopies(room,p,cards).map(id=>({id,card:cards.get(room.units[id].cardId)}))}:{})};
  if(p.weapon)return {who:p.who,cardId:p.cardId,weapon:true,zone:p.cardId==='COC-09-006'?'grave':'deck',maxCount:2,
   ...(viewer===p.who?{choices:weaponCandidates(room,p.who,p.cardId,cards).filter(id=>p.choices.includes(id)).map(id=>({id,card:cards.get(room.units[id].cardId)}))}:{})};
@@ -40,6 +48,9 @@ export function deckSearchView(room,viewer,cards){
 }
 export function finishDeckSearch(room,who,id,cards,H){
  const p=room.pendingDeckSearch;
+ if(p?.cartoonSchedule)return chooseCartoonSchedule(room,who,id,H);
+ if(p?.trade)return chooseTrade(room,who,id,H);
+ if(p?.blackMetal)return chooseBlackMetal(room,who,id,H);
  if(p?.clayCopies)return chooseClayCopies(room,who,id,H);
  if(p?.weapon)return chooseWeapons(room,who,id,H);
  if(room.status!=='active'||!p||p.who!==who)H.fail(403,'카드 검색 효과의 선택권자가 아닙니다.');
