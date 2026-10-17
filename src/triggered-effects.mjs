@@ -1,4 +1,5 @@
 import {recordCartoonKill,resolveCartoonTrigger,cartoonSummonBeforeParent} from './cartoon-land.mjs';
+import {resolveProphet} from './deck-control.mjs';
 import {gainUnitStats} from './stat-gains.mjs';
 import {dragonAttackTriggers,resolveDragonTrigger} from './dragon-gold.mjs';
 import {linkStraw,applySharedUnitEffect,destroySharedUnits,hurtSharedUnits,moveSharedUnits,captureSharedUnits} from './shared-unit-effects.mjs';
@@ -15,6 +16,8 @@ import {queueDeathRevival} from './death-revival.mjs';
 // Draft automation: the user requested implementation batches before testing.
 // Automatic monster/integration triggers, not selectable MAIN abilities.
 export const TRIGGER_RULES=Object.freeze({
+ 'COC-07-005':{effectNumber:1,event:'effect-draw',repeatPerEvent:true},
+ 'COC-27-007':{effectNumber:1,event:'natural-draw-replacement'},
  'COC-22-011':{effectNumber:2,event:'end-phase'},
  'COC-22-014':{effectNumber:2,event:'attack-completed',repeatPerEvent:true},
  'COC-05-001':{effectNumber:1,event:'enemy-monster-destroyed',repeatPerEvent:true},
@@ -59,9 +62,11 @@ export function recordSummonTrigger(r,who,id,H){
  if(!['summoned','integration-enter'].includes(rule?.event))return false;
  if(u.cardId==='COC-10-007'&&u.twinsOffspring)return true;
  if(u.cardId==='COC-10-003'&&r.players[who].hp<=500)return true;
- if(!u.effectsNegated&&!effectUsedThisTurn(r,who,id,rule.effectNumber)){
+ if(!u.effectsNegated&&(rule.repeatPerEvent||!effectUsedThisTurn(r,who,id,rule.effectNumber))){
   const pending=r.deferredMonsterTriggers??=[];
-  if(!pending.some(e=>e.sourceId===id&&e.payload.eventTurn===r.turnNumber))pending.push(trigger(r,who,id,{eventTurn:r.turnNumber}));
+  const event=trigger(r,who,id,{eventTurn:r.turnNumber});
+  if(rule.repeatPerEvent)event.key+=`-summon-${event.payload.sourceRevision}`;
+  if(!pending.some(e=>e.key===event.key))pending.push(event);
  }else settleSummonTrigger(r,trigger(r,who,id),H);
  return true;
 }
@@ -87,7 +92,7 @@ export function suspendResponseForGraveTriggers(r,H){
  if(r.status!=='active'||responseChoices(r))return;
  const root=r.pendingAbility||r.pendingSpell||r.pendingExtraSummon;
  if(!root||root.stage==='cost-triggers')return;
- const effects=(r.deferredMonsterTriggers||[]).filter(e=>(e.payload.graveEvent||e.payload.cartoonEvent)&&e.payload.eventTurn===r.turnNumber);
+ const effects=(r.deferredMonsterTriggers||[]).filter(e=>(e.payload.graveEvent||e.payload.cartoonEvent||e.payload.drawEvent)&&e.payload.eventTurn===r.turnNumber);
  if(!effects.length)return;
  r.suspendedResponses??=[];
  if(r.suspendedResponses.length>=32)throw new Error('nested response safety budget reached');
@@ -326,6 +331,10 @@ export function resolveMonsterTrigger(r,e,H){
  }
  const sourceZone=TRIGGER_RULES[p.cardId].sourceZone||'field';
  if(!u||u.cardId!==p.cardId||u.effectsNegated||z?.zone!==sourceZone||z.player!==e.owner||((sourceZone==='integration'?u.integrationRevision:sourceZone==='field'?u.fieldRevision:u.zoneRevision)||0)!==p.sourceRevision){H.log(r,'effect','유발 소스 이탈/재진입·조종권/무효 상태로 불발');return;}
+ if(p.cardId==='COC-27-007'){resolveProphet(r,e,H);return;}
+ if(p.cardId==='COC-07-005'){
+  H.mill(r,p.drawPlayer,p.count);H.log(r,'effect',`포식의 전투마차: 상대의 효과 드로우 성공 ${p.count}장만큼 덱 위 묘지 이동`);return;
+ }
  if(p.cardId==='COC-22-011'){
   damagePlayer(r,1-e.owner,p.amount);H.log(r,'effect',`블랙 메탈 키메라: 이번 턴 공격한 서로 다른 몬스터 수 × 100 = ${p.amount} 피해`);H.outcome(r);return;
  }

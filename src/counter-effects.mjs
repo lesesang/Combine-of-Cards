@@ -19,7 +19,7 @@ export function currentCounterTarget(room,pending,kind){
 }
 function targetKind(effect){
  if(effect?.effectId==='dragon-gold-cast-resolution')return 'spell';
- if(effect?.effectId==='zone-ability-resolution'&&effect.payload?.cardId==='COC-11-004')return 'monster-effect';
+ if(effect?.effectId==='zone-ability-resolution'&&['COC-11-004','COC-12-005'].includes(effect.payload?.cardId))return 'monster-effect';
  if(effect?.effectId==='monster-trigger-resolution'&&TRIGGER_RULES[effect.payload?.cardId]?.sourceType==='spell')return 'spell';
  if(effect?.effectId==='original-sin-resolution')return 'integration-effect';
  if(effect?.effectId==='grave-ability-resolution'&&effect.payload?.cardId==='COC-22-008')return 'spell';

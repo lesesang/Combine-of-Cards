@@ -1,4 +1,5 @@
 import {legalClayCopies,chooseClayCopies} from './clay-copies.mjs';
+import {deckControlView,chooseDeckControl} from './deck-control.mjs';
 import {cartoonChoices,chooseCartoonSchedule} from './history-spells.mjs';
 import {tradeChoices,chooseTrade} from './trade-separation.mjs';
 import {blackMetalChoices,chooseBlackMetal} from './black-metal-change.mjs';
@@ -39,6 +40,7 @@ export function beginDeckSearch(room,who,cardId,cards,H,source={}){
 }
 export function deckSearchView(room,viewer,cards){
  const p=room.pendingDeckSearch;if(!p)return null;
+ if(p.deckControl)return deckControlView(room,viewer,cards);
  if(p.cartoonSchedule||p.trade||p.blackMetal){
   const choices=p.cartoonSchedule?cartoonChoices(room,p,cards):p.trade?tradeChoices(room,p):blackMetalChoices(room,p,cards);
   return {who:p.who,cardId:p.cardId,zone:p.trade?'field':'deck',cartoonSchedule:!!p.cartoonSchedule,remaining:p.remaining,trade:!!p.trade,blackMetal:!!p.blackMetal,
@@ -51,6 +53,7 @@ export function deckSearchView(room,viewer,cards){
 }
 export function finishDeckSearch(room,who,id,cards,H){
  const p=room.pendingDeckSearch;
+ if(p?.deckControl)return chooseDeckControl(room,who,id,H);
  if(p?.cartoonSchedule)return chooseCartoonSchedule(room,who,id,H);
  if(p?.trade)return chooseTrade(room,who,id,H);
  if(p?.blackMetal)return chooseBlackMetal(room,who,id,H);

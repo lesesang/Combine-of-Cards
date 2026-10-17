@@ -2,7 +2,7 @@
 // Classify registered clauses explicitly; damage, costs and ATK/HP state rules
 // must never become "destruction effects" by inspecting handler side effects.
 const SPELLS=new Set(['COC-08-006','COC-21-004','COC-21-005','COC-24-006','COC-30-001','COC-31-006','COC-31-008','COC-32-008']);
-const FIELDS=new Set(['COC-05-009','COC-10-005','COC-12-013','COC-32-012']);
+const FIELDS=new Set(['COC-05-009','COC-10-005','COC-12-013','COC-27-011','COC-32-012']);
 const TRIGGERS=new Set(['COC-03-004','COC-12-012','COC-19-003','COC-19-006','COC-27-004','COC-31-002','COC-32-002']);
 function destructiveSpell(room,owner,id,body){
  if(id==='COC-23-009')return body?.option===1;

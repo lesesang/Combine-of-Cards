@@ -6658,5 +6658,426 @@
       ]
     },
     "rationale": "덱의 다회 공격과 공격 기회 자원 배분·융합 준비·나이트 카운터→매지션 흐름을 유지한다. 기존 수치는 보존하고 임시 기간/중복/실물별 제한/대응 경계를 명확화했다. 서로 다른 카드의 사용 횟수와 매지션 실제50/취급250 및 R29를 유지하며 원문 정본으로 가장하지 않는다."
+  },
+  {
+    "patchId": "TEN-CARD-2026-10-18-DRAFT",
+    "cardId": "COC-06-006",
+    "source": "Tracked runtime catalog at 7b7e2e8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-06-006",
+      "deckId": "06",
+      "name": "마도합성수 쿠퍼 타이거",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "원소 / 금속",
+      "atk": "140",
+      "hp": "140",
+      "conditions": [],
+      "effects": [
+        "필드에 대상을 하나 지정한다. 이 카드가 필드에 있는동안 내 일체화의 공격력을 그 대상의 공격력의 절반과 같게합니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-06-006",
+      "deckId": "06",
+      "name": "마도합성수 쿠퍼 타이거",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "원소 / 금속",
+      "atk": "140",
+      "hp": "140",
+      "conditions": [],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드 기준 한 턴에 1회, 필드 몬스터 1장을 지정한다. 이 카드와 대상이 계속 필드에 있고 이 카드의 효과가 유효한 동안, 현재 조종자의 일체화 공격력을 대상의 현재 실제 공격력의 절반(소수점 버림)으로 한다."
+      ],
+      "notes": [
+        "개발자 명확화: 지정에는 자기 자신도 포함하며, 일체화가 없어도 미리 지정할 수 있다. 같은 일체화에 여러 쿠퍼 타이거가 적용되면 가장 최근에 성공한 유효 지정을 적용한다. 일체화의 다른 가산 강화는 저장해 두고 이 설정이 끝나면 다시 적용한다. 대상의 마검 배율은 참조 공격력에 포함하고 일체화 자신에게 부여된 마검 배율은 설정값에 별도로 적용한다. 조종권 변경만으로 연결을 끊지 않지만 소스 또는 대상의 필드 이탈·재진입으로 옛 연결을 복원하지 않는다."
+      ]
+    },
+    "rationale": "연금술의 일체화 운용과 대상 수치 조절을 유지하고 지속 설정·가산 강화·마검 배율의 적용 순서를 분리한다."
+  },
+  {
+    "patchId": "TEN-CARD-2026-10-18-DRAFT",
+    "cardId": "COC-07-005",
+    "source": "Tracked runtime catalog at 7b7e2e8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-07-005",
+      "deckId": "07",
+      "name": "포식의 전투마차",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "포식",
+      "atk": "150",
+      "hp": "150",
+      "conditions": [
+        "이 카드의 소환 시, 상대는 1장 드로우한다."
+      ],
+      "effects": [
+        "상대는 카드를 뽑는 효과를 발동할 때마다(자연스러운 드로우는 해당되지 않는다) 그 매수만큼 덱 위에서 카드를 묘지로 보내야 한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-07-005",
+      "deckId": "07",
+      "name": "포식의 전투마차",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "포식",
+      "atk": "150",
+      "hp": "150",
+      "conditions": [
+        "이 카드의 소환이 성공할 때마다 상대는 1장 드로우한다. 이 필수 처리는 이 카드의 효과가 무효여도 적용한다."
+      ],
+      "effects": [
+        "이 카드가 필드에 있고 효과가 유효한 동안, 상대가 카드 효과·조건·비용으로 실제 드로우할 때마다 그 성공한 매수만큼 상대 덱 위 카드를 묘지로 보내는 효과를 발동한다. 일반 드로우 및 그 대체 드로우는 제외한다."
+      ],
+      "notes": [
+        "개발자 개정: 효과 발동 선언만으로 덱을 버리지 않고 실제 드로우 성공을 기준으로 한다. 이 카드의 소환으로 상대가 뽑는 카드도 센다. 한 엔진 동작의 연속 드로우는 매수를 모아 처리하며 다른 실제 전투마차는 각각 발동한다. 턴 1회 제한은 없다. 드로우 실패·무효로 뽑지 못한 카드, 시작 패 배분·수동 판정 드로우는 제외한다. 묘지 이동 자체에는 리로드를 하지 않고 남은 덱까지만 보낸다."
+      ]
+    },
+    "rationale": "상대에게 드로우를 주고 덱을 소모시켜 마도사의 피해로 연결하는 포식 흐름을 유지한다. 실제 드로우와 덱 위 묘지 사건을 구분한다."
+  },
+  {
+    "patchId": "TEN-CARD-2026-10-18-DRAFT",
+    "cardId": "COC-07-009",
+    "source": "Tracked runtime catalog at 7b7e2e8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-07-009",
+      "deckId": "07",
+      "name": "포식자와 계약한 마도사",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "포식",
+      "atk": "150",
+      "hp": "50",
+      "conditions": [
+        "상대는 카드를 1장 뽑습니다. 한 턴에 1회만 사용할 수 있다."
+      ],
+      "effects": [
+        "적 영웅에게 저번 턴과 이번 턴을 통틀어, (카드를 덱 위에서 묘지로 보낸 매수)d50의 피해를 입힌다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-07-009",
+      "deckId": "07",
+      "name": "포식자와 계약한 마도사",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "포식",
+      "atk": "150",
+      "hp": "50",
+      "conditions": [
+        "이 실제 카드의 일반 사용은 한 턴에 1회이며, 상대에게 1장 드로우시키는 비용을 지불한다. 소환 무효에도 비용과 사용 횟수는 반환하지 않는다."
+      ],
+      "effects": [
+        "이 카드의 소환 성공 후 이 실제 카드 기준 한 턴에 1회, 직전 턴과 현재 턴에 양쪽 덱 맨 위에서 묘지로 보낸 카드 수만큼 d50을 굴려 합계만큼 상대 플레이어에게 피해를 준다. 매수는 효과 해결 시 계산한다."
+      ],
+      "notes": [
+        "개발자 명확화: 적 영웅은 상대 플레이어를 뜻하고 직전 턴은 직전 전역 턴이다. 덱 중간 카드의 묘지 이동·패 버리기·덱의 다른 영역 이동은 세지 않는다. 일반 사용과 소환 유발의 실물별 기록을 구분하며 효과 소환은 기존 공통 규칙에 따라 일반 사용 비용을 다시 지불하지 않는다."
+      ]
+    },
+    "rationale": "상대에게 드로우를 주고 덱을 소모시켜 마도사의 피해로 연결하는 포식 흐름을 유지한다. 실제 드로우와 덱 위 묘지 사건을 구분한다."
+  },
+  {
+    "patchId": "TEN-CARD-2026-10-18-DRAFT",
+    "cardId": "COC-12-005",
+    "source": "Tracked runtime catalog at 7b7e2e8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-12-005",
+      "deckId": "12",
+      "name": "F=HERO 스켈레톤 보이",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영웅",
+      "atk": "50",
+      "hp": "40",
+      "conditions": [
+        "자신의 필드나 패에 있는 이 카드를 버린다."
+      ],
+      "effects": [
+        "자신의 묘지에 있는 다른 몬스터 1장을 자신의 필드에 소환한다. 이 효과로 묘지에 간 스켈레톤 보이 자신은 소환할 수 없다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-12-005",
+      "deckId": "12",
+      "name": "F=HERO 스켈레톤 보이",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영웅",
+      "atk": "50",
+      "hp": "40",
+      "conditions": [
+        "이 카드의 일반 소환에는 자기 버리기 비용이 없다. 아래 부활 효과를 발동하려면 자신의 패 또는 필드의 이 카드를 묘지로 버린다."
+      ],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드 기준 한 턴에 1회, 자신을 버리는 비용을 지불하고 자신의 묘지에 있는 다른 실제 몬스터 1장을 선택하여 자신의 필드에 소환한다. 비용으로 버린 이 실제 카드는 선택할 수 없다."
+      ],
+      "notes": [
+        "개발자 밸런스 개정: 반복 부활 순환을 막기 위해 실물별 턴 1회를 적용한다. 다른 스켈레톤 보이는 별개이며 버리기는 파괴가 아니다. 비용 지불 후 효과 대응과 부활 소환 대응을 따로 거친다. 효과 무효에도 자신은 묘지에 남고, 부활 소환 무효 시 대상은 원래 묘지에 남는다. 묘지 선택은 비용 지불 전 확정하며 소스/대상의 이탈·재진입 또는 빈 칸 소실 시 불발한다."
+      ]
+    },
+    "rationale": "F=HERO의 묘지 부활과 퓨전 방어 역할은 유지하되 무한 부활·무제한 보호 누적을 억제한다. 기존 수치 너프와 퓨전 소재를 보존한다."
+  },
+  {
+    "patchId": "TEN-CARD-2026-10-18-DRAFT",
+    "cardId": "COC-12-015",
+    "source": "Tracked runtime catalog at 7b7e2e8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-12-015",
+      "deckId": "12",
+      "name": "F=HERO 버디 더 이모탈",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "영웅",
+      "atk": "260",
+      "hp": "240",
+      "conditions": [
+        "이 카드는 \"용기의 패왕\"의 효과로 \"일렉트릭 보이\"와 \"스플래쉬 걸\"과 \"라이징 윈드 걸\"을 버렸을 때 소환할 수 있다."
+      ],
+      "effects": [
+        "자신 덱의 카드 1장을 묘지로 보내고, 자신 필드 위의 몬스터 1장을 선택한다. 이 카드가 필드에 존재하는 한, 선택한 몬스터는 전투에 의해서는 파괴되지 않는다."
+      ],
+      "notes": [
+        "v1.2 소환 분류: 퓨전. 용기의 패왕 효과로 지정 소재를 사용해 엑스트라 덱에서 소환한다."
+      ]
+    },
+    "after": {
+      "id": "COC-12-015",
+      "deckId": "12",
+      "name": "F=HERO 버디 더 이모탈",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "영웅",
+      "atk": "260",
+      "hp": "240",
+      "conditions": [
+        "이 카드는 \"용기의 패왕\"의 효과로 \"일렉트릭 보이\"와 \"스플래쉬 걸\"과 \"라이징 윈드 걸\"을 버렸을 때 소환할 수 있다."
+      ],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드 기준 한 턴에 1회, 자기 덱에서 카드 1장을 골라 묘지로 보내는 비용을 지불하고 자기 필드 몬스터 1장을 지정한다. 이 카드와 대상이 계속 필드에 있고 이 카드의 효과가 유효한 동안 대상은 전투로 파괴되지 않는다. 이 실제 카드의 새로운 지정이 성공하면 이전 지정은 종료한다."
+      ],
+      "notes": [
+        "v1.2 소환 분류: 퓨전. 용기의 패왕 효과로 지정 소재를 사용해 엑스트라 덱에서 소환한다.",
+        "개발자 밸런스 개정: 한 이모탈이 턴마다 보호 대상을 누적하지 않고 하나의 지정을 유지한다. 다른 실제 이모탈의 지정은 독립이다. 전투 피해는 그대로 받고 치명적인 전투 피해에서는 HP 1로 남는다. 효과 피해·직접 파괴·비파괴 이동은 막지 않는다. 효과 무효 중에는 보호가 멈추며 같은 연속 체류에서 무효가 끝나면 다시 적용한다. 소스/대상 재소환은 옛 보호를 복원하지 않고 조종권 변경만으로 보호를 끊지 않는다. 덱 비용은 대응 전에 지불하며 무효에도 돌려주지 않는다. 기존 260/240과 지정 퓨전 소재는 유지한다."
+      ]
+    },
+    "rationale": "F=HERO의 묘지 부활과 퓨전 방어 역할은 유지하되 무한 부활·무제한 보호 누적을 억제한다. 기존 수치 너프와 퓨전 소재를 보존한다."
+  },
+  {
+    "patchId": "TEN-CARD-2026-10-18-DRAFT",
+    "cardId": "COC-20-002",
+    "source": "Tracked runtime catalog at 7b7e2e8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-20-002",
+      "deckId": "20",
+      "name": "버닝 데몬즈 비스트",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "악마",
+      "atk": "0",
+      "hp": "300",
+      "conditions": [],
+      "effects": [
+        "공격력을 300까지 올릴수 있다 단 자신이 올린 공격력의 절반만큼의 피해를 받는다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-20-002",
+      "deckId": "20",
+      "name": "버닝 데몬즈 비스트",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "악마",
+      "atk": "0",
+      "hp": "300",
+      "conditions": [],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드 기준 한 턴에 1회, 현재 실제 공격력이 300 미만이면 기본 강화량을 1~300에서 선택한다. 받는 강화 배율과 마검 배율을 계산한 뒤 이 효과로 얻는 최종 실제 공격력이 300을 넘지 않는 범위에서 올리고, 실제로 증가한 공격력의 절반(소수점 올림)만큼 자기 플레이어에게 피해를 준다."
+      ],
+      "notes": [
+        "개발자 명확화: 자신이 받는 피해는 버닝 덱의 낮은 플레이어 체력 흐름에 맞춰 자기 플레이어 피해로 정한다. 이 효과는 매번 300 추가 강화가 아니며 다른 효과의 나중 강화까지 300으로 제한하지 않는다. 해결 시 올릴 수 없으면 강화·자기 피해가 없고 사용 횟수는 소모한다. 자기 피해는 HP 비용이 아니므로 피해 보호를 적용하며 패배를 일으킬 수 있다."
+      ]
+    },
+    "rationale": "공격력 획득과 자기 플레이어 체력 감소를 교환하는 버닝 덱 흐름을 지원하며 300을 반복 가산으로 해석하지 않는다."
+  },
+  {
+    "patchId": "TEN-CARD-2026-10-18-DRAFT",
+    "cardId": "COC-27-007",
+    "source": "Tracked runtime catalog at 7b7e2e8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-27-007",
+      "deckId": "27",
+      "name": "수정 예언자",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "슈페리얼",
+      "atk": "50",
+      "hp": "50",
+      "conditions": [],
+      "effects": [
+        "자신의 드로우 페이즈에 일반적인 드로우 대신 카드를 덱 위에서 3장 넘깁니다. 3장 중에 원하는 1장을 골라 뽑고, 덱을 섞습니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-27-007",
+      "deckId": "27",
+      "name": "수정 예언자",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "슈페리얼",
+      "atk": "50",
+      "hp": "50",
+      "conditions": [],
+      "effects": [
+        "자신의 드로우 페이즈에 일반 드로우 1장을 대체하여 덱 위 최대 3장을 자신만 확인하고 그중 1장을 드로우한 뒤 남은 덱 전체를 섞는다. 일반 드로우 한 번에는 자신의 수정 예언자 한 장만 적용한다."
+      ],
+      "notes": [
+        "개발자 명확화: 효과 대응 후 선택하며 무효/불발이면 일반 드로우 1장을 처리한다. 덱이 비었다면 기존 리로드와 드로우 실패 규칙을 먼저 적용한다. 덱이 1~2장이면 남은 카드 중 선택한다. 이 선택 드로우도 일반 드로우이므로 포식의 전투마차를 유발하지 않는다. 선택지와 선택한 카드 이름은 상대에게 공개하지 않는다. 전체 셔플은 이 카드의 명시 효과이며 R11의 일반 되돌리기 규칙을 바꾸지 않는다."
+      ]
+    },
+    "rationale": "슈페리얼의 덱 조작·소재별 퓨전 역할·조건부 제거와 덱 자원 피해를 유지하고 선택/대응/비공개 경계를 명확히 한다."
+  },
+  {
+    "patchId": "TEN-CARD-2026-10-18-DRAFT",
+    "cardId": "COC-27-011",
+    "source": "Tracked runtime catalog at 7b7e2e8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-27-011",
+      "deckId": "27",
+      "name": "드레고닉 슈페리얼 파이터",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "슈페리얼",
+      "atk": "350",
+      "hp": "200",
+      "conditions": [
+        "용 속성 몬스터+슈페리얼 파이터."
+      ],
+      "effects": [
+        "이 카드는 한 턴에 1회 상대 필드의 카드를 파괴할 수 있다. 이효과는 내 필드에 다른카드가 있으면 발동하지 않는다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-27-011",
+      "deckId": "27",
+      "name": "드레고닉 슈페리얼 파이터",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "슈페리얼",
+      "atk": "350",
+      "hp": "200",
+      "conditions": [
+        "용 속성 몬스터+슈페리얼 파이터."
+      ],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드 기준 한 턴에 1회, 자기 필드에 다른 카드가 없으면 상대 필드 몬스터 1장을 지정하여 파괴한다. 효과 해결 시에도 자기 필드에 이 카드만 있어야 한다."
+      ],
+      "notes": [
+        "개발자 명확화: 필드는 몬스터 3칸을 뜻하며 별도 일체화는 단독 필드 조건을 방해하지 않는다. 직접 파괴 보호·스핑크스 대응을 적용한다. 대응 중 조건이 사라지거나 소스/대상이 이탈·재진입하면 불발하며 사용 횟수는 돌려주지 않는다."
+      ]
+    },
+    "rationale": "슈페리얼의 덱 조작·소재별 퓨전 역할·조건부 제거와 덱 자원 피해를 유지하고 선택/대응/비공개 경계를 명확히 한다."
+  },
+  {
+    "patchId": "TEN-CARD-2026-10-18-DRAFT",
+    "cardId": "COC-27-012",
+    "source": "Tracked runtime catalog at 7b7e2e8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-27-012",
+      "deckId": "27",
+      "name": "오라클 슈페리얼 파이터",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "슈페리얼",
+      "atk": "300",
+      "hp": "200",
+      "conditions": [
+        "수정 예언자+슈페리얼 파이터."
+      ],
+      "effects": [
+        "이 카드가 소환되었을 때 양측 플레이어는덱에서 원하는카드를 맨위로 올린다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-27-012",
+      "deckId": "27",
+      "name": "오라클 슈페리얼 파이터",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "슈페리얼",
+      "atk": "300",
+      "hp": "200",
+      "conditions": [
+        "수정 예언자+슈페리얼 파이터."
+      ],
+      "effects": [
+        "이 카드가 소환될 때마다 몬스터 효과 대응을 거친 뒤, 양쪽 플레이어는 각자 자기 덱에서 원하는 카드 1장을 비공개로 선택하여 자기 덱 맨 위에 놓는다. 이 카드의 조종자부터 선택하며 빈 덱은 건너뛴다."
+      ],
+      "notes": [
+        "개발자 명확화: 턴 1회 제한을 추가하지 않는다. 선택 결과·카드 이름·덱 순서는 상대에게 공개하지 않는다. 덱 위 이동은 드로우·새 영역 진입이 아니고 셔플하지 않는다. 소스 이탈·재진입·조종권 변경·효과 무효로 남은 선택을 종료하더라도 이미 완료한 플레이어의 덱 위 이동은 되돌리지 않는다."
+      ]
+    },
+    "rationale": "슈페리얼의 덱 조작·소재별 퓨전 역할·조건부 제거와 덱 자원 피해를 유지하고 선택/대응/비공개 경계를 명확히 한다."
+  },
+  {
+    "patchId": "TEN-CARD-2026-10-18-DRAFT",
+    "cardId": "COC-27-014",
+    "source": "Tracked runtime catalog at 7b7e2e8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-27-014",
+      "deckId": "27",
+      "name": "파워아머드 슈페리얼 파이터",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "슈페리얼",
+      "atk": "350",
+      "hp": "350",
+      "conditions": [
+        "분쇄차 티라노+슈페리얼 파이터."
+      ],
+      "effects": [
+        "한 턴에 1회 덱에 맨위에서 임의의 수 만큼 카드를 버린다. (최대 3장) 버린만큼 대상에게 50피해를 준다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-27-014",
+      "deckId": "27",
+      "name": "파워아머드 슈페리얼 파이터",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "슈페리얼",
+      "atk": "350",
+      "hp": "350",
+      "conditions": [
+        "분쇄차 티라노+슈페리얼 파이터."
+      ],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드 기준 한 턴에 1회, 자기 덱 위 1~3장을 묘지로 보내는 비용을 지불하고 플레이어 또는 필드 몬스터 1장을 지정한다. 지불한 매수 × 50만큼 대상에게 피해를 준다."
+      ],
+      "notes": [
+        "개발자 명확화: 선언 시 덱에 실제 있는 매수까지만 선택하며 0장 사용은 하지 않는다. 비용은 대응 전에 지불하고 피해가 무효/불발이어도 반환하지 않는다. 덱 위 묘지 이력에 기록하며 비용 지불에는 리로드하지 않는다. 피해에는 별도 다이스를 굴리지 않고 기존 피해 보호·밀짚인형 피해 공유를 적용한다."
+      ]
+    },
+    "rationale": "슈페리얼의 덱 조작·소재별 퓨전 역할·조건부 제거와 덱 자원 피해를 유지하고 선택/대응/비공개 경계를 명확히 한다."
   }
 ]

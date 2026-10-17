@@ -1,4 +1,6 @@
 import {gainUnitStats,gainPlayerStats} from './stat-gains.mjs';
+import {beginOracle,settleProphet} from './deck-control.mjs';
+import {recentMillCount} from './history-spells.mjs';
 import {createDragonTreasures,settleDragonTrigger} from './dragon-gold.mjs';
 import {applySharedUnitEffect,destroySharedUnits,moveSharedUnits} from './shared-unit-effects.mjs';
 import {queueCardRevival} from './death-revival.mjs';
@@ -10,6 +12,8 @@ import {swordActualAttack} from './life-eating-sword.mjs';
 // These handlers resolve only after the summon and its separate monster-effect
 // response window. Printed summon costs belong to activation-rules instead.
 export const SUMMON_TRIGGER_RULES=Object.freeze({
+ 'COC-07-009':{action:'mill-history-damage'},
+ 'COC-27-012':{action:'oracle-top',repeatPerEvent:true},
  'COC-11-007':{action:'create-dragon-treasures'},
  'COC-10-007':{action:'twins-copy'},
  'COC-17-001':{action:'pharaoh-buff',sourceZone:'integration',event:'integration-enter'},
@@ -42,6 +46,11 @@ export function resolveSummonTrigger(r,e,H){
  const rule=SUMMON_TRIGGER_RULES[e.payload.cardId];if(!rule?.action)return false;
  const who=e.owner,p=r.players[who],foe=r.players[1-who],u=r.units[e.sourceId];
  switch(rule.action){
+ case 'oracle-top':beginOracle(r,e,H);break;
+ case 'mill-history-damage':{
+  const count=recentMillCount(r),rolls=Array.from({length:count},()=>H.roll(50)),damage=rolls.reduce((n,x)=>n+x,0);
+  damagePlayer(r,1-who,damage);H.log(r,'dice',`포식자와 계약한 마도사: 직전/현재 턴 덱 위 묘지 ${count}장, ${count}d50 합계 ${damage} 피해`);break;
+ }
  case 'create-dragon-treasures':createDragonTreasures(r,who,u.id,H);break;
  case 'twins-copy':{
   if(u.twinsOffspring||!p.field.includes(null))break;
@@ -114,6 +123,7 @@ export function resolveSummonTrigger(r,e,H){
 }
 
 export function settleSummonTrigger(r,e,H){
+ settleProphet(r,e,H);
  settleDragonTrigger(r,e,H);
  // Tyranno's printed HP is unspecified because this trigger supplies it.
  // A negated/empty-deck effect must not leave an immortal null-HP monster.

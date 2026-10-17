@@ -71,8 +71,9 @@ register('COC-05-010',c=>require_(!c.hasField('카툰 랜드'),'카툰 랜드가
 register('COC-06-001',c=>require_((c.player.metalElementUsedGame||0)>=5,'금속 또는 원소 카드 5장 사용 기록이 필요합니다.'));
 register('COC-06-005',c=>require_((c.player.elementSpellPlaysThisTurn||0)>=2,'이번 턴에 원소 주문을 2장 이상 사용해야 합니다.'));
 register('COC-06-007',c=>require_((c.player.roundPlays||0)>=5,'이 카드를 제외하고 이번 턴에 카드 5장을 먼저 사용해야 합니다.'));
-register('COC-07-002',c=>{
- require_(c.room.units[c.unitId].activationTurn!==c.room.turnNumber,'이 렌 카드는 이번 턴에 이미 사용했습니다.');
+register('COC-07-005 COC-12-005',ok);
+register('COC-07-002 COC-07-009',c=>{
+ require_(c.room.units[c.unitId].activationTurn!==c.room.turnNumber,'이 실제 카드는 이번 턴에 이미 일반 사용했습니다.');
  return {costs:[{markActivation:c.unitId},{draw:1,player:1-c.who}]};
 });
 register('COC-08-001',c=>require_(c.deckCount('요괴')>=2,'덱에 요괴 속성 카드가 2장 이상 있어야 합니다.'));

@@ -6,9 +6,18 @@
 import {weaponAttackBonus} from './weapon-equipment.mjs';
 import {continuousAttackBonus} from './protection-auras.mjs';
 import {blackMetalAttackModifier} from './black-metal-state.mjs';
+import {copperTarget} from './linked-card-stats.mjs';
+import {swordActualAttack} from './life-eating-sword.mjs';
 export const BLACK_METAL_MAGICIAN_ID='COC-22-015';
 
 export function actualAttack(unit,{room,getZone}={}) {
+ const linked=copperTarget(room,unit);
+ if(linked){
+  // The target is restricted to a field monster, so this cannot recurse into
+  // another integrated player's override. The bearer's Sword is layered later.
+  const zone=getZone||((r,id)=>{const player=r.players.findIndex(p=>p.field.includes(id)||p.integration===id);return player<0?null:{player,zone:r.players[player].integration===id?'integration':'field'};});
+  return Math.floor(swordActualAttack(room,linked,{getZone:zone})/2);
+ }
  let aura=Number(unit?.fieldAura?.amount||0);
  if(aura&&room){
   const source=room.units[unit.fieldAura.sourceId],z=getZone?.(room,unit.id);
