@@ -23,7 +23,7 @@ export function queueFieldAbility(r,who,body,H){
   }else{
    const effect=declareEffect(r,{effectId:'field-ability-resolution',owner:who,sourceId:plan.sourceId,sourceZone:plan.sourceZone,payload:plan});
    payFieldEffect(r,who,plan,H);
-   r.pendingAbility={who,sourceId:plan.sourceId,cardId:plan.cardId,sequence:effect.sequence,stage:'response'};
+   r.pendingAbility={who,sourceId:plan.sourceId,cardId:plan.cardId,sequence:effect.sequence,stage:'response',effectNumber:plan.effectNumber||FIELD_EFFECT_RULES[plan.cardId].effectNumber||1};
   }
   H.log(r,'effect',`${H.name(r,plan.sourceId)}: 필드 효과 선언 및 대응 대기`);
   if(plan.graveActivation)H.graveActivation?.(r,{eventKey:`field-grave-${r.pendingAbility.sequence}`,cardId:plan.cardId});

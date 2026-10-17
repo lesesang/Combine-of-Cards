@@ -5,6 +5,7 @@
  */
 import {weaponAttackBonus} from './weapon-equipment.mjs';
 import {continuousAttackBonus} from './protection-auras.mjs';
+import {blackMetalAttackModifier} from './black-metal-state.mjs';
 export const BLACK_METAL_MAGICIAN_ID='COC-22-015';
 
 export function actualAttack(unit,{room,getZone}={}) {
@@ -16,7 +17,7 @@ export function actualAttack(unit,{room,getZone}={}) {
  const equipment=room?weaponAttackBonus(room,unit):Number(unit?.weaponAttackBonus||0);
  const tempering=(unit?.temperingBonuses||[]).filter(b=>!room||b.turn===room.turnNumber).reduce((n,b)=>n+b.amount,0);
  const continuous=room?continuousAttackBonus(room,unit):Number(unit?.continuousAttackBonus||0);
- const raw=tempering+Number(unit?.atk)+(unit?.effectsNegated?0:Number(unit?.historyAttackBonus||0)+Number(unit?.clayAttackBonus||0)+equipment)+aura+continuous;
+ const raw=blackMetalAttackModifier(room,unit)+tempering+Number(unit?.atk)+(unit?.effectsNegated?0:Number(unit?.historyAttackBonus||0)+Number(unit?.clayAttackBonus||0)+equipment)+aura+continuous;
  return Number.isFinite(raw)?Math.max(0,Math.floor(raw)):0;
 }
 

@@ -1,3 +1,5 @@
+import {BLACK_METAL_ACTIVE_IDS} from './black-metal-state.mjs';
+import {prepareBlackMetalEffect,payBlackMetalEffect,resolveBlackMetalEffect} from './black-metal-effects.mjs';
 import {gainUnitStats,gainPlayerStats} from './stat-gains.mjs';
 import {applySharedUnitEffect,destroySharedUnits,moveSharedUnits,captureSharedUnits} from './shared-unit-effects.mjs';
 import {actionLocked,nobleTarget,grantNoble,lureTarget,consumeLure} from './demon-effects.mjs';
@@ -15,6 +17,7 @@ import {batchSummonCount,beginSummonBatch} from './effect-summon-batches.mjs';
 
 // Audited activated effects only; unrelated summon/death triggers remain partial.
 export const FIELD_EFFECT_RULES=Object.freeze({
+ ...Object.fromEntries(BLACK_METAL_ACTIVE_IDS.map(id=>[id,{zone:'field',sourceType:'monster',multipleEffects:true}])),
  'COC-05-009':{zone:'integration',sourceType:'integration',maxUsesPerTurn:2},
  'COC-01-003':{zone:'integration',sourceType:'integration',oncePerTurn:true},
  'COC-21-012':{zone:'field',sourceType:'monster',oncePerTurn:true},
@@ -59,6 +62,7 @@ export function prepareFieldEffect(r,who,body,H,checkingLure=false){
   if(forced){try{return prepareFieldEffect(r,who,{...body,target:forced},H,true);}catch(error){if(error.status!==409)throw error;}}
  }
  const plan={cardId:u.cardId,sourceId,sourceZone:z.zone,sourceRevision:revision(u,z.zone)};
+ if(rule.multipleEffects)return prepareBlackMetalEffect(r,who,body,plan,H);
  if(u.cardId==='COC-05-009'){
   const targetId=body.target?.id,tz=targetId&&H.zone(r,targetId),target=r.units[targetId];
   if(tz?.zone!=='field'||!Number.isFinite(target.hp))invalid(H,'흡수할 필드 몬스터 한 장을 선택하세요.');
@@ -129,7 +133,8 @@ export function prepareFieldEffect(r,who,body,H,checkingLure=false){
 }
 export function payFieldEffect(r,who,plan,H){
  const p=r.players[who],u=r.units[plan.sourceId];
- if(plan.targetId||plan.nobleTarget)consumeLure(r,plan.sourceId);
+ if(plan.targetId||plan.nobleTarget||plan.healPlayer!==undefined)consumeLure(r,plan.sourceId);
+ if(FIELD_EFFECT_RULES[plan.cardId].multipleEffects)return payBlackMetalEffect(r,who,plan,H);
  if(plan.cardId==='COC-21-003')p.hp-=plan.altarHpCost;
  if(plan.cardId==='COC-26-001')p.hp-=100;
  if(isElemental(plan.cardId)){
@@ -161,6 +166,7 @@ export function resolveFieldEffect(r,who,plan,H){
  if(!u||u.cardId!==plan.cardId||u.effectsNegated||z?.player!==who||z?.zone!==plan.sourceZone||revision(u,z.zone)!==plan.sourceRevision)return fizzle('소스 이탈/재진입·조종자/상태 변경');
  if(plan.targetId){const tz=H.zone(r,plan.targetId);if(tz?.zone!=='field'||tz.player!==plan.targetController||(r.units[plan.targetId].fieldRevision||0)!==plan.targetRevision)return fizzle('선언 대상 소실/조종권 변경');}
  const p=r.players[who],c=plan.cardId,t=plan.targetId;
+ if(FIELD_EFFECT_RULES[c].multipleEffects)return resolveBlackMetalEffect(r,who,plan,H);
  if(captureIds.has(c)&&!p.field.includes(null))return fizzle('필드 빈 자리 소실');
  switch(c){
  case 'COC-05-009':{

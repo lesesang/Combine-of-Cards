@@ -15,6 +15,8 @@ import {queueDeathRevival} from './death-revival.mjs';
 // Draft automation: the user requested implementation batches before testing.
 // Automatic monster/integration triggers, not selectable MAIN abilities.
 export const TRIGGER_RULES=Object.freeze({
+ 'COC-22-011':{effectNumber:2,event:'end-phase'},
+ 'COC-22-014':{effectNumber:2,event:'attack-completed',repeatPerEvent:true},
  'COC-05-001':{effectNumber:1,event:'enemy-monster-destroyed',repeatPerEvent:true},
  'COC-05-008':{effectNumber:1,event:'cartoon-land-destroyed',sourceZone:'grave',sourceType:'spell',repeatPerEvent:true},
  'COC-21-008':{effectNumber:1,event:'summoned',target:'straw-link'},
@@ -324,6 +326,13 @@ export function resolveMonsterTrigger(r,e,H){
  }
  const sourceZone=TRIGGER_RULES[p.cardId].sourceZone||'field';
  if(!u||u.cardId!==p.cardId||u.effectsNegated||z?.zone!==sourceZone||z.player!==e.owner||((sourceZone==='integration'?u.integrationRevision:sourceZone==='field'?u.fieldRevision:u.zoneRevision)||0)!==p.sourceRevision){H.log(r,'effect','유발 소스 이탈/재진입·조종권/무효 상태로 불발');return;}
+ if(p.cardId==='COC-22-011'){
+  damagePlayer(r,1-e.owner,p.amount);H.log(r,'effect',`블랙 메탈 키메라: 이번 턴 공격한 서로 다른 몬스터 수 × 100 = ${p.amount} 피해`);H.outcome(r);return;
+ }
+ if(p.cardId==='COC-22-014'){
+  const field=r.players[p.counterPlayer];field.blackMetalCounters=(field.blackMetalCounters||0)+1;
+  H.refreshStats?.(r);H.log(r,'effect',`${field.label} 필드: 블랙 메탈 카운터 +1 (공격받은 몬스터 이탈 후에도 유지)`);return;
+ }
  if(p.cardId==='COC-11-003'||p.cardId==='COC-11-006'){
   if(p.eventTurn!==r.turnNumber||r.turn!==e.owner||r.phase!=='ATTACK')return;
   const enemy=1-e.owner;

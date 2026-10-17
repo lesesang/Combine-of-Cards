@@ -6,6 +6,8 @@ import {WEAPON_SPELLS,weaponCandidates,chooseWeapons} from './weapon-equipment.m
 // Selection opens only after the effect survives the opponent response.
 export const deckSearchSpellIds=Object.freeze(['COC-07-004','COC-19-004','COC-20-003','COC-24-008','COC-26-008']);
 const SEARCH_NAMES=Object.freeze({
+ 'COC-22-001':['블랙메탈체인지'],
+ 'COC-22-003':['퓨전업'],
  'COC-20-009':['버닝데몬즈드래곤'],
  'COC-12-003':['F=HERO'],
  'COC-22-015':['퓨전업','블랙메탈퓨전업'],
@@ -14,12 +16,13 @@ const SEARCH_NAMES=Object.freeze({
  'COC-26-002':['베스트지니어스'],
  'COC-26-005':['퓨전업']
 });
-const sourceZone=cardId=>cardId==='COC-06-001'?'grave':'deck';
+const sourceZone=cardId=>['COC-06-001','COC-22-004'].includes(cardId)?'grave':'deck';
 export function eligibleSearchIds(room,who,cardId,cards){
  if(WEAPON_SPELLS.includes(cardId))return weaponCandidates(room,who,cardId,cards);
- if(!deckSearchSpellIds.includes(cardId)&&!SEARCH_NAMES[cardId]&&cardId!=='COC-06-001')return [];
+ if(!deckSearchSpellIds.includes(cardId)&&!SEARCH_NAMES[cardId]&&!['COC-06-001','COC-22-004'].includes(cardId))return [];
  return room.players[who][sourceZone(cardId)].filter(id=>{
   const c=cards.get(room.units[id]?.cardId);if(!c)return false;
+  if(cardId==='COC-22-004')return c.name.startsWith('블랙 메탈');
   if(cardId==='COC-06-001')return c.type==='주문'&&room.units[id].owner===who&&room.players[who].usedCardsGame?.[id]?.cardId===c.id;
   const names=SEARCH_NAMES[cardId];
   if(names){const name=c.name.replace(/\s/g,'');return cardId==='COC-12-003'?name.includes(names[0]):names.includes(name);}

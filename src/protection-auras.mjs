@@ -1,4 +1,5 @@
 import {fafnirGrowthBonus,refreshFafnirGrowth} from './dragon-growth.mjs';
+import {blackMetalDestructionProtected,refreshBlackMetalState} from './black-metal-state.mjs';
 import {demonAura,refreshDemonAttributes} from './demon-effects.mjs';
 import {refreshStatAttributes,scaledStatGain,gainPlayerStats} from './stat-gains.mjs';
 // Independent spell grants are serialized separately from printed abilities.
@@ -8,7 +9,7 @@ export function damageProtected(r,target){
  return (bearer?.protectionGrants||[]).some(g=>g.kind==='peace'||g.kind==='spirit'&&r.turnNumber<=g.endTurn);
 }
 export function destructionProtected(r,id){
- return (r.units[id]?.protectionGrants||[]).some(g=>g.kind==='peace');
+ return blackMetalDestructionProtected(r,id)||(r.units[id]?.protectionGrants||[]).some(g=>g.kind==='peace');
 }
 export function grantSpirit(r,who,sourceId){
  const p=r.players[who];p.protectionGrants??=[];
@@ -56,6 +57,7 @@ export function continuousAttackBonus(r,unit){
  return bonus;
 }
 export function refreshContinuousAuras(r,cards){
+ refreshBlackMetalState(r);
  refreshStatAttributes(r,cards);
  refreshDemonAttributes(r,cards);
  refreshFafnirGrowth(r);
