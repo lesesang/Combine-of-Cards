@@ -3370,5 +3370,3714 @@
       ]
     },
     "rationale": "3소재 피니셔의 전 영역 압박은 보존하면서 패·덱·묘지 전체를 한꺼번에 지우는 회복 불가능한 봉쇄를 최대6장으로 제한한다."
+  },
+  {
+    "patchId": "EQUIPMENT-2026-10-16-DRAFT",
+    "cardId": "COC-09-001",
+    "source": "Tracked runtime catalog at a42a5ca; not missing canonical v1.3 source",
+    "authority": "2026-10-16 user delegated interpretation using balance and deck intent; untested draft",
+    "before": {
+      "id": "COC-09-001",
+      "deckId": "09",
+      "name": "생명의 대장장이",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "무기",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "내 덱에 무기 속성 카드가 3장 이상 있어야 한다."
+      ],
+      "effects": [
+        "이 카드는 게임이 시작될 때 패로 들어옵니다. 내가 낸 몬스터가 처치되면 나에게 장착되어, 그 공격력과 효과를 부여한다. 장착된 몬스터는 3턴 후에 파괴된다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-09-001",
+      "deckId": "09",
+      "name": "생명의 대장장이",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "무기",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "내 덱에 무기 속성 카드가 3장 이상 있어야 한다."
+      ],
+      "effects": [
+        "이 카드는 게임이 시작될 때 패로 들어옵니다. 자신이 소환했고 현재 자신이 조종하는 몬스터가 파괴되어 자신의 묘지에 남으면, 그 카드를 자신에게 장착하여 파괴 직전 공격력과 그 카드의 효과를 얻는다. 장착한 턴을 제외하고 양쪽 플레이어의 턴을 세어 세 번째 턴 종료에 장착 카드를 파괴한다. 장착은 자의로 해제할 수 없다."
+      ],
+      "notes": []
+    },
+    "rationale": "몬스터 전투→일시 장착→묘지 재사용이라는 무기 덱 흐름을 보존한다. 용광로의 주문/일체화까지 장착하는 해석을 몬스터로 좁히고, 직접 장착·부활 장착에 같은 3턴 수명을 적용해 영구 피해1 방패와 영구 강화 누적을 제한한다. 새 사용자 개별 확정이나 검증 완료가 아니다."
+  },
+  {
+    "patchId": "EQUIPMENT-2026-10-16-DRAFT",
+    "cardId": "COC-09-005",
+    "source": "Tracked runtime catalog at a42a5ca; not missing canonical v1.3 source",
+    "authority": "2026-10-16 user delegated interpretation using balance and deck intent; untested draft",
+    "before": {
+      "id": "COC-09-005",
+      "deckId": "09",
+      "name": "마음의 용광로",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "무기",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "일체화 상태여야 합니다."
+      ],
+      "effects": [
+        "내 덱에서 무기 속성 카드를 2장까지 뽑습니다. 그 무기들을 장착합니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-09-005",
+      "deckId": "09",
+      "name": "마음의 용광로",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "무기",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "일체화 상태여야 합니다."
+      ],
+      "effects": [
+        "자신의 덱에서 무기 속성 몬스터를 최대 2장 선택하여 자신에게 장착하고, 각 카드의 기본 공격력과 효과를 얻는다. 장착한 턴을 제외하고 양쪽 플레이어의 턴을 세어 세 번째 턴 종료에 그 장착 카드를 파괴한다. 장착은 자의로 해제할 수 없다."
+      ],
+      "notes": []
+    },
+    "rationale": "몬스터 전투→일시 장착→묘지 재사용이라는 무기 덱 흐름을 보존한다. 용광로의 주문/일체화까지 장착하는 해석을 몬스터로 좁히고, 직접 장착·부활 장착에 같은 3턴 수명을 적용해 영구 피해1 방패와 영구 강화 누적을 제한한다. 새 사용자 개별 확정이나 검증 완료가 아니다."
+  },
+  {
+    "patchId": "EQUIPMENT-2026-10-16-DRAFT",
+    "cardId": "COC-09-006",
+    "source": "Tracked runtime catalog at a42a5ca; not missing canonical v1.3 source",
+    "authority": "2026-10-16 user delegated interpretation using balance and deck intent; untested draft",
+    "before": {
+      "id": "COC-09-006",
+      "deckId": "09",
+      "name": "육신 주조",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "무기",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "일체화 상태여야 합니다."
+      ],
+      "effects": [
+        "현재 자신의 묘지에 있는 무기 속성 몬스터를 최대 2장 부활시킨 뒤 자신에게 장착한다."
+      ],
+      "notes": [
+        "과거에 파괴된 적이 있어도 현재 묘지에 없는 카드는 선택할 수 없다."
+      ]
+    },
+    "after": {
+      "id": "COC-09-006",
+      "deckId": "09",
+      "name": "육신 주조",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "무기",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "일체화 상태여야 합니다."
+      ],
+      "effects": [
+        "현재 자신의 묘지에 있는 무기 속성 몬스터를 최대 2장 선택한다. 자신의 빈 필드에 한 장씩 부활시킨 뒤 자신에게 장착하여 각 카드의 기본 공격력과 효과를 얻는다. 각 부활은 소환 무효화에 대응할 수 있고, 무효된 카드는 원래 묘지에 남는다. 장착한 턴을 제외하고 양쪽 플레이어의 턴을 세어 세 번째 턴 종료에 그 장착 카드를 파괴한다. 장착은 자의로 해제할 수 없다."
+      ],
+      "notes": [
+        "과거에 파괴된 적이 있어도 현재 묘지에 없는 카드는 선택할 수 없다."
+      ]
+    },
+    "rationale": "몬스터 전투→일시 장착→묘지 재사용이라는 무기 덱 흐름을 보존한다. 용광로의 주문/일체화까지 장착하는 해석을 몬스터로 좁히고, 직접 장착·부활 장착에 같은 3턴 수명을 적용해 영구 피해1 방패와 영구 강화 누적을 제한한다. 새 사용자 개별 확정이나 검증 완료가 아니다."
+  },
+  {
+    "patchId": "TURN-CLAY-2026-10-16-DRAFT",
+    "cardId": "COC-10-007",
+    "source": "Tracked runtime catalog at f50f84c; not the absent canonical v1.3 source",
+    "before": {
+      "id": "COC-10-007",
+      "deckId": "10",
+      "name": "들러붙은 쌍둥이 골과 몰",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "언데드",
+      "atk": "100",
+      "hp": "150",
+      "conditions": [],
+      "effects": [
+        "이 몬스터가 소환될 때 자신을 하나 더 소환한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-10-007",
+      "deckId": "10",
+      "name": "들러붙은 쌍둥이 골과 몰",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "언데드",
+      "atk": "100",
+      "hp": "150",
+      "conditions": [],
+      "effects": [
+        "이 몬스터가 소환될 때 빈 필드가 있으면, 기본 상태의 복사본 1장을 자신의 패에 만들고 그 복사본을 소환한다. 이 효과로 만든 복사본은 게임 동안 이 증식 효과를 발동하지 않는다. 복사본의 소환이 무효화되면 패에 남는다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and deck-preserving balance refinement; not a newly user-confirmed official ruling",
+    "rationale": "쌍둥이 한 쌍이라는 의도를 유지하고 복사본의 재귀 증식으로 필드를 자동으로 가득 채우는 해석을 방지. 일반 횟수 제한은 실물별로 유지."
+  },
+  {
+    "patchId": "TURN-CLAY-2026-10-16-DRAFT",
+    "cardId": "COC-11-001",
+    "source": "Tracked runtime catalog at f50f84c; not the absent canonical v1.3 source",
+    "before": {
+      "id": "COC-11-001",
+      "deckId": "11",
+      "name": "낙동강 이무기",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "70",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신의 드로우 페이즈가 시작될 때 자신의 필드에 용 속성 몬스터가 없으면 드로우와 별개로 손패에 들어온다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-11-001",
+      "deckId": "11",
+      "name": "낙동강 이무기",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "70",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신의 드로우 페이즈가 시작될 때 이 카드가 자신의 덱에 있고 자신의 필드에 용/드래곤 속성 몬스터가 없으면 발동한다. 해결 시에도 같은 조건을 만족하면 이 카드를 공개하고, 일반 드로우와 별개로 자신의 패에 넣는다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and deck-preserving balance refinement; not a newly user-confirmed official ruling",
+    "rationale": "용 덱의 초반 일체화 확보를 보존. 기존 구현의 덱 출발점을 문구에 명시하고 재진입 세대 검사와 용/드래곤 부재 재검사. 상대에게 나머지 덱은 공개하지 않음."
+  },
+  {
+    "patchId": "TURN-CLAY-2026-10-16-DRAFT",
+    "cardId": "COC-17-001",
+    "source": "Tracked runtime catalog at f50f84c; not the absent canonical v1.3 source",
+    "before": {
+      "id": "COC-17-001",
+      "deckId": "17",
+      "name": "호루스의 현신–파라오",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "파라오",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "태양신–호루스가 필드에 있어야 사용 가능하다, 사용후 태양신–호루스가 필드에서 사라져도 무효화 되지는 않는다."
+      ],
+      "effects": [
+        "필드에 존재하는 몬스터에 체력과 공격력을 50씩 높인다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-17-001",
+      "deckId": "17",
+      "name": "호루스의 현신–파라오",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "파라오",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "태양신–호루스가 필드에 있어야 사용 가능하다, 사용후 태양신–호루스가 필드에서 사라져도 무효화 되지는 않는다."
+      ],
+      "effects": [
+        "일체화할 때 양쪽 필드에 현재 존재하는 모든 몬스터의 공격력과 현재 체력을 각각 50 올린다. 이 강화는 각 몬스터가 필드를 떠날 때까지 유지된다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and deck-preserving balance refinement; not a newly user-confirmed official ruling",
+    "rationale": "원문 필드에 존재하는 몬스터 범위에 맞춰 기존 아군 한정 오류 수정. 일체화 진입의 일회 강화이며 이후 소환 몬스터에는 소급하지 않음."
+  },
+  {
+    "patchId": "TURN-CLAY-2026-10-16-DRAFT",
+    "cardId": "COC-19-001",
+    "source": "Tracked runtime catalog at f50f84c; not the absent canonical v1.3 source",
+    "before": {
+      "id": "COC-19-001",
+      "deckId": "19",
+      "name": "토우 병사",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "토우병사",
+      "atk": "50",
+      "hp": "70",
+      "conditions": [],
+      "effects": [
+        "이번 게임에서 소환된 다른 토우 병사 하나당 50/50을 얻는다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-19-001",
+      "deckId": "19",
+      "name": "토우 병사",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "토우병사",
+      "atk": "50",
+      "hp": "70",
+      "conditions": [],
+      "effects": [
+        "이번 게임에서 양쪽 플레이어가 실제로 소환한 다른 토우 병사 카드 1장당 이 카드의 공격력과 현재 체력이 각각 50 증가한다. 같은 실물 카드를 다시 소환해도 이력에는 한 번만 센다. 새로운 복사본은 별개의 카드로 센다. 이 지속 효과가 무효화되면 증가분을 제거하며, 다시 적용할 때 이미 받은 피해는 유지한다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and deck-preserving balance refinement; not a newly user-confirmed official ruling",
+    "rationale": "토우의 복제 성장 의도는 유지하되 동일 UID 반복 소환으로 무한 성장을 만드는 해석을 제외. 양측의 새 병사는 각각 누적하며 HP 재계산으로 피해가 사라지지 않음."
+  },
+  {
+    "patchId": "TURN-CLAY-2026-10-16-DRAFT",
+    "cardId": "COC-19-002",
+    "source": "Tracked runtime catalog at f50f84c; not the absent canonical v1.3 source",
+    "before": {
+      "id": "COC-19-002",
+      "deckId": "19",
+      "name": "형틀",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "토우병사",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "내 몬스터 하나를 복사해서 내 패로 가져오거나, 내 덱에 섞어 넣습니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-19-002",
+      "deckId": "19",
+      "name": "형틀",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "토우병사",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신이 소유하고 조종하는 필드의 기본 몬스터 1장을 선택한다. 자신의 덱에 속한 그 카드의 기본 상태 복사본 1장을 자신의 패에 넣거나 덱에 섞는다. 공격력·체력 변화, 부여 효과와 사용 이력은 복사하지 않는다. 생성 토큰·엑스트라 몬스터는 선택할 수 없다. 대상과 복사본의 이동 위치는 발동 시 정한다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and deck-preserving balance refinement; not a newly user-confirmed official ruling",
+    "rationale": "병사를 늘려 덱/패를 순환하는 의도 보존. 강화 및 카운터 복제, 탈취 카드의 다른 덱 혼합과 엑스트라 일반 소환 우회를 방지."
+  },
+  {
+    "patchId": "TURN-CLAY-2026-10-16-DRAFT",
+    "cardId": "COC-19-006",
+    "source": "Tracked runtime catalog at f50f84c; not the absent canonical v1.3 source",
+    "before": {
+      "id": "COC-19-006",
+      "deckId": "19",
+      "name": "잠든 황제 셔우롱",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "토우병사",
+      "atk": "150",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "필드의 모든 몬스터를 파괴한 뒤 원래 상태로 부활시킨다. 부활 직후 적용 중인 지속·누적 효과를 다시 계산해 능력치를 조정한다. 이 몬스터들은 이번 턴에 공격할 수 없다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-19-006",
+      "deckId": "19",
+      "name": "잠든 황제 셔우롱",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "토우병사",
+      "atk": "150",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "일체화할 때 필드의 모든 몬스터를 파괴한다. 이 효과로 실제 파괴되어 묘지에 남아 있는 몬스터를 파괴 전 조종자의 빈 필드에 기본 상태로 차례로 부활시킨다. 각 부활 소환은 별도로 무효화할 수 있으며, 무효화된 카드는 묘지에 남는다. 부활 직후 적용 중인 지속·누적 효과를 다시 계산한다. 이 효과로 파괴된 몬스터는 이번 턴에 공격할 수 없다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and deck-preserving balance refinement; not a newly user-confirmed official ruling",
+    "rationale": "기존 원래 상태 복구와 재계산/공격 금지 유지. 파괴 면역/토큰 소멸을 존중하고 실물 부활마다 R22 대응. 순서는 현재 필드 슬롯 순서(턴 플레이어 우선)."
+  },
+  {
+    "patchId": "TURN-CLAY-2026-10-16-DRAFT",
+    "cardId": "COC-19-007",
+    "source": "Tracked runtime catalog at f50f84c; not the absent canonical v1.3 source",
+    "before": {
+      "id": "COC-19-007",
+      "deckId": "19",
+      "name": "흙거북 노지귀",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "토우병사",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "내 필드가 지난 턴부터 비어 있어야 한다."
+      ],
+      "effects": [
+        "파괴된 몬스터 하나를 복사해 되살립니다. 3번 반복합니다."
+      ],
+      "notes": [
+        "원문 표기: 맹약. 일체화 교체가 아닌 부활 효과를 가진 주문."
+      ]
+    },
+    "after": {
+      "id": "COC-19-007",
+      "deckId": "19",
+      "name": "흙거북 노지귀",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "토우병사",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "지난 한 턴 전체부터 현재까지 자신의 필드에 몬스터가 없었어야 한다."
+      ],
+      "effects": [
+        "자신의 묘지에 있는, 필드에서 파괴된 자기 소유 기본 몬스터 1장을 선택한다. 자신의 덱에 속한 그 카드의 기본 상태 복사본을 묘지에 최대 3장 만들고, 빈 필드 수만큼 차례로 부활 소환한다. 원본은 묘지에 남긴다. 각 소환은 별도로 무효화할 수 있으며, 무효화된 복사본은 묘지에 남는다. 능력치 변화·부여 효과·사용 이력은 복사하지 않는다."
+      ],
+      "notes": [
+        "원문 표기: 맹약. 일체화 교체가 아닌 부활 효과를 가진 주문."
+      ]
+    },
+    "authority": "User-delegated developer interpretation and deck-preserving balance refinement; not a newly user-confirmed official ruling",
+    "rationale": "빈 필드를 견디고 병사를 복구하는 덱 의도 보존. 자신의 파괴된 기본 몬스터 복사, 세 번 복구, 기본값/개별 대응/원본 유지 명시. 생성한 복사본은 무효 시 원래 묘지 유지."
+  },
+  {
+    "patchId": "TURN-CLAY-2026-10-16-DRAFT",
+    "cardId": "COC-20-009",
+    "source": "Tracked runtime catalog at f50f84c; not the absent canonical v1.3 source",
+    "before": {
+      "id": "COC-20-009",
+      "deckId": "20",
+      "name": "버닝 데몬즈 와이번",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "악마",
+      "atk": "200",
+      "hp": "150",
+      "conditions": [
+        "자신이 100피해를 받습니다."
+      ],
+      "effects": [
+        "덱의 버닝 데몬즈 드래곤을 패로 가져온다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-20-009",
+      "deckId": "20",
+      "name": "버닝 데몬즈 와이번",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "악마",
+      "atk": "200",
+      "hp": "150",
+      "conditions": [
+        "일반 소환을 선언하기 전에 자신의 플레이어가 피해 100을 받는다. 이 피해로 패배하면 소환하지 않는다. 소환이 무효화되어도 받은 피해를 되돌리지 않는다."
+      ],
+      "effects": [
+        "이 몬스터가 소환되면 자신의 덱에서 버닝 데몬즈 드래곤 1장을 선택해 공개하고 패에 넣는다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and deck-preserving balance refinement; not a newly user-confirmed official ruling",
+    "rationale": "불명확한 자신 100피해를 플레이어의 일반 소환 선언 전 피해 비용으로 정비. 버닝 덱의 체력 구간 일체화 연계를 돕고 비용을 검색 무효화와 분리. 이전 코드의 소환 후 몬스터 피해100 제거."
+  },
+  {
+    "patchId": "ATTACK-UNDEAD-2026-10-16-DRAFT",
+    "cardId": "COC-09-007",
+    "source": "Tracked runtime catalog at 2f7b92b; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-09-007",
+      "deckId": "09",
+      "name": "영혼의 뜨임질",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "무기",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "일체화 상태여야 합니다."
+      ],
+      "effects": [
+        "이번 턴에 공격력을 100만큼 추가로 얻고, 모든 적을 공격합니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-09-007",
+      "deckId": "09",
+      "name": "영혼의 뜨임질",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "무기",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "일체화 상태여야 합니다."
+      ],
+      "effects": [
+        "발동 시 자신의 일체화를 지정한다. 해결 시 그 일체화의 공격력이 이번 턴 종료까지 100 증가한다. 이어서 해결 시점에 있던 상대 플레이어와 상대 필드 몬스터 각각에게 최대 1회씩 효과 공격한다. 공격 순서는 자신이 선택하며 매 공격마다 대응과 공격 다이스를 처리한다. 일반 공격 기회는 소모하지 않지만 공격 금지·동결·직접 공격 금지·강제 대상을 따른다. 남은 합법 대상이 없거나 공격한 일체화가 떠나면 종료한다. 새로 등장하거나 필드에 재진입한 적을 추가 대상으로 삼지 않는다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation; confirmed rules preserved, no new individual user ruling claimed",
+    "rationale": "전체 공격을 독립된 유한 공격 목록으로 명확화. 기존 어그로/금지와 공격별 대응을 유지하고 재진입/반복 공격 악용 방지. 무기 장착→뜨임질 강화라는 덱 마무리 흐름 보존."
+  },
+  {
+    "patchId": "ATTACK-UNDEAD-2026-10-16-DRAFT",
+    "cardId": "COC-10-008",
+    "source": "Tracked runtime catalog at 2f7b92b; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-10-008",
+      "deckId": "10",
+      "name": "망령의 등불",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "언데드",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신의 덱에서 몬스터 카드를 최대 2장 드로우한다. 덱에 몬스터가 1장뿐이라면 그 1장을 가져온 다음 리로드를 처리한다. 이 주문으로 덱의 카드를 모두 뽑았다면 이 효과로 가져온 몬스터들의 공격력과 체력을 각각 100 올린다."
+      ],
+      "notes": [
+        "몬스터 1장만 남은 경우 1장 획득 후 리로드하는 카드별 예외를 적용한다."
+      ]
+    },
+    "after": {
+      "id": "COC-10-008",
+      "deckId": "10",
+      "name": "망령의 등불",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "언데드",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신의 덱에서 위쪽에 있는 몬스터부터 최대 2장 드로우하여 공개한다. 다음 몬스터를 드로우하려는데 덱에 몬스터가 없으면 리로드 피해를 받고 자신의 묘지를 남아 있는 덱에 합쳐 섞은 뒤 다시 시도한다. 덱에 몬스터가 1장뿐이면 반드시 그 1장을 먼저 뽑고 다음 드로우에서 리로드한다. 리로드 후에도 몬스터가 없으면 드로우 실패로 종료한다. 이 효과의 드로우로 덱이 한 번이라도 0장이 되었다면 이 효과로 패에 가져온 몬스터의 공격력과 체력을 각각 100 올린다."
+      ],
+      "notes": [
+        "몬스터 1장만 남은 경우 1장 획득 후 리로드하는 카드별 예외를 적용한다."
+      ]
+    },
+    "authority": "User-delegated developer interpretation; confirmed rules preserved, no new individual user ruling claimed",
+    "rationale": "몬스터1장 먼저 드로우 후 리로드라는 확정 재정을 유지. 일반 검색 선택과 구별해 덱에서 먼저 만나는 몬스터를 뽑고, 비몬스터가 남은 경우와 리로드 후 추가 시도/실패/강화 시점을 명시."
+  },
+  {
+    "patchId": "ATTACK-UNDEAD-2026-10-16-DRAFT",
+    "cardId": "COC-10-010",
+    "source": "Tracked runtime catalog at 2f7b92b; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-10-010",
+      "deckId": "10",
+      "name": "강령의 맹약",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "언데드",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "여교주 프람덴베르카와 일체화한 상태에서 내 몬스터가 셋 이상 파괴됐을 것."
+      ],
+      "effects": [
+        "내 필드에 '뒤섞인 백작 빌헬름'을 소환한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-10-010",
+      "deckId": "10",
+      "name": "강령의 맹약",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "언데드",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "현재 여교주 프람덴베르카와 일체화한 동안 자신이 조종하는 몬스터가 3장 이상 파괴되었고 자신의 필드에 빈 칸이 있어야 한다."
+      ],
+      "effects": [
+        "뒤섞인 백작 빌헬름 1장을 기본 상태로 자신의 패에 생성하고 그 카드를 소환한다. 이 소환은 별도로 무효화할 수 있으며, 무효화되면 생성한 카드는 패에 남는다. 파괴된 몬스터 3장의 기록은 비용으로 소모하지 않는다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation; confirmed rules preserved, no new individual user ruling claimed",
+    "rationale": "현재 일체화 체류 중 파괴3회라는 조건을 명시하고 과거 다른 일체화의 사망을 재활용하지 않음. 원본 생성 카드만 사용, 각 소환 R22 대응, 조건과 비용을 구분."
+  },
+  {
+    "patchId": "ATTACK-UNDEAD-2026-10-16-DRAFT",
+    "cardId": "COC-11-002",
+    "source": "Tracked runtime catalog at 2f7b92b; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-11-002",
+      "deckId": "11",
+      "name": "1000년의 비원 여의보주",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "낙동강 이무기를 사용 중이어야 한다.",
+        "필드에 용/드래곤 속성 몬스터가 2개 이상 있어야 한다.",
+        "체력을 300 바친다."
+      ],
+      "effects": [
+        "자신의 일체화를 해풍을 다스리는 용왕으로 만든다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-11-002",
+      "deckId": "11",
+      "name": "1000년의 비원 여의보주",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "낙동강 이무기와 일체화 중이어야 한다.",
+        "양쪽 필드에 용/드래곤 속성 몬스터가 합계 2장 이상 있어야 한다.",
+        "발동 비용으로 자신의 플레이어 체력 300을 지불한다. 지불 후 생존해야 하며 효과가 무효화되어도 반환하지 않는다."
+      ],
+      "effects": [
+        "자신의 일체화를 해풍을 다스리는 용왕으로 만든다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation; confirmed rules preserved, no new individual user ruling claimed",
+    "rationale": "필드의 용/드래곤 범위를 양쪽 합계로 명확화하여 원문의 비한정 범위와 용 덱 연계를 유지.300은 피해가 아닌 지불 비용, 무효화 시 미반환. 진화 기본값/강화/원형 복원 확정 유지."
+  },
+  {
+    "patchId": "SPELL-FAMILIES-2026-10-16-DRAFT",
+    "cardId": "COC-01-002",
+    "source": "Tracked runtime catalog at d2f1a77; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-01-002",
+      "deckId": "01",
+      "name": "사이보그 퓨저너",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "G",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "필드의 그란레오를 릴리스하고 내 일체화를 그랜드카이저로 바꾼다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-01-002",
+      "deckId": "01",
+      "name": "사이보그 퓨저너",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "G",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "자신이 일체화하지 않은 상태에서 자신 필드의 G-머신 그란레오 1장을 릴리스하고 사용한다."
+      ],
+      "effects": [
+        "이 카드로 일체화한 뒤 그랜드 카이저로 바꾼다. 기본 공격력을 50으로 교체하고 기존 강화는 유지한다. 패·덱·묘지로 이동하면 사이보그 퓨저너로 복원한다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and balance patch; confirmed rulings preserved; not a new individual user confirmation",
+    "rationale": "그란레오를 사용하는 합체 덱의 초동을 비용·일체화 교체로 명확히 한다. 확정된 진화 기본값 교체/강화 유지/원형 복원을 적용한다."
+  },
+  {
+    "patchId": "SPELL-FAMILIES-2026-10-16-DRAFT",
+    "cardId": "COC-01-003",
+    "source": "Tracked runtime catalog at d2f1a77; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-01-003",
+      "deckId": "01",
+      "name": "그랜드 카이저",
+      "type": "일체화",
+      "zone": "created",
+      "attribute": "G",
+      "atk": "50",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "이 카드는 G-툴을 몬스터 취급하여 필드에 소환할 수 있다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-01-003",
+      "deckId": "01",
+      "name": "그랜드 카이저",
+      "type": "일체화",
+      "zone": "created",
+      "attribute": "G",
+      "atk": "50",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신의 메인 페이즈에 이 카드의 효과로 턴당 1회, 패의 G-툴 1장을 몬스터로 빈 필드에 소환할 수 있다. 일반 주문으로 사용할 때의 효과는 처리하지 않고 몬스터로 존재할 때의 효과를 적용한다. 소환이 무효화되면 그 G-툴은 패에 남는다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and balance patch; confirmed rulings preserved; not a new individual user confirmation",
+    "rationale": "G-툴을 일반 주문과 구별하여 패에서 효과 소환한다. 카드별 기본 사용 제한을 적용하고 슬롯과 대응을 명시한다."
+  },
+  {
+    "patchId": "SPELL-FAMILIES-2026-10-16-DRAFT",
+    "cardId": "COC-01-004",
+    "source": "Tracked runtime catalog at d2f1a77; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-01-004",
+      "deckId": "01",
+      "name": "G-툴 커팅드라이버",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "G",
+      "atk": "100",
+      "hp": "10",
+      "conditions": [
+        "몬스터 취급으로 필드에 소환된 동안 공격할 수 없습니다."
+      ],
+      "effects": [
+        "필드에 몬스터 하나에게 100피해를 준다. 만약 이 카드가 몬스터 취급으로 필드에 소환되었을시 다음의 효과를 가진다.",
+        "일체화 공격력을 100올린다 몬스터를 공격할 때 최소다이스 50을 붙힙니다."
+      ],
+      "notes": [
+        "공격력·체력 수치는 주문이 몬스터 취급되어 필드에 소환된 상태에 적용."
+      ]
+    },
+    "after": {
+      "id": "COC-01-004",
+      "deckId": "01",
+      "name": "G-툴 커팅드라이버",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "G",
+      "atk": "100",
+      "hp": "10",
+      "conditions": [
+        "몬스터 취급으로 필드에 소환된 동안 공격할 수 없습니다."
+      ],
+      "effects": [
+        "필드의 몬스터 하나에게 100 피해를 준다. 그랜드 카이저로 몬스터 취급하여 소환했다면 이 주문 피해는 처리하지 않고 다음 효과를 가진다.",
+        "이 카드가 몬스터로 자신의 필드에 있고 효과가 유효한 동안 자신의 일체화 공격력 +100. 그 일체화가 몬스터를 공격할 때 공격 다이스의 최소값은 50이며 상한이 작으면 해당 상한으로 조정한다."
+      ],
+      "notes": [
+        "공격력·체력 수치는 주문이 몬스터 취급되어 필드에 소환된 상태에 적용."
+      ]
+    },
+    "authority": "User-delegated developer interpretation and balance patch; confirmed rulings preserved; not a new individual user confirmation",
+    "rationale": "장비형 기체의 지원 의도를 유지하며 후발 일체화/소스 무효/이탈 시 지속 보너스 범위를 명확히 한다."
+  },
+  {
+    "patchId": "SPELL-FAMILIES-2026-10-16-DRAFT",
+    "cardId": "COC-01-005",
+    "source": "Tracked runtime catalog at d2f1a77; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-01-005",
+      "deckId": "01",
+      "name": "G-툴 디멘션 렌치",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "G",
+      "atk": "100",
+      "hp": "20",
+      "conditions": [
+        "몬스터 취급으로 필드에 소환된 동안 공격할 수 없습니다."
+      ],
+      "effects": [
+        "필드의 원하는 카드1장을 덱으로 되돌린다 그 카드의 주인이 1장 드로우한다. 이 카드가 몬스터 취급으로 필드의 소환되었을경우 다음의 효과와 스텟을 가집니다.",
+        "내 일체화에게 100의 공격력을 부여한다. 몬스터를 공격할 때 그 몬스터를 덱으로 되돌린다."
+      ],
+      "notes": [
+        "공격력·체력 수치는 주문이 몬스터 취급되어 필드에 소환된 상태에 적용."
+      ]
+    },
+    "after": {
+      "id": "COC-01-005",
+      "deckId": "01",
+      "name": "G-툴 디멘션 렌치",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "G",
+      "atk": "100",
+      "hp": "20",
+      "conditions": [
+        "몬스터 취급으로 필드에 소환된 동안 공격할 수 없습니다."
+      ],
+      "effects": [
+        "필드의 원하는 몬스터 1장을 원래 소유자의 덱으로 되돌리고 그 소유자가 1장 드로우한다. 그랜드 카이저로 몬스터 취급하여 소환했다면 이 주문 효과는 처리하지 않고 다음 효과를 가진다.",
+        "이 카드가 몬스터로 자신의 필드에 있고 효과가 유효한 동안 자신의 일체화 공격력 +100. 자신의 일체화가 몬스터를 공격 선언하면 이 실제 카드마다 턴당 1회 그 공격 대상을 원래 소유자의 덱으로 되돌리는 효과를 발동한다. 되돌리기에 성공하면 일반 공격의 대상 재선택 규칙을 따른다."
+      ],
+      "notes": [
+        "공격력·체력 수치는 주문이 몬스터 취급되어 필드에 소환된 상태에 적용."
+      ]
+    },
+    "authority": "User-delegated developer interpretation and balance patch; confirmed rulings preserved; not a new individual user confirmation",
+    "rationale": "지원 기체의 지속 강화와 공격 선언 유발을 분리하고 UID별 기본 횟수, 대상 이동, 대응을 명시한다."
+  },
+  {
+    "patchId": "SPELL-FAMILIES-2026-10-16-DRAFT",
+    "cardId": "COC-01-006",
+    "source": "Tracked runtime catalog at d2f1a77; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-01-006",
+      "deckId": "01",
+      "name": "G-머신 골드마그마",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "G",
+      "atk": "180",
+      "hp": "100",
+      "conditions": [
+        "만약 내가 일체화 상태라면 공격할 수 없습니다."
+      ],
+      "effects": [
+        "내 일체화에 공격력을 300 추가한다. 내 일체화가 공격하면 파괴된다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-01-006",
+      "deckId": "01",
+      "name": "G-머신 골드마그마",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "G",
+      "atk": "180",
+      "hp": "100",
+      "conditions": [
+        "만약 내가 일체화 상태라면 공격할 수 없습니다."
+      ],
+      "effects": [
+        "이 카드가 자신의 필드에 있고 효과가 유효한 동안 자신의 일체화 공격력 +300. 자신의 일체화가 공격 판정을 마친 직후 이 카드를 파괴한다. 파괴/효과 무효로 지원이 끊기면 공격력 보너스도 사라진다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and balance patch; confirmed rulings preserved; not a new individual user confirmation",
+    "rationale": "공격과 동시에 보너스가 사라져 정작 피해 계산에 쓰지 못하는 모순을 피하고 단발 지원 의도를 유지한다."
+  },
+  {
+    "patchId": "SPELL-FAMILIES-2026-10-16-DRAFT",
+    "cardId": "COC-01-007",
+    "source": "Tracked runtime catalog at d2f1a77; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-01-007",
+      "deckId": "01",
+      "name": "G-툴 개틀링 드라이버",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "G",
+      "atk": "0",
+      "hp": "50",
+      "conditions": [],
+      "effects": [
+        "만약 이 카드가 몬스터 취급으로 필드에 소환되었을시 다음의 효과를 가진다.",
+        "내 일체화는 2회 공격할 수 있다."
+      ],
+      "notes": [
+        "공격력·체력 수치는 주문이 몬스터 취급되어 필드에 소환된 상태에 적용."
+      ]
+    },
+    "after": {
+      "id": "COC-01-007",
+      "deckId": "01",
+      "name": "G-툴 개틀링 드라이버",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "G",
+      "atk": "0",
+      "hp": "50",
+      "conditions": [],
+      "effects": [
+        "그랜드 카이저의 효과로 몬스터 취급하여 필드에 소환할 수 있다.",
+        "이 카드가 자신의 필드에 몬스터로 존재하고 효과가 유효한 동안 자신의 일체화의 기본 공격 기회를 2회로 만든다. 다른 효과의 추가 공격은 별도로 더한다."
+      ],
+      "notes": [
+        "공격력·체력 수치는 주문이 몬스터 취급되어 필드에 소환된 상태에 적용."
+      ]
+    },
+    "authority": "User-delegated developer interpretation and balance patch; confirmed rulings preserved; not a new individual user confirmation",
+    "rationale": "그랜드 카이저의 몬스터화 경로와 추가 공격 적용 범위를 명시한다. 공격력 0 카드의 공격 허용 확정은 유지한다."
+  },
+  {
+    "patchId": "SPELL-FAMILIES-2026-10-16-DRAFT",
+    "cardId": "COC-03-006",
+    "source": "Tracked runtime catalog at d2f1a77; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-03-006",
+      "deckId": "03",
+      "name": "유체이탈",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "영매",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "패에서 영매 속성 카드를 1장 버리고 발동할 수 있다."
+      ],
+      "effects": [
+        "자신은 이 카드의 발동 후 2턴간 피해를 입지 않는다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-03-006",
+      "deckId": "03",
+      "name": "유체이탈",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "영매",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "발동 비용으로 이 카드 외에 패의 영매 속성 카드 1장을 버린다."
+      ],
+      "effects": [
+        "자신의 플레이어는 발동한 턴과 그 다음 턴의 종료까지 공격·효과 피해를 받지 않는다. 체력 지불·체력 설정·흡수 및 리로드 피드백에는 적용하지 않는다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and balance patch; confirmed rulings preserved; not a new individual user confirmation",
+    "rationale": "2턴 보호의 경계와 HP비용/리로드 예외를 명시하여 영매 덱의 방어 역할을 보존한다."
+  },
+  {
+    "patchId": "SPELL-FAMILIES-2026-10-16-DRAFT",
+    "cardId": "COC-05-005",
+    "source": "Tracked runtime catalog at d2f1a77; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-05-005",
+      "deckId": "05",
+      "name": "카툰 방영 일정표",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "내가 턴이 시작하고 처음쓰는 카드가 아니면 발동할 수 없습니다."
+      ],
+      "effects": [
+        "내 덱에서 카툰이라고 적힌 카드를 2장 가져온다. 내 턴을 종료합니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-05-005",
+      "deckId": "05",
+      "name": "카툰 방영 일정표",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "내가 턴이 시작하고 처음쓰는 카드가 아니면 발동할 수 없습니다."
+      ],
+      "effects": [
+        "자신의 덱에서 이름에 카툰이 적힌 서로 다른 카드 2장을 선택해 공개하고 패에 넣는다. 후보가 2장 미만이면 가능한 만큼 가져온다. 검색을 마친 뒤 어택 페이즈를 생략하고 엔드 페이즈 효과를 정상 처리한 후 자신의 턴을 종료한다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and balance patch; confirmed rulings preserved; not a new individual user confirmation",
+    "rationale": "검색은 본인 선택이며 부족한 후보는 가능한 만큼, 강제 턴 종료는 END 효과를 생략하지 않는다."
+  },
+  {
+    "patchId": "SPELL-FAMILIES-2026-10-16-DRAFT",
+    "cardId": "COC-06-008",
+    "source": "Tracked runtime catalog at d2f1a77; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-06-008",
+      "deckId": "06",
+      "name": "대지 충격파!",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "원소 / 금속",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "필드의 카드 하나를 선택한다. 그효과를 무효화 합니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-06-008",
+      "deckId": "06",
+      "name": "대지 충격파!",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "원소 / 금속",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "필드 몬스터 또는 일체화 카드 1장을 선택한다. 그 카드가 해당 필드·일체화 상태를 벗어날 때까지 그 카드 자체의 효과를 무효화한다. 다른 카드가 독립적으로 부여한 효과는 이 무효로 제거하지 않는다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and balance patch; confirmed rulings preserved; not a new individual user confirmation",
+    "rationale": "필드와 일체화 영역의 카드 효과 무효와 독립 부여 효과의 구분을 명시한다."
+  },
+  {
+    "patchId": "SPELL-FAMILIES-2026-10-16-DRAFT",
+    "cardId": "COC-07-008",
+    "source": "Tracked runtime catalog at d2f1a77; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-07-008",
+      "deckId": "07",
+      "name": "포식자의 심판",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "포식",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "상대는 카드를 1장 뽑습니다."
+      ],
+      "effects": [
+        "지정한 대상에게 저번 턴과 이번 턴을 통틀어, (카드를 덱 위에서 묘지로 보낸 매수)d100의 피해를 입힌다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-07-008",
+      "deckId": "07",
+      "name": "포식자의 심판",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "포식",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "발동 비용으로 상대가 카드 1장을 뽑는다."
+      ],
+      "effects": [
+        "플레이어 또는 필드 몬스터 1장을 지정한다. 직전 턴과 현재 턴에 양쪽 덱 맨 위에서 묘지로 실제 이동한 카드의 합계 매수만큼 1d100을 굴려 합계 피해를 준다. 대상은 선언 때 고정하며 필드를 떠났다가 돌아오면 불발한다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and balance patch; confirmed rulings preserved; not a new individual user confirmation",
+    "rationale": "소유자 비한정 덱 위 이동 수를 양측/직전 전체 턴+현재 턴으로 명확히 한다. 상대 드로우는 선언 비용으로 유지한다."
+  },
+  {
+    "patchId": "SPELL-FAMILIES-2026-10-16-DRAFT",
+    "cardId": "COC-11-010",
+    "source": "Tracked runtime catalog at d2f1a77; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-11-010",
+      "deckId": "11",
+      "name": "평화의 선율 만파식적",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "해풍을 다스리는 용왕 상태여야 한다."
+      ],
+      "effects": [
+        "모든 존재의 체력을 100 회복시킨다. 용/드래곤 속성은 추가로 100 회복시킨다.",
+        "모든 존재가 다음 턴 자신의 어택 페이즈가 시작될 때까지 피해와 파괴 효과를 받지 않게 한다. 단, 피드백 피해는 받는다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-11-010",
+      "deckId": "11",
+      "name": "평화의 선율 만파식적",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "해풍을 다스리는 용왕 상태여야 한다."
+      ],
+      "effects": [
+        "효과 해결 당시 양쪽 플레이어와 필드 몬스터의 체력을 100 회복시킨다. 용/드래곤 속성 몬스터와 해당 속성으로 일체화한 플레이어는 추가로 100 회복한다.",
+        "그 플레이어·몬스터와 현재 일체화 카드는 발동 턴보다 이후인 각 조종자의 첫 어택 페이즈 시작까지 공격·효과 피해와 파괴 효과를 받지 않는다. 어택 페이즈를 생략하면 보호가 유지된다. 체력 지불·설정·흡수 및 리로드 피드백은 막지 않는다. 나중에 소환된 몬스터에는 부여하지 않으며 몬스터가 필드를 떠나면 종료한다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and balance patch; confirmed rulings preserved; not a new individual user confirmation",
+    "rationale": "용 덱의 회복 우위를 유지하면서 양측 보호의 각자 만료 시점과 현재 대상 스냅샷을 명확히 한다."
+  },
+  {
+    "patchId": "SPELL-FAMILIES-2026-10-16-DRAFT",
+    "cardId": "COC-14-007",
+    "source": "Tracked runtime catalog at d2f1a77; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-14-007",
+      "deckId": "14",
+      "name": "트레이드",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "스톰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "자신 필드의 몬스터 1장을 상대 필드로 넘길 수 있어야 한다."
+      ],
+      "effects": [
+        "자신 필드의 몬스터 1장을 상대 필드로 넘긴다. 상대는 방금 받은 그 몬스터를 제외한 자신의 몬스터 1장을 선택해 자신의 필드로 넘긴다.",
+        "다음 자신의 턴에 교환된 몬스터 중 필드에 남아 있는 카드만 원래 필드로 되돌린다. 필드를 떠난 카드는 반환하지 않는다. 반환할 자리가 없으면 반환하지 않지만, 상대에게서 교환받은 몬스터가 차지한 자리와 맞교환할 수 있다면 그 자리를 이용해 복귀시킨다."
+      ],
+      "notes": [
+        "교환으로 받은 몬스터는 같은 효과의 맞교환 대상으로 다시 선택할 수 없다."
+      ]
+    },
+    "after": {
+      "id": "COC-14-007",
+      "deckId": "14",
+      "name": "트레이드",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "스톰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "자신과 상대 필드에 교환할 몬스터가 각각 1장 이상 있어야 한다. 양쪽 필드가 가득 차도 맞교환할 수 있다."
+      ],
+      "effects": [
+        "선언 시 자신의 필드 몬스터 1장과 당시 상대 필드의 후보를 기록한다. 상대가 자신의 기존 몬스터 중 1장을 선택하면 두 몬스터의 조종권을 동시에 교환한다. 자신의 몬스터를 상대의 반환 후보로 다시 선택하지 않는다. 조종권 교환은 재소환이 아니다.",
+        "다음 자신의 턴 시작에 같은 필드 체류 상태로 남아 있는 교환 몬스터만 교환 전 필드로 되돌린다. 필드를 떠났거나 다른 조종권 이동을 거친 카드는 반환하지 않는다. 빈 자리가 없으면 반환하지 않으며, 두 반환 카드의 맞교환으로 확보되는 자리는 사용할 수 있다."
+      ],
+      "notes": [
+        "교환으로 받은 몬스터는 같은 효과의 맞교환 대상으로 다시 선택할 수 없다."
+      ]
+    },
+    "authority": "User-delegated developer interpretation and balance patch; confirmed rulings preserved; not a new individual user confirmation",
+    "rationale": "3칸 제한을 침범하는 임시 네 번째 몬스터 없이 맞교환을 원자적으로 처리한다. 재소환 카운터는 초기화하지 않는다."
+  },
+  {
+    "patchId": "SPELL-FAMILIES-2026-10-16-DRAFT",
+    "cardId": "COC-14-008",
+    "source": "Tracked runtime catalog at d2f1a77; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-14-008",
+      "deckId": "14",
+      "name": "강제 분리!",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "스톰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "양쪽 플레이어의 일체화가 해제되기 직전, 해당 일체화의 현재 공격력으로 공격 판정을 처리해 피해를 준다. 그 후 양쪽 일체화를 해제한다. 장착된 무기가 있다면 함께 묘지로 보낸다."
+      ],
+      "notes": [
+        "공격 판정 후 해제한다."
+      ]
+    },
+    "after": {
+      "id": "COC-14-008",
+      "deckId": "14",
+      "name": "강제 분리!",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "스톰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "해결 당시 양쪽 일체화의 현재 실제 공격력으로 각각 공격 다이스를 굴려 해당 일체화 플레이어 자신에게 반동 피해를 준다. 공격력 0이면 굴리지 않고 피해도 없다. 양쪽 피해를 먼저 적용한 후 일체화와 장착 무기를 원래 소유자의 묘지로 보내고 승패를 판정한다. 이 반동 판정은 일반 공격 선언이나 공격 기회를 발생시키지 않는다."
+      ],
+      "notes": [
+        "공격 판정 후 해제한다."
+      ]
+    },
+    "authority": "User-delegated developer interpretation and balance patch; confirmed rulings preserved; not a new individual user confirmation",
+    "rationale": "스톰 판본의 공격 판정 후 해제 순서를 기준으로 불명확한 피해 수신자를 각 일체화 플레이어의 반동으로 명시한다. 다이스 경계/양측 동시 피해/장착 해제 순서와 슈페리얼 판본을 통일한다."
+  },
+  {
+    "patchId": "SPELL-FAMILIES-2026-10-16-DRAFT",
+    "cardId": "COC-17-002",
+    "source": "Tracked runtime catalog at d2f1a77; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-17-002",
+      "deckId": "17",
+      "name": "파라오의 침전 –피라미드",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "파라오",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자기 필드 전체에 필드에 있는 몬스터의 체력이 50 올라가는 효과 부여."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-17-002",
+      "deckId": "17",
+      "name": "파라오의 침전 –피라미드",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "파라오",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신의 필드에 지속 효과를 부여한다: 자신의 필드에 있는 모든 몬스터의 체력 +50. 나중에 소환되는 몬스터에도 적용하고 필드를 떠나면 제거한다. 같은 실제 피라미드 카드의 재사용은 기존 효과를 갱신하며 별개의 실제 피라미드 카드는 각각 중첩한다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and balance patch; confirmed rulings preserved; not a new individual user confirmation",
+    "rationale": "파라오 덱의 지속 필드 강화로 해석한다. 후발 몬스터도 적용하되 같은 실물 재사용으로 영구 버프를 무한 복제하지 않는다."
+  },
+  {
+    "patchId": "SPELL-FAMILIES-2026-10-16-DRAFT",
+    "cardId": "COC-21-003",
+    "source": "Tracked runtime catalog at d2f1a77; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-21-003",
+      "deckId": "21",
+      "name": "사바스의 재단",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "저주 / 악마",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "내 덱에 저주카드가 2장이상 있을 때 내 첫드로우 패이즈에 발동한다.",
+        "한 턴에 1회 발동한다. 소환하는 몬스터에 따라서 특정한 제물을 바친다."
+      ],
+      "effects": [
+        "이 카드를 0/1의 몬스터로 취급하여 필드에 놓는다. 전투로 파괴되지 않는다.",
+        "악마/저주 속성 몬스터를 1개 소환한다. 이 카드의 효과로 소환된 몬스터는 자신의 필드에서 사라질 경우 이번 게임에서 삭제된다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-21-003",
+      "deckId": "21",
+      "name": "사바스의 재단",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "저주 / 악마",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "자신의 첫 드로우 페이즈 시작에 덱의 저주 속성 카드가 2장 이상이고 빈 몬스터 칸이 있으면 패 또는 덱의 이 카드를 자동 발동한다. 주문 발동과 이후 몬스터 소환은 각각 무효화할 수 있다.",
+        "몬스터로 존재하는 동안 효과 2는 자신의 메인 페이즈에 실제 카드마다 턴당 1회 사용할 수 있다. 발동 시 소환 대상을 고르고 플레이어 체력을 지불하며 지불 후 생존해야 한다. 비용: 흡혈 공작 180, 밀짚인형 30, 임프 60, 가고일 150, 몽마 200, 나락의 귀족 300."
+      ],
+      "effects": [
+        "이 카드를 공격력 0/체력 1의 공격할 수 없는 몬스터로 소환한다. 이 카드의 효과가 유효한 동안 전투로 파괴되지 않는다.",
+        "선택한 악마/저주 몬스터 1장을 소환한다. 흡혈 공작·밀짚인형은 자신의 패·덱·묘지의 실물을, 임프·가고일·몽마·나락의 귀족은 카탈로그의 생성 몬스터를 사용한다. 이 효과로 소환된 몬스터는 자신의 필드를 떠나거나 상대에게 넘어가면 이번 게임에서 삭제한다. 소환 무효 시 실물은 원래 영역에 유지하고 아직 필드에 놓이지 않은 생성체는 폐기하며 지불 체력은 돌려주지 않는다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and balance patch; confirmed rulings preserved; not a new individual user confirmation",
+    "rationale": "저주/악마 덱의 초동을 안정시키되 체력 제물과 3칸/효과 횟수/소환 대응으로 제어한다. 미정이던 흡혈공작·귀족 비용을 개발자 위임으로 지정하며 기존 네 비용은 보존한다."
+  },
+  {
+    "patchId": "SPELL-FAMILIES-2026-10-16-DRAFT",
+    "cardId": "COC-21-006",
+    "source": "Tracked runtime catalog at d2f1a77; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-21-006",
+      "deckId": "21",
+      "name": "망자의 분노",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "저주",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "자신의 몬스터가 3개 이상 파괴/삭제되었어야 한다.",
+        "대상은 자신의 몬스터를 공격/효과/주문으로 파괴/삭제한 적 있어야 한다."
+      ],
+      "effects": [
+        "가장 최근 파괴/삭제된 몬스터 3개의 최대 공격력 총합 ÷ 3 만큼의 피해를 준다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-21-006",
+      "deckId": "21",
+      "name": "망자의 분노",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "저주",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "자신이 조종하는 몬스터가 3장 이상 파괴 또는 게임에서 제외/삭제된 실제 이력이 필요하다.",
+        "지정 대상은 자신의 몬스터를 직접 파괴/제외/삭제한 적 있는 필드 몬스터 또는 플레이어여야 한다. 몬스터가 한 처치는 조종자의 플레이어 처치로 대신 계산하지 않는다."
+      ],
+      "effects": [
+        "가장 최근 파괴/제외/삭제된 자신의 몬스터 3장이 각각 그 필드 체류 중 기록한 최고 실제 공격력을 합하고 3으로 나눈 값(소수점 버림)만큼 지정 대상에게 피해를 준다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and balance patch; confirmed rulings preserved; not a new individual user confirmation",
+    "rationale": "저주 덱의 복수 역할을 보존하며 최근 3사건/최고 공격력/실제 행위 주체를 JSON 이력으로 명시한다. 과거 로그로 누락 이력을 지어내지 않는다."
+  },
+  {
+    "patchId": "SPELL-FAMILIES-2026-10-16-DRAFT",
+    "cardId": "COC-22-006",
+    "source": "Tracked runtime catalog at d2f1a77; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-22-006",
+      "deckId": "22",
+      "name": "언데드 퓨전 업",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "묘지에서 엑스트라 덱의 퓨전 몬스터에 기제된 몬스터를 덱으로 되돌리고 그 퓨전 몬스터를 소환한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-22-006",
+      "deckId": "22",
+      "name": "언데드 퓨전 업",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신의 묘지에서 자신의 엑스트라 덱 퓨전 몬스터의 지정 소재를 선택한다. 발동 시 주문을 묘지로 보내고 소재를 원래 소유자의 덱으로 되돌린 뒤 해당 몬스터의 소환을 선언한다. 원래 엑스트라 카드인 소재는 엑스트라 덱으로 되돌린다. 소환이 무효화되면 소환하려던 몬스터는 엑스트라 덱에 남으며 지불한 주문과 소재는 반환하지 않는다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and balance patch; confirmed rulings preserved; not a new individual user confirmation",
+    "rationale": "묘지 지정 소재/빈 칸/R22 비용 미반환을 명시하며 퓨전 레시피와 결합한다."
+  },
+  {
+    "patchId": "SPELL-FAMILIES-2026-10-16-DRAFT",
+    "cardId": "COC-22-007",
+    "source": "Tracked runtime catalog at d2f1a77; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-22-007",
+      "deckId": "22",
+      "name": "블랙 메탈 체인지",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신 필드의 블랙 메탈 몬스터 1장을 자신의 덱 또는 엑스트라 덱으로 되돌린다. 그 몬스터의 현재 공격력 또는 효과로 취급되는 공격력과 같은 공격력을 가진 블랙 메탈 몬스터를 자신의 덱·엑스트라 덱에서 소환한다."
+      ],
+      "notes": [
+        "현재 공격력과 취급 공격력 모두 같은 공격력 판정에 사용할 수 있다."
+      ]
+    },
+    "after": {
+      "id": "COC-22-007",
+      "deckId": "22",
+      "name": "블랙 메탈 체인지",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "선언 시 자신의 필드 블랙 메탈 몬스터 1장을 지정한다. 해결 시 그 몬스터의 현재 실제 공격력 또는 효과가 유효할 때의 취급 공격력과 같은 값을 가진 다른 블랙 메탈 몬스터가 자신의 덱·엑스트라 덱에 있어야 한다. 지정한 몬스터를 원래 소유자의 덱(엑스트라 카드면 엑스트라 덱)으로 되돌리고, 기록한 후보 중 1장을 선택해 소환한다. 블랙 메탈 매지션은 실제 공격력 50과 취급 공격력 250을 구별하여 비교한다. 소환 무효 시 후보는 원래 덱·엑스트라에 남고 반환한 몬스터를 되돌리지 않는다."
+      ],
+      "notes": [
+        "현재 공격력과 취급 공격력 모두 같은 공격력 판정에 사용할 수 있다."
+      ]
+    },
+    "authority": "User-delegated developer interpretation and balance patch; confirmed rulings preserved; not a new individual user confirmation",
+    "rationale": "형태 교체 덱의 의도를 유지하며 같은 실물의 자기 교체 회복을 막고 실제/취급ATK 비교와 비공개 선택 시점을 명시한다."
+  },
+  {
+    "patchId": "SPELL-FAMILIES-2026-10-16-DRAFT",
+    "cardId": "COC-27-002",
+    "source": "Tracked runtime catalog at d2f1a77; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-27-002",
+      "deckId": "27",
+      "name": "언데드 퓨전업",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "슈페리얼",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신의 묘지에서 엑스트라 덱 퓨전 몬스터의 지정 소재를 덱으로 되돌리고, 해당 퓨전 몬스터를 엑스트라 덱에서 소환한다."
+      ],
+      "notes": [
+        "블랙 메탈 덱의 언데드 퓨전 업과 동일한 효과입니다."
+      ]
+    },
+    "after": {
+      "id": "COC-27-002",
+      "deckId": "27",
+      "name": "언데드 퓨전업",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "슈페리얼",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "자신의 묘지에서 자신의 엑스트라 덱 퓨전 몬스터의 지정 소재를 선택한다. 발동 시 주문을 묘지로 보내고 소재를 원래 소유자의 덱으로 되돌린 뒤 해당 몬스터의 소환을 선언한다. 원래 엑스트라 카드인 소재는 엑스트라 덱으로 되돌린다. 소환이 무효화되면 소환하려던 몬스터는 엑스트라 덱에 남으며 지불한 주문과 소재는 반환하지 않는다."
+      ],
+      "notes": [
+        "블랙 메탈 덱의 언데드 퓨전 업과 동일한 효과입니다."
+      ]
+    },
+    "authority": "User-delegated developer interpretation and balance patch; confirmed rulings preserved; not a new individual user confirmation",
+    "rationale": "묘지 지정 소재/빈 칸/R22 비용 미반환을 명시하며 퓨전 레시피와 결합한다."
+  },
+  {
+    "patchId": "SPELL-FAMILIES-2026-10-16-DRAFT",
+    "cardId": "COC-27-005",
+    "source": "Tracked runtime catalog at d2f1a77; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-27-005",
+      "deckId": "27",
+      "name": "강제 분리!",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "슈페리얼",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "모든 플레이어의 일체화를 해제하고 일체화된 공격력만큼 피해를준다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-27-005",
+      "deckId": "27",
+      "name": "강제 분리!",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "슈페리얼",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "해결 당시 양쪽 일체화의 현재 실제 공격력으로 각각 공격 다이스를 굴려 해당 일체화 플레이어 자신에게 반동 피해를 준다. 공격력 0이면 굴리지 않고 피해도 없다. 양쪽 피해를 먼저 적용한 후 일체화와 장착 무기를 원래 소유자의 묘지로 보내고 승패를 판정한다. 이 반동 판정은 일반 공격 선언이나 공격 기회를 발생시키지 않는다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation and balance patch; confirmed rulings preserved; not a new individual user confirmation",
+    "rationale": "스톰 판본의 공격 판정 후 해제 순서를 기준으로 불명확한 피해 수신자를 각 일체화 플레이어의 반동으로 명시한다. 다이스 경계/양측 동시 피해/장착 해제 순서와 슈페리얼 판본을 통일한다."
+  },
+  {
+    "patchId": "SIN-DEMONS-2026-10-16-DRAFT",
+    "cardId": "COC-17-009",
+    "source": "Tracked runtime catalog at ce08e811ec17298aba668a30187b0ca860de7817; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-17-009",
+      "deckId": "17",
+      "name": "태양 신–호루스",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "파라오",
+      "atk": "200",
+      "hp": "200",
+      "conditions": [],
+      "effects": [
+        "이 카드가 필드에 존재하는 동안 호루스의 권능이 이름에 들어가 있는 카드는 다이스의 최댓값을 100 올린다. 다르다면 레스 주세요."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-17-009",
+      "deckId": "17",
+      "name": "태양 신–호루스",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "파라오",
+      "atk": "200",
+      "hp": "200",
+      "conditions": [],
+      "effects": [
+        "이 카드가 필드에 있고 효과가 유효한 동안 이름에 「호루스의 권능」이 들어가는 주문의 수치 다이스 최댓값을 100 올린다. 양쪽 플레이어에게 적용하고, 별개의 실제 호루스와 다른 주사위 상한 증가분은 중첩한다. 해당 주문 효과의 재사용·복사에도 적용하며 코인토스에는 적용하지 않는다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation; confirmed rulings preserved; not an individual new user confirmation",
+    "rationale": "본문에 섞여 있던 대화 요청을 제거하고 이름 범위/양측 적용/실물 중첩/복사 수치 다이스만 명시한다. 권능 주문2종의 피해 보조라는 파라오 덱 의도를 보존하며 기존 +100 수치를 유지한다."
+  },
+  {
+    "patchId": "SIN-DEMONS-2026-10-16-DRAFT",
+    "cardId": "COC-21-011",
+    "source": "Tracked runtime catalog at ce08e811ec17298aba668a30187b0ca860de7817; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-21-011",
+      "deckId": "21",
+      "name": "몽마",
+      "type": "몬스터",
+      "zone": "created",
+      "attribute": "저주 / 악마",
+      "atk": "140",
+      "hp": "140",
+      "conditions": [],
+      "effects": [
+        "사바스의 재단으로 소환할 때 자신의 플레이어 체력 200을 제물로 바친다. 소환 시 상대 필드 몬스터 1장을 지정하고 1d2를 굴린다. 1이면 자신의 다음 어택 페이즈 종료까지 그 몬스터는 공격하거나 효과를 발동할 수 없다. 2이면 그 몬스터의 다음 공격 또는 단일 대상 효과는 이 카드가 합법적인 대상일 때 이 카드를 대상으로 해야 한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-21-011",
+      "deckId": "21",
+      "name": "몽마",
+      "type": "몬스터",
+      "zone": "created",
+      "attribute": "저주 / 악마",
+      "atk": "140",
+      "hp": "140",
+      "conditions": [],
+      "effects": [
+        "사바스의 재단으로 소환할 때 자신의 플레이어 체력 200을 제물로 바친다. 소환 시 상대 필드 몬스터 1장을 지정하고 1d2를 굴린다. 1이면 발동한 턴이 지난 뒤 처음 맞는 자신의 어택 페이즈가 끝날 때까지 그 몬스터는 공격하거나 효과를 발동할 수 없다. 어택 페이즈를 생략하면 제한이 유지된다. 2이면 그 몬스터의 다음 공격 또는 단일 대상 효과는 이 몽마가 합법적인 대상일 때 이 몽마를 대상으로 해야 한다. 나중에 다른 몽마가 유인하면 새 유인으로 교체한다. 부여받은 몬스터의 필드 이탈 또는 조종권 변경 시 제한·유인을 해제한다. 몽마가 필드를 떠나거나 조종권이 바뀌면 그 몽마를 향한 유인은 적용하지 않는다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation; confirmed rulings preserved; not an individual new user confirmation",
+    "rationale": "200HP 소환 비용에 맞게 봉쇄가 상대 턴에도 작용하도록 발동 턴 이후 첫 자기 ATTACK 종료를 명확화했다. 지속 무효가 아니라 새 발동 금지이며 이미 선언한 효과는 소급 무효화하지 않는다. 유인 중첩·이탈/조종권 변경을 명시한다."
+  },
+  {
+    "patchId": "SIN-DEMONS-2026-10-16-DRAFT",
+    "cardId": "COC-21-012",
+    "source": "Tracked runtime catalog at ce08e811ec17298aba668a30187b0ca860de7817; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-21-012",
+      "deckId": "21",
+      "name": "나락의 귀족",
+      "type": "몬스터",
+      "zone": "created",
+      "attribute": "저주 / 악마",
+      "atk": "300",
+      "hp": "320",
+      "conditions": [],
+      "effects": [
+        "아군 한 명의 공격력과 체력을 게임이 끝날 때까지 30 올린다. 몬스터의 경우 파괴되고 다시 소환되어도 올라간 수치가 적용된 상태로 소환된다.",
+        "필드에 존재하는 동안 악마 속성의 공격력을 30 올린다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-21-012",
+      "deckId": "21",
+      "name": "나락의 귀족",
+      "type": "몬스터",
+      "zone": "created",
+      "attribute": "저주 / 악마",
+      "atk": "300",
+      "hp": "320",
+      "conditions": [],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드마다 턴당 1회, 자신의 플레이어 또는 필드 몬스터 1명을 선택한다. 그 대상의 공격력과 현재 체력을 30 올리고 게임이 끝날 때까지 그 강화를 유지한다. 플레이어의 공격력 강화는 이후 일체화에도 적용한다. 몬스터는 같은 실제 카드라면 파괴되어 다시 소환되어도 +30/+30을 유지하며 별도로 생성한 복사본에는 이 영구 강화를 복제하지 않는다.",
+        "이 카드가 필드에 있고 효과가 유효한 동안 양쪽 필드의 악마 속성 몬스터와 악마 속성 일체화 플레이어의 공격력을 30 올린다. 다른 실제 귀족의 지속 강화와 중첩한다."
+      ],
+      "notes": []
+    },
+    "authority": "User-delegated developer interpretation; confirmed rulings preserved; not an individual new user confirmation",
+    "rationale": "원래 영구 강화와 악마 전체 오라를 유지한다. 아군 한 명을 자신의 플레이어/몬스터로 명시하고 기본 실물별 턴 제한, 재소환/일체화/복제 상속 범위 및 편 제한 없는 오라를 구체화한다. 수치는 유지했다."
+  },
+  {
+    "patchId": "SIN-DEMONS-2026-10-16-DRAFT",
+    "cardId": "COC-21-001",
+    "source": "Tracked runtime catalog at ce08e811ec17298aba668a30187b0ca860de7817; not the missing canonical v1.3 source",
+    "before": {
+      "id": "COC-21-001",
+      "deckId": "21",
+      "name": "원죄를 저지른 자",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "저주 / 악마",
+      "atk": "50",
+      "hp": "—",
+      "conditions": [
+        "자신의 체력을 333 바친다. 체력이 333 이하라면 자신의 체력을 50으로 만든다.",
+        "저주 속성 주문/몬스터의 공격/효과/조건으로 둘 이상의 몬스터를 파괴했어야 한다."
+      ],
+      "effects": [
+        "자신 또는 상대의 패·필드에 존재하는 몬스터·주문의 효과 1개를 선택해 사용한다. 선택한 카드의 조건 항목 전체를 무시하며, 그 조건 항목에 포함된 비용성 요구도 무시한다. 조건 밖의 비용과 효과 해결 중 지불은 정상 처리한다. 선택한 원본 카드는 소모하지 않는다.",
+        "복사해 사용한 효과에서 「이 카드」 또는 「자신」은 원죄를 저지른 자와 일체화한 플레이어를 가리킨다. 발동 사건을 새로 만들지는 않으며, 원본 카드 효과의 발동 횟수 제한은 플레이어별로 적용한다."
+      ],
+      "notes": [
+        "사용 주체=원죄를 저지른 자의 플레이어. 조건 항목 밖의 비용은 면제되지 않는다."
+      ]
+    },
+    "after": {
+      "id": "COC-21-001",
+      "deckId": "21",
+      "name": "원죄를 저지른 자",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "저주 / 악마",
+      "atk": "50",
+      "hp": "—",
+      "conditions": [
+        "자신의 체력을 333 바친다. 체력이 333 이하라면 자신의 체력을 50으로 만든다.",
+        "저주 속성 주문/몬스터의 공격/효과/조건으로 둘 이상의 몬스터를 파괴했어야 한다."
+      ],
+      "effects": [
+        "자신 또는 상대의 패·필드에 존재하는 몬스터·주문의 효과 1개를 선택해 사용한다. 선택한 카드의 조건 항목 전체를 무시하며, 그 조건 항목에 포함된 비용성 요구도 무시한다. 조건 밖의 비용과 효과 해결 중 지불은 정상 처리한다. 선택한 원본 카드는 소모하지 않는다.",
+        "복사해 사용한 효과에서 「이 카드」 또는 「자신」은 원죄를 저지른 자와 일체화한 플레이어를 가리킨다. 발동 사건을 새로 만들지는 않으며, 원본 카드 효과의 발동 횟수 제한은 플레이어별로 적용한다."
+      ],
+      "notes": [
+        "사용 주체=원죄를 저지른 자의 플레이어. 조건 항목 밖의 비용은 면제되지 않는다.",
+        "개발자 명확화: 효과를 발동할 수 있는 자신의 메인 페이즈에 원본 선택을 위해 양측 패의 몬스터·주문 정체를 복사하는 플레이어만 확인한다. 조건 면제는 새 소환·공격·파괴 사건을 만들지 않는다. 원죄 자체의 기본 턴당 횟수와 원본 실물/효과별 플레이어 사용 기록을 별도로 관리한다."
+      ]
+    },
+    "authority": "User-delegated developer clarification; existing confirmed effect paragraphs unchanged",
+    "rationale": "확정한 조건 면제/플레이어 주체/발동 사건 비조작을 유지한다. 원본을 선택할 수 있게 하는 최소 패 정보 공개 범위와 기본 원죄 발동 횟수/독립 원본 실물별 기록을 주석으로 명확화한다. 트리거/이력 의존 조항의 미구현을 완료로 표시하지 않는다."
+  },
+  {
+    "patchId": "SHARING-SPHINX-2026-10-17-DRAFT",
+    "cardId": "COC-17-007",
+    "source": "Tracked runtime catalog at 0723d7eed300d13b32bd27aba6a344b6323958f8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer ruling refinement; not a newly user-confirmed ruling",
+    "before": {
+      "id": "COC-17-007",
+      "deckId": "17",
+      "name": "피라미드를 수호하는 신수–스핑크스",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "파라오",
+      "atk": "150",
+      "hp": "250",
+      "conditions": [
+        "파라오의 침전–피라미드의 효과를 사용 중이어야 한다."
+      ],
+      "effects": [
+        "이 몬스터가 필드에 존재하는 동안 상대의 파괴 주문/효과는 한 턴에 1회 발동하지 않는다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-17-007",
+      "deckId": "17",
+      "name": "피라미드를 수호하는 신수–스핑크스",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "파라오",
+      "atk": "150",
+      "hp": "250",
+      "conditions": [
+        "파라오의 침전–피라미드의 효과를 사용 중이어야 한다."
+      ],
+      "effects": [
+        "이 카드가 필드에 있고 효과가 유효한 동안, 상대가 직접 파괴 조항이 포함된 주문 또는 효과를 선언하면 이 실제 카드마다 한 턴에 처음 1회 그 발동을 차단한다. 조건부 파괴도 포함하되 피해·전투·체력이나 공격력 0에 따른 상태 파괴·제물 비용만으로 파괴하는 경우는 포함하지 않는다. 이미 지불한 비용과 사용 횟수는 반환하지 않는다."
+      ],
+      "notes": [
+        "개발자 명확화: 양쪽 턴마다 각각 갱신하며 재소환·조종권 이동으로 같은 턴의 횟수를 되돌리지 않는다. 여러 스핑크스가 있으면 필드 칸 순서로 아직 사용하지 않은 1장만 적용한다. 자동 동시 유발은 확정한 선언 순서대로 판정하며, 이미 차단한 효과는 스핑크스가 나중에 이탈해도 다시 살아나지 않는다. 이는 지속 효과의 발동 차단으로 별도 카운터 발동이 아니다."
+      ]
+    },
+    "rationale": "피라미드→스핑크스가 파라오/호루스 전개를 지키는 의도를 유지한다. 모든 피해를 봉쇄하지 않고 첫 직접 파괴 선언만 차단하며, 지불 비용 유지·실물별 턴 제한·복수 카드 선택 순서를 정한다. 기존17공식재정과 개별 실물 횟수 원칙은 변경하지 않는다."
+  },
+  {
+    "patchId": "SHARING-SPHINX-2026-10-17-DRAFT",
+    "cardId": "COC-21-008",
+    "source": "Tracked runtime catalog at 0723d7eed300d13b32bd27aba6a344b6323958f8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer ruling refinement; not a newly user-confirmed ruling",
+    "before": {
+      "id": "COC-21-008",
+      "deckId": "21",
+      "name": "나태한 밀짚인형",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "저주",
+      "atk": "70",
+      "hp": "90",
+      "conditions": [
+        "이 몬스터는 소환되고 2턴간 공격하지 않는다."
+      ],
+      "effects": [
+        "적용된 효과/주문을 필드에 있는 몬스터 하나와 같이 적용받는다. 제물로 30의 체력을 바쳤을 때 소환되는 몬스터."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-21-008",
+      "deckId": "21",
+      "name": "나태한 밀짚인형",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "저주",
+      "atk": "70",
+      "hp": "90",
+      "conditions": [
+        "이 몬스터는 소환된 턴과 그다음 턴에 공격할 수 없다. 사바스의 재단으로 소환할 때 플레이어 체력 30을 지불한다."
+      ],
+      "effects": [
+        "소환 성공 시 이 카드 이외의 필드 몬스터 1장을 선택해 연결한다. 다른 몬스터가 없으면 연결하지 않는다. 이 카드의 효과가 유효하고 두 몬스터가 각각 연결 당시 조종자의 필드에 계속 머무르는 동안, 이 카드에 적용하는 주문·몬스터·일체화 효과의 몬스터 적용 부분을 연결한 몬스터에게도 적용한다. 두 몬스터의 조종자는 서로 달라도 된다. 어느 한쪽이 필드를 떠나거나 조종권이 바뀌면 연결은 끝난다."
+      ],
+      "notes": [
+        "개발자 명확화: 연결은 밀짚인형에서 선택 몬스터로만 전달한다. 전투 피해·발동 비용·드로우·플레이어에게 적용하는 부분은 복제하지 않는다. 같은 주사위·코인 결과를 사용하고 같은 광역 적용은 대상마다 한 번만 받으며, 공유받은 부분을 다른 연결로 다시 전달하지 않는다. 면역은 받는 몬스터마다 처리한다. 명시적인 자기 자신 제외는 공유보다 우선한다. 이미 부여된 독립 지속 효과는 연결 종료 후에도 원래 기간을 따른다."
+      ]
+    },
+    "rationale": "저주/악마 덱의 저비용 연결 도구라는 역할과 마검·욕망·귀족 연계를 보존한다. 공격 지연과 재단HP30을 유지하고, 소환 시 선택·단방향·영역/조종권 종료·주사위/광역 중복 및 재귀 방지를 명확화한다. 플레이어 회복/드로우/비용을 통째로 복제하는 무한 이득은 허용하지 않는다. 일반 소환은 재단 전용HP 비용을 다시 요구하지 않는 것으로 다른 재단 소환체 문구와 맞춘 개발자 결정이다."
+  },
+  {
+    "patchId": "STAT-DRAGON-2026-10-17-DRAFT",
+    "cardId": "COC-11-003",
+    "source": "Tracked runtime catalog at 5170435596552f7ddc77f0ca5a614e191448e40d; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer ruling refinement; not a newly user-confirmed ruling",
+    "before": {
+      "id": "COC-11-003",
+      "deckId": "11",
+      "name": "해풍을 다스리는 용왕",
+      "type": "일체화",
+      "zone": "created",
+      "attribute": "용",
+      "atk": "170",
+      "hp": "—",
+      "conditions": [
+        "1000년의 비원 여의보주의 효과로만 사용 가능하다."
+      ],
+      "effects": [
+        "매 턴 자신의 어택 페이즈가 시작될 때 상대 전체에게 50의 피해를 입힌다.",
+        "용/드래곤 속성에게 적용되는 공격력·체력 상승 효과의 ×1.5를 한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-11-003",
+      "deckId": "11",
+      "name": "해풍을 다스리는 용왕",
+      "type": "일체화",
+      "zone": "created",
+      "attribute": "용",
+      "atk": "170",
+      "hp": "—",
+      "conditions": [
+        "1000년의 비원 여의보주의 효과로만 사용 가능하다."
+      ],
+      "effects": [
+        "자신의 어택 페이즈가 시작될 때 발동한다. 해결 시 상대 플레이어와 상대 필드의 모든 몬스터에게 각각 50의 효과 피해를 준다. 어택 페이즈를 생략하면 발동하지 않는다.",
+        "이 카드와 일체화하고 이 카드의 효과가 유효한 동안, 양쪽의 용/드래곤 속성 카드와 그 속성으로 일체화한 플레이어가 효과로 받는 공격력·현재 체력의 가산 증가량 및 회복량을 1.5배로 한다. 카드 이름이 아니라 현재 속성을 기준으로 한다."
+      ],
+      "notes": [
+        "개발자 명확화: 서로 다른 용왕·꽝철이의 배율을 모두 곱한 뒤 각 효과의 증가량마다 한 번 소수점을 버린다. 이미 적용한 일회성 강화·회복은 다시 계산하지 않으며, 지속 오라의 가산량은 현재 유효한 배율로 다시 계산한다. 기본 능력치 생성·설정·복사·교환·진화·비용·피해와 마검의 독립 ×2 배수에는 이 배율을 적용하지 않는다. 어택 시작 효과는 일반 유발 대응 및 소스 이탈·무효 판정을 따른다."
+      ]
+    },
+    "rationale": "드래곤 레어에만 적용되던 원문의 용 강화 1.5배를 공통 가산 강화/회복으로 연결한다. 원문에 아군 제한이 없으므로 양쪽 용 속성에 적용하며 이무기→용왕→용 강화/만파식적의 성장 흐름과 원래 50 피해를 보존한다. 수치나 진화 비용을 임의로 늘리지 않고 반감/중첩/반올림 경계를 명확화한다."
+  },
+  {
+    "patchId": "STAT-DRAGON-2026-10-17-DRAFT",
+    "cardId": "COC-11-005",
+    "source": "Tracked runtime catalog at 5170435596552f7ddc77f0ca5a614e191448e40d; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer ruling refinement; not a newly user-confirmed ruling",
+    "before": {
+      "id": "COC-11-005",
+      "deckId": "11",
+      "name": "흉작의 꽝철이",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "130",
+      "hp": "160",
+      "conditions": [],
+      "effects": [
+        "이 몬스터가 필드에 존재하는 동안 상대에게 적용되는 모든 공격력·체력 상승 효과는 반감된다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-11-005",
+      "deckId": "11",
+      "name": "흉작의 꽝철이",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "130",
+      "hp": "160",
+      "conditions": [],
+      "effects": [
+        "이 몬스터가 필드에 있고 효과가 유효한 동안, 현재 조종자의 상대 플레이어 및 그 상대가 조종하거나 보유한 카드가 효과로 받는 공격력·현재 체력의 가산 증가량과 회복량을 절반으로 한다."
+      ],
+      "notes": [
+        "개발자 명확화: 필드 밖 카드의 강화와 일체화하지 않은 상대 플레이어의 회복에도 적용한다. 서로 다른 꽝철이는 각각 반감하며 용왕의 1.5배와 곱한 뒤 각 효과의 증가량마다 한 번 소수점을 버린다. 이미 적용된 일회성 강화·회복을 되돌리지 않으며 지속 오라는 현재 배율로 다시 계산한다. 기본 능력치 생성·설정·복사·교환·진화·비용·피해 및 마검의 독립 ×2 배수에는 적용하지 않는다."
+      ]
+    },
+    "rationale": "누락된 드래곤 덱의 성장 억제 역할을 구현한다. 필드 제압/제거로 대응할 수 있는 원래 지속 반감을 유지하고, 상대라는 범위를 플레이어·필드/비공개 영역 카드로 명확화한다. 과거 회복을 되돌리거나 진화/소환 기본 능력치까지 반감시키는 해석은 피한다."
+  },
+  {
+    "patchId": "STAT-DRAGON-2026-10-17-DRAFT",
+    "cardId": "COC-11-006",
+    "source": "Tracked runtime catalog at 5170435596552f7ddc77f0ca5a614e191448e40d; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer ruling refinement; not a newly user-confirmed ruling",
+    "before": {
+      "id": "COC-11-006",
+      "deckId": "11",
+      "name": "팔두룡 야마타노오로치",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "170",
+      "hp": "180",
+      "conditions": [],
+      "effects": [
+        "상대 전체에게 자신의 어택 페이즈가 시작될 때 이 몬스터가 공격한 횟수×80의 피해를 준다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-11-006",
+      "deckId": "11",
+      "name": "팔두룡 야마타노오로치",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "용",
+      "atk": "170",
+      "hp": "180",
+      "conditions": [],
+      "effects": [
+        "자신의 어택 페이즈가 시작될 때, 이 몬스터가 현재의 필드 체류 중 실제로 실행한 공격 횟수를 기록하고 발동한다. 해결 시 상대 플레이어와 상대 필드의 모든 몬스터에게 각각 기록한 횟수 × 80의 효과 피해를 준다."
+      ],
+      "notes": [
+        "개발자 명확화: 공격 선언 후 취소되거나 대상 재선택만 한 경우에는 횟수를 늘리지 않는다. 실제 공격은 공격력 0 또는 피해 면역으로 피해가 없어도 1회로 기록한다. 효과가 무효인 동안 실제로 실행한 공격도 이력에 남는다. 필드를 떠나면 횟수는 0이 되며 필드를 떠나지 않는 조종권 변경은 횟수를 유지한다. 재소환 후에는 다시 쌓는다. 이번 어택 페이즈에 새로 하는 공격은 다음 어택 시작부터 반영한다. 어택 페이즈를 생략하면 발동하지 않는다. 일반 유발 대응 및 소스 이탈·재진입·무효 판정을 따른다."
+      ]
+    },
+    "rationale": "공격을 이어간 용이 다음 턴 광역 피해로 보상받는 성장 의도를 유지한다. 턴 공격 횟수와 누적 이력을 구분하고 취소 선언 반복으로 피해량을 부풀리는 경로를 막는다. 원래 계수 80과 기본 능력치를 유지하며 제거 후 재소환에는 성장 초기화라는 대응 여지를 둔다."
+  },
+  {
+    "patchId": "DRAGON-RESPONSE-2026-10-17-DRAFT",
+    "cardId": "COC-11-004",
+    "source": "Tracked runtime catalog at ebe85576ca5aa493d45a8246af486645f529073e; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer ruling refinement; not a newly user-confirmed ruling",
+    "before": {
+      "id": "COC-11-004",
+      "deckId": "11",
+      "name": "천공을 자유롭게 누비는 와이번",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "드래곤",
+      "atk": "150",
+      "hp": "140",
+      "conditions": [],
+      "effects": [
+        "한 턴에 1회 덱/패/필드를 오갈 수 있다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-11-004",
+      "deckId": "11",
+      "name": "천공을 자유롭게 누비는 와이번",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "드래곤",
+      "atk": "150",
+      "hp": "140",
+      "conditions": [],
+      "effects": [
+        "자신의 메인 페이즈에 자신의 패·덱·필드에 있는 이 카드를 공개하고, 현재 영역 이외의 패·덱·필드 중 한 곳을 지정해 발동한다. 이 효과는 실제 카드 1장마다 한 턴에 1회만 발동할 수 있다. 필드로 이동하려면 빈 칸이 있어야 하며 효과 해결 후 별도의 효과 소환으로 처리한다. 패·덱으로 이동할 때는 원래 소유자의 해당 영역으로 보낸다."
+      ],
+      "notes": [
+        "개발자 명확화: 해결 시 선언한 실물이 같은 영역·조종자/보유자·체류 상태로 남아 있어야 한다. 영역 이동·재소환으로 같은 턴의 사용 횟수를 초기화하지 않는다. 효과가 무효화되면 이동하지 않는다. 효과 소환이 무효화되면 소환하려던 패/덱에 남고 발동 횟수는 반환하지 않는다. 덱 반환은 기존 덱을 섞지 않고 이 카드만 임의 위치에 넣는다."
+      ]
+    },
+    "rationale": "기동성과 용왕 진화용 용 전개라는 역할을 유지한다. 한 번의 발동으로 한 영역만 바꾸고, 덱/패를 거쳐 사용 횟수를 초기화하는 반복은 막는다. 일반적인 자기 메인 발동·원소유자 반환·R11/R22와 기존 소환 원래 영역 유지 판정을 적용한다. 기본 능력치는 변경하지 않는다."
+  },
+  {
+    "patchId": "DRAGON-RESPONSE-2026-10-17-DRAFT",
+    "cardId": "COC-11-007",
+    "source": "Tracked runtime catalog at ebe85576ca5aa493d45a8246af486645f529073e; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer ruling refinement; not a newly user-confirmed ruling",
+    "before": {
+      "id": "COC-11-007",
+      "deckId": "11",
+      "name": "탐욕의 악룡 파프니르",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "드래곤",
+      "atk": "20",
+      "hp": "40",
+      "conditions": [
+        "이 몬스터는 덱/패에 존재할 때 토큰이 사용/생성되면 소환된다."
+      ],
+      "effects": [
+        "이 몬스터가 소환되면 라인의 황금과 니벨룽겐의 반지를 나의 패에 생성한다.",
+        "이 몬스터는 소환된 후 사용/생성된 보물의 개수×10 만큼 공격력·체력가 상승한다."
+      ],
+      "notes": [
+        "토큰 생성·사용에 반응하는 파프니르 소환은 라인의 황금의 보물 전환보다 먼저 처리한다."
+      ]
+    },
+    "after": {
+      "id": "COC-11-007",
+      "deckId": "11",
+      "name": "탐욕의 악룡 파프니르",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "드래곤",
+      "atk": "20",
+      "hp": "40",
+      "conditions": [
+        "이 몬스터는 덱/패에 존재할 때 토큰이 사용/생성되면 소환된다."
+      ],
+      "effects": [
+        "이 몬스터의 소환에 성공하면 발동한다. 라인의 황금과 니벨룽겐의 반지를 각각 1장 자신의 패에 생성하고, 두 카드를 이 실제 파프니르에 연결한다.",
+        "이 몬스터는 소환된 후 사용/생성된 보물의 개수×10 만큼 공격력·체력가 상승한다."
+      ],
+      "notes": [
+        "토큰 생성·사용에 반응하는 파프니르 소환은 라인의 황금의 보물 전환보다 먼저 처리한다.",
+        "개발자 명확화: 생성한 반지는 함께 생성한 황금과 그 황금에 연결된 실제 파프니르를 참조한다. 다른 파프니르의 파괴만으로 이 반지를 사용하지 않는다."
+      ]
+    },
+    "rationale": "일반/효과 소환 성공에도 원문의 황금·반지 생성 유발을 적용한다. 대응 가능한 공통 생성 경로와 토큰 선행 소환의 기존 경로가 같은 생성 함수를 사용하도록 하되, 토큰 경로의 별도 대응까지 완료한 것으로 표시하지 않는다. 보물 증가 수치와 소환 우선 재정은 바꾸지 않는다."
+  },
+  {
+    "patchId": "DRAGON-RESPONSE-2026-10-17-DRAFT",
+    "cardId": "COC-11-008",
+    "source": "Tracked runtime catalog at ebe85576ca5aa493d45a8246af486645f529073e; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer ruling refinement; not a newly user-confirmed ruling",
+    "before": {
+      "id": "COC-11-008",
+      "deckId": "11",
+      "name": "라인의 황금",
+      "type": "주문",
+      "zone": "created",
+      "attribute": "드래곤",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "패에 들어온 즉시 사용된다.",
+        "탐욕의 악룡 파프니르가 파괴되면 삭제된다."
+      ],
+      "effects": [
+        "이 주문이 적용되는 동안 생성·사용되는 토큰을 보물로 전환해 이 주문의 보물 수에 기록한다. 파프니르 소환 판정을 먼저 처리한 뒤 보물 전환을 처리한다.",
+        "자신의 어택 페이즈가 시작될 때마다 보물 5개를 추가한다."
+      ],
+      "notes": [
+        "파프니르가 파괴되면 니벨룽겐의 반지가 먼저 저장 보물 수를 참조한 후 종료한다."
+      ]
+    },
+    "after": {
+      "id": "COC-11-008",
+      "deckId": "11",
+      "name": "라인의 황금",
+      "type": "주문",
+      "zone": "created",
+      "attribute": "드래곤",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "패에 들어온 즉시 사용된다.",
+        "연결된 탐욕의 악룡 파프니르가 파괴되면 보물 수를 보관하고 새 보물 적립을 중단한다. 연결된 니벨룽겐의 반지의 발동 가능 여부와 해결/무효 처리를 끝낸 뒤 이 주문의 지속 효과를 종료하고 이 카드를 게임에서 제외한다."
+      ],
+      "effects": [
+        "이 주문이 적용되는 동안 생성·사용되는 토큰을 보물로 전환해 이 주문의 보물 수에 기록한다. 파프니르 소환 판정을 먼저 처리한 뒤 보물 전환을 처리한다.",
+        "자신의 어택 페이즈가 시작될 때 이 독립 지속 효과에서 발동해 보물 5개를 추가한다. 이 발동이 무효화되면 이번 5개만 추가하지 않으며, 황금의 지속 효과 자체를 종료하지 않는다."
+      ],
+      "notes": [
+        "확정 재정 유지: 토큰 조종자 측 황금 우선, 한 토큰 사건은 한 황금에만 적립한다. 토큰 생성/소환 시 파프니르 소환이 보물 전환보다 먼저이며 보물 전환은 파괴가 아니다.",
+        "개발자 명확화: 어택 시작의 다른 동일 우선도 자동 효과와 함께 선언 순서를 정하고 역순 해결한다. 독립 지속 효과이므로 황금 카드 자체의 묘지/덱 이동만으로 종료하지 않는다. 파프니르 파괴 보상은 보관한 보물 수를 사용하므로 대응 중 다른 보물을 나중에 더하지 않는다."
+      ]
+    },
+    "rationale": "황금의 5개 추가를 즉시 처리에서 공통 유발 순서/주문 효과 대응으로 옮긴다. 무효는 이번 발동에만 적용해 지속 엔진의 역할을 보존한다. 파프니르 파괴 시 반지보다 먼저 카운터가 사라지거나 사망 후 보물이 더 쌓이는 충돌을 막는다."
+  },
+  {
+    "patchId": "DRAGON-RESPONSE-2026-10-17-DRAFT",
+    "cardId": "COC-11-009",
+    "source": "Tracked runtime catalog at ebe85576ca5aa493d45a8246af486645f529073e; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer ruling refinement; not a newly user-confirmed ruling",
+    "before": {
+      "id": "COC-11-009",
+      "deckId": "11",
+      "name": "니벨룽겐의 반지",
+      "type": "주문",
+      "zone": "created",
+      "attribute": "드래곤",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "탐욕의 악룡 파프니르가 파괴되면 즉시 사용된다."
+      ],
+      "effects": [
+        "탐욕의 악룡 파프니르가 파괴되면, 라인의 황금이 삭제되기 전에 저장된 보물 수를 확인한다. 그 수×10만큼 자신의 플레이어 공격력과 체력을 올리고 이 카드를 게임에서 제외한다."
+      ],
+      "notes": [
+        "라인의 황금보다 먼저 발동·해결한다."
+      ]
+    },
+    "after": {
+      "id": "COC-11-009",
+      "deckId": "11",
+      "name": "니벨룽겐의 반지",
+      "type": "주문",
+      "zone": "created",
+      "attribute": "드래곤",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "함께 생성한 라인의 황금에 연결된 실제 파프니르가 파괴될 때, 이 카드가 그 황금 소유자의 패에 있고 주문을 사용할 수 있으면 자동으로 사용한다."
+      ],
+      "effects": [
+        "파괴 당시 라인의 황금에 저장된 보물 수를 보관하고 이 카드를 묘지로 보낸 뒤 발동한다. 해결 시 이 사용한 카드가 같은 묘지 체류에 있으면 보관한 보물 수 × 10만큼 황금 소유자의 플레이어 공격력과 현재 체력을 올리고 이 카드를 게임에서 제외한다."
+      ],
+      "notes": [
+        "플레이어 공격력 보너스는 현재/이후 일체화에 한 번만 적용한다.",
+        "개발자 명확화: 파괴된 파프니르의 현재 조종자와 관계없이 황금 소유자가 보상을 받는다. 반지가 무효화되면 강화하지 않고 묘지에 남는다. 원본이 묘지를 떠나거나 재진입하면 강화는 불발한다. 반지가 없거나 사용할 수 없을 때와 해결/무효가 끝난 때 모두 황금은 종료한다. 황금 종료보다 반지 처리가 먼저이며 다른 카드의 진행 중인 체인을 강제로 해결하지 않는다."
+      ]
+    },
+    "rationale": "R08의 플레이어 영구 보상을 유지하고 파괴 시점의 정확한 보물 수를 저장한다. 기존 코드가 아무 영역의 반지를 다시 사용하거나 조종권 변경으로 종료를 놓치던 범위를 패에서의 자동 사용/생성된 연결로 명확화한다. 무효 후 무한 보물 지속과 반지의 늦은 수치 재계산을 막는다."
+  },
+  {
+    "patchId": "TOKEN-DRAGON-2026-10-17-DRAFT",
+    "cardId": "COC-06-002",
+    "source": "Tracked runtime catalog at c77246f; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-06-002",
+      "deckId": "06",
+      "name": "금속 생명체 연성술",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "금속",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "0/50인 인조 생물 토큰을 하나 소환한다. 이번 턴에 사용한 원소·금속속성의 카드 1장당 공격력·체력이 50오릅니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-06-002",
+      "deckId": "06",
+      "name": "금속 생명체 연성술",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "금속",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "0/50인 인조 생물 토큰을 하나 소환한다. 이번 턴에 사용한 원소·금속속성의 카드 1장당 공격력·체력이 50오릅니다."
+      ],
+      "notes": [
+        "개발자 명확화: 토큰은 1장씩 소환을 선언하고 대응을 해결한다. 성공한 토큰마다 파프니르 자동 소환·생성 유발·황금 자동 사용·보물 전환을 처리한 뒤 다음 토큰의 빈 필드를 확인한다. 소환이 무효화된 토큰은 필드에 생기지 않으며 생성/소환 사건과 보물을 적립하지 않는다. 이미 지불한 비용은 반환하지 않는다."
+      ]
+    },
+    "rationale": "복수 토큰을 먼저 전부 배치하여 파프니르의 빈 칸을 막던 즉시 루프를 순차 소환으로 명확화한다. 금속/스톰/미라의 소환 수·기본 수치·비용을 유지하고 R05~R07 사건 및 R22 비용 원칙을 따른다."
+  },
+  {
+    "patchId": "TOKEN-DRAGON-2026-10-17-DRAFT",
+    "cardId": "COC-11-007",
+    "source": "Tracked runtime catalog at c77246f; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-11-007",
+      "deckId": "11",
+      "name": "탐욕의 악룡 파프니르",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "드래곤",
+      "atk": "20",
+      "hp": "40",
+      "conditions": [
+        "이 몬스터는 덱/패에 존재할 때 토큰이 사용/생성되면 소환된다."
+      ],
+      "effects": [
+        "이 몬스터의 소환에 성공하면 발동한다. 라인의 황금과 니벨룽겐의 반지를 각각 1장 자신의 패에 생성하고, 두 카드를 이 실제 파프니르에 연결한다.",
+        "이 몬스터는 소환된 후 사용/생성된 보물의 개수×10 만큼 공격력·체력가 상승한다."
+      ],
+      "notes": [
+        "토큰 생성·사용에 반응하는 파프니르 소환은 라인의 황금의 보물 전환보다 먼저 처리한다.",
+        "개발자 명확화: 생성한 반지는 함께 생성한 황금과 그 황금에 연결된 실제 파프니르를 참조한다. 다른 파프니르의 파괴만으로 이 반지를 사용하지 않는다."
+      ]
+    },
+    "after": {
+      "id": "COC-11-007",
+      "deckId": "11",
+      "name": "탐욕의 악룡 파프니르",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "드래곤",
+      "atk": "20",
+      "hp": "40",
+      "conditions": [
+        "이 몬스터가 자신의 패/덱에 있을 때 어느 쪽의 토큰이 생성·소환·사용·릴리스되는 실제 사건이 발생하면 자동 소환을 선언한다. 같은 필드 진입의 생성/소환은 하나의 사건이다. 원래 패/덱의 이 카드와 빈 필드가 유지되어야 소환하며, 소환 무효 시 원래 영역에 남는다."
+      ],
+      "effects": [
+        "이 몬스터의 소환에 성공하면 발동한다. 라인의 황금과 니벨룽겐의 반지를 각각 1장 자신의 패에 생성하고, 두 카드를 이 실제 파프니르에 연결한다.",
+        "이 몬스터는 소환된 후 사용/생성된 보물의 개수×10 만큼 공격력·체력가 상승한다."
+      ],
+      "notes": [
+        "토큰 생성·사용에 반응하는 파프니르 소환은 라인의 황금의 보물 전환보다 먼저 처리한다.",
+        "개발자 명확화: 생성한 반지는 함께 생성한 황금과 그 황금에 연결된 실제 파프니르를 참조한다. 다른 파프니르의 파괴만으로 이 반지를 사용하지 않는다.",
+        "개발자 명확화: 사건 당시 패/덱에 있던 실제 파프니르마다 판정한다. 동일 우선도의 선언 순서는 공통 자동 효과 순서를 따르고 역순으로 소환을 해결한다. 다른 파프니르의 황금이 이미 있어도 이 카드의 소환을 막지 않는다. 소환 성공의 황금/반지 생성은 별도 몬스터 효과로 대응하며 실제 카드별 1번 효과의 턴 사용 제한을 따른다."
+      ]
+    },
+    "rationale": "확정 R05의 네 사건을 문구에도 맞추고, 이전 코드의 한쪽 황금 존재 시 다른 실물 자동 소환 금지를 제거한다. 용 덱의 복수 전개/보물 성장 흐름을 유지하되 사건 당시 원본·소환 대응·생성 효과 대응·실물별 횟수를 구분한다."
+  },
+  {
+    "patchId": "TOKEN-DRAGON-2026-10-17-DRAFT",
+    "cardId": "COC-11-008",
+    "source": "Tracked runtime catalog at c77246f; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-11-008",
+      "deckId": "11",
+      "name": "라인의 황금",
+      "type": "주문",
+      "zone": "created",
+      "attribute": "드래곤",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "패에 들어온 즉시 사용된다.",
+        "연결된 탐욕의 악룡 파프니르가 파괴되면 보물 수를 보관하고 새 보물 적립을 중단한다. 연결된 니벨룽겐의 반지의 발동 가능 여부와 해결/무효 처리를 끝낸 뒤 이 주문의 지속 효과를 종료하고 이 카드를 게임에서 제외한다."
+      ],
+      "effects": [
+        "이 주문이 적용되는 동안 생성·사용되는 토큰을 보물로 전환해 이 주문의 보물 수에 기록한다. 파프니르 소환 판정을 먼저 처리한 뒤 보물 전환을 처리한다.",
+        "자신의 어택 페이즈가 시작될 때 이 독립 지속 효과에서 발동해 보물 5개를 추가한다. 이 발동이 무효화되면 이번 5개만 추가하지 않으며, 황금의 지속 효과 자체를 종료하지 않는다."
+      ],
+      "notes": [
+        "확정 재정 유지: 토큰 조종자 측 황금 우선, 한 토큰 사건은 한 황금에만 적립한다. 토큰 생성/소환 시 파프니르 소환이 보물 전환보다 먼저이며 보물 전환은 파괴가 아니다.",
+        "개발자 명확화: 어택 시작의 다른 동일 우선도 자동 효과와 함께 선언 순서를 정하고 역순 해결한다. 독립 지속 효과이므로 황금 카드 자체의 묘지/덱 이동만으로 종료하지 않는다. 파프니르 파괴 보상은 보관한 보물 수를 사용하므로 대응 중 다른 보물을 나중에 더하지 않는다."
+      ]
+    },
+    "after": {
+      "id": "COC-11-008",
+      "deckId": "11",
+      "name": "라인의 황금",
+      "type": "주문",
+      "zone": "created",
+      "attribute": "드래곤",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "이 카드가 패에 들어오면 실제 카드별 이번 턴 1번 효과를 사용하지 않았고 주문 사용이 가능할 때 자동 사용한다. 원본을 원래 소유자의 묘지로 보내고 주문 대응을 받는다. 해결 때 같은 묘지 체류와 생성 당시 연결된 파프니르의 필드 체류가 유지되면 독립 지속 효과를 적용한다. 이미 이 실제 황금의 지속 효과가 있으면 새로 중복 등록하거나 보물 수를 초기화하지 않는다.",
+        "연결된 탐욕의 악룡 파프니르가 파괴되면 보물 수를 보관하고 새 보물 적립을 중단한다. 연결된 니벨룽겐의 반지의 발동 가능 여부와 해결/무효 처리를 끝낸 뒤 이 주문의 지속 효과를 종료하고 이 카드를 게임에서 제외한다."
+      ],
+      "effects": [
+        "이 주문이 적용되는 동안 토큰의 생성·소환·사용·릴리스 실제 사건마다 보물 1개를 기록한다. 한 번의 필드 진입은 한 사건으로 센다. 그 사건으로 파프니르의 자동 소환과 황금/반지 생성·황금 자동 사용을 먼저 처리한다. 생성/소환된 같은 토큰이 원래 필드 체류에 남아 있으면 파괴하지 않고 보물로 전환해 제거한다.",
+        "자신의 어택 페이즈가 시작될 때 이 독립 지속 효과에서 발동해 보물 5개를 추가한다. 이 발동이 무효화되면 이번 5개만 추가하지 않으며, 황금의 지속 효과 자체를 종료하지 않는다."
+      ],
+      "notes": [
+        "확정 재정 유지: 토큰 조종자 측 황금 우선, 한 토큰 사건은 한 황금에만 적립한다. 토큰 생성/소환 시 파프니르 소환이 보물 전환보다 먼저이며 보물 전환은 파괴가 아니다.",
+        "개발자 명확화: 어택 시작의 다른 동일 우선도 자동 효과와 함께 선언 순서를 정하고 역순 해결한다. 독립 지속 효과이므로 황금 카드 자체의 묘지/덱 이동만으로 종료하지 않는다. 파프니르 파괴 보상은 보관한 보물 수를 사용하므로 대응 중 다른 보물을 나중에 더하지 않는다.",
+        "개발자 명확화: 한 사건은 토큰 조종자 측의 활성 황금 하나에만 적립하며 없으면 상대 측에 적립한다. 같은 쪽의 황금이 여러 장이면 가장 먼저 적용된 활성 황금을 사용한다. 황금 첫 사용이 무효화되면 원본은 묘지에 남고 그 사용으로 새 지속 효과가 생기지 않는다. 이미 적용된 독립 지속 효과는 재사용 무효만으로 종료되지 않는다. 여러 황금의 동시 자동 사용은 공통 선언 순서 선택/역순 해결을 따른다."
+      ]
+    },
+    "rationale": "패 진입 즉시 사용을 별도 주문 대응으로 연결한다. 황금 한 실물의 재사용으로 보물이 초기화/복제되는 것을 막고 서로 다른 실물은 독립시킨다. R06의 조종자 우선/단일 적립 안에서 동측 다중 황금의 수신 기준을 가장 오래된 활성 상태로 정한다. 인쇄 수치와 R07 선행 순서는 유지한다."
+  },
+  {
+    "patchId": "TOKEN-DRAGON-2026-10-17-DRAFT",
+    "cardId": "COC-14-002",
+    "source": "Tracked runtime catalog at c77246f; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-14-002",
+      "deckId": "14",
+      "name": "스토밍 마인드",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "스톰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "덱에 맨위의 카드를 버린다."
+      ],
+      "effects": [
+        "스톰 토큰을 두개 소환한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-14-002",
+      "deckId": "14",
+      "name": "스토밍 마인드",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "스톰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "덱에 맨위의 카드를 버린다."
+      ],
+      "effects": [
+        "스톰 토큰을 두개 소환한다."
+      ],
+      "notes": [
+        "개발자 명확화: 토큰은 1장씩 소환을 선언하고 대응을 해결한다. 성공한 토큰마다 파프니르 자동 소환·생성 유발·황금 자동 사용·보물 전환을 처리한 뒤 다음 토큰의 빈 필드를 확인한다. 소환이 무효화된 토큰은 필드에 생기지 않으며 생성/소환 사건과 보물을 적립하지 않는다. 이미 지불한 비용은 반환하지 않는다."
+      ]
+    },
+    "rationale": "복수 토큰을 먼저 전부 배치하여 파프니르의 빈 칸을 막던 즉시 루프를 순차 소환으로 명확화한다. 금속/스톰/미라의 소환 수·기본 수치·비용을 유지하고 R05~R07 사건 및 R22 비용 원칙을 따른다."
+  },
+  {
+    "patchId": "TOKEN-DRAGON-2026-10-17-DRAFT",
+    "cardId": "COC-14-004",
+    "source": "Tracked runtime catalog at c77246f; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-14-004",
+      "deckId": "14",
+      "name": "스톰 블레이거 나이트",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "스톰",
+      "atk": "260",
+      "hp": "260",
+      "conditions": [
+        "자신을 제외한 자신의 필드 몬스터를 1~2장 게임에서 제외한다."
+      ],
+      "effects": [
+        "제외한 몬스터가 1장이면 공격력 0 / 체력 50의 스톰 토큰 1장을 소환한다.",
+        "제외한 몬스터가 2장이면 몬스터 1장을 선택해 그 공격력을 절반으로 낮춘다."
+      ],
+      "notes": [
+        "자기 자신은 제거 대상이 될 수 없어 최대 2장까지 제거할 수 있다.",
+        "자기 자신은 제거 대상에 포함할 수 없으므로 최대 2장의 다른 아군 몬스터 제거 가능.",
+        "자기 자신을 제거할 수 없으므로 제거 가능한 자신의 다른 몬스터는 최대 2장입니다."
+      ]
+    },
+    "after": {
+      "id": "COC-14-004",
+      "deckId": "14",
+      "name": "스톰 블레이거 나이트",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "스톰",
+      "atk": "260",
+      "hp": "260",
+      "conditions": [
+        "자신을 제외한 자신의 필드 몬스터를 1~2장 게임에서 제외한다."
+      ],
+      "effects": [
+        "제외한 몬스터가 1장이면 공격력 0 / 체력 50의 스톰 토큰 1장을 소환한다.",
+        "제외한 몬스터가 2장이면 몬스터 1장을 선택해 그 공격력을 절반으로 낮춘다."
+      ],
+      "notes": [
+        "자기 자신은 제거 대상이 될 수 없어 최대 2장까지 제거할 수 있다.",
+        "자기 자신은 제거 대상에 포함할 수 없으므로 최대 2장의 다른 아군 몬스터 제거 가능.",
+        "자기 자신을 제거할 수 없으므로 제거 가능한 자신의 다른 몬스터는 최대 2장입니다.",
+        "개발자 명확화: 토큰은 1장씩 소환을 선언하고 대응을 해결한다. 성공한 토큰마다 파프니르 자동 소환·생성 유발·황금 자동 사용·보물 전환을 처리한 뒤 다음 토큰의 빈 필드를 확인한다. 소환이 무효화된 토큰은 필드에 생기지 않으며 생성/소환 사건과 보물을 적립하지 않는다. 이미 지불한 비용은 반환하지 않는다."
+      ]
+    },
+    "rationale": "복수 토큰을 먼저 전부 배치하여 파프니르의 빈 칸을 막던 즉시 루프를 순차 소환으로 명확화한다. 금속/스톰/미라의 소환 수·기본 수치·비용을 유지하고 R05~R07 사건 및 R22 비용 원칙을 따른다."
+  },
+  {
+    "patchId": "TOKEN-DRAGON-2026-10-17-DRAFT",
+    "cardId": "COC-14-005",
+    "source": "Tracked runtime catalog at c77246f; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-14-005",
+      "deckId": "14",
+      "name": "스톰 팬니르",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "스톰",
+      "atk": "80",
+      "hp": "70",
+      "conditions": [
+        "내 덱에 카드를 무작위로 1장 버린다."
+      ],
+      "effects": [
+        "스톰 토큰 0/50을 1장 소환한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-14-005",
+      "deckId": "14",
+      "name": "스톰 팬니르",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "스톰",
+      "atk": "80",
+      "hp": "70",
+      "conditions": [
+        "내 덱에 카드를 무작위로 1장 버린다."
+      ],
+      "effects": [
+        "스톰 토큰 0/50을 1장 소환한다."
+      ],
+      "notes": [
+        "개발자 명확화: 토큰은 1장씩 소환을 선언하고 대응을 해결한다. 성공한 토큰마다 파프니르 자동 소환·생성 유발·황금 자동 사용·보물 전환을 처리한 뒤 다음 토큰의 빈 필드를 확인한다. 소환이 무효화된 토큰은 필드에 생기지 않으며 생성/소환 사건과 보물을 적립하지 않는다. 이미 지불한 비용은 반환하지 않는다."
+      ]
+    },
+    "rationale": "복수 토큰을 먼저 전부 배치하여 파프니르의 빈 칸을 막던 즉시 루프를 순차 소환으로 명확화한다. 금속/스톰/미라의 소환 수·기본 수치·비용을 유지하고 R05~R07 사건 및 R22 비용 원칙을 따른다."
+  },
+  {
+    "patchId": "TOKEN-DRAGON-2026-10-17-DRAFT",
+    "cardId": "COC-14-009",
+    "source": "Tracked runtime catalog at c77246f; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-14-009",
+      "deckId": "14",
+      "name": "스톰샷",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "스톰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "선택-1.상대방 필드와 플레이어에게 50피해를 준다. 2-내 필드에 스톰 토큰을 하나 소환한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-14-009",
+      "deckId": "14",
+      "name": "스톰샷",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "스톰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "선택-1.상대방 필드와 플레이어에게 50피해를 준다. 2-내 필드에 스톰 토큰을 하나 소환한다."
+      ],
+      "notes": [
+        "개발자 명확화: 토큰은 1장씩 소환을 선언하고 대응을 해결한다. 성공한 토큰마다 파프니르 자동 소환·생성 유발·황금 자동 사용·보물 전환을 처리한 뒤 다음 토큰의 빈 필드를 확인한다. 소환이 무효화된 토큰은 필드에 생기지 않으며 생성/소환 사건과 보물을 적립하지 않는다. 이미 지불한 비용은 반환하지 않는다."
+      ]
+    },
+    "rationale": "복수 토큰을 먼저 전부 배치하여 파프니르의 빈 칸을 막던 즉시 루프를 순차 소환으로 명확화한다. 금속/스톰/미라의 소환 수·기본 수치·비용을 유지하고 R05~R07 사건 및 R22 비용 원칙을 따른다."
+  },
+  {
+    "patchId": "TOKEN-DRAGON-2026-10-17-DRAFT",
+    "cardId": "COC-17-004",
+    "source": "Tracked runtime catalog at c77246f; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-17-004",
+      "deckId": "17",
+      "name": "파라오의 권능–미라 군사 소환",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "파라오",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "공격력60/체력80의 미라 병사 토큰을 자신의 빈 필드에 최대3장 소환한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-17-004",
+      "deckId": "17",
+      "name": "파라오의 권능–미라 군사 소환",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "파라오",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "공격력60/체력80의 미라 병사 토큰을 자신의 빈 필드에 최대3장 소환한다."
+      ],
+      "notes": [
+        "개발자 명확화: 토큰은 1장씩 소환을 선언하고 대응을 해결한다. 성공한 토큰마다 파프니르 자동 소환·생성 유발·황금 자동 사용·보물 전환을 처리한 뒤 다음 토큰의 빈 필드를 확인한다. 소환이 무효화된 토큰은 필드에 생기지 않으며 생성/소환 사건과 보물을 적립하지 않는다. 이미 지불한 비용은 반환하지 않는다."
+      ]
+    },
+    "rationale": "복수 토큰을 먼저 전부 배치하여 파프니르의 빈 칸을 막던 즉시 루프를 순차 소환으로 명확화한다. 금속/스톰/미라의 소환 수·기본 수치·비용을 유지하고 R05~R07 사건 및 R22 비용 원칙을 따른다."
+  },
+  {
+    "patchId": "CARTOON-2026-10-17-DRAFT",
+    "cardId": "COC-05-001",
+    "source": "Tracked runtime catalog at 7538586; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-05-001",
+      "deckId": "05",
+      "name": "카툰 데몬즈 드래곤",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "500",
+      "hp": "500",
+      "conditions": [
+        "이 카드는 카툰 랜드가 필드에 없을 경우 파괴된다."
+      ],
+      "effects": [
+        "이 카드는 직접 공격할 수 없다. 대신 이 카드가 몬스터를 파괴했을때 이 파괴한 카드의 공격력에 절반만큼 상대에게 피해를 준다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-05-001",
+      "deckId": "05",
+      "name": "카툰 데몬즈 드래곤",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "500",
+      "hp": "500",
+      "conditions": [
+        "자신의 필드에 카툰 랜드가 없으면 이 카드를 유지 조건으로 파괴한다. 카툰 랜드의 효과가 무효여도 존재 조건은 충족한다."
+      ],
+      "effects": [
+        "플레이어를 직접 공격할 수 없다. 이 카드가 상대 필드 몬스터를 실제로 파괴할 때마다, 그 몬스터의 파괴 직전 실제 공격력의 절반(소수점 버림)만큼 상대 플레이어에게 피해를 준다."
+      ],
+      "notes": [
+        "개발자 명확화: 유지 조건에 따른 파괴는 효과 무효·효과 파괴 면역으로 막지 않는다. 카툰 랜드가 파괴된 사건에서는 다른 랜드가 남아 있어도 당시 같은 쪽 드래곤을 가이드 사용보다 먼저 파괴한다.",
+        "처치 피해는 비용/유지 조건 파괴를 제외하고 사건마다 몬스터 효과로 대응한다. 해결 시 원본 드래곤의 조종자·필드 체류가 같고 효과가 유효해야 한다. 직접 공격 금지는 대상 재선택에도 적용한다."
+      ]
+    },
+    "rationale": "랜드 의존 고화력/직접 공격 금지라는 덱 의도를 유지하면서 누락된 유지 조건과 처치 보상을 연결한다. 상대 처치마다 반응하도록 개발자 예외를 명시하되 비용 파괴/소스 무효로 공짜 피해를 만들지 않는다."
+  },
+  {
+    "patchId": "CARTOON-2026-10-17-DRAFT",
+    "cardId": "COC-05-002",
+    "source": "Tracked runtime catalog at 7538586; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-05-002",
+      "deckId": "05",
+      "name": "카툰 랜드",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "사용할 때 100체력를 지불하고 사용한다."
+      ],
+      "effects": [
+        "이 카드를 0/1의 몬스터로 취급하여 필드에 놓는다. 전투로 파괴되지 않는다. 내 필드의 몬스터를 \"카툰\"몬스터로 취급합니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-05-002",
+      "deckId": "05",
+      "name": "카툰 랜드",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "사용할 때 체력100을 지불하며 지불 후 생존해야 한다. 빈 필드 칸이 필요하다."
+      ],
+      "effects": [
+        "주문 효과가 해결되면 묘지의 사용 원본을 공격력0/현재 체력1의 몬스터 취급으로 자신의 필드에 소환한다. 공격할 수 없다. 효과가 유효한 동안 전투로 파괴되지 않으며 자신의 필드 몬스터를 카툰 몬스터로 취급한다."
+      ],
+      "notes": [
+        "주문 대응과 몬스터 취급 소환 대응을 각각 처리한다. 어느 단계에서 무효화되어도 지불한 체력은 반환하지 않으며 소환 무효 시 랜드는 원래 묘지에 남는다.",
+        "체력1 또는 월드 가이드의 현재 체력50 설정은 회복이 아니며 강화/회복 배율을 곱하지 않는다."
+      ]
+    },
+    "rationale": "확정된100비용·0/1·전투 파괴 방지를 유지하고 공통 주문/소환 대응으로 분리한다. 효과 무효 시 카툰 분류 오라와 전투 방지가 계속되던 예외를 제거한다."
+  },
+  {
+    "patchId": "CARTOON-2026-10-17-DRAFT",
+    "cardId": "COC-05-003",
+    "source": "Tracked runtime catalog at 7538586; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-05-003",
+      "deckId": "05",
+      "name": "카툰 브레드코기",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "120",
+      "hp": "120",
+      "conditions": [
+        "이 카드는 카툰랜드가 없으면 공격할 수 없다."
+      ],
+      "effects": [],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-05-003",
+      "deckId": "05",
+      "name": "카툰 브레드코기",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "120",
+      "hp": "120",
+      "conditions": [
+        "자신의 필드에 카툰 랜드가 없으면 공격할 수 없다. 랜드의 효과 무효 여부와 무관하게 존재를 확인하며 공격 해결 시에도 조건을 다시 확인한다."
+      ],
+      "effects": [],
+      "notes": []
+    },
+    "rationale": "랜드와 연계하는 낮은 비용 공격원 역할을 유지하며 상대 랜드로 공격 조건을 우회하지 못하도록 자기 필드와 해결 시점을 명확히 한다."
+  },
+  {
+    "patchId": "CARTOON-2026-10-17-DRAFT",
+    "cardId": "COC-05-004",
+    "source": "Tracked runtime catalog at 7538586; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-05-004",
+      "deckId": "05",
+      "name": "카툰 룩스 에터나",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "150",
+      "hp": "150",
+      "conditions": [
+        "이 카드는 필드/패에서 이름에 \"카툰\"이 들어가는 카드 2장을 파괴해야 소환 할 수 있다."
+      ],
+      "effects": [
+        "한 턴에 1회 상대 몬스터를 하나 덱으로 되돌린다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-05-004",
+      "deckId": "05",
+      "name": "카툰 룩스 에터나",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "150",
+      "hp": "150",
+      "conditions": [
+        "소환 비용으로 자신 이외의 패/필드에서 이름에 카툰이 들어가는 서로 다른 실물 카드2장을 선택한다. 필드 카드는 파괴하고 패 카드는 묘지로 보낸다."
+      ],
+      "effects": [
+        "자신의 턴에 실제 카드마다1회 상대 필드 몬스터1장을 선택하여 원래 소유자의 덱 임의 위치에 되돌린다. 덱 전체를 다시 섞지 않는다."
+      ],
+      "notes": [
+        "공식 R24: 패 카드의 파괴 표기는 묘지 이동으로 처리하며 필드 파괴 사건을 만들지 않는다. 랜드로 카툰 취급되는 것만으로는 이름 조건을 충족하지 않는다.",
+        "두 비용을 모두 지불할 수 있어야 선언한다. 필드 랜드 파괴의 드래곤/가이드 연계를 해결한 뒤 룩스의 소환 대응을 재개한다. 소환 무효·빈 칸 소실에도 지불한 비용은 반환하지 않는다."
+      ]
+    },
+    "rationale": "기존 두 장 비용이 누락되어 무료 소환되던 경로를 실제 비용으로 연결한다. R24와 이름 조건을 보존하고 랜드 제물/가이드 복구 후 자리가 없으면 소환이 불발하는 위험을 남긴다."
+  },
+  {
+    "patchId": "CARTOON-2026-10-17-DRAFT",
+    "cardId": "COC-05-006",
+    "source": "Tracked runtime catalog at 7538586; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-05-006",
+      "deckId": "05",
+      "name": "카툰 우드 에로우즈",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "필드에 \"카툰\"이외의 몬스터 2장 에게 150 다이스 만큼에 피해를 준다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-05-006",
+      "deckId": "05",
+      "name": "카툰 우드 에로우즈",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "카툰으로 취급되지 않는 서로 다른 필드 몬스터2장을 선택한다. 1d150을 한 번 굴려 같은 결과의 피해를 각 대상에게 준다."
+      ],
+      "notes": [
+        "선언과 해결 시 카툰 이름·울트라 카툰 핸드의 부여·효과가 유효한 자기 랜드의 카툰 취급을 확인한다. 랜드가 무효화되어도 카드 이름이나 핸드의 독립 부여는 사라지지 않는다."
+      ]
+    },
+    "rationale": "기존 두 대상·공유1d150 피해를 유지하며 랜드 무효 시에도 전부 카툰으로 보던 오라 예외를 정리한다."
+  },
+  {
+    "patchId": "CARTOON-2026-10-17-DRAFT",
+    "cardId": "COC-05-007",
+    "source": "Tracked runtime catalog at 7538586; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-05-007",
+      "deckId": "05",
+      "name": "울트라 카툰 핸드",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "내 필드에 카툰 랜드가 없으면 발동하지 않는다."
+      ],
+      "effects": [
+        "상대 몬스터의 컨트롤을 가져온다. 그 몬스터를 \"카툰\"몬스터로 취급합니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-05-007",
+      "deckId": "05",
+      "name": "울트라 카툰 핸드",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "내 필드에 카툰 랜드가 없으면 발동하지 않는다."
+      ],
+      "effects": [
+        "상대 몬스터의 컨트롤을 가져온다. 그 몬스터를 \"카툰\"몬스터로 취급합니다."
+      ],
+      "notes": [
+        "랜드의 존재 조건은 자신의 필드를 기준으로 한다. 빼앗은 몬스터의 카툰 취급은 랜드의 지속 취급과 별도이며 그 몬스터가 필드를 떠나면 해제한다. 원래 소유자는 바뀌지 않는다."
+      ]
+    },
+    "rationale": "원문 컨트롤 탈취/카툰 취급을 유지하고 독립 부여와 랜드 오라, 원래 소유자를 구분한다."
+  },
+  {
+    "patchId": "CARTOON-2026-10-17-DRAFT",
+    "cardId": "COC-05-008",
+    "source": "Tracked runtime catalog at 7538586; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-05-008",
+      "deckId": "05",
+      "name": "카툰 월드 가이드",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "내 필드의 카툰랜드가 파괴될때 덱에서 발동한다."
+      ],
+      "effects": [
+        "자신의 카툰 랜드가 파괴되면, 먼저 카툰 데몬즈 드래곤의 파괴를 처리한다. 그 후 이 카드를 덱에서 묘지로 보내고, 카툰 랜드를 체력 50으로 자신의 필드에 다시 소환한다."
+      ],
+      "notes": [
+        "카툰 데몬즈 드래곤 파괴 → 카툰 랜드 복귀 순서가 고정된다."
+      ]
+    },
+    "after": {
+      "id": "COC-05-008",
+      "deckId": "05",
+      "name": "카툰 월드 가이드",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "자신이 조종하는 카툰 랜드가 실제로 필드에서 파괴될 때, 당시 자신의 덱에 있던 이 카드를 자동으로 사용한다. 손패에서 일반 발동할 수 없다."
+      ],
+      "effects": [
+        "해당 랜드가 파괴될 당시 같은 쪽 필드에 있던 카툰 데몬즈 드래곤을 먼저 파괴한다. 그 뒤 가이드1장을 덱에서 원래 소유자의 묘지로 보내 주문을 선언한다. 해결되면 파괴된 바로 그 랜드를 묘지에서 현재 체력50으로 자신의 필드에 소환한다."
+      ],
+      "notes": [
+        "카툰 데몬즈 드래곤 파괴 → 카툰 랜드 복귀 순서가 고정된다.",
+        "개발자 명확화: 랜드 파괴 사건마다 가이드1장만 사용한다. 후보가 여러 장이면 실물 식별자 순으로 선택한다. 같은 실물 가이드는 한 턴1회이며 주문 사용 금지를 따른다. 서로 다른 가이드는 별개로 사용한다.",
+        "가이드 주문 대응 뒤 랜드 소환에 별도로 대응한다. 원본 가이드 또는 해당 랜드가 묘지를 떠났다 재진입하면 복구하지 않는다. 랜드 소환 무효 시 원래 묘지 유지, 이미 지불한 비용은 반환하지 않는다. 랜드의 비파괴 이동은 발동 사건이 아니다."
+      ]
+    },
+    "rationale": "확정된 드래곤 선행/현재HP50 복구를 공통 대응으로 옮겨 부모 스택을 즉시 소모하던 문제를 없앤다. 기존 사건당1장 방식·실물별 사용과 원본 체류를 명시하여 재활용 무한 연계를 제한한다."
+  },
+  {
+    "patchId": "CARTOON-2026-10-17-DRAFT",
+    "cardId": "COC-05-009",
+    "source": "Tracked runtime catalog at 7538586; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-05-009",
+      "deckId": "05",
+      "name": "드레이나블",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "사용할 때 내 체력을 100으로 만듭니다."
+      ],
+      "effects": [
+        "한 턴에 2번 필드의 몬스터를 하나 파괴하고 그 카드의 공격력은 자신의 공격력에 추가하고, 그 카드의 체력만큼 자신의 플레이어 체력을 회복한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-05-009",
+      "deckId": "05",
+      "name": "드레이나블",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "사용 비용으로 자신의 현재 체력을100으로 설정한다. 회복이나 피해가 아니며 강화/회복 배율을 적용하지 않는다."
+      ],
+      "effects": [
+        "자신의 턴에 이 실제 카드의 효과를 최대2회 선언할 수 있다. 필드 몬스터1장을 선택하여 파괴하고, 성공하면 그 몬스터의 파괴 직전 실제 공격력만큼 이 일체화 카드의 공격력을 올리고, 파괴 직전 현재 체력만큼 자신의 플레이어 체력을 회복한다."
+      ],
+      "notes": [
+        "아군/상대 필드를 모두 선택할 수 있다. 대상 파괴 면역·무효화·소스/대상의 이탈·조종권 변경으로 불발해도 선언 횟수는 반환하지 않는다. 같은 실물의 재진입으로 이번 턴 횟수를 초기화하지 않는다.",
+        "공유로 다른 몬스터도 파괴되어도 원래 선택한 몬스터의 성공 보상만 한 번 받는다. 강화·회복의 공통 배율을 각각 받는 쪽에 적용한다. 스핑크스의 직접 파괴 발동 차단 대상이다."
+      ]
+    },
+    "rationale": "HP100 위험을 감수하고 최대2회 흡수하는 창작 의도를 유지한다. 기존 미연결 효과를 대상 선택/대응/횟수로 구현하며 파괴 실패·공유 보상 중복을 막는다."
+  },
+  {
+    "patchId": "DRAGON-GROWTH-2026-10-17-DRAFT",
+    "cardId": "COC-11-007",
+    "source": "Tracked runtime catalog at 55f1d98; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-11-007",
+      "deckId": "11",
+      "name": "탐욕의 악룡 파프니르",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "드래곤",
+      "atk": "20",
+      "hp": "40",
+      "conditions": [
+        "이 몬스터가 자신의 패/덱에 있을 때 어느 쪽의 토큰이 생성·소환·사용·릴리스되는 실제 사건이 발생하면 자동 소환을 선언한다. 같은 필드 진입의 생성/소환은 하나의 사건이다. 원래 패/덱의 이 카드와 빈 필드가 유지되어야 소환하며, 소환 무효 시 원래 영역에 남는다."
+      ],
+      "effects": [
+        "이 몬스터의 소환에 성공하면 발동한다. 라인의 황금과 니벨룽겐의 반지를 각각 1장 자신의 패에 생성하고, 두 카드를 이 실제 파프니르에 연결한다.",
+        "이 몬스터는 소환된 후 사용/생성된 보물의 개수×10 만큼 공격력·체력가 상승한다."
+      ],
+      "notes": [
+        "토큰 생성·사용에 반응하는 파프니르 소환은 라인의 황금의 보물 전환보다 먼저 처리한다.",
+        "개발자 명확화: 생성한 반지는 함께 생성한 황금과 그 황금에 연결된 실제 파프니르를 참조한다. 다른 파프니르의 파괴만으로 이 반지를 사용하지 않는다.",
+        "개발자 명확화: 사건 당시 패/덱에 있던 실제 파프니르마다 판정한다. 동일 우선도의 선언 순서는 공통 자동 효과 순서를 따르고 역순으로 소환을 해결한다. 다른 파프니르의 황금이 이미 있어도 이 카드의 소환을 막지 않는다. 소환 성공의 황금/반지 생성은 별도 몬스터 효과로 대응하며 실제 카드별 1번 효과의 턴 사용 제한을 따른다."
+      ]
+    },
+    "after": {
+      "id": "COC-11-007",
+      "deckId": "11",
+      "name": "탐욕의 악룡 파프니르",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "드래곤",
+      "atk": "20",
+      "hp": "40",
+      "conditions": [
+        "이 몬스터가 자신의 패/덱에 있을 때 어느 쪽의 토큰이 생성·소환·사용·릴리스되는 실제 사건이 발생하면 자동 소환을 선언한다. 같은 필드 진입의 생성/소환은 하나의 사건이다. 원래 패/덱의 이 카드와 빈 필드가 유지되어야 소환하며, 소환 무효 시 원래 영역에 남는다."
+      ],
+      "effects": [
+        "이 몬스터의 소환에 성공하면 발동한다. 라인의 황금과 니벨룽겐의 반지를 각각 1장 자신의 패에 생성하고, 두 카드를 이 실제 파프니르에 연결한다.",
+        "이 실제 파프니르가 이번에 필드에 진입한 뒤, 연결된 활성 라인의 황금에 실제로 추가된 보물 수×10만큼 공격력·체력의 지속 증가를 얻는다. 효과 무효 중에도 보물 수를 기록하되 증가분은 적용하지 않고, 무효가 풀리면 다시 적용한다."
+      ],
+      "notes": [
+        "토큰 생성·사용에 반응하는 파프니르 소환은 라인의 황금의 보물 전환보다 먼저 처리한다.",
+        "개발자 명확화: 생성한 반지는 함께 생성한 황금과 그 황금에 연결된 실제 파프니르를 참조한다. 다른 파프니르의 파괴만으로 이 반지를 사용하지 않는다.",
+        "개발자 명확화: 사건 당시 패/덱에 있던 실제 파프니르마다 판정한다. 동일 우선도의 선언 순서는 공통 자동 효과 순서를 따르고 역순으로 소환을 해결한다. 다른 파프니르의 황금이 이미 있어도 이 카드의 소환을 막지 않는다. 소환 성공의 황금/반지 생성은 별도 몬스터 효과로 대응하며 실제 카드별 1번 효과의 턴 사용 제한을 따른다.",
+        "개발자 명확화: 필드의 조종권만 바뀌면 성장 기록은 유지하며 현재 받는 쪽의 강화 배율을 적용한다. 지속 체력은 증가분 차이만 반영하여 받은 피해를 보존한다. 필드 이탈 시 이번 성장은 끝나고 재소환은0부터 새로 센다. 필드 밖에서 쌓인 보물은 과거 성장으로 소급하지 않는다.",
+        "같은 실제 파프니르에 연결된 여러 황금은 각자 실제로 추가한 보물만 성장 기록에 합산한다. 한 토큰 사건의 한 황금 적립 규칙은 그대로 유지한다."
+      ]
+    },
+    "rationale": "증가분을 기본 수치에 영구 합산하던 구현을 체류별 지속 성장으로 분리한다. 무효/회복·조종권 변경·재소환에서 이력을 잃거나 과거 보물을 중복 보상하지 않으면서 용 덱의 축적 전략과 기존 수치를 유지한다."
+  },
+  {
+    "patchId": "DRAGON-GROWTH-2026-10-17-DRAFT",
+    "cardId": "COC-11-008",
+    "source": "Tracked runtime catalog at 55f1d98; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-11-008",
+      "deckId": "11",
+      "name": "라인의 황금",
+      "type": "주문",
+      "zone": "created",
+      "attribute": "드래곤",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "이 카드가 패에 들어오면 실제 카드별 이번 턴 1번 효과를 사용하지 않았고 주문 사용이 가능할 때 자동 사용한다. 원본을 원래 소유자의 묘지로 보내고 주문 대응을 받는다. 해결 때 같은 묘지 체류와 생성 당시 연결된 파프니르의 필드 체류가 유지되면 독립 지속 효과를 적용한다. 이미 이 실제 황금의 지속 효과가 있으면 새로 중복 등록하거나 보물 수를 초기화하지 않는다.",
+        "연결된 탐욕의 악룡 파프니르가 파괴되면 보물 수를 보관하고 새 보물 적립을 중단한다. 연결된 니벨룽겐의 반지의 발동 가능 여부와 해결/무효 처리를 끝낸 뒤 이 주문의 지속 효과를 종료하고 이 카드를 게임에서 제외한다."
+      ],
+      "effects": [
+        "이 주문이 적용되는 동안 토큰의 생성·소환·사용·릴리스 실제 사건마다 보물 1개를 기록한다. 한 번의 필드 진입은 한 사건으로 센다. 그 사건으로 파프니르의 자동 소환과 황금/반지 생성·황금 자동 사용을 먼저 처리한다. 생성/소환된 같은 토큰이 원래 필드 체류에 남아 있으면 파괴하지 않고 보물로 전환해 제거한다.",
+        "자신의 어택 페이즈가 시작될 때 이 독립 지속 효과에서 발동해 보물 5개를 추가한다. 이 발동이 무효화되면 이번 5개만 추가하지 않으며, 황금의 지속 효과 자체를 종료하지 않는다."
+      ],
+      "notes": [
+        "확정 재정 유지: 토큰 조종자 측 황금 우선, 한 토큰 사건은 한 황금에만 적립한다. 토큰 생성/소환 시 파프니르 소환이 보물 전환보다 먼저이며 보물 전환은 파괴가 아니다.",
+        "개발자 명확화: 어택 시작의 다른 동일 우선도 자동 효과와 함께 선언 순서를 정하고 역순 해결한다. 독립 지속 효과이므로 황금 카드 자체의 묘지/덱 이동만으로 종료하지 않는다. 파프니르 파괴 보상은 보관한 보물 수를 사용하므로 대응 중 다른 보물을 나중에 더하지 않는다.",
+        "개발자 명확화: 한 사건은 토큰 조종자 측의 활성 황금 하나에만 적립하며 없으면 상대 측에 적립한다. 같은 쪽의 황금이 여러 장이면 가장 먼저 적용된 활성 황금을 사용한다. 황금 첫 사용이 무효화되면 원본은 묘지에 남고 그 사용으로 새 지속 효과가 생기지 않는다. 이미 적용된 독립 지속 효과는 재사용 무효만으로 종료되지 않는다. 여러 황금의 동시 자동 사용은 공통 선언 순서 선택/역순 해결을 따른다."
+      ]
+    },
+    "after": {
+      "id": "COC-11-008",
+      "deckId": "11",
+      "name": "라인의 황금",
+      "type": "주문",
+      "zone": "created",
+      "attribute": "드래곤",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "이 카드가 패에 들어오면 실제 카드별 이번 턴 1번 효과를 사용하지 않았고 주문 사용이 가능할 때 자동 사용한다. 원본을 원래 소유자의 묘지로 보내고 주문 대응을 받는다. 해결 때 같은 묘지 체류와 생성 당시 연결된 파프니르의 필드 체류가 유지되면 독립 지속 효과를 적용한다. 이미 이 실제 황금의 지속 효과가 있으면 새로 중복 등록하거나 보물 수를 초기화하지 않는다.",
+        "연결된 탐욕의 악룡 파프니르가 파괴되면 보물 수를 보관하고 새 보물 적립을 중단한다. 연결된 니벨룽겐의 반지의 발동 가능 여부와 해결/무효 처리를 끝낸 뒤 이 주문의 지속 효과를 종료하고 이 카드를 게임에서 제외한다."
+      ],
+      "effects": [
+        "이 주문이 적용되는 동안 토큰의 생성·소환·사용·릴리스 실제 사건마다 보물 1개를 기록한다. 한 번의 필드 진입은 한 사건으로 센다. 그 사건으로 파프니르의 자동 소환과 황금/반지 생성·황금 자동 사용을 먼저 처리한다. 생성/소환된 같은 토큰이 원래 필드 체류에 남아 있으면 파괴하지 않고 보물로 전환해 제거한다.",
+        "자신의 어택 페이즈가 시작될 때 이 독립 지속 효과에서 발동해 보물 5개를 추가한다. 이 발동이 무효화되면 이번 5개만 추가하지 않으며, 황금의 지속 효과 자체를 종료하지 않는다."
+      ],
+      "notes": [
+        "확정 재정 유지: 토큰 조종자 측 황금 우선, 한 토큰 사건은 한 황금에만 적립한다. 토큰 생성/소환 시 파프니르 소환이 보물 전환보다 먼저이며 보물 전환은 파괴가 아니다.",
+        "개발자 명확화: 어택 시작의 다른 동일 우선도 자동 효과와 함께 선언 순서를 정하고 역순 해결한다. 독립 지속 효과이므로 황금 카드 자체의 묘지/덱 이동만으로 종료하지 않는다. 파프니르 파괴 보상은 보관한 보물 수를 사용하므로 대응 중 다른 보물을 나중에 더하지 않는다.",
+        "개발자 명확화: 한 사건은 토큰 조종자 측의 활성 황금 하나에만 적립하며 없으면 상대 측에 적립한다. 같은 쪽의 황금이 여러 장이면 가장 먼저 적용된 활성 황금을 사용한다. 황금 첫 사용이 무효화되면 원본은 묘지에 남고 그 사용으로 새 지속 효과가 생기지 않는다. 이미 적용된 독립 지속 효과는 재사용 무효만으로 종료되지 않는다. 여러 황금의 동시 자동 사용은 공통 선언 순서 선택/역순 해결을 따른다.",
+        "개발자 명확화: 최초 적용 전의 황금은 생성 당시 파프니르의 연속 필드 체류에 연결된다. 조종권 변경만으로 체류가 바뀌지는 않지만, 파프니르가 필드를 떠나면 미적용 연결은 다시 적용할 수 없다. 이미 적용된 독립 황금은 비파괴 이탈만으로 종료하지 않으며 소유자/보물을 유지한다.",
+        "황금 첫 사용이 무효화되었거나 미해결 상태여도 연결된 실제 파프니르가 파괴되면 그 미적용 황금은 제외되고 연결이 끝난다. 활성 황금이 없으면 반지 보상을 새로 만들지 않는다. 활성 황금은 기존대로 반지 처리 뒤 종료한다."
+      ]
+    },
+    "rationale": "최초 사용 전 연결과 이미 적용된 독립 지속 효과를 구분한다. 조종권 변경/필드 재진입을 혼동하지 않고 미적용 생성 카드가 파프니르 파괴 후 다시 활성화되는 경로를 막는다. 확정된 반지 선행과 비파괴/파괴 구분을 유지한다."
+  },
+  {
+    "patchId": "DRAGON-GROWTH-2026-10-17-DRAFT",
+    "cardId": "COC-11-009",
+    "source": "Tracked runtime catalog at 55f1d98; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-11-009",
+      "deckId": "11",
+      "name": "니벨룽겐의 반지",
+      "type": "주문",
+      "zone": "created",
+      "attribute": "드래곤",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "함께 생성한 라인의 황금에 연결된 실제 파프니르가 파괴될 때, 이 카드가 그 황금 소유자의 패에 있고 주문을 사용할 수 있으면 자동으로 사용한다."
+      ],
+      "effects": [
+        "파괴 당시 라인의 황금에 저장된 보물 수를 보관하고 이 카드를 묘지로 보낸 뒤 발동한다. 해결 시 이 사용한 카드가 같은 묘지 체류에 있으면 보관한 보물 수 × 10만큼 황금 소유자의 플레이어 공격력과 현재 체력을 올리고 이 카드를 게임에서 제외한다."
+      ],
+      "notes": [
+        "플레이어 공격력 보너스는 현재/이후 일체화에 한 번만 적용한다.",
+        "개발자 명확화: 파괴된 파프니르의 현재 조종자와 관계없이 황금 소유자가 보상을 받는다. 반지가 무효화되면 강화하지 않고 묘지에 남는다. 원본이 묘지를 떠나거나 재진입하면 강화는 불발한다. 반지가 없거나 사용할 수 없을 때와 해결/무효가 끝난 때 모두 황금은 종료한다. 황금 종료보다 반지 처리가 먼저이며 다른 카드의 진행 중인 체인을 강제로 해결하지 않는다."
+      ]
+    },
+    "after": {
+      "id": "COC-11-009",
+      "deckId": "11",
+      "name": "니벨룽겐의 반지",
+      "type": "주문",
+      "zone": "created",
+      "attribute": "드래곤",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "함께 생성한 라인의 황금에 연결된 실제 파프니르가 파괴될 때, 이 카드가 그 황금 소유자의 패에 있고 주문을 사용할 수 있으면 자동으로 사용한다."
+      ],
+      "effects": [
+        "파괴 당시 라인의 황금에 저장된 보물 수를 보관하고 이 카드를 묘지로 보낸 뒤 발동한다. 해결 시 이 사용한 카드가 같은 묘지 체류에 있으면 보관한 보물 수 × 10만큼 황금 소유자의 플레이어 공격력과 현재 체력을 올리고 이 카드를 게임에서 제외한다."
+      ],
+      "notes": [
+        "플레이어 공격력 보너스는 현재/이후 일체화에 한 번만 적용한다.",
+        "개발자 명확화: 파괴된 파프니르의 현재 조종자와 관계없이 황금 소유자가 보상을 받는다. 반지가 무효화되면 강화하지 않고 묘지에 남는다. 원본이 묘지를 떠나거나 재진입하면 강화는 불발한다. 반지가 없거나 사용할 수 없을 때와 해결/무효가 끝난 때 모두 황금은 종료한다. 황금 종료보다 반지 처리가 먼저이며 다른 카드의 진행 중인 체인을 강제로 해결하지 않는다.",
+        "자동 사용도 실제 카드별 이번 턴 사용 횟수와 카드/주문 사용 이력을 기록한다. 같은 파프니르에 여러 활성 황금이 연결되어 있으면 반지마다 함께 생성된 황금의 보물만 참조하고 각자 대응한다. 황금이 적용되지 않았다면 반지 보상을 새로 발동하지 않는다."
+      ]
+    },
+    "rationale": "자동 반지 사용에서 누락된 실물별 사용 횟수/주문 이력을 일반 사용과 일치시킨다. 연결별 스냅샷과 황금 원소유자 보상을 유지하며 미적용 황금에서 보상을 만들지 않는다."
+  },
+  {
+    "patchId": "BLACK-METAL-2026-10-17-DRAFT",
+    "cardId": "COC-22-001",
+    "source": "Tracked runtime catalog at c285a9e; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-22-001",
+      "deckId": "22",
+      "name": "블랙 메탈 팔콘",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "100",
+      "hp": "110",
+      "conditions": [],
+      "effects": [
+        "한 턴에 1회 공격력을 50으로 줄이고 공격 기회를 2번으로 늘린다.",
+        "공격 기회를 하나 사용해서 덱의 \"블랙 메탈 체인지\"를 가져온다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-22-001",
+      "deckId": "22",
+      "name": "블랙 메탈 팔콘",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "100",
+      "hp": "110",
+      "conditions": [],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드의 효과 1을 한 턴에 1회 발동한다. 이번 턴 동안 기본 공격력을 50으로, 기본 공격 기회를 총 2회로 바꾼다. 다른 강화·약화·추가 공격은 별도로 계산하며 이미 공격하거나 비용으로 지불한 공격 기회는 회복하지 않는다.",
+        "자신의 메인 페이즈에 남은 공격 기회 1회를 비용으로 지불하고, 덱의 블랙 메탈 체인지 1장을 선택하여 공개하고 패로 가져온다."
+      ],
+      "notes": [
+        "개발자 명확화: 효과 1과 효과 2 및 다른 실제 카드의 사용 횟수는 공유하지 않는다. 공격 기회 비용은 동결·공격 금지 중에도 남아 있으면 지불할 수 있다(R29). 대응 무효/불발에도 지불한 공격 기회와 선언 때 소모한 횟수는 반환하지 않는다. 이미 해결된 전환·부여 수치는 이후 소스 효과 무효와 독립적으로 정해진 기간 유지한다. 필드 이탈 시 임시 수치는 종료한다.",
+        "효과 2에는 별도의 턴 1회 제한을 추가하지 않는다. 남은 공격 기회를 매번 1회씩 지불해야 한다."
+      ]
+    },
+    "rationale": "덱의 다회 공격과 공격 기회 자원 배분·융합 준비·나이트 카운터→매지션 흐름을 유지한다. 기존 수치는 보존하고 임시 기간/중복/실물별 제한/대응 경계를 명확화했다. 서로 다른 카드의 사용 횟수와 매지션 실제50/취급250 및 R29를 유지하며 원문 정본으로 가장하지 않는다."
+  },
+  {
+    "patchId": "BLACK-METAL-2026-10-17-DRAFT",
+    "cardId": "COC-22-002",
+    "source": "Tracked runtime catalog at c285a9e; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-22-002",
+      "deckId": "22",
+      "name": "블랙 메탈 램",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "100",
+      "hp": "110",
+      "conditions": [],
+      "effects": [
+        "한 턴에 1회 공격력을 50으로 줄이고 공격 기회를 2번으로 늘린다.",
+        "공격 기회를 하나 사용해서 플레이어 혹은 몬스터의 체력을 50회복시킨다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-22-002",
+      "deckId": "22",
+      "name": "블랙 메탈 램",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "100",
+      "hp": "110",
+      "conditions": [],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드의 효과 1을 한 턴에 1회 발동한다. 이번 턴 동안 기본 공격력을 50으로, 기본 공격 기회를 총 2회로 바꾼다. 다른 강화·약화·추가 공격은 별도로 계산하며 이미 공격하거나 비용으로 지불한 공격 기회는 회복하지 않는다.",
+        "자신의 메인 페이즈에 남은 공격 기회 1회를 비용으로 지불하고, 선택한 플레이어 또는 필드 몬스터의 현재 체력을 기본 50 회복한다."
+      ],
+      "notes": [
+        "개발자 명확화: 효과 1과 효과 2 및 다른 실제 카드의 사용 횟수는 공유하지 않는다. 공격 기회 비용은 동결·공격 금지 중에도 남아 있으면 지불할 수 있다(R29). 대응 무효/불발에도 지불한 공격 기회와 선언 때 소모한 횟수는 반환하지 않는다. 이미 해결된 전환·부여 수치는 이후 소스 효과 무효와 독립적으로 정해진 기간 유지한다. 필드 이탈 시 임시 수치는 종료한다.",
+        "효과 2에는 별도의 턴 1회 제한을 추가하지 않는다. 남은 공격 기회를 매번 1회씩 지불해야 한다."
+      ]
+    },
+    "rationale": "덱의 다회 공격과 공격 기회 자원 배분·융합 준비·나이트 카운터→매지션 흐름을 유지한다. 기존 수치는 보존하고 임시 기간/중복/실물별 제한/대응 경계를 명확화했다. 서로 다른 카드의 사용 횟수와 매지션 실제50/취급250 및 R29를 유지하며 원문 정본으로 가장하지 않는다."
+  },
+  {
+    "patchId": "BLACK-METAL-2026-10-17-DRAFT",
+    "cardId": "COC-22-003",
+    "source": "Tracked runtime catalog at c285a9e; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-22-003",
+      "deckId": "22",
+      "name": "블랙 메탈 샤크",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "100",
+      "hp": "110",
+      "conditions": [],
+      "effects": [
+        "한 턴에 1회 공격력을 50으로 줄이고 공격 기회를 2번으로 만든다.",
+        "공격 기회를 하나 사용해서 덱의 \"퓨전업\"을 가져온다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-22-003",
+      "deckId": "22",
+      "name": "블랙 메탈 샤크",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "100",
+      "hp": "110",
+      "conditions": [],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드의 효과 1을 한 턴에 1회 발동한다. 이번 턴 동안 기본 공격력을 50으로, 기본 공격 기회를 총 2회로 바꾼다. 다른 강화·약화·추가 공격은 별도로 계산하며 이미 공격하거나 비용으로 지불한 공격 기회는 회복하지 않는다.",
+        "자신의 메인 페이즈에 남은 공격 기회 1회를 비용으로 지불하고, 덱의 퓨전업 1장을 선택하여 공개하고 패로 가져온다."
+      ],
+      "notes": [
+        "개발자 명확화: 효과 1과 효과 2 및 다른 실제 카드의 사용 횟수는 공유하지 않는다. 공격 기회 비용은 동결·공격 금지 중에도 남아 있으면 지불할 수 있다(R29). 대응 무효/불발에도 지불한 공격 기회와 선언 때 소모한 횟수는 반환하지 않는다. 이미 해결된 전환·부여 수치는 이후 소스 효과 무효와 독립적으로 정해진 기간 유지한다. 필드 이탈 시 임시 수치는 종료한다.",
+        "효과 2에는 별도의 턴 1회 제한을 추가하지 않는다. 남은 공격 기회를 매번 1회씩 지불해야 한다."
+      ]
+    },
+    "rationale": "덱의 다회 공격과 공격 기회 자원 배분·융합 준비·나이트 카운터→매지션 흐름을 유지한다. 기존 수치는 보존하고 임시 기간/중복/실물별 제한/대응 경계를 명확화했다. 서로 다른 카드의 사용 횟수와 매지션 실제50/취급250 및 R29를 유지하며 원문 정본으로 가장하지 않는다."
+  },
+  {
+    "patchId": "BLACK-METAL-2026-10-17-DRAFT",
+    "cardId": "COC-22-004",
+    "source": "Tracked runtime catalog at c285a9e; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-22-004",
+      "deckId": "22",
+      "name": "블랙 메탈 솔저",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "100",
+      "hp": "110",
+      "conditions": [],
+      "effects": [
+        "한 턴에 1회 공격력을 50으로 줄이고 공격 기회를 2번으로 만든다.",
+        "소환하고 1회,공격 기회를 하나 사용해서 묘지의 블랙 메탈 카드를 패로 가져온다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-22-004",
+      "deckId": "22",
+      "name": "블랙 메탈 솔저",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "100",
+      "hp": "110",
+      "conditions": [],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드의 효과 1을 한 턴에 1회 발동한다. 이번 턴 동안 기본 공격력을 50으로, 기본 공격 기회를 총 2회로 바꾼다. 다른 강화·약화·추가 공격은 별도로 계산하며 이미 공격하거나 비용으로 지불한 공격 기회는 회복하지 않는다.",
+        "소환 후 이번 필드 체류에 1회, 자신의 메인 페이즈에 남은 공격 기회 1회를 비용으로 지불하고 자신의 묘지에서 블랙 메탈 카드 1장을 선택하여 공개하고 패로 가져온다. 필드를 떠났다가 다시 소환되면 재사용할 수 있으나 조종권 변경만으로 초기화하지 않는다."
+      ],
+      "notes": [
+        "개발자 명확화: 효과 1과 효과 2 및 다른 실제 카드의 사용 횟수는 공유하지 않는다. 공격 기회 비용은 동결·공격 금지 중에도 남아 있으면 지불할 수 있다(R29). 대응 무효/불발에도 지불한 공격 기회와 선언 때 소모한 횟수는 반환하지 않는다. 이미 해결된 전환·부여 수치는 이후 소스 효과 무효와 독립적으로 정해진 기간 유지한다. 필드 이탈 시 임시 수치는 종료한다.",
+        "묘지 회수 선언은 묘지 효과 사용 사건을 발생시킨다. 소환 후 1회는 선언 시 소모하며 무효화되어도 같은 체류에서 다시 사용할 수 없다."
+      ]
+    },
+    "rationale": "덱의 다회 공격과 공격 기회 자원 배분·융합 준비·나이트 카운터→매지션 흐름을 유지한다. 기존 수치는 보존하고 임시 기간/중복/실물별 제한/대응 경계를 명확화했다. 서로 다른 카드의 사용 횟수와 매지션 실제50/취급250 및 R29를 유지하며 원문 정본으로 가장하지 않는다."
+  },
+  {
+    "patchId": "BLACK-METAL-2026-10-17-DRAFT",
+    "cardId": "COC-22-005",
+    "source": "Tracked runtime catalog at c285a9e; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-22-005",
+      "deckId": "22",
+      "name": "블랙 메탈 가드너",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "100",
+      "hp": "110",
+      "conditions": [],
+      "effects": [
+        "한 턴에 1회 공격력을 50으로 줄이고 공격 기회를 2번으로 만든다.",
+        "한게임당 1회 공격 기회를 하나 사용해서 필드 위의 블랙 메탈 몬스터에게 주문/효과 파괴 무효 효과를 부여한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-22-005",
+      "deckId": "22",
+      "name": "블랙 메탈 가드너",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "기계",
+      "atk": "100",
+      "hp": "110",
+      "conditions": [],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드의 효과 1을 한 턴에 1회 발동한다. 이번 턴 동안 기본 공격력을 50으로, 기본 공격 기회를 총 2회로 바꾼다. 다른 강화·약화·추가 공격은 별도로 계산하며 이미 공격하거나 비용으로 지불한 공격 기회는 회복하지 않는다.",
+        "이 실제 카드 기준 게임 중 1회, 자신의 메인 페이즈에 남은 공격 기회 1회를 비용으로 지불하고 필드의 블랙 메탈 몬스터 1장에 주문·효과의 직접 파괴를 막는 효과를 부여한다. 보호는 부여한 가드너가 떠나도 유지되며, 보호받는 몬스터가 필드를 떠나면 종료한다."
+      ],
+      "notes": [
+        "개발자 명확화: 효과 1과 효과 2 및 다른 실제 카드의 사용 횟수는 공유하지 않는다. 공격 기회 비용은 동결·공격 금지 중에도 남아 있으면 지불할 수 있다(R29). 대응 무효/불발에도 지불한 공격 기회와 선언 때 소모한 횟수는 반환하지 않는다. 이미 해결된 전환·부여 수치는 이후 소스 효과 무효와 독립적으로 정해진 기간 유지한다. 필드 이탈 시 임시 수치는 종료한다.",
+        "게임 1회는 선언 시 소모하고 패·덱·묘지 왕복이나 조종권 변경으로 복구하지 않는다. 직접 파괴 보호는 전투 피해·비파괴 이동·HP/ATK 상태 기반 파괴를 막지 않는다."
+      ]
+    },
+    "rationale": "덱의 다회 공격과 공격 기회 자원 배분·융합 준비·나이트 카운터→매지션 흐름을 유지한다. 기존 수치는 보존하고 임시 기간/중복/실물별 제한/대응 경계를 명확화했다. 서로 다른 카드의 사용 횟수와 매지션 실제50/취급250 및 R29를 유지하며 원문 정본으로 가장하지 않는다."
+  },
+  {
+    "patchId": "BLACK-METAL-2026-10-17-DRAFT",
+    "cardId": "COC-22-011",
+    "source": "Tracked runtime catalog at c285a9e; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-22-011",
+      "deckId": "22",
+      "name": "블랙 메탈 키메라",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "기계",
+      "atk": "500",
+      "hp": "500",
+      "conditions": [
+        "블랙 메탈 몬스터 5체."
+      ],
+      "effects": [
+        "한 턴에 1회 공격력을 100으로 줄이고 공격 기회를 5번으로 만든다.",
+        "엔드 페이즈에 이 카드에게 공격받은 몬스터의 수×100만큼 상대 플레이어에게 피해를 준다.",
+        "플레이어가 일체화 했을때 이 카드는 주문/효과로는 파괴되지 않는다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-22-011",
+      "deckId": "22",
+      "name": "블랙 메탈 키메라",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "기계",
+      "atk": "500",
+      "hp": "500",
+      "conditions": [
+        "블랙 메탈 몬스터 5체."
+      ],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드의 효과 1을 한 턴에 1회 발동한다. 이번 턴 동안 기본 공격력을 100으로, 기본 공격 기회를 총 5회로 바꾼다. 다른 강화·약화·추가 공격은 별도로 계산하며 이미 공격하거나 비용으로 지불한 공격 기회는 회복하지 않는다.",
+        "엔드 페이즈에, 이번 턴 이 실제 카드가 이번 필드 체류 중 실제로 공격한 서로 다른 몬스터 수 × 100만큼 상대 플레이어에게 피해를 준다. 같은 몬스터를 여러 번 공격해도 1장으로 센다. 공격받은 몬스터가 떠나도 이력은 남으며, 공격 선언 취소·공격 기회 비용 지불·플레이어 공격은 세지 않는다.",
+        "현재 조종자가 일체화 중이고 이 카드의 효과가 유효하면, 이 카드는 주문·효과로 직접 파괴되지 않는다."
+      ],
+      "notes": [
+        "개발자 명확화: 효과 1과 효과 2 및 다른 실제 카드의 사용 횟수는 공유하지 않는다. 공격 기회 비용은 동결·공격 금지 중에도 남아 있으면 지불할 수 있다(R29). 대응 무효/불발에도 지불한 공격 기회와 선언 때 소모한 횟수는 반환하지 않는다. 이미 해결된 전환·부여 수치는 이후 소스 효과 무효와 독립적으로 정해진 기간 유지한다. 필드 이탈 시 임시 수치는 종료한다.",
+        "실행한 공격 이력은 효과가 무효인 동안에도 기록한다. 엔드 피해는 엔드 시점과 해결 시점에 이 카드가 같은 필드 체류/조종권에서 효과가 유효해야 한다. 피해를 막아 0이 된 공격도 실행된 공격이면 센다. 필드 이탈 시 이력은 종료한다."
+      ]
+    },
+    "rationale": "덱의 다회 공격과 공격 기회 자원 배분·융합 준비·나이트 카운터→매지션 흐름을 유지한다. 기존 수치는 보존하고 임시 기간/중복/실물별 제한/대응 경계를 명확화했다. 서로 다른 카드의 사용 횟수와 매지션 실제50/취급250 및 R29를 유지하며 원문 정본으로 가장하지 않는다."
+  },
+  {
+    "patchId": "BLACK-METAL-2026-10-17-DRAFT",
+    "cardId": "COC-22-012",
+    "source": "Tracked runtime catalog at c285a9e; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-22-012",
+      "deckId": "22",
+      "name": "블랙 메탈 드래곤",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "기계",
+      "atk": "300",
+      "hp": "300",
+      "conditions": [
+        "블랙 메탈 몬스터 3체."
+      ],
+      "effects": [
+        "한 턴에 1회 자신의 공격력을 100으로 줄이고 공격 기회를 3번으로 만들 수 있다.",
+        "공격 기회를 하나 사용해서 상대 몬스터의 공격력을 100줄인다,자신의 턴이 돌아오면 해제된다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-22-012",
+      "deckId": "22",
+      "name": "블랙 메탈 드래곤",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "기계",
+      "atk": "300",
+      "hp": "300",
+      "conditions": [
+        "블랙 메탈 몬스터 3체."
+      ],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드의 효과 1을 한 턴에 1회 발동한다. 이번 턴 동안 기본 공격력을 100으로, 기본 공격 기회를 총 3회로 바꾼다. 다른 강화·약화·추가 공격은 별도로 계산하며 이미 공격하거나 비용으로 지불한 공격 기회는 회복하지 않는다.",
+        "자신의 메인 페이즈에 남은 공격 기회 1회를 비용으로 지불하고 상대 필드 몬스터 1장의 공격력을 100 줄인다. 감소는 다음 자신의 턴 시작 또는 대상의 필드 이탈에 종료하며 조종권 변경만으로 끝나지 않는다."
+      ],
+      "notes": [
+        "개발자 명확화: 효과 1과 효과 2 및 다른 실제 카드의 사용 횟수는 공유하지 않는다. 공격 기회 비용은 동결·공격 금지 중에도 남아 있으면 지불할 수 있다(R29). 대응 무효/불발에도 지불한 공격 기회와 선언 때 소모한 횟수는 반환하지 않는다. 이미 해결된 전환·부여 수치는 이후 소스 효과 무효와 독립적으로 정해진 기간 유지한다. 필드 이탈 시 임시 수치는 종료한다.",
+        "효과 2에는 별도의 턴 1회 제한을 추가하지 않는다. 남은 공격 기회를 매번 1회씩 지불해야 한다.",
+        "양수였던 현재 실제 ATK가 감소로 0이 되면 기존 수치 감소 상태 규칙에 따라 파괴한다. 원래 ATK 0인 몬스터의 공격 가능 규칙은 바꾸지 않는다. 감소량에는 강화 배율을 곱하지 않는다."
+      ]
+    },
+    "rationale": "덱의 다회 공격과 공격 기회 자원 배분·융합 준비·나이트 카운터→매지션 흐름을 유지한다. 기존 수치는 보존하고 임시 기간/중복/실물별 제한/대응 경계를 명확화했다. 서로 다른 카드의 사용 횟수와 매지션 실제50/취급250 및 R29를 유지하며 원문 정본으로 가장하지 않는다."
+  },
+  {
+    "patchId": "BLACK-METAL-2026-10-17-DRAFT",
+    "cardId": "COC-22-013",
+    "source": "Tracked runtime catalog at c285a9e; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-22-013",
+      "deckId": "22",
+      "name": "블랙 메탈 제네럴",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "기계",
+      "atk": "300",
+      "hp": "300",
+      "conditions": [
+        "블랙 메탈 몬스터 3체."
+      ],
+      "effects": [
+        "한 턴에 1회 자신의 공격력을 100으로 줄이고 공격 기회를 3번으로 만든다.",
+        "공격 기회를 하나 사용해서 지정한 몬스터 1장의 공격력을 한 턴간 50늘린다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-22-013",
+      "deckId": "22",
+      "name": "블랙 메탈 제네럴",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "기계",
+      "atk": "300",
+      "hp": "300",
+      "conditions": [
+        "블랙 메탈 몬스터 3체."
+      ],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드의 효과 1을 한 턴에 1회 발동한다. 이번 턴 동안 기본 공격력을 100으로, 기본 공격 기회를 총 3회로 바꾼다. 다른 강화·약화·추가 공격은 별도로 계산하며 이미 공격하거나 비용으로 지불한 공격 기회는 회복하지 않는다.",
+        "자신의 메인 페이즈에 남은 공격 기회 1회를 비용으로 지불하고 지정한 필드 몬스터 1장의 공격력을 이번 턴 동안 기본 50 늘린다. 다른 강화와 별도로 적용·만료하며 대상의 필드 이탈 시 종료한다."
+      ],
+      "notes": [
+        "개발자 명확화: 효과 1과 효과 2 및 다른 실제 카드의 사용 횟수는 공유하지 않는다. 공격 기회 비용은 동결·공격 금지 중에도 남아 있으면 지불할 수 있다(R29). 대응 무효/불발에도 지불한 공격 기회와 선언 때 소모한 횟수는 반환하지 않는다. 이미 해결된 전환·부여 수치는 이후 소스 효과 무효와 독립적으로 정해진 기간 유지한다. 필드 이탈 시 임시 수치는 종료한다.",
+        "효과 2에는 별도의 턴 1회 제한을 추가하지 않는다. 남은 공격 기회를 매번 1회씩 지불해야 한다.",
+        "가산 강화 배율은 해결 시 받는 몬스터를 기준으로 적용하고 적용량을 저장한다. 소스가 떠나도 남은 기간 유지한다."
+      ]
+    },
+    "rationale": "덱의 다회 공격과 공격 기회 자원 배분·융합 준비·나이트 카운터→매지션 흐름을 유지한다. 기존 수치는 보존하고 임시 기간/중복/실물별 제한/대응 경계를 명확화했다. 서로 다른 카드의 사용 횟수와 매지션 실제50/취급250 및 R29를 유지하며 원문 정본으로 가장하지 않는다."
+  },
+  {
+    "patchId": "BLACK-METAL-2026-10-17-DRAFT",
+    "cardId": "COC-22-014",
+    "source": "Tracked runtime catalog at c285a9e; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-22-014",
+      "deckId": "22",
+      "name": "블랙 메탈 나이트",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "기계",
+      "atk": "250",
+      "hp": "200",
+      "conditions": [
+        "블랙 메탈 몬스터 2체."
+      ],
+      "effects": [
+        "한 턴에 1회 공격력을 50으로 줄이고 공격 기회를 5번으로 만든다.",
+        "이 카드에게 공격받은 몬스터에게는 블랙 메탈 카운터가 추가된다,카운터가 추가된 몬스터가 없어져도 카운터는 필드에 남고 블랙 메탈 카운터가 추가되는건 몬스터당 한 턴에 1회 뿐이다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-22-014",
+      "deckId": "22",
+      "name": "블랙 메탈 나이트",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "기계",
+      "atk": "250",
+      "hp": "200",
+      "conditions": [
+        "블랙 메탈 몬스터 2체."
+      ],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드의 효과 1을 한 턴에 1회 발동한다. 이번 턴 동안 기본 공격력을 50으로, 기본 공격 기회를 총 5회로 바꾼다. 다른 강화·약화·추가 공격은 별도로 계산하며 이미 공격하거나 비용으로 지불한 공격 기회는 회복하지 않는다.",
+        "이 카드가 몬스터를 실제로 공격했을 때, 공격 당시 상대 필드에 블랙 메탈 카운터 1개를 추가하는 효과를 발동한다. 공격받은 몬스터가 파괴되거나 떠나도 카운터는 그 필드에 남는다. 이 실제 나이트와 공격받은 실제 몬스터의 조합마다 한 턴에 1회이며, 서로 다른 나이트는 별개로 계산한다."
+      ],
+      "notes": [
+        "개발자 명확화: 효과 1과 효과 2 및 다른 실제 카드의 사용 횟수는 공유하지 않는다. 공격 기회 비용은 동결·공격 금지 중에도 남아 있으면 지불할 수 있다(R29). 대응 무효/불발에도 지불한 공격 기회와 선언 때 소모한 횟수는 반환하지 않는다. 이미 해결된 전환·부여 수치는 이후 소스 효과 무효와 독립적으로 정해진 기간 유지한다. 필드 이탈 시 임시 수치는 종료한다.",
+        "나이트의 대상별 턴 횟수는 유발 선언 예약 시 소모한다. 효과가 무효화되어도 같은 실제 나이트가 같은 실제 대상을 다시 공격해 그 턴에 재발동하지 않는다. 나이트/대상이 떠났다가 재진입해도 그 턴의 사용 기록은 유지한다. 부여 유발은 공통 몬스터 효과 대응을 거치며 소스 이탈/재진입·조종권 변경 시 불발한다."
+      ]
+    },
+    "rationale": "덱의 다회 공격과 공격 기회 자원 배분·융합 준비·나이트 카운터→매지션 흐름을 유지한다. 기존 수치는 보존하고 임시 기간/중복/실물별 제한/대응 경계를 명확화했다. 서로 다른 카드의 사용 횟수와 매지션 실제50/취급250 및 R29를 유지하며 원문 정본으로 가장하지 않는다."
+  },
+  {
+    "patchId": "BLACK-METAL-2026-10-17-DRAFT",
+    "cardId": "COC-22-015",
+    "source": "Tracked runtime catalog at c285a9e; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-22-015",
+      "deckId": "22",
+      "name": "블랙 메탈 매지션",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "기계",
+      "atk": "50",
+      "hp": "200",
+      "conditions": [
+        "블랙 메탈 몬스터 2체."
+      ],
+      "effects": [
+        "실제 공격력은 50이며 기본 공격은 1d50으로 판정한다. 단, 공격력 250을 참조하는 카드의 조건·효과에는 공격력 250인 몬스터로도 취급한다.",
+        "이 카드는 현재 존재하는 블랙 메탈 카운터의 수만큼 공격할 수 있다.",
+        "소환되었을때 덱의 \"퓨전업\" 혹은 \"블랙 메탈 퓨전 업\"을 패로 가져온다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-22-015",
+      "deckId": "22",
+      "name": "블랙 메탈 매지션",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "기계",
+      "atk": "50",
+      "hp": "200",
+      "conditions": [
+        "블랙 메탈 몬스터 2체."
+      ],
+      "effects": [
+        "실제 공격력은 50이며 기본 공격은 1d50으로 판정한다. 단, 공격력 250을 참조하는 카드의 조건·효과에는 공격력 250인 몬스터로도 취급한다.",
+        "효과가 유효한 동안 이 카드의 기본 공격 기회는 양쪽 필드에 현재 남아 있는 블랙 메탈 카운터의 합계와 같다. 카운터가 0개면 기본 공격 기회도 0회다. 별도로 부여받은 추가 공격 기회는 더하며 이미 지불한 공격 기회는 회복하지 않는다.",
+        "소환되었을때 덱의 \"퓨전업\" 혹은 \"블랙 메탈 퓨전 업\"을 패로 가져온다."
+      ],
+      "notes": [
+        "개발자 명확화: 실제 ATK 50과 조건용 취급 ATK 250은 그대로 구분한다. 효과가 무효인 동안에는 카운터 참조 대신 기본 공격 기회 1회로 돌아가며 사용한 횟수는 유지한다. 카운터는 몬스터 이탈 후에도 원래 적립된 필드에 남고 게임 중 자동 소멸하지 않는다."
+      ]
+    },
+    "rationale": "덱의 다회 공격과 공격 기회 자원 배분·융합 준비·나이트 카운터→매지션 흐름을 유지한다. 기존 수치는 보존하고 임시 기간/중복/실물별 제한/대응 경계를 명확화했다. 서로 다른 카드의 사용 횟수와 매지션 실제50/취급250 및 R29를 유지하며 원문 정본으로 가장하지 않는다."
+  },
+  {
+    "patchId": "TEN-CARD-2026-10-18-DRAFT",
+    "cardId": "COC-06-006",
+    "source": "Tracked runtime catalog at 7b7e2e8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-06-006",
+      "deckId": "06",
+      "name": "마도합성수 쿠퍼 타이거",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "원소 / 금속",
+      "atk": "140",
+      "hp": "140",
+      "conditions": [],
+      "effects": [
+        "필드에 대상을 하나 지정한다. 이 카드가 필드에 있는동안 내 일체화의 공격력을 그 대상의 공격력의 절반과 같게합니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-06-006",
+      "deckId": "06",
+      "name": "마도합성수 쿠퍼 타이거",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "원소 / 금속",
+      "atk": "140",
+      "hp": "140",
+      "conditions": [],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드 기준 한 턴에 1회, 필드 몬스터 1장을 지정한다. 이 카드와 대상이 계속 필드에 있고 이 카드의 효과가 유효한 동안, 현재 조종자의 일체화 공격력을 대상의 현재 실제 공격력의 절반(소수점 버림)으로 한다."
+      ],
+      "notes": [
+        "개발자 명확화: 지정에는 자기 자신도 포함하며, 일체화가 없어도 미리 지정할 수 있다. 같은 일체화에 여러 쿠퍼 타이거가 적용되면 가장 최근에 성공한 유효 지정을 적용한다. 일체화의 다른 가산 강화는 저장해 두고 이 설정이 끝나면 다시 적용한다. 대상의 마검 배율은 참조 공격력에 포함하고 일체화 자신에게 부여된 마검 배율은 설정값에 별도로 적용한다. 조종권 변경만으로 연결을 끊지 않지만 소스 또는 대상의 필드 이탈·재진입으로 옛 연결을 복원하지 않는다."
+      ]
+    },
+    "rationale": "연금술의 일체화 운용과 대상 수치 조절을 유지하고 지속 설정·가산 강화·마검 배율의 적용 순서를 분리한다."
+  },
+  {
+    "patchId": "TEN-CARD-2026-10-18-DRAFT",
+    "cardId": "COC-07-005",
+    "source": "Tracked runtime catalog at 7b7e2e8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-07-005",
+      "deckId": "07",
+      "name": "포식의 전투마차",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "포식",
+      "atk": "150",
+      "hp": "150",
+      "conditions": [
+        "이 카드의 소환 시, 상대는 1장 드로우한다."
+      ],
+      "effects": [
+        "상대는 카드를 뽑는 효과를 발동할 때마다(자연스러운 드로우는 해당되지 않는다) 그 매수만큼 덱 위에서 카드를 묘지로 보내야 한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-07-005",
+      "deckId": "07",
+      "name": "포식의 전투마차",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "포식",
+      "atk": "150",
+      "hp": "150",
+      "conditions": [
+        "이 카드의 소환이 성공할 때마다 상대는 1장 드로우한다. 이 필수 처리는 이 카드의 효과가 무효여도 적용한다."
+      ],
+      "effects": [
+        "이 카드가 필드에 있고 효과가 유효한 동안, 상대가 카드 효과·조건·비용으로 실제 드로우할 때마다 그 성공한 매수만큼 상대 덱 위 카드를 묘지로 보내는 효과를 발동한다. 일반 드로우 및 그 대체 드로우는 제외한다."
+      ],
+      "notes": [
+        "개발자 개정: 효과 발동 선언만으로 덱을 버리지 않고 실제 드로우 성공을 기준으로 한다. 이 카드의 소환으로 상대가 뽑는 카드도 센다. 한 엔진 동작의 연속 드로우는 매수를 모아 처리하며 다른 실제 전투마차는 각각 발동한다. 턴 1회 제한은 없다. 드로우 실패·무효로 뽑지 못한 카드, 시작 패 배분·수동 판정 드로우는 제외한다. 묘지 이동 자체에는 리로드를 하지 않고 남은 덱까지만 보낸다."
+      ]
+    },
+    "rationale": "상대에게 드로우를 주고 덱을 소모시켜 마도사의 피해로 연결하는 포식 흐름을 유지한다. 실제 드로우와 덱 위 묘지 사건을 구분한다."
+  },
+  {
+    "patchId": "TEN-CARD-2026-10-18-DRAFT",
+    "cardId": "COC-07-009",
+    "source": "Tracked runtime catalog at 7b7e2e8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-07-009",
+      "deckId": "07",
+      "name": "포식자와 계약한 마도사",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "포식",
+      "atk": "150",
+      "hp": "50",
+      "conditions": [
+        "상대는 카드를 1장 뽑습니다. 한 턴에 1회만 사용할 수 있다."
+      ],
+      "effects": [
+        "적 영웅에게 저번 턴과 이번 턴을 통틀어, (카드를 덱 위에서 묘지로 보낸 매수)d50의 피해를 입힌다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-07-009",
+      "deckId": "07",
+      "name": "포식자와 계약한 마도사",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "포식",
+      "atk": "150",
+      "hp": "50",
+      "conditions": [
+        "이 실제 카드의 일반 사용은 한 턴에 1회이며, 상대에게 1장 드로우시키는 비용을 지불한다. 소환 무효에도 비용과 사용 횟수는 반환하지 않는다."
+      ],
+      "effects": [
+        "이 카드의 소환 성공 후 이 실제 카드 기준 한 턴에 1회, 직전 턴과 현재 턴에 양쪽 덱 맨 위에서 묘지로 보낸 카드 수만큼 d50을 굴려 합계만큼 상대 플레이어에게 피해를 준다. 매수는 효과 해결 시 계산한다."
+      ],
+      "notes": [
+        "개발자 명확화: 적 영웅은 상대 플레이어를 뜻하고 직전 턴은 직전 전역 턴이다. 덱 중간 카드의 묘지 이동·패 버리기·덱의 다른 영역 이동은 세지 않는다. 일반 사용과 소환 유발의 실물별 기록을 구분하며 효과 소환은 기존 공통 규칙에 따라 일반 사용 비용을 다시 지불하지 않는다."
+      ]
+    },
+    "rationale": "상대에게 드로우를 주고 덱을 소모시켜 마도사의 피해로 연결하는 포식 흐름을 유지한다. 실제 드로우와 덱 위 묘지 사건을 구분한다."
+  },
+  {
+    "patchId": "TEN-CARD-2026-10-18-DRAFT",
+    "cardId": "COC-12-005",
+    "source": "Tracked runtime catalog at 7b7e2e8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-12-005",
+      "deckId": "12",
+      "name": "F=HERO 스켈레톤 보이",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영웅",
+      "atk": "50",
+      "hp": "40",
+      "conditions": [
+        "자신의 필드나 패에 있는 이 카드를 버린다."
+      ],
+      "effects": [
+        "자신의 묘지에 있는 다른 몬스터 1장을 자신의 필드에 소환한다. 이 효과로 묘지에 간 스켈레톤 보이 자신은 소환할 수 없다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-12-005",
+      "deckId": "12",
+      "name": "F=HERO 스켈레톤 보이",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "영웅",
+      "atk": "50",
+      "hp": "40",
+      "conditions": [
+        "이 카드의 일반 소환에는 자기 버리기 비용이 없다. 아래 부활 효과를 발동하려면 자신의 패 또는 필드의 이 카드를 묘지로 버린다."
+      ],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드 기준 한 턴에 1회, 자신을 버리는 비용을 지불하고 자신의 묘지에 있는 다른 실제 몬스터 1장을 선택하여 자신의 필드에 소환한다. 비용으로 버린 이 실제 카드는 선택할 수 없다."
+      ],
+      "notes": [
+        "개발자 밸런스 개정: 반복 부활 순환을 막기 위해 실물별 턴 1회를 적용한다. 다른 스켈레톤 보이는 별개이며 버리기는 파괴가 아니다. 비용 지불 후 효과 대응과 부활 소환 대응을 따로 거친다. 효과 무효에도 자신은 묘지에 남고, 부활 소환 무효 시 대상은 원래 묘지에 남는다. 묘지 선택은 비용 지불 전 확정하며 소스/대상의 이탈·재진입 또는 빈 칸 소실 시 불발한다."
+      ]
+    },
+    "rationale": "F=HERO의 묘지 부활과 퓨전 방어 역할은 유지하되 무한 부활·무제한 보호 누적을 억제한다. 기존 수치 너프와 퓨전 소재를 보존한다."
+  },
+  {
+    "patchId": "TEN-CARD-2026-10-18-DRAFT",
+    "cardId": "COC-12-015",
+    "source": "Tracked runtime catalog at 7b7e2e8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-12-015",
+      "deckId": "12",
+      "name": "F=HERO 버디 더 이모탈",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "영웅",
+      "atk": "260",
+      "hp": "240",
+      "conditions": [
+        "이 카드는 \"용기의 패왕\"의 효과로 \"일렉트릭 보이\"와 \"스플래쉬 걸\"과 \"라이징 윈드 걸\"을 버렸을 때 소환할 수 있다."
+      ],
+      "effects": [
+        "자신 덱의 카드 1장을 묘지로 보내고, 자신 필드 위의 몬스터 1장을 선택한다. 이 카드가 필드에 존재하는 한, 선택한 몬스터는 전투에 의해서는 파괴되지 않는다."
+      ],
+      "notes": [
+        "v1.2 소환 분류: 퓨전. 용기의 패왕 효과로 지정 소재를 사용해 엑스트라 덱에서 소환한다."
+      ]
+    },
+    "after": {
+      "id": "COC-12-015",
+      "deckId": "12",
+      "name": "F=HERO 버디 더 이모탈",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "영웅",
+      "atk": "260",
+      "hp": "240",
+      "conditions": [
+        "이 카드는 \"용기의 패왕\"의 효과로 \"일렉트릭 보이\"와 \"스플래쉬 걸\"과 \"라이징 윈드 걸\"을 버렸을 때 소환할 수 있다."
+      ],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드 기준 한 턴에 1회, 자기 덱에서 카드 1장을 골라 묘지로 보내는 비용을 지불하고 자기 필드 몬스터 1장을 지정한다. 이 카드와 대상이 계속 필드에 있고 이 카드의 효과가 유효한 동안 대상은 전투로 파괴되지 않는다. 이 실제 카드의 새로운 지정이 성공하면 이전 지정은 종료한다."
+      ],
+      "notes": [
+        "v1.2 소환 분류: 퓨전. 용기의 패왕 효과로 지정 소재를 사용해 엑스트라 덱에서 소환한다.",
+        "개발자 밸런스 개정: 한 이모탈이 턴마다 보호 대상을 누적하지 않고 하나의 지정을 유지한다. 다른 실제 이모탈의 지정은 독립이다. 전투 피해는 그대로 받고 치명적인 전투 피해에서는 HP 1로 남는다. 효과 피해·직접 파괴·비파괴 이동은 막지 않는다. 효과 무효 중에는 보호가 멈추며 같은 연속 체류에서 무효가 끝나면 다시 적용한다. 소스/대상 재소환은 옛 보호를 복원하지 않고 조종권 변경만으로 보호를 끊지 않는다. 덱 비용은 대응 전에 지불하며 무효에도 돌려주지 않는다. 기존 260/240과 지정 퓨전 소재는 유지한다."
+      ]
+    },
+    "rationale": "F=HERO의 묘지 부활과 퓨전 방어 역할은 유지하되 무한 부활·무제한 보호 누적을 억제한다. 기존 수치 너프와 퓨전 소재를 보존한다."
+  },
+  {
+    "patchId": "TEN-CARD-2026-10-18-DRAFT",
+    "cardId": "COC-20-002",
+    "source": "Tracked runtime catalog at 7b7e2e8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-20-002",
+      "deckId": "20",
+      "name": "버닝 데몬즈 비스트",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "악마",
+      "atk": "0",
+      "hp": "300",
+      "conditions": [],
+      "effects": [
+        "공격력을 300까지 올릴수 있다 단 자신이 올린 공격력의 절반만큼의 피해를 받는다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-20-002",
+      "deckId": "20",
+      "name": "버닝 데몬즈 비스트",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "악마",
+      "atk": "0",
+      "hp": "300",
+      "conditions": [],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드 기준 한 턴에 1회, 현재 실제 공격력이 300 미만이면 기본 강화량을 1~300에서 선택한다. 받는 강화 배율과 마검 배율을 계산한 뒤 이 효과로 얻는 최종 실제 공격력이 300을 넘지 않는 범위에서 올리고, 실제로 증가한 공격력의 절반(소수점 올림)만큼 자기 플레이어에게 피해를 준다."
+      ],
+      "notes": [
+        "개발자 명확화: 자신이 받는 피해는 버닝 덱의 낮은 플레이어 체력 흐름에 맞춰 자기 플레이어 피해로 정한다. 이 효과는 매번 300 추가 강화가 아니며 다른 효과의 나중 강화까지 300으로 제한하지 않는다. 해결 시 올릴 수 없으면 강화·자기 피해가 없고 사용 횟수는 소모한다. 자기 피해는 HP 비용이 아니므로 피해 보호를 적용하며 패배를 일으킬 수 있다."
+      ]
+    },
+    "rationale": "공격력 획득과 자기 플레이어 체력 감소를 교환하는 버닝 덱 흐름을 지원하며 300을 반복 가산으로 해석하지 않는다."
+  },
+  {
+    "patchId": "TEN-CARD-2026-10-18-DRAFT",
+    "cardId": "COC-27-007",
+    "source": "Tracked runtime catalog at 7b7e2e8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-27-007",
+      "deckId": "27",
+      "name": "수정 예언자",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "슈페리얼",
+      "atk": "50",
+      "hp": "50",
+      "conditions": [],
+      "effects": [
+        "자신의 드로우 페이즈에 일반적인 드로우 대신 카드를 덱 위에서 3장 넘깁니다. 3장 중에 원하는 1장을 골라 뽑고, 덱을 섞습니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-27-007",
+      "deckId": "27",
+      "name": "수정 예언자",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "슈페리얼",
+      "atk": "50",
+      "hp": "50",
+      "conditions": [],
+      "effects": [
+        "자신의 드로우 페이즈에 일반 드로우 1장을 대체하여 덱 위 최대 3장을 자신만 확인하고 그중 1장을 드로우한 뒤 남은 덱 전체를 섞는다. 일반 드로우 한 번에는 자신의 수정 예언자 한 장만 적용한다."
+      ],
+      "notes": [
+        "개발자 명확화: 효과 대응 후 선택하며 무효/불발이면 일반 드로우 1장을 처리한다. 덱이 비었다면 기존 리로드와 드로우 실패 규칙을 먼저 적용한다. 덱이 1~2장이면 남은 카드 중 선택한다. 이 선택 드로우도 일반 드로우이므로 포식의 전투마차를 유발하지 않는다. 선택지와 선택한 카드 이름은 상대에게 공개하지 않는다. 전체 셔플은 이 카드의 명시 효과이며 R11의 일반 되돌리기 규칙을 바꾸지 않는다."
+      ]
+    },
+    "rationale": "슈페리얼의 덱 조작·소재별 퓨전 역할·조건부 제거와 덱 자원 피해를 유지하고 선택/대응/비공개 경계를 명확히 한다."
+  },
+  {
+    "patchId": "TEN-CARD-2026-10-18-DRAFT",
+    "cardId": "COC-27-011",
+    "source": "Tracked runtime catalog at 7b7e2e8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-27-011",
+      "deckId": "27",
+      "name": "드레고닉 슈페리얼 파이터",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "슈페리얼",
+      "atk": "350",
+      "hp": "200",
+      "conditions": [
+        "용 속성 몬스터+슈페리얼 파이터."
+      ],
+      "effects": [
+        "이 카드는 한 턴에 1회 상대 필드의 카드를 파괴할 수 있다. 이효과는 내 필드에 다른카드가 있으면 발동하지 않는다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-27-011",
+      "deckId": "27",
+      "name": "드레고닉 슈페리얼 파이터",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "슈페리얼",
+      "atk": "350",
+      "hp": "200",
+      "conditions": [
+        "용 속성 몬스터+슈페리얼 파이터."
+      ],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드 기준 한 턴에 1회, 자기 필드에 다른 카드가 없으면 상대 필드 몬스터 1장을 지정하여 파괴한다. 효과 해결 시에도 자기 필드에 이 카드만 있어야 한다."
+      ],
+      "notes": [
+        "개발자 명확화: 필드는 몬스터 3칸을 뜻하며 별도 일체화는 단독 필드 조건을 방해하지 않는다. 직접 파괴 보호·스핑크스 대응을 적용한다. 대응 중 조건이 사라지거나 소스/대상이 이탈·재진입하면 불발하며 사용 횟수는 돌려주지 않는다."
+      ]
+    },
+    "rationale": "슈페리얼의 덱 조작·소재별 퓨전 역할·조건부 제거와 덱 자원 피해를 유지하고 선택/대응/비공개 경계를 명확히 한다."
+  },
+  {
+    "patchId": "TEN-CARD-2026-10-18-DRAFT",
+    "cardId": "COC-27-012",
+    "source": "Tracked runtime catalog at 7b7e2e8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-27-012",
+      "deckId": "27",
+      "name": "오라클 슈페리얼 파이터",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "슈페리얼",
+      "atk": "300",
+      "hp": "200",
+      "conditions": [
+        "수정 예언자+슈페리얼 파이터."
+      ],
+      "effects": [
+        "이 카드가 소환되었을 때 양측 플레이어는덱에서 원하는카드를 맨위로 올린다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-27-012",
+      "deckId": "27",
+      "name": "오라클 슈페리얼 파이터",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "슈페리얼",
+      "atk": "300",
+      "hp": "200",
+      "conditions": [
+        "수정 예언자+슈페리얼 파이터."
+      ],
+      "effects": [
+        "이 카드가 소환될 때마다 몬스터 효과 대응을 거친 뒤, 양쪽 플레이어는 각자 자기 덱에서 원하는 카드 1장을 비공개로 선택하여 자기 덱 맨 위에 놓는다. 이 카드의 조종자부터 선택하며 빈 덱은 건너뛴다."
+      ],
+      "notes": [
+        "개발자 명확화: 턴 1회 제한을 추가하지 않는다. 선택 결과·카드 이름·덱 순서는 상대에게 공개하지 않는다. 덱 위 이동은 드로우·새 영역 진입이 아니고 셔플하지 않는다. 소스 이탈·재진입·조종권 변경·효과 무효로 남은 선택을 종료하더라도 이미 완료한 플레이어의 덱 위 이동은 되돌리지 않는다."
+      ]
+    },
+    "rationale": "슈페리얼의 덱 조작·소재별 퓨전 역할·조건부 제거와 덱 자원 피해를 유지하고 선택/대응/비공개 경계를 명확히 한다."
+  },
+  {
+    "patchId": "TEN-CARD-2026-10-18-DRAFT",
+    "cardId": "COC-27-014",
+    "source": "Tracked runtime catalog at 7b7e2e8; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-27-014",
+      "deckId": "27",
+      "name": "파워아머드 슈페리얼 파이터",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "슈페리얼",
+      "atk": "350",
+      "hp": "350",
+      "conditions": [
+        "분쇄차 티라노+슈페리얼 파이터."
+      ],
+      "effects": [
+        "한 턴에 1회 덱에 맨위에서 임의의 수 만큼 카드를 버린다. (최대 3장) 버린만큼 대상에게 50피해를 준다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-27-014",
+      "deckId": "27",
+      "name": "파워아머드 슈페리얼 파이터",
+      "type": "퓨전 몬스터",
+      "zone": "extra",
+      "attribute": "슈페리얼",
+      "atk": "350",
+      "hp": "350",
+      "conditions": [
+        "분쇄차 티라노+슈페리얼 파이터."
+      ],
+      "effects": [
+        "자신의 메인 페이즈에 이 실제 카드 기준 한 턴에 1회, 자기 덱 위 1~3장을 묘지로 보내는 비용을 지불하고 플레이어 또는 필드 몬스터 1장을 지정한다. 지불한 매수 × 50만큼 대상에게 피해를 준다."
+      ],
+      "notes": [
+        "개발자 명확화: 선언 시 덱에 실제 있는 매수까지만 선택하며 0장 사용은 하지 않는다. 비용은 대응 전에 지불하고 피해가 무효/불발이어도 반환하지 않는다. 덱 위 묘지 이력에 기록하며 비용 지불에는 리로드하지 않는다. 피해에는 별도 다이스를 굴리지 않고 기존 피해 보호·밀짚인형 피해 공유를 적용한다."
+      ]
+    },
+    "rationale": "슈페리얼의 덱 조작·소재별 퓨전 역할·조건부 제거와 덱 자원 피해를 유지하고 선택/대응/비공개 경계를 명확히 한다."
   }
 ]

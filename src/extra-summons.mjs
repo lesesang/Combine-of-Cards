@@ -2,7 +2,8 @@
  * Strict v1.3 extra-deck recipes. No text guessing, no generic-material fallback.
  * Verifies summon eligibility only; triggered and continuous effects have separate support.
  */
-import {FUSION_UP_ID,requireUnusedEffect} from './effect-usage.mjs';
+import {requireUnusedEffect} from './effect-usage.mjs';
+import {destructionProtected} from './protection-auras.mjs';
 import {elementalFormId} from './elemental-dragons.mjs';
 const id=(...ids)=>ids.map(value=>({kind:'id',value}));
 export const EXTRA_RECIPES=Object.freeze({
@@ -29,7 +30,8 @@ export const EXTRA_RECIPES=Object.freeze({
  'COC-32-015':{method:'infinity',parts:Array(3).fill({kind:'family',value:['원소의 마법사','드래곤 위저드']})}
 });
 export const SUPPORTED_EXTRA_IDS=Object.freeze(Object.keys(EXTRA_RECIPES));
-const spellForDeck={'22':['COC-22-008','COC-22-009'],'26':['COC-26-007'],'27':['COC-27-009']};
+export const UNDEAD_FUSION_IDS=Object.freeze(['COC-22-006','COC-27-002']);
+const spellForDeck={'22':['COC-22-006','COC-22-008','COC-22-009'],'26':['COC-26-007'],'27':['COC-27-002','COC-27-009']};
 function reject(message){const e=new Error(message);e.status=409;throw e}
 function matches(card,part){
  if(!card||!card.type.includes('몬스터'))return false;
@@ -59,12 +61,13 @@ export function validateExtraSummon({room,who,extraUnitId,materials,spellUnitId,
  if(!player||!player.extra.includes(extraUnitId))reject('해당 카드는 자신의 엑스트라 덱에 없습니다.');
  const extra=room.units[extraUnitId],recipe=EXTRA_RECIPES[extra?.cardId];
  if(!recipe)reject('이 엑스트라 카드의 소환 조건은 아직 자동 검증할 수 없습니다.');
+ const undead=recipe.method==='fusion'&&UNDEAD_FUSION_IDS.includes(room.units[spellUnitId]?.cardId);
  if(!Array.isArray(materials)||materials.length!==recipe.parts.length||new Set(materials).size!==materials.length)reject('소재 개수 또는 중복 지정이 잘못되었습니다.');
  const fieldOnly=recipe.method==='wakeup'||recipe.method==='infinity';
  const materialCards=materials.map(unitId=>{
-  const zone=player.field.includes(unitId)?'field':player.hand.includes(unitId)?'hand':null;
-  if(!zone||(fieldOnly&&zone!=='field'))reject('소재를 자신의 올바른 패·필드 영역에서 선택해야 합니다.');
-  if(recipe.method==='wakeup'&&room.units[unitId].effectDestructionImmune)reject('파괴 면역인 몬스터는 웨이크업 파괴 비용으로 지불할 수 없습니다.');
+  const zone=player.field.includes(unitId)?'field':player.hand.includes(unitId)?'hand':player.grave.includes(unitId)?'grave':null;
+  if(!zone||(undead?zone!=='grave':zone==='grave')||(fieldOnly&&zone!=='field'))reject(undead?'언데드 퓨전의 지정 소재는 자신의 묘지에서 선택해야 합니다.':'소재를 자신의 올바른 패·필드 영역에서 선택해야 합니다.');
+  if(recipe.method==='wakeup'&&(room.units[unitId].effectDestructionImmune||destructionProtected(room,unitId)))reject('파괴 면역인 몬스터는 웨이크업 파괴 비용으로 지불할 수 없습니다.');
   const card=cards.get(room.units[unitId]?.cardId);
   if(!card)reject('존재하지 않는 소재 카드입니다.');
   return card;
@@ -78,7 +81,7 @@ export function validateExtraSummon({room,who,extraUnitId,materials,spellUnitId,
  }else if(recipe.method==='fusion'||recipe.method==='wakeup'){
   const allowed=recipe.method==='wakeup'?['COC-32-009']:(spellForDeck[extra.cardId.slice(4,6)]||[]);
   if(!player.hand.includes(spellUnitId)||!allowed.includes(room.units[spellUnitId]?.cardId))reject('이 소환에 필요한 지정 주문을 패에서 사용해야 합니다.');
-  if(room.units[spellUnitId].cardId===FUSION_UP_ID)requireUnusedEffect(room,who,spellUnitId,1);
+  requireUnusedEffect(room,who,spellUnitId,1);
  }else if(spellUnitId)reject('해당 소환에는 퓨전 주문을 소비하지 않습니다.');
- return {method:recipe.method,spellUnitId:spellUnitId||null,materials:[...materials]};
+ return {method:undead?'undead-fusion':recipe.method,spellUnitId:spellUnitId||null,materials:[...materials]};
 }

@@ -1,3 +1,4 @@
+export const TIMED_SPELL_IDS=Object.freeze(['COC-03-006','COC-05-005','COC-06-008','COC-07-008','COC-11-010','COC-14-007','COC-14-008','COC-17-002','COC-21-006','COC-22-007','COC-27-005','COC-09-007','COC-10-008','COC-10-010','COC-07-006','COC-11-002']);
 // Limits belong to a physical card UID and its individual effect, never to a
 // card name, effect text, or every card with the same catalog ID.
 export const FUSION_UP_ID='COC-22-008';
@@ -10,6 +11,10 @@ export function effectUsedThisTurn(room,who,sourceUnitId,effectNumber){
  if(shared)return room.players[who].sharedEffectUsage?.[shared]===room.turnNumber;
  return !!unit&&unit.effectUsage?.[key(unit,effectNumber)]===room.turnNumber;
 }
+export function effectUsesThisTurn(room,who,id,effectNumber){
+ const unit=room.units[id],record=unit?.effectUsageCounts?.[key(unit,effectNumber)];
+ return record?.turn===room.turnNumber?record.count:effectUsedThisTurn(room,who,id,effectNumber)?1:0;
+}
 export function requireUnusedEffect(room,who,sourceUnitId,effectNumber){
  if(effectUsedThisTurn(room,who,sourceUnitId,effectNumber)){
   const error=new Error('이 카드의 효과는 이번 턴에 이미 사용했습니다.');error.status=409;throw error;
@@ -17,6 +22,8 @@ export function requireUnusedEffect(room,who,sourceUnitId,effectNumber){
 }
 export function markEffectUsed(room,who,sourceUnitId,effectNumber){
  const unit=room.units[sourceUnitId];if(!unit)throw new Error('effect usage source is missing');
+ const count=effectUsesThisTurn(room,who,sourceUnitId,effectNumber)+1;
+ unit.effectUsageCounts??={};unit.effectUsageCounts[key(unit,effectNumber)]={turn:room.turnNumber,count};
  unit.effectUsage??={};unit.effectUsage[key(unit,effectNumber)]=room.turnNumber;
  const shared=group(unit.cardId,effectNumber);if(shared){room.players[who].sharedEffectUsage??={};room.players[who].sharedEffectUsage[shared]=room.turnNumber;}
 }

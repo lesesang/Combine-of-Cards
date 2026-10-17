@@ -1,13 +1,32 @@
+import {BLACK_METAL_ACTIVE_IDS} from './black-metal-state.mjs';
+import {REMAINING_FIELD_IDS,prepareRemainingField,payRemainingField,resolveRemainingField} from './remaining-card-effects.mjs';
+import {prepareBlackMetalEffect,payBlackMetalEffect,resolveBlackMetalEffect} from './black-metal-effects.mjs';
+import {gainUnitStats,gainPlayerStats} from './stat-gains.mjs';
+import {applySharedUnitEffect,destroySharedUnits,moveSharedUnits,captureSharedUnits} from './shared-unit-effects.mjs';
+import {actionLocked,nobleTarget,grantNoble,lureTarget,consumeLure} from './demon-effects.mjs';
+import {damagePlayer} from './weapon-equipment.mjs';
+import {prepareGTool,summonGTool,prepareAltar,summonAltar} from './monsterized-spells.mjs';
+import {destructionProtected} from './protection-auras.mjs';
 import {recruitChoices,beginRecruitChoice} from './recruit-summons.mjs';
 import {balanceValues as B} from './balance-values.mjs';
 import {ELEMENTAL_MAGICIAN_IDS} from './effect-usage.mjs';
 import {isElemental,prepareElemental,beginElementalChoice} from './elemental-replacement.mjs';
-import {requireUnusedEffect,markEffectUsed} from './effect-usage.mjs';
+import {requireUnusedEffect,markEffectUsed,effectUsesThisTurn} from './effect-usage.mjs';
 import {swordActualAttack} from './life-eating-sword.mjs';
 import {terraReady} from './elemental-dragons.mjs';
+import {batchSummonCount,beginSummonBatch} from './effect-summon-batches.mjs';
 
 // Audited activated effects only; unrelated summon/death triggers remain partial.
 export const FIELD_EFFECT_RULES=Object.freeze({
+ ...Object.fromEntries(REMAINING_FIELD_IDS.map(id=>[id,{zone:'field',sourceType:'monster',oncePerTurn:true}])),
+ ...Object.fromEntries(BLACK_METAL_ACTIVE_IDS.map(id=>[id,{zone:'field',sourceType:'monster',multipleEffects:true}])),
+ 'COC-05-009':{zone:'integration',sourceType:'integration',maxUsesPerTurn:2},
+ 'COC-01-003':{zone:'integration',sourceType:'integration',oncePerTurn:true},
+ 'COC-21-012':{zone:'field',sourceType:'monster',oncePerTurn:true},
+ 'COC-21-003':{zone:'field',sourceType:'monster',oncePerTurn:true,effectNumber:2},
+ 'COC-08-011':{zone:'integration',sourceType:'integration',oncePerTurn:true},
+ 'COC-20-008':{zone:'integration',sourceType:'integration',oncePerTurn:true},
+ 'COC-26-001':{zone:'integration',sourceType:'integration',oncePerTurn:true},
  ...Object.fromEntries(ELEMENTAL_MAGICIAN_IDS.map(id=>[id,{zone:'field',sourceType:'monster',oncePerTurn:true,selfCost:true}])),
  'COC-32-012':{zone:'field',sourceType:'monster',oncePerTurn:true,effectNumber:2},
  'COC-32-014':{zone:'field',sourceType:'monster',oncePerTurn:true,effectNumber:2},
@@ -27,6 +46,7 @@ export const FIELD_EFFECT_RULES=Object.freeze({
 });
 export const FIELD_RESPONSE_IDS=Object.freeze(Object.keys(FIELD_EFFECT_RULES));
 export const fieldEffectNumber=id=>FIELD_EFFECT_RULES[id]?.effectNumber||1;
+export const fieldEffectLimit=id=>FIELD_EFFECT_RULES[id]?.maxUsesPerTurn||1;
 const captureIds=new Set(['COC-13-001','COC-13-002','COC-13-005']);
 const revision=(unit,zone)=>zone==='field'?(unit.fieldRevision||0):(unit.integrationRevision||0);
 const invalid=(H,message)=>H.fail(409,message);
@@ -34,12 +54,43 @@ function findSearch(r,who,cardId){
  const p=r.players[who];
  return ['deck','grave','banished','extra','field','integration'].flatMap(z=>z==='integration'?[p.integration]:p[z]).find(id=>id&&r.units[id]?.cardId===cardId);
 }
-export function prepareFieldEffect(r,who,body,H){
+export function prepareFieldEffect(r,who,body,H,checkingLure=false){
  const sourceId=body.sourceUnitId,u=r.units[sourceId],z=H.zone(r,sourceId),rule=u&&FIELD_EFFECT_RULES[u.cardId],p=r.players[who];
- if(!rule||!z||z.player!==who||z.zone!==rule.zone||u.effectsNegated)invalid(H,'효과가 유효한 자신의 필드 또는 일체화 카드가 필요합니다.');
+ if(!rule||!z||z.player!==who||z.zone!==rule.zone||u.effectsNegated||actionLocked(r,sourceId))invalid(H,'효과가 유효한 자신의 필드 또는 일체화 카드가 필요합니다.');
+ if(rule.maxUsesPerTurn&&effectUsesThisTurn(r,who,sourceId,fieldEffectNumber(u.cardId))>=rule.maxUsesPerTurn)invalid(H,'이 실제 카드의 효과 사용 한도를 모두 사용했습니다.');
  if(rule.oncePerTurn)requireUnusedEffect(r,who,sourceId,fieldEffectNumber(u.cardId));
+ if(!checkingLure&&body.target){
+  const forced=lureTarget(r,sourceId,H);
+  if(forced){try{return prepareFieldEffect(r,who,{...body,target:forced},H,true);}catch(error){if(error.status!==409)throw error;}}
+ }
  const plan={cardId:u.cardId,sourceId,sourceZone:z.zone,sourceRevision:revision(u,z.zone)};
+ if(REMAINING_FIELD_IDS.includes(u.cardId))return prepareRemainingField(r,who,body,plan,H);
+ if(rule.multipleEffects)return prepareBlackMetalEffect(r,who,body,plan,H);
+ if(u.cardId==='COC-05-009'){
+  const targetId=body.target?.id,tz=targetId&&H.zone(r,targetId),target=r.units[targetId];
+  if(tz?.zone!=='field'||!Number.isFinite(target.hp))invalid(H,'흡수할 필드 몬스터 한 장을 선택하세요.');
+  return {...plan,targetId,targetController:tz.player,targetRevision:target.fieldRevision||0};
+ }
+ if(u.cardId==='COC-21-012'){
+  const target=nobleTarget(r,who,body.target,H);
+  return {...plan,nobleTarget:target,...(target.type==='unit'?{targetId:target.id,targetController:who,targetRevision:r.units[target.id].fieldRevision||0}:{})};
+ }
+ if(u.cardId==='COC-01-003')return {...plan,...prepareGTool(r,who,body,H)};
+ if(u.cardId==='COC-21-003')return {...plan,...prepareAltar(r,who,body,H)};
  if(isElemental(u.cardId)){prepareElemental(r,who,sourceId,H);return plan;}
+ if(u.cardId==='COC-08-011'){
+  if(!batchSummonCount(r,who,u.cardId,H))invalid(H,'부활 가능한 파괴된 츠쿠모가미와 빈 필드가 필요합니다.');
+  plan.graveActivation=true;return plan;
+ }
+ if(u.cardId==='COC-20-008'){
+  if(!Number.isInteger(body.discardCount)||body.discardCount<1||body.discardCount>Math.min(4,p.deck.length))invalid(H,'덱에서 버릴 카드 수를 1~4장 중 선택하세요.');
+  plan.discardCount=body.discardCount;return plan;
+ }
+ if(u.cardId==='COC-26-001'){
+  if(p.hp<=100)invalid(H,'체력100을 지불한 뒤 생존해야 합니다.');
+  if(!r.players.some(pp=>pp.field.some(id=>id&&H.name(r,id).includes('매치'))))invalid(H,'필드에 매치 몬스터가 필요합니다.');
+  return plan;
+ }
  if(u.cardId==='COC-32-014'){
   if(!terraReady(u)||!Number.isFinite(u.hp)||u.hp<=0)invalid(H,'소환 뒤 자신의 턴 시작을 두 번 맞은 체력이 있는 테라가 필요합니다.');
   return plan;
@@ -60,12 +111,14 @@ export function prepareFieldEffect(r,who,body,H){
  if(u.cardId==='COC-10-005'){
   if((u.abilityGameCount||0)>=3)invalid(H,'이번 게임의 최대 3회 사용 한도를 초과했습니다.');
   const costId=body.costTarget?.id,cz=costId&&H.zone(r,costId);
-  if(cz?.zone!=='field'||cz.player!==who||r.units[costId].effectDestructionImmune)invalid(H,'파괴 가능한 자신의 필드 몬스터를 비용으로 선택하세요.');
+  if(cz?.zone!=='field'||cz.player!==who||r.units[costId].effectDestructionImmune||destructionProtected(r,costId))invalid(H,'파괴 가능한 자신의 필드 몬스터를 비용으로 선택하세요.');
   plan.costUnitId=costId;
  }
  if(u.cardId==='COC-03-002'){
   plan.searchCardId=p.integration&&r.units[p.integration]?.cardId==='COC-03-001'?'COC-03-003':'COC-03-001';
-  if(!findSearch(r,who,plan.searchCardId))invalid(H,'대상 카드가 자신의 영역에 없습니다.');
+  const selected=findSearch(r,who,plan.searchCardId);
+  if(!selected)invalid(H,'대상 카드가 자신의 영역에 없습니다.');
+  plan.graveActivation=H.zone(r,selected)?.zone==='grave';
  }else{
   const targetId=body.target?.id,tz=targetId&&H.zone(r,targetId),own=['COC-22-010','COC-24-003','COC-26-003'].includes(u.cardId);
   if(!tz||tz.zone!=='field'||tz.player!==(own?who:1-who)||(targetId===sourceId&&!['COC-24-003','COC-26-003'].includes(u.cardId)))invalid(H,'올바른 필드 대상을 선택해야 합니다.');
@@ -83,6 +136,11 @@ export function prepareFieldEffect(r,who,body,H){
 }
 export function payFieldEffect(r,who,plan,H){
  const p=r.players[who],u=r.units[plan.sourceId];
+ if(plan.targetId||plan.nobleTarget||plan.healPlayer!==undefined||plan.damagePlayer!==undefined)consumeLure(r,plan.sourceId);
+ if(REMAINING_FIELD_IDS.includes(plan.cardId))payRemainingField(r,who,plan,H);
+ if(FIELD_EFFECT_RULES[plan.cardId].multipleEffects)return payBlackMetalEffect(r,who,plan,H);
+ if(plan.cardId==='COC-21-003')p.hp-=plan.altarHpCost;
+ if(plan.cardId==='COC-26-001')p.hp-=100;
  if(isElemental(plan.cardId)){
   H.destroy(r,plan.sourceId,{cause:'cost',sourceId:plan.sourceId});
   if(H.zone(r,plan.sourceId)?.zone!=='grave')invalid(H,'자기 파괴 비용 지불에 실패했습니다.');
@@ -103,7 +161,7 @@ export function payFieldEffect(r,who,plan,H){
   u.attackCount=(u.attackCount||0)+1;
   H.log(r,'cost',`${p.label}: 블랙 메탈 카이저 공격 기회 1회 지불`);
  }
- if(FIELD_EFFECT_RULES[plan.cardId].oncePerTurn)markEffectUsed(r,who,plan.sourceId,fieldEffectNumber(plan.cardId));
+ if(FIELD_EFFECT_RULES[plan.cardId].oncePerTurn||FIELD_EFFECT_RULES[plan.cardId].maxUsesPerTurn)markEffectUsed(r,who,plan.sourceId,fieldEffectNumber(plan.cardId));
 }
 export function resolveFieldEffect(r,who,plan,H){
  if(isElemental(plan.cardId))return beginElementalChoice(r,who,plan.sourceId,H);
@@ -112,39 +170,62 @@ export function resolveFieldEffect(r,who,plan,H){
  if(!u||u.cardId!==plan.cardId||u.effectsNegated||z?.player!==who||z?.zone!==plan.sourceZone||revision(u,z.zone)!==plan.sourceRevision)return fizzle('소스 이탈/재진입·조종자/상태 변경');
  if(plan.targetId){const tz=H.zone(r,plan.targetId);if(tz?.zone!=='field'||tz.player!==plan.targetController||(r.units[plan.targetId].fieldRevision||0)!==plan.targetRevision)return fizzle('선언 대상 소실/조종권 변경');}
  const p=r.players[who],c=plan.cardId,t=plan.targetId;
+ if(REMAINING_FIELD_IDS.includes(c))return resolveRemainingField(r,who,plan,H);
+ if(FIELD_EFFECT_RULES[c].multipleEffects)return resolveBlackMetalEffect(r,who,plan,H);
  if(captureIds.has(c)&&!p.field.includes(null))return fizzle('필드 빈 자리 소실');
  switch(c){
+ case 'COC-05-009':{
+  const victim=r.units[t],attack=swordActualAttack(r,t,{getZone:(room,id)=>H.zone(room,id)}),hp=Math.max(0,victim.hp||0);
+  applySharedUnitEffect(r,[t],H,id=>H.destroy(r,id,{sourceId:plan.sourceId}));
+  const after=H.zone(r,t);
+  if(after?.zone==='field'&&(r.units[t].fieldRevision||0)===plan.targetRevision){H.log(r,'effect','드레이나블: 선택 대상이 파괴되지 않아 흡수 없음');break;}
+  gainUnitStats(r,u.id,{atk:attack});gainPlayerStats(r,who,{hp});
+  H.log(r,'effect',`드레이나블: 선택 몬스터의 파괴 직전 ATK ${attack} 흡수, HP ${hp} 기본 회복`);H.outcome(r);break;
+ }
+
+ case 'COC-21-012':grantNoble(r,who,plan.nobleTarget,H);break;
+ case 'COC-01-003':return summonGTool(r,who,plan,H);
+ case 'COC-21-003':return summonAltar(r,who,plan,H);
+ case 'COC-08-011':return beginSummonBatch(r,who,c,H);
+ case 'COC-20-008':{
+  const count=Math.min(plan.discardCount,p.deck.length);
+  for(let i=0;i<count;i++)H.move(r,p.deck[0],'grave',who);
+  gainUnitStats(r,u.id,{atk:count*50});H.log(r,'effect',`워리어 드라고닉: 덱 위 ${count}장 묘지 이동, 공격력 +${count*50}`);break;
+ }
+ case 'COC-26-001':
+  applySharedUnitEffect(r,r.players.flatMap(pp=>pp.field.filter(id=>id&&H.name(r,id).includes('매치'))),H,(id,u)=>{gainUnitStats(r,id,{atk:50});});
+  break;
  case 'COC-32-012':
   if(!(r.units[t].hp>swordActualAttack(r,plan.sourceId,{getZone:(room,id)=>H.zone(room,id)})))return fizzle('대상 체력이 현재 실제 공격력 이하');
-  H.destroy(r,t,{sourceId:plan.sourceId});break;
+  destroySharedUnits(r,[t],H,{sourceId:plan.sourceId});break;
  case 'COC-32-014':
   if(!terraReady(u)||!Number.isFinite(u.hp)||u.hp<=0)return fizzle('체류 조건 또는 현재 체력 소실');
-  r.players[1-who].hp-=Math.floor(u.hp/2);H.outcome(r);break;
+  damagePlayer(r,1-who,Math.floor(u.hp/2));H.outcome(r);break;
  case 'COC-08-003':H.draw(r,who);break;
- case 'COC-10-005':H.destroy(r,t,{sourceId:plan.sourceId});break;
+ case 'COC-10-005':destroySharedUnits(r,[t],H,{sourceId:plan.sourceId});break;
  case 'COC-23-002':{
   const iz=H.zone(r,plan.integrationId),iu=r.units[plan.integrationId];
   if(iz?.zone!=='integration'||iz.player!==who||iu.cardId!=='COC-23-001'||(iu.integrationRevision||0)!==plan.integrationRevision)return fizzle('라이드 위저드 이탈/진화/재진입');
-  iu.atk+=50;break;
+  gainUnitStats(r,iu.id,{atk:50});break;
  }
  case 'COC-24-003':case 'COC-26-003':{
   const target=r.units[t];if(!Number.isFinite(target.hp))return fizzle('현재 체력 소실');
-  target.atk=Math.max(0,Math.floor(target.hp));if(target.atk===0)H.destroy(r,t,{sourceId:plan.sourceId});break;
+  applySharedUnitEffect(r,[t],H,(id,u)=>{if(!Number.isFinite(u.hp))return;u.atk=Math.max(0,Math.floor(u.hp));if(u.atk===0)H.destroy(r,id,{sourceId:plan.sourceId});});break;
  }
  case 'COC-31-004':return beginRecruitChoice(r,who,H);
 
  case 'COC-03-002':{
   const id=findSearch(r,who,plan.searchCardId);if(!id)return fizzle('검색 카드 소실');H.move(r,id,'hand',who);break;
  }
- case 'COC-05-004':H.move(r,t,'deck',r.units[t].owner);break;
- case 'COC-12-013':H.destroy(r,t,{sourceId:plan.sourceId});break;
+ case 'COC-05-004':moveSharedUnits(r,[t],'deck',H,{sourceId:plan.sourceId});break;
+ case 'COC-12-013':destroySharedUnits(r,[t],H,{sourceId:plan.sourceId});break;
  case 'COC-13-001':case 'COC-13-002':case 'COC-13-005':{
   if(c==='COC-13-002'){const result=H.roll(2);H.log(r,'dice',`사랑 도둑: 1d2 = ${result}`);if(result!==1)break;}
   const attack=swordActualAttack(r,t,{getZone:(room,id)=>H.zone(room,id)});
-  H.capture(r,who,t);if(c==='COC-13-005'){r.players[1-who].hp-=Math.floor(attack/B.thiefDamageDivisor);H.outcome(r);}break;
+  captureSharedUnits(r,[t],who,H);if(c==='COC-13-005'){damagePlayer(r,1-who,Math.floor(attack/B.thiefDamageDivisor));H.outcome(r);}break;
  }
  case 'COC-22-010':{
-  const target=r.units[t];if(target.bonusAttackTurn!==r.turnNumber){target.bonusAttackTurn=r.turnNumber;target.bonusAttackCount=0;}target.bonusAttackCount++;break;
+  applySharedUnitEffect(r,[t],H,(id,target)=>{if(target.bonusAttackTurn!==r.turnNumber){target.bonusAttackTurn=r.turnNumber;target.bonusAttackCount=0;}target.bonusAttackCount++;});break;
  }
  default:throw new Error('unregistered field effect');
  }

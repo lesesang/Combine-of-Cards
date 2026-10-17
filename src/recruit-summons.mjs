@@ -19,6 +19,7 @@ export function chooseRecruit(r,who,id,H){
  const choices=recruitChoices(r,who);
  if(!choices.length||!r.players[who].field.includes(null)){r.pendingRecruitChoice=null;H.log(r,'effect','슈의 소환 대상 또는 빈 자리 소실');return;}
  const c=choices.find(c=>c.id===id);if(!c)H.fail(409,'자신의 패·덱·묘지에서 크로와를 선택하세요.');
+ if(c.zone==='grave')H.graveActivation?.(r,{cardId:'COC-31-004'});
  H.queueEffectSummon(r,{who,extraUnitId:id,originZone:c.zone,recipe:{method:'recruit',materials:[]},turnNumber:r.turnNumber});
  r.pendingRecruitChoice=null;
 }
