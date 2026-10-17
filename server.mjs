@@ -1,3 +1,4 @@
+import {moveFafnirResidence,fafnirGrowthView} from './src/dragon-growth.mjs';
 import {queueZoneAbility,legalZoneAbilities,chooseAIZoneAbility} from './src/zone-abilities.mjs';
 import {gainPlayerStats,scaledStatGain,statGainFactor} from './src/stat-gains.mjs';
 import {originalSinView,queueOriginalSin,chooseAIOriginalSin} from './src/original-sin.mjs';
@@ -41,7 +42,7 @@ import {planActivation,commitActivationCosts,PRECHECKED_ACTIVATION_IDS} from './
 import {validateExtraSummon, EXTRA_RECIPES, UNDEAD_FUSION_IDS} from './src/extra-summons.mjs';
 import {applyFieldAbility,FIELD_ABILITY_IDS} from './src/field-abilities.mjs';
 import {hasTokenWork,queueTokenGeneration,clearTokenWork,beginTokenWork,resumeTokenWork,tokenOrderPending,negateTokenSummon,finishTokenSummon,finishFafnirSummon} from './src/token-pipeline.mjs';
-import {queueGoldHandArrival,onTokenActivity,onFafnirDestroyed,pendingDragonDeath} from './src/dragon-gold.mjs';
+import {queueGoldHandArrival,onTokenActivity,onFafnirDestroyed,onFafnirLeftField,pendingDragonDeath} from './src/dragon-gold.mjs';
 import {hasCartoonLand,hasCartoonWork,clearCartoonWork,onCartoonLandDestroyed,resumeCartoonDeaths,queueCartoonLandSummon,beginCartoonSummons,resumeCartoonSummons,finishCartoonLandSummon} from './src/cartoon-land.mjs';
 import {applyGraveAbility,legalGraveAbilities,GRAVE_ABILITY_IDS} from './src/grave-abilities.mjs';
 import {TIMED_SPELL_IDS,FUSION_UP_ID,markEffectUsed,effectUsedThisTurn,effectUsesThisTurn,migrateLegacyEffectUsage} from './src/effect-usage.mjs';
@@ -54,7 +55,7 @@ const PUBLIC=path.join(ROOT,'public');
 const DATA_DIR=process.env.DATA_DIR || path.join(ROOT,'.data');
 const STORAGE=path.join(DATA_DIR,'rooms.json');
 const hasAutomaticWork=r=>hasTokenWork(r)||hasCartoonWork(r);
-const RULES='1.3-ai-beta.28-draft';
+const RULES='1.3-ai-beta.29-draft';
 // Add a spell only after auditing declaration-time conditions, target choices,
 // costs and retention. This shared registry also drives coverage reporting.
 const REACTIVE_SPELL_IDS=new Set(responseSpellIds);
@@ -207,7 +208,7 @@ function move(r,id,to,owner,options={}){const u=r.units[id];if(!u)fail(400,'카�
  if(!['field','integration'].includes(to))validateLeavingLinks(r,id);
 if(originZone?.zone==='deck'&&to==='grave'&&r.players[originZone.player].deck[0]===id)recordTopToGrave(r,originZone.player);
  if(originZone?.zone==='field'&&to==='banished'&&!options.monsterLossRecorded&&!options.treasureConversion)recordMonsterLoss(r,id,{kind:'banish',sourceId:options.sourceId,sourcePlayer:options.sourcePlayer},H);
-const previousZone=options.tokenAction&&u.created?zoneOwner(r,id):null;if(to==='field'&&!r.players[owner??u.owner].field.includes(null))fail(409,'필드 세 칸이 모두 차 있습니다.');if(to==='integration'&&r.players[owner??u.owner].integration)fail(409,'이미 일체화 중입니다.');u.zoneRevision=(u.zoneRevision||0)+1;if(originZone?.zone==='field'&&to!=='field')u.hasLeftField=true;moveDragonResidence(u,zoneOwner(r,id),to);resetFieldCounterOnSummon(u,zoneOwner(r,id),to);if(to==='field'||zoneOwner(r,id)?.zone==='field')u.fieldRevision=(u.fieldRevision||0)+1;if(to==='integration'||zoneOwner(r,id)?.zone==='integration')u.integrationRevision=(u.integrationRevision||0)+1;unlinkPhysical(r,id);
+const previousZone=options.tokenAction&&u.created?zoneOwner(r,id):null;if(to==='field'&&!r.players[owner??u.owner].field.includes(null))fail(409,'필드 세 칸이 모두 차 있습니다.');if(to==='integration'&&r.players[owner??u.owner].integration)fail(409,'이미 일체화 중입니다.');u.zoneRevision=(u.zoneRevision||0)+1;if(originZone?.zone==='field'&&to!=='field')u.hasLeftField=true;moveFafnirResidence(u,originZone,to);if(u.cardId==='COC-11-007'&&originZone?.zone==='field'&&to!=='field')onFafnirLeftField(r,id);moveDragonResidence(u,zoneOwner(r,id),to);resetFieldCounterOnSummon(u,zoneOwner(r,id),to);if(to==='field'||zoneOwner(r,id)?.zone==='field')u.fieldRevision=(u.fieldRevision||0)+1;if(to==='integration'||zoneOwner(r,id)?.zone==='integration')u.integrationRevision=(u.integrationRevision||0)+1;unlinkPhysical(r,id);
  restoreEvolutionCard(u,to);
  if(to!=='field')delete u.orochiAttacks;
  // Enchantments granted to a specific monster cease when its physical UID
@@ -613,7 +614,7 @@ function runManual(r,m){const x=m.payload;const p=r.players;switch(m.kind){
  case 'note':break;
  default:fail(400,'허용되지 않는 수동 판정 유형');
  }}
-function publicState(r,viewer){const mapId=id=>id?{...r.units[id],fieldEffectRemaining:FIELD_RESPONSE_IDS.includes(r.units[id].cardId)?Math.max(0,fieldEffectLimit(r.units[id].cardId)-effectUsesThisTurn(r,zoneOwner(r,id)?.player??r.units[id].owner,id,fieldEffectNumber(r.units[id].cardId))):null,actionLocked:actionLocked(r,id),gainFactor:statGainFactor(r,{id}),atk:swordActualAttack(r,id,{getZone:zoneOwner}),swordDoubleStacks:swordMultiplierCount(r,id,{getZone:zoneOwner}),equippedWeapons:(r.units[id].attachments||[]).filter(uid=>r.units[uid]?.weaponGrant).map(uid=>({id:uid,name:unitName(r,uid),attack:r.units[id].effectsNegated||r.units[uid].effectsNegated?0:scaledStatGain(r,{id},r.units[uid].weaponGrant.attack),expiresAfterTurn:r.units[uid].weaponGrant.expiresAfterTurn})),attackLimit:maxAttacks(r.units[id],r.turnNumber),card:cards.get(r.units[id].cardId)||r.units[id].tokenCard}:null;return {code:r.code,status:r.status,version:r.version,rulesVersion:RULES,balanceRevision:BALANCE_REVISION,mode:r.mode||'pvp',difficulty:r.aiDifficulty||null,aiDeckId:r.mode==='ai'?r.players[1]?.deckId:null,automation:{supportedSpells:spellHandlerIds.length,totalSpells:catalog.cards.filter(c=>c.type==='주문').length,fieldAbilityIds:FIELD_ABILITY_IDS,fieldAbilityEffects:Object.fromEntries(FIELD_ABILITY_IDS.map(id=>[id,fieldEffectNumber(id)])),graveAbilityIds:GRAVE_ABILITY_IDS},zoneAbilities:legalZoneAbilities(r,viewer,H),originalSin:originalSinView(r,viewer,H),spellReuse:spellReuseView(r,viewer,H),graveAbilities:legalGraveAbilities(r,viewer,H),altarChoices:altarChoices(r,viewer,H).map(c=>({...c,name:cards.get(c.cardId).name})),turn:r.turn,phase:r.phase,turnNumber:r.turnNumber,winner:r.winner,pendingAttackSequence:sequenceView(r,viewer,H),pendingAttack:r.pendingAttack?{...r.pendingAttack,attacker:mapId(r.pendingAttack.attackerId),target:r.pendingAttack.target}:null,pendingTriggerOrder:r.pendingTriggerOrder?{
+function publicState(r,viewer){const mapId=id=>id?{...r.units[id],fafnirGrowthView:fafnirGrowthView(r,id),fieldEffectRemaining:FIELD_RESPONSE_IDS.includes(r.units[id].cardId)?Math.max(0,fieldEffectLimit(r.units[id].cardId)-effectUsesThisTurn(r,zoneOwner(r,id)?.player??r.units[id].owner,id,fieldEffectNumber(r.units[id].cardId))):null,actionLocked:actionLocked(r,id),gainFactor:statGainFactor(r,{id}),atk:swordActualAttack(r,id,{getZone:zoneOwner}),swordDoubleStacks:swordMultiplierCount(r,id,{getZone:zoneOwner}),equippedWeapons:(r.units[id].attachments||[]).filter(uid=>r.units[uid]?.weaponGrant).map(uid=>({id:uid,name:unitName(r,uid),attack:r.units[id].effectsNegated||r.units[uid].effectsNegated?0:scaledStatGain(r,{id},r.units[uid].weaponGrant.attack),expiresAfterTurn:r.units[uid].weaponGrant.expiresAfterTurn})),attackLimit:maxAttacks(r.units[id],r.turnNumber),card:cards.get(r.units[id].cardId)||r.units[id].tokenCard}:null;return {code:r.code,status:r.status,version:r.version,rulesVersion:RULES,balanceRevision:BALANCE_REVISION,mode:r.mode||'pvp',difficulty:r.aiDifficulty||null,aiDeckId:r.mode==='ai'?r.players[1]?.deckId:null,automation:{supportedSpells:spellHandlerIds.length,totalSpells:catalog.cards.filter(c=>c.type==='주문').length,fieldAbilityIds:FIELD_ABILITY_IDS,fieldAbilityEffects:Object.fromEntries(FIELD_ABILITY_IDS.map(id=>[id,fieldEffectNumber(id)])),graveAbilityIds:GRAVE_ABILITY_IDS},zoneAbilities:legalZoneAbilities(r,viewer,H),originalSin:originalSinView(r,viewer,H),spellReuse:spellReuseView(r,viewer,H),graveAbilities:legalGraveAbilities(r,viewer,H),altarChoices:altarChoices(r,viewer,H).map(c=>({...c,name:cards.get(c.cardId).name})),turn:r.turn,phase:r.phase,turnNumber:r.turnNumber,winner:r.winner,pendingAttackSequence:sequenceView(r,viewer,H),pendingAttack:r.pendingAttack?{...r.pendingAttack,attacker:mapId(r.pendingAttack.attackerId),target:r.pendingAttack.target}:null,pendingTriggerOrder:r.pendingTriggerOrder?{
  awaiting:r.pendingTriggerOrder.awaiting[0],
  count:r.pendingTriggerOrder.effects.length,
  options:r.pendingTriggerOrder.effects.filter(e=>e.owner===viewer&&r.pendingTriggerOrder.awaiting[0]===viewer)
@@ -750,7 +751,7 @@ function apply(r,who,type,body){const p=r.players[who];let changed=true;
  if(a.target.type==='unit'){
   const partner=r.players[r.turn].field.some(mid=>mid&&r.units[mid].cardId==='COC-12-006'&&!r.units[mid].effectsNegated);
   if(partner&&cards.get(src.cardId)?.attribute==='영웅')dealt+=B.heroPartnerDamage;
-  const targetUnit=r.units[a.target.id],prior=Math.max(0,targetUnit.hp??0),targetAtk=targetUnit.atk,targetActualAtk=swordActualAttack(r,targetUnit.id,{getZone:zoneOwner}),invulnerable=targetUnit.battleInvulnerable||damageProtected(r,{type:'unit',id:targetUnit.id});let inflicted=0,destroyed=false;
+  const targetUnit=r.units[a.target.id],prior=Math.max(0,targetUnit.hp??0),targetActualAtk=swordActualAttack(r,targetUnit.id,{getZone:zoneOwner}),targetAtk=targetActualAtk,invulnerable=targetUnit.battleInvulnerable||damageProtected(r,{type:'unit',id:targetUnit.id});let inflicted=0,destroyed=false;
   if(!invulnerable){destroyed=dealt>0?damageUnit(r,a.target.id,-dealt,{battle:true,sourceId:src.id}):false;inflicted=Math.max(0,destroyed?prior:prior-(r.units[a.target.id]?.hp??prior));if(['COC-12-008','COC-12-013'].includes(src.cardId)&&!src.effectsNegated&&destroyed){damagePlayer(r,who,Math.max(0,dice-prior))}if(destroyed&&src.cardId==='COC-12-011'){damagePlayer(r,who,Math.max(0,targetAtk));log(r,'effect',`버디 히트토네이도: 파괴한 몬스터의 공격력 ${Math.max(0,targetAtk)}만큼 상대에게 피해`)}
    if(destroyed&&src.superiorClaw){const bonus=Math.max(0,Math.floor(targetAtk));damagePlayer(r,who,bonus);log(r,'effect',`슈페리얼 클로: 전투로 파괴한 몬스터의 공격력 ${bonus}만큼 상대에게 피해`)}}
   else dealt=0;
@@ -821,7 +822,7 @@ function chooseAIFieldAbility(r){
   if(u.effectsNegated||actionLocked(r,sourceUnitId)||!FIELD_ABILITY_IDS.includes(id)||effectUsesThisTurn(r,who,sourceUnitId,fieldEffectNumber(id))>=fieldEffectLimit(id)||u.abilityGameUsed||p.aiRejectedAbilities?.includes(sourceUnitId))continue;
   const foes=r.players[enemy].field.filter(Boolean);
   const allies=p.field.filter(Boolean);
-  const stronger=foes.sort((a,b)=>r.units[b].atk-r.units[a].atk);
+  const stronger=foes.sort((a,b)=>swordActualAttack(r,b,{getZone:zoneOwner})-swordActualAttack(r,a,{getZone:zoneOwner}));
   const body={sourceUnitId};
   if(id==='COC-05-009'){const target=stronger.find(mid=>Number.isFinite(r.units[mid].hp)&&!r.units[mid].effectDestructionImmune&&!destructionProtected(r,mid));if(!target)continue;body.target={type:'unit',id:target};}
   if(['COC-05-004','COC-13-001','COC-13-002','COC-13-005'].includes(id)){
@@ -845,7 +846,7 @@ function chooseAIFieldAbility(r){
   if(id==='COC-10-005'){
    if(!stronger.length||!allies.length)continue;
    body.target={type:'unit',id:stronger[0]};
-   const low=allies.filter(id=>!r.units[id].effectDestructionImmune).sort((a,b)=>r.units[a].atk-r.units[b].atk)[0];if(!low)continue;
+   const low=allies.filter(id=>!r.units[id].effectDestructionImmune).sort((a,b)=>swordActualAttack(r,a,{getZone:zoneOwner})-swordActualAttack(r,b,{getZone:zoneOwner}))[0];if(!low)continue;
    body.costTarget={type:'unit',id:low};
   }
   if(id==='COC-20-008')body.discardCount=Math.min(r.aiDifficulty==='easy'?1:4,p.deck.length);
@@ -854,7 +855,7 @@ function chooseAIFieldAbility(r){
    body.costCardId=[...p.hand].sort((a,b)=>(Number(cards.get(r.units[a].cardId)?.atk)||0)-(Number(cards.get(r.units[b].cardId)?.atk)||0))[0];
   }
   if(id==='COC-22-010'){
-   const choice=allies.filter(a=>a!==sourceUnitId&&r.units[a].atk>0).sort((a,b)=>r.units[b].atk-r.units[a].atk)[0];
+   const choice=allies.filter(a=>a!==sourceUnitId&&r.units[a].atk>0).sort((a,b)=>swordActualAttack(r,b,{getZone:zoneOwner})-swordActualAttack(r,a,{getZone:zoneOwner}))[0];
    if(!choice)continue;
    body.target={type:'unit',id:choice};
   }
@@ -963,7 +964,7 @@ function chooseAITarget(r,attacker,{forAttack=false}={}){const dragon=forAttack&
  if(forAttack&&hasWeaponAbility(r,r.units[foe.integration],'COC-09-004'))return null;
  const options=foe.field.filter(Boolean);if(dragon||forAttack&&(r.players[1].noDirectAttackUntil||0)>0&&r.players[1].noDirectAttackUntil>=r.players[1].turnsTaken)return options.length?{type:'unit',id:options[0]}:null;if(level==='easy')return options.length&&crypto.randomInt(2)===0?{type:'unit',id:options[crypto.randomInt(options.length)]}:{type:'player'};
  const atk=swordActualAttack(r,attacker,{getZone:zoneOwner});const killable=options.filter(id=>r.units[id].hp<=Math.max(1,atk/2));
- if(level==='hard'&&killable.length){killable.sort((a,b)=>r.units[b].atk-r.units[a].atk);return {type:'unit',id:killable[0]}}
+ if(level==='hard'&&killable.length){killable.sort((a,b)=>swordActualAttack(r,b,{getZone:zoneOwner})-swordActualAttack(r,a,{getZone:zoneOwner}));return {type:'unit',id:killable[0]}}
  if(level==='medium'&&options.length&&crypto.randomInt(3)===0)return {type:'unit',id:options[0]};
  return {type:'player'};
 }
@@ -1129,7 +1130,7 @@ function runAI(r){if(r.mode!=='ai'||r.status!=='active')return;
    }
    if(r.phase==='ATTACK'){
     const units=r.players[1].noAttackUntil>=r.players[1].turnsTaken?[]:[...r.players[1].field,r.players[1].integration].filter(id=>id&&!actionLocked(r,id)&&!r.units[id].cannotAttack&&!r.units[id].frozen&&r.units[id].cannotAttackUntil!==r.turnNumber&&(r.units[id].cannotAttackThroughTurn||0)<r.turnNumber&&attackAvailable(r.units[id],r.turnNumber)&&!(r.units[id].cardId==='COC-01-006'&&r.players[1].integration)&&!(r.units[id].cardId==='COC-05-003'&&!hasCartoonLand(r,1))&&!(r.units[id].cardId==='COC-05-001'&&!chooseAITarget(r,id,{forAttack:true})));
-    if(units.length){const attackerId=r.aiDifficulty==='easy'?units[crypto.randomInt(units.length)]:units.sort((a,b)=>r.units[b].atk-r.units[a].atk)[0];{const chosen=chooseAITarget(r,attackerId,{forAttack:true});if(chosen)apply(r,1,'attack',{attackerId,target:chosen});else apply(r,1,'phase',{})};continue}
+    if(units.length){const attackerId=r.aiDifficulty==='easy'?units[crypto.randomInt(units.length)]:units.sort((a,b)=>swordActualAttack(r,b,{getZone:zoneOwner})-swordActualAttack(r,a,{getZone:zoneOwner}))[0];{const chosen=chooseAITarget(r,attackerId,{forAttack:true});if(chosen)apply(r,1,'attack',{attackerId,target:chosen});else apply(r,1,'phase',{})};continue}
     apply(r,1,'phase',{});continue;
    }
    if(r.phase==='END'){apply(r,1,'phase',{});continue}

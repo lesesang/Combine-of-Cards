@@ -1,6 +1,7 @@
+import {recordFafnirTreasure,fafnirResidence} from './dragon-growth.mjs';
 import {effectUsedThisTurn,markEffectUsed} from './effect-usage.mjs';
 import {declareEffect} from './effect-runtime.mjs';
-import {gainUnitStats,gainPlayerStats} from './stat-gains.mjs';
+import {gainPlayerStats} from './stat-gains.mjs';
 import {
   registerPersistent, endPersistent
 } from './effect-runtime.mjs';
@@ -21,12 +22,7 @@ export function dragonGoldEffects(room) {
 function addTreasure(room, gold, n, { log } = {}) {
   if (!Number.isInteger(n) || n < 1) return;
   gold.counters += n;
-  const active = room.players[gold.owner].field.find(
-    id => id && id === gold.anchorId && room.units[id]?.cardId === DRAGON_CARDS.fafnir
-  );
-  if (active) {
-    if(!room.units[active].effectsNegated)gainUnitStats(room,active,{atk:10*n,hp:10*n});
-  }
+  recordFafnirTreasure(room,gold.anchorId,n);
   log?.(room, 'effect', `라인의 황금: 보물 ${n}개 추가 (총 ${gold.counters}개)`);
 }
 
@@ -34,22 +30,23 @@ function addTreasure(room, gold, n, { log } = {}) {
 // allowed in a movement hook or in the middle of a token-producing effect.
 export function createDragonTreasures(room,who,anchorId,H){
  const goldId=H.instantiate(room,DRAGON_CARDS.gold,who),ringId=H.instantiate(room,DRAGON_CARDS.ring,who);
- room.units[goldId].dragonGoldBinding={anchorId,anchorRevision:room.units[anchorId].fieldRevision||0,ringId,owner:who};
+ room.units[goldId].dragonGoldBinding={anchorId,anchorRevision:room.units[anchorId].fieldRevision||0,anchorResidence:fafnirResidence(room.units[anchorId]),ringId,owner:who};
+ room.units[ringId].dragonRingBinding={anchorId,goldId,owner:who};
  H.move(room,goldId,'hand',who);H.move(room,ringId,'hand',who);
  H.log(room,'effect',`${room.players[who].label}: 연결된 황금·반지 생성, 황금 자동 사용 대기`);
 }
 export function queueGoldHandArrival(room,id,who){
  const unit=room.units[id];if(room.status!=='active'||unit?.cardId!==DRAGON_CARDS.gold)return;
  const old=(room.persistentEffects||[]).find(g=>g.kind==='dragon-gold'&&g.sourceId===id&&!g.closing);
- const binding=unit.dragonGoldBinding||(old?{anchorId:old.anchorId,anchorRevision:room.units[old.anchorId]?.fieldRevision||0,ringId:old.data?.ringId,owner:old.owner}:null);
- if(!binding||binding.ended)return;
+ const binding=unit.dragonGoldBinding||(old?{anchorId:old.anchorId,anchorRevision:room.units[old.anchorId]?.fieldRevision||0,...(Number.isInteger(old.data?.anchorResidence)?{anchorResidence:old.data.anchorResidence}:{}),ringId:old.data?.ringId,owner:old.owner}:null);
+ if(!binding||binding.ended||binding.lapsed)return;
  const revision=unit.zoneRevision||0;
  if((room.goldCastQueue||[]).some(j=>j.sourceId===id&&j.sourceRevision===revision))return;
  (room.goldCastQueue??=[]).push({sourceId:id,who,sourceRevision:revision,binding:{...binding}});
 }
 export function declareGoldCast(room,job,H){
  const u=room.units[job.sourceId],z=u&&H.zone(room,u.id),p=room.players[job.who];
- if(!u||u.cardId!==DRAGON_CARDS.gold||z?.zone!=='hand'||z.player!==job.who||(u.zoneRevision||0)!==job.sourceRevision||u.dragonGoldBinding?.ended)return false;
+ if(!u||u.cardId!==DRAGON_CARDS.gold||z?.zone!=='hand'||z.player!==job.who||(u.zoneRevision||0)!==job.sourceRevision||u.dragonGoldBinding?.ended||u.dragonGoldBinding?.lapsed)return false;
  if((p.turnsTaken>0&&(p.spellForbiddenUntil||0)>=p.turnsTaken)||effectUsedThisTurn(room,job.who,u.id,1)){
   H.log(room,'effect','라인의 황금: 주문 금지/실물별 이번 턴 사용 제한으로 자동 사용 불가');return false;
  }
@@ -62,18 +59,28 @@ export function declareGoldCast(room,job,H){
 }
 export function resolveGoldCast(room,e,H){
  const u=room.units[e.sourceId],z=u&&H.zone(room,u.id),b=e.payload.binding;
- if(!u||u.cardId!==DRAGON_CARDS.gold||z?.zone!=='grave'||z.player!==u.owner||(u.zoneRevision||0)!==e.payload.sourceRevision||u.dragonGoldBinding?.ended){
+ if(!u||u.cardId!==DRAGON_CARDS.gold||z?.zone!=='grave'||z.player!==u.owner||(u.zoneRevision||0)!==e.payload.sourceRevision||u.dragonGoldBinding?.ended||u.dragonGoldBinding?.lapsed){
   H.log(room,'effect','라인의 황금: 사용 원본 이탈/재진입으로 불발');return;
  }
  // Reusing the same physical Gold does not duplicate its independent grant
  // or reset already earned treasure. A different physical Gold is separate.
  if((room.persistentEffects||[]).some(g=>g.kind==='dragon-gold'&&g.sourceId===u.id))return;
  const anchor=room.units[b.anchorId],az=anchor&&H.zone(room,anchor.id);
- if(!anchor||anchor.cardId!==DRAGON_CARDS.fafnir||az?.zone!=='field'||(anchor.fieldRevision||0)!==b.anchorRevision){
+ if(!anchor||anchor.cardId!==DRAGON_CARDS.fafnir||az?.zone!=='field'||(b.anchorResidence!==undefined?fafnirResidence(anchor)!==b.anchorResidence:(anchor.fieldRevision||0)!==b.anchorRevision)){
   H.log(room,'effect','라인의 황금: 생성 당시 파프니르의 필드 체류 소실로 지속 효과 불발');return;
  }
- registerPersistent(room,{kind:'dragon-gold',owner:b.owner,sourceId:u.id,anchorId:b.anchorId,expires:'anchor-destroyed',counters:0,data:{ringId:b.ringId}});
+ registerPersistent(room,{kind:'dragon-gold',owner:b.owner,sourceId:u.id,anchorId:b.anchorId,expires:'anchor-destroyed',counters:0,data:{ringId:b.ringId,...(Number.isInteger(b.anchorResidence)?{anchorResidence:b.anchorResidence}:{})}});
  H.log(room,'effect','라인의 황금: 보물 지속 효과 적용');
+}
+// Unresolved generated Gold belongs to that uninterrupted field residence.
+// An already applied independent Gold survives non-destructive departure.
+export function onFafnirLeftField(room,anchorId){
+ const active=new Set((room.persistentEffects||[]).filter(g=>g.kind==='dragon-gold').map(g=>g.sourceId));
+ for(const u of Object.values(room.units))if(u.cardId===DRAGON_CARDS.gold&&u.dragonGoldBinding?.anchorId===anchorId&&!active.has(u.id))u.dragonGoldBinding.lapsed=true;
+}
+function endGoldBinding(room,id){
+ const binding=room.units[id]?.dragonGoldBinding;
+ if(binding){binding.ended=true;const ring=room.units[binding.ringId];if(ring?.dragonRingBinding)ring.dragonRingBinding.ended=true;}
 }
 export function onTokenCreation(room,tokenId,controller,H){
  if(room.units[tokenId]?.created)onTokenActivity(room,'생성',controller,H,tokenId);
@@ -119,19 +126,21 @@ export function pendingDragonDeath(room){
 }
 function expireGold(room,gold,H){
  endPersistent(room,item=>item.id===gold.id);
- if(room.units[gold.sourceId]?.dragonGoldBinding)room.units[gold.sourceId].dragonGoldBinding.ended=true;
+ endGoldBinding(room,gold.sourceId);
  if(H.zone(room,gold.sourceId))H.move(room,gold.sourceId,'banished',room.units[gold.sourceId].owner);
  H.log(room,'effect','라인의 황금: 반지 처리 종료 후 지속 효과 종료');
 }
 /** Save the death event; never drain the caller's spell/counter stack here. */
 export function onFafnirDestroyed(room,fafnirId,controller,H){
  for(const gold of dragonGoldEffects(room).filter(g=>g.anchorId===fafnirId)){
-  gold.closing=true;
+  gold.closing=true;endGoldBinding(room,gold.sourceId);
   const ringId=gold.data?.ringId,ring=room.units[ringId],z=ring&&H.zone(room,ringId);
   const owner=room.players[gold.owner],spellForbidden=owner.turnsTaken>0&&(owner.spellForbiddenUntil||0)>=owner.turnsTaken;
-  if(!ring||ring.cardId!==DRAGON_CARDS.ring||z?.zone!=='hand'||z.player!==gold.owner||spellForbidden){expireGold(room,gold,H);continue;}
+  if(!ring||ring.cardId!==DRAGON_CARDS.ring||z?.zone!=='hand'||z.player!==gold.owner||spellForbidden||effectUsedThisTurn(room,gold.owner,ringId,1)){expireGold(room,gold,H);continue;}
   // Ordinary automatic spell use: reveal/move before responding. A negated
   // Ring remains in the grave; only successful resolution banishes the Ring.
+  markEffectUsed(room,gold.owner,ringId,1);
+  owner.roundPlays=(owner.roundPlays||0)+1;owner.spellsThisTurn=(owner.spellsThisTurn||0)+1;
   H.move(room,ringId,'grave',ring.owner);
   H.recordUse?.(room,gold.owner,ringId);
   (room.deferredMonsterTriggers??=[]).push({
@@ -141,6 +150,16 @@ export function onFafnirDestroyed(room,fafnirId,controller,H){
     treasureCount:Math.max(0,Math.floor(gold.counters)),sourceRevision:ring.zoneRevision||0,eventTurn:room.turnNumber}
   });
   H.log(room,'effect',`니벨룽겐의 반지: 보물 ${gold.counters}개 기록, 현재 체인 후 자동 주문 대응`);
+ }
+ // A countered/unresolved initial Gold has no treasure grant and cannot pay
+ // a Ring reward, but its physical link must still end on actual destruction.
+ const registered=new Set((room.persistentEffects||[]).filter(g=>g.kind==='dragon-gold').map(g=>g.sourceId));
+ for(const u of Object.values(room.units)){
+  const b=u.dragonGoldBinding;
+  if(u.cardId!==DRAGON_CARDS.gold||b?.anchorId!==fafnirId||b.ended||registered.has(u.id))continue;
+  endGoldBinding(room,u.id);
+  if(H.zone(room,u.id))H.move(room,u.id,'banished',u.owner);
+  H.log(room,'effect','파프니르 파괴: 미적용 황금의 연결 종료, 반지 보상 없음');
  }
 }
 export function resolveDragonTrigger(room,e,H){

@@ -1,3 +1,4 @@
+import {fafnirGrowthBonus,refreshFafnirGrowth} from './dragon-growth.mjs';
 import {demonAura,refreshDemonAttributes} from './demon-effects.mjs';
 import {refreshStatAttributes,scaledStatGain,gainPlayerStats} from './stat-gains.mjs';
 // Independent spell grants are serialized separately from printed abilities.
@@ -46,7 +47,7 @@ export function continuousAttackBonus(r,unit){
  if(!unit)return 0;
  const p=r.players.find(p=>p.integration===unit.id||p.field.includes(unit.id));
  if(!p)return 0;
- let bonus=demonAura(r,unit)+p.field.filter(id=>id&&r.units[id]?.cardId==='COC-17-008'&&!r.units[id].effectsNegated).length*scaledStatGain(r,{id:unit.id},50);
+ let bonus=fafnirGrowthBonus(r,unit)+demonAura(r,unit)+p.field.filter(id=>id&&r.units[id]?.cardId==='COC-17-008'&&!r.units[id].effectsNegated).length*scaledStatGain(r,{id:unit.id},50);
  if(p.integration===unit.id)for(const id of p.field.filter(Boolean)){
   const u=r.units[id];if(u.effectsNegated)continue;
   if(u.gToolBody&&['COC-01-004','COC-01-005'].includes(u.cardId))bonus+=scaledStatGain(r,{id:unit.id},100);
@@ -57,6 +58,7 @@ export function continuousAttackBonus(r,unit){
 export function refreshContinuousAuras(r,cards){
  refreshStatAttributes(r,cards);
  refreshDemonAttributes(r,cards);
+ refreshFafnirGrowth(r);
  for(const u of Object.values(r.units)){delete u.continuousAttackBonus;delete u.gatlingDoubleAttack;delete u.gToolDiceMin;}
  for(const p of r.players){
   for(const id of p.field.filter(Boolean)){
