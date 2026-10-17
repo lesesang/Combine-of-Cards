@@ -1,3 +1,4 @@
+import {isCartoonField} from './cartoon-land.mjs';
 // Explicit clauses from the runtime catalog; not full-card certification.
 export const choiceResponseTargets=Object.freeze({
  'COC-06-004':'mercury','COC-24-006':null,
@@ -10,10 +11,7 @@ export const choiceResponseTargets=Object.freeze({
 });
 export const choiceResponseSpellIds=Object.freeze(Object.keys(choiceResponseTargets));
 export function isNonToonField(room,id,H){
- const z=typeof id==='string'&&H.zone(room,id);
- return Boolean(z?.zone==='field'&&!room.units[id].treatedAsToon&&
-  !H.name(room,id).includes('카툰')&&
-  !room.players[z.player].field.some(uid=>uid&&H.name(room,uid).includes('카툰 랜드')));
+ return H.zone(room,id)?.zone==='field'&&!isCartoonField(room,id,H);
 }
 export function prepareChoiceDeclaration(room,who,cardId,body,H){
  if(cardId==='COC-24-006'){

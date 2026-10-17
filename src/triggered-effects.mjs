@@ -1,3 +1,4 @@
+import {recordCartoonKill,resolveCartoonTrigger,cartoonSummonBeforeParent} from './cartoon-land.mjs';
 import {gainUnitStats} from './stat-gains.mjs';
 import {dragonAttackTriggers,resolveDragonTrigger} from './dragon-gold.mjs';
 import {linkStraw,applySharedUnitEffect,destroySharedUnits,hurtSharedUnits,moveSharedUnits,captureSharedUnits} from './shared-unit-effects.mjs';
@@ -14,6 +15,8 @@ import {queueDeathRevival} from './death-revival.mjs';
 // Draft automation: the user requested implementation batches before testing.
 // Automatic monster/integration triggers, not selectable MAIN abilities.
 export const TRIGGER_RULES=Object.freeze({
+ 'COC-05-001':{effectNumber:1,event:'enemy-monster-destroyed',repeatPerEvent:true},
+ 'COC-05-008':{effectNumber:1,event:'cartoon-land-destroyed',sourceZone:'grave',sourceType:'spell',repeatPerEvent:true},
  'COC-21-008':{effectNumber:1,event:'summoned',target:'straw-link'},
  'COC-21-011':{effectNumber:1,event:'summoned',target:'succubus-enemy'},
  'COC-01-005':{effectNumber:2,event:'integration-attacks-monster'},
@@ -82,7 +85,7 @@ export function suspendResponseForGraveTriggers(r,H){
  if(r.status!=='active'||responseChoices(r))return;
  const root=r.pendingAbility||r.pendingSpell||r.pendingExtraSummon;
  if(!root||root.stage==='cost-triggers')return;
- const effects=(r.deferredMonsterTriggers||[]).filter(e=>e.payload.graveEvent&&e.payload.eventTurn===r.turnNumber);
+ const effects=(r.deferredMonsterTriggers||[]).filter(e=>(e.payload.graveEvent||e.payload.cartoonEvent)&&e.payload.eventTurn===r.turnNumber);
  if(!effects.length)return;
  r.suspendedResponses??=[];
  if(r.suspendedResponses.length>=32)throw new Error('nested response safety budget reached');
@@ -96,6 +99,7 @@ export function resumeSuspendedResponse(r){
  if(r.status!=='active'){r.suspendedResponses=[];return;}
  if(!r.suspendedResponses?.length||RESPONSE_FRAME_KEYS.some(key=>r[key])||responseChoices(r)||r.effectStack?.length||r.deferredMonsterTriggers?.length)return;
  if(r.suspendedResponses.at(-1).tokenPipeline&&(r.tokenPipeline||r.tokenWorkQueue?.length||r.goldCastQueue?.length))return;
+ if(cartoonSummonBeforeParent(r))return;
  const frame=r.suspendedResponses.pop();
  for(const key of RESPONSE_FRAME_KEYS)r[key]=frame[key];
  r.effectStack=frame.effectStack;
@@ -190,7 +194,8 @@ export function recordElementalBattle(r,sourceId,{sourceAttack,targetAttack},H){
  if(r.units[sourceId]?.cardId==='COC-32-001'&&sourceAttack>targetAttack)
   deferAttackBonus(r,sourceId,H,{event:'battle-completed',sourceAttack,targetAttack});
 }
-export function recordMonsterDestruction(r,{sourceId,victimId,victimController,victimType,cause},H){
+export function recordMonsterDestruction(r,{sourceId,victimId,victimController,victimType,cause,victimAttack,victimRevision},H){
+ recordCartoonKill(r,{sourceId,victimId,victimController,victimType,cause,victimAttack,victimRevision},H);
  const z=sourceId&&H.zone(r,sourceId);
  if(r.units[sourceId]?.cardId!=='COC-32-011'||cause==='cost'||sourceId===victimId||z?.player===victimController||!victimType?.includes('몬스터'))return;
  deferAttackBonus(r,sourceId,H,{event:'enemy-monster-destroyed',victimId});
@@ -299,7 +304,7 @@ export function resumeMonsterTriggers(r,H){
 }
 export function resolveMonsterTrigger(r,e,H){
  const u=r.units[e.sourceId],z=H.zone(r,e.sourceId),p=e.payload;
- if(resolveDragonTrigger(r,e,H))return;
+ if(resolveDragonTrigger(r,e,H)||resolveCartoonTrigger(r,e,H))return;
  if(p.cardId==='COC-19-003'){
   // Printed source-leave exception: the declared return survives destruction.
   if(z?.zone==='field'&&z.player===e.owner&&(u.fieldRevision||0)===p.sourceRevision){

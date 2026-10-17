@@ -1,3 +1,4 @@
+import {cartoonSummonBeforeParent} from './cartoon-land.mjs';
 import {beginAutomaticTriggerOrder} from './effect-runtime.mjs';
 import {cardUseForbidden} from './card-game-history.mjs';
 import {DRAGON_CARDS,onTokenCreation,declareGoldCast,settleTokenEvent} from './dragon-gold.mjs';
@@ -20,7 +21,7 @@ export function clearTokenWork(r){
 // own response. Preserve that parent, including lower automatic entries.
 export function beginTokenWork(r){
  if(r.status!=='active'){clearTokenWork(r);return;}
- if(r.tokenPipeline||!hasTokenWork(r)||CHOICES.some(k=>r[k]))return;
+ if(r.tokenPipeline||!hasTokenWork(r)||cartoonSummonBeforeParent(r)||CHOICES.some(k=>r[k]))return;
  const frame={tokenPipeline:true,effectStack:r.effectStack||[]};
  if(ROOTS.some(k=>r[k])||frame.effectStack.length){
   r.suspendedResponses??=[];
@@ -41,6 +42,7 @@ export function tokenOrderPending(r){
 export function resumeTokenWork(r,H){
  if(r.status!=='active'){clearTokenWork(r);return;}
  beginTokenWork(r);
+ if(cartoonSummonBeforeParent(r))return;
  if(!r.tokenPipeline||CHOICES.some(k=>r[k])||ROOTS.some(k=>r[k])||r.deferredMonsterTriggers?.length||r.destroyHealGroups?.length)return;
  // Ordinary grave-trigger frames above our parent must resume first.
  if(r.suspendedResponses?.length&&!r.suspendedResponses.at(-1).tokenPipeline)return;

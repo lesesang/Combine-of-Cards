@@ -5715,5 +5715,347 @@
       ]
     },
     "rationale": "복수 토큰을 먼저 전부 배치하여 파프니르의 빈 칸을 막던 즉시 루프를 순차 소환으로 명확화한다. 금속/스톰/미라의 소환 수·기본 수치·비용을 유지하고 R05~R07 사건 및 R22 비용 원칙을 따른다."
+  },
+  {
+    "patchId": "CARTOON-2026-10-17-DRAFT",
+    "cardId": "COC-05-001",
+    "source": "Tracked runtime catalog at 7538586; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-05-001",
+      "deckId": "05",
+      "name": "카툰 데몬즈 드래곤",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "500",
+      "hp": "500",
+      "conditions": [
+        "이 카드는 카툰 랜드가 필드에 없을 경우 파괴된다."
+      ],
+      "effects": [
+        "이 카드는 직접 공격할 수 없다. 대신 이 카드가 몬스터를 파괴했을때 이 파괴한 카드의 공격력에 절반만큼 상대에게 피해를 준다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-05-001",
+      "deckId": "05",
+      "name": "카툰 데몬즈 드래곤",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "500",
+      "hp": "500",
+      "conditions": [
+        "자신의 필드에 카툰 랜드가 없으면 이 카드를 유지 조건으로 파괴한다. 카툰 랜드의 효과가 무효여도 존재 조건은 충족한다."
+      ],
+      "effects": [
+        "플레이어를 직접 공격할 수 없다. 이 카드가 상대 필드 몬스터를 실제로 파괴할 때마다, 그 몬스터의 파괴 직전 실제 공격력의 절반(소수점 버림)만큼 상대 플레이어에게 피해를 준다."
+      ],
+      "notes": [
+        "개발자 명확화: 유지 조건에 따른 파괴는 효과 무효·효과 파괴 면역으로 막지 않는다. 카툰 랜드가 파괴된 사건에서는 다른 랜드가 남아 있어도 당시 같은 쪽 드래곤을 가이드 사용보다 먼저 파괴한다.",
+        "처치 피해는 비용/유지 조건 파괴를 제외하고 사건마다 몬스터 효과로 대응한다. 해결 시 원본 드래곤의 조종자·필드 체류가 같고 효과가 유효해야 한다. 직접 공격 금지는 대상 재선택에도 적용한다."
+      ]
+    },
+    "rationale": "랜드 의존 고화력/직접 공격 금지라는 덱 의도를 유지하면서 누락된 유지 조건과 처치 보상을 연결한다. 상대 처치마다 반응하도록 개발자 예외를 명시하되 비용 파괴/소스 무효로 공짜 피해를 만들지 않는다."
+  },
+  {
+    "patchId": "CARTOON-2026-10-17-DRAFT",
+    "cardId": "COC-05-002",
+    "source": "Tracked runtime catalog at 7538586; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-05-002",
+      "deckId": "05",
+      "name": "카툰 랜드",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "사용할 때 100체력를 지불하고 사용한다."
+      ],
+      "effects": [
+        "이 카드를 0/1의 몬스터로 취급하여 필드에 놓는다. 전투로 파괴되지 않는다. 내 필드의 몬스터를 \"카툰\"몬스터로 취급합니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-05-002",
+      "deckId": "05",
+      "name": "카툰 랜드",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "사용할 때 체력100을 지불하며 지불 후 생존해야 한다. 빈 필드 칸이 필요하다."
+      ],
+      "effects": [
+        "주문 효과가 해결되면 묘지의 사용 원본을 공격력0/현재 체력1의 몬스터 취급으로 자신의 필드에 소환한다. 공격할 수 없다. 효과가 유효한 동안 전투로 파괴되지 않으며 자신의 필드 몬스터를 카툰 몬스터로 취급한다."
+      ],
+      "notes": [
+        "주문 대응과 몬스터 취급 소환 대응을 각각 처리한다. 어느 단계에서 무효화되어도 지불한 체력은 반환하지 않으며 소환 무효 시 랜드는 원래 묘지에 남는다.",
+        "체력1 또는 월드 가이드의 현재 체력50 설정은 회복이 아니며 강화/회복 배율을 곱하지 않는다."
+      ]
+    },
+    "rationale": "확정된100비용·0/1·전투 파괴 방지를 유지하고 공통 주문/소환 대응으로 분리한다. 효과 무효 시 카툰 분류 오라와 전투 방지가 계속되던 예외를 제거한다."
+  },
+  {
+    "patchId": "CARTOON-2026-10-17-DRAFT",
+    "cardId": "COC-05-003",
+    "source": "Tracked runtime catalog at 7538586; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-05-003",
+      "deckId": "05",
+      "name": "카툰 브레드코기",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "120",
+      "hp": "120",
+      "conditions": [
+        "이 카드는 카툰랜드가 없으면 공격할 수 없다."
+      ],
+      "effects": [],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-05-003",
+      "deckId": "05",
+      "name": "카툰 브레드코기",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "120",
+      "hp": "120",
+      "conditions": [
+        "자신의 필드에 카툰 랜드가 없으면 공격할 수 없다. 랜드의 효과 무효 여부와 무관하게 존재를 확인하며 공격 해결 시에도 조건을 다시 확인한다."
+      ],
+      "effects": [],
+      "notes": []
+    },
+    "rationale": "랜드와 연계하는 낮은 비용 공격원 역할을 유지하며 상대 랜드로 공격 조건을 우회하지 못하도록 자기 필드와 해결 시점을 명확히 한다."
+  },
+  {
+    "patchId": "CARTOON-2026-10-17-DRAFT",
+    "cardId": "COC-05-004",
+    "source": "Tracked runtime catalog at 7538586; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-05-004",
+      "deckId": "05",
+      "name": "카툰 룩스 에터나",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "150",
+      "hp": "150",
+      "conditions": [
+        "이 카드는 필드/패에서 이름에 \"카툰\"이 들어가는 카드 2장을 파괴해야 소환 할 수 있다."
+      ],
+      "effects": [
+        "한 턴에 1회 상대 몬스터를 하나 덱으로 되돌린다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-05-004",
+      "deckId": "05",
+      "name": "카툰 룩스 에터나",
+      "type": "몬스터",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "150",
+      "hp": "150",
+      "conditions": [
+        "소환 비용으로 자신 이외의 패/필드에서 이름에 카툰이 들어가는 서로 다른 실물 카드2장을 선택한다. 필드 카드는 파괴하고 패 카드는 묘지로 보낸다."
+      ],
+      "effects": [
+        "자신의 턴에 실제 카드마다1회 상대 필드 몬스터1장을 선택하여 원래 소유자의 덱 임의 위치에 되돌린다. 덱 전체를 다시 섞지 않는다."
+      ],
+      "notes": [
+        "공식 R24: 패 카드의 파괴 표기는 묘지 이동으로 처리하며 필드 파괴 사건을 만들지 않는다. 랜드로 카툰 취급되는 것만으로는 이름 조건을 충족하지 않는다.",
+        "두 비용을 모두 지불할 수 있어야 선언한다. 필드 랜드 파괴의 드래곤/가이드 연계를 해결한 뒤 룩스의 소환 대응을 재개한다. 소환 무효·빈 칸 소실에도 지불한 비용은 반환하지 않는다."
+      ]
+    },
+    "rationale": "기존 두 장 비용이 누락되어 무료 소환되던 경로를 실제 비용으로 연결한다. R24와 이름 조건을 보존하고 랜드 제물/가이드 복구 후 자리가 없으면 소환이 불발하는 위험을 남긴다."
+  },
+  {
+    "patchId": "CARTOON-2026-10-17-DRAFT",
+    "cardId": "COC-05-006",
+    "source": "Tracked runtime catalog at 7538586; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-05-006",
+      "deckId": "05",
+      "name": "카툰 우드 에로우즈",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "필드에 \"카툰\"이외의 몬스터 2장 에게 150 다이스 만큼에 피해를 준다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-05-006",
+      "deckId": "05",
+      "name": "카툰 우드 에로우즈",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [],
+      "effects": [
+        "카툰으로 취급되지 않는 서로 다른 필드 몬스터2장을 선택한다. 1d150을 한 번 굴려 같은 결과의 피해를 각 대상에게 준다."
+      ],
+      "notes": [
+        "선언과 해결 시 카툰 이름·울트라 카툰 핸드의 부여·효과가 유효한 자기 랜드의 카툰 취급을 확인한다. 랜드가 무효화되어도 카드 이름이나 핸드의 독립 부여는 사라지지 않는다."
+      ]
+    },
+    "rationale": "기존 두 대상·공유1d150 피해를 유지하며 랜드 무효 시에도 전부 카툰으로 보던 오라 예외를 정리한다."
+  },
+  {
+    "patchId": "CARTOON-2026-10-17-DRAFT",
+    "cardId": "COC-05-007",
+    "source": "Tracked runtime catalog at 7538586; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-05-007",
+      "deckId": "05",
+      "name": "울트라 카툰 핸드",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "내 필드에 카툰 랜드가 없으면 발동하지 않는다."
+      ],
+      "effects": [
+        "상대 몬스터의 컨트롤을 가져온다. 그 몬스터를 \"카툰\"몬스터로 취급합니다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-05-007",
+      "deckId": "05",
+      "name": "울트라 카툰 핸드",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "내 필드에 카툰 랜드가 없으면 발동하지 않는다."
+      ],
+      "effects": [
+        "상대 몬스터의 컨트롤을 가져온다. 그 몬스터를 \"카툰\"몬스터로 취급합니다."
+      ],
+      "notes": [
+        "랜드의 존재 조건은 자신의 필드를 기준으로 한다. 빼앗은 몬스터의 카툰 취급은 랜드의 지속 취급과 별도이며 그 몬스터가 필드를 떠나면 해제한다. 원래 소유자는 바뀌지 않는다."
+      ]
+    },
+    "rationale": "원문 컨트롤 탈취/카툰 취급을 유지하고 독립 부여와 랜드 오라, 원래 소유자를 구분한다."
+  },
+  {
+    "patchId": "CARTOON-2026-10-17-DRAFT",
+    "cardId": "COC-05-008",
+    "source": "Tracked runtime catalog at 7538586; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-05-008",
+      "deckId": "05",
+      "name": "카툰 월드 가이드",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "내 필드의 카툰랜드가 파괴될때 덱에서 발동한다."
+      ],
+      "effects": [
+        "자신의 카툰 랜드가 파괴되면, 먼저 카툰 데몬즈 드래곤의 파괴를 처리한다. 그 후 이 카드를 덱에서 묘지로 보내고, 카툰 랜드를 체력 50으로 자신의 필드에 다시 소환한다."
+      ],
+      "notes": [
+        "카툰 데몬즈 드래곤 파괴 → 카툰 랜드 복귀 순서가 고정된다."
+      ]
+    },
+    "after": {
+      "id": "COC-05-008",
+      "deckId": "05",
+      "name": "카툰 월드 가이드",
+      "type": "주문",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "자신이 조종하는 카툰 랜드가 실제로 필드에서 파괴될 때, 당시 자신의 덱에 있던 이 카드를 자동으로 사용한다. 손패에서 일반 발동할 수 없다."
+      ],
+      "effects": [
+        "해당 랜드가 파괴될 당시 같은 쪽 필드에 있던 카툰 데몬즈 드래곤을 먼저 파괴한다. 그 뒤 가이드1장을 덱에서 원래 소유자의 묘지로 보내 주문을 선언한다. 해결되면 파괴된 바로 그 랜드를 묘지에서 현재 체력50으로 자신의 필드에 소환한다."
+      ],
+      "notes": [
+        "카툰 데몬즈 드래곤 파괴 → 카툰 랜드 복귀 순서가 고정된다.",
+        "개발자 명확화: 랜드 파괴 사건마다 가이드1장만 사용한다. 후보가 여러 장이면 실물 식별자 순으로 선택한다. 같은 실물 가이드는 한 턴1회이며 주문 사용 금지를 따른다. 서로 다른 가이드는 별개로 사용한다.",
+        "가이드 주문 대응 뒤 랜드 소환에 별도로 대응한다. 원본 가이드 또는 해당 랜드가 묘지를 떠났다 재진입하면 복구하지 않는다. 랜드 소환 무효 시 원래 묘지 유지, 이미 지불한 비용은 반환하지 않는다. 랜드의 비파괴 이동은 발동 사건이 아니다."
+      ]
+    },
+    "rationale": "확정된 드래곤 선행/현재HP50 복구를 공통 대응으로 옮겨 부모 스택을 즉시 소모하던 문제를 없앤다. 기존 사건당1장 방식·실물별 사용과 원본 체류를 명시하여 재활용 무한 연계를 제한한다."
+  },
+  {
+    "patchId": "CARTOON-2026-10-17-DRAFT",
+    "cardId": "COC-05-009",
+    "source": "Tracked runtime catalog at 7538586; not the missing canonical v1.3 source",
+    "authority": "User-delegated developer clarification and balance review; not a new individually user-confirmed ruling",
+    "before": {
+      "id": "COC-05-009",
+      "deckId": "05",
+      "name": "드레이나블",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "사용할 때 내 체력을 100으로 만듭니다."
+      ],
+      "effects": [
+        "한 턴에 2번 필드의 몬스터를 하나 파괴하고 그 카드의 공격력은 자신의 공격력에 추가하고, 그 카드의 체력만큼 자신의 플레이어 체력을 회복한다."
+      ],
+      "notes": []
+    },
+    "after": {
+      "id": "COC-05-009",
+      "deckId": "05",
+      "name": "드레이나블",
+      "type": "일체화",
+      "zone": "main",
+      "attribute": "카툰",
+      "atk": "—",
+      "hp": "—",
+      "conditions": [
+        "사용 비용으로 자신의 현재 체력을100으로 설정한다. 회복이나 피해가 아니며 강화/회복 배율을 적용하지 않는다."
+      ],
+      "effects": [
+        "자신의 턴에 이 실제 카드의 효과를 최대2회 선언할 수 있다. 필드 몬스터1장을 선택하여 파괴하고, 성공하면 그 몬스터의 파괴 직전 실제 공격력만큼 이 일체화 카드의 공격력을 올리고, 파괴 직전 현재 체력만큼 자신의 플레이어 체력을 회복한다."
+      ],
+      "notes": [
+        "아군/상대 필드를 모두 선택할 수 있다. 대상 파괴 면역·무효화·소스/대상의 이탈·조종권 변경으로 불발해도 선언 횟수는 반환하지 않는다. 같은 실물의 재진입으로 이번 턴 횟수를 초기화하지 않는다.",
+        "공유로 다른 몬스터도 파괴되어도 원래 선택한 몬스터의 성공 보상만 한 번 받는다. 강화·회복의 공통 배율을 각각 받는 쪽에 적용한다. 스핑크스의 직접 파괴 발동 차단 대상이다."
+      ]
+    },
+    "rationale": "HP100 위험을 감수하고 최대2회 흡수하는 창작 의도를 유지한다. 기존 미연결 효과를 대상 선택/대응/횟수로 구현하며 파괴 실패·공유 보상 중복을 막는다."
   }
 ]

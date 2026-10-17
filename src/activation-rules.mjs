@@ -58,6 +58,13 @@ register('COC-03-006',c=>{
 });
 register('COC-17-007',c=>require_(Object.keys(c.player.pyramidSources||{}).length>0,'피라미드의 필드 효과가 적용 중이어야 합니다.'));
 register('COC-21-006',c=>require_((c.player.monsterLossCount||0)>=3&&(c.player.recentMonsterLosses||[]).length===3,'자신의 몬스터 3장 이상 파괴/삭제 이력이 필요합니다.'));
+register('COC-05-001',ok);
+register('COC-05-009',c=>({costs:[{player:c.who,hpSet:100}]}));
+register('COC-05-004',c=>{
+ const ids=c.body.costUnitIds,allowed=[...c.player.hand,...c.ownField].filter(id=>id!==c.unitId&&c.named(id).includes('카툰'));
+ require_(Array.isArray(ids)&&ids.length===2&&new Set(ids).size===2&&ids.every(id=>allowed.includes(id)),'자신 이외의 패/필드에서 이름에 카툰이 들어가는 서로 다른 카드 2장을 선택하세요.');
+ return {costs:ids.map(id=>({unitId:id,to:c.ownField.includes(id)?'destroy':'grave'}))};
+});
 register('COC-05-005',c=>require_(!c.player.roundPlays&&c.player.lastCardUseTurn!==c.room.turnNumber,'이번 턴에 처음 사용하는 카드여야 합니다.'));
 register('COC-05-007',c=>{require_(c.hasField('카툰 랜드'),'카툰 랜드가 필드에 있어야 합니다.');return require_(c.player.field.includes(null),'카드를 가져올 빈 필드 칸이 없습니다.');});
 register('COC-05-010',c=>require_(!c.hasField('카툰 랜드'),'카툰 랜드가 필드에 없어야 합니다.'));
@@ -235,7 +242,7 @@ export function commitActivationCosts(room,plan,{move,destroy,draw}){
    continue;
   }
   if(cost.draw){if(!room.players[cost.player]||typeof draw!=='function')deny('드로우 비용을 처리할 수 없습니다.');continue;}
-  if(cost.hpSet!==undefined){if(!room.players[cost.player]||cost.hpSet!==50)deny('잘못된 체력 설정 비용입니다.');continue;}
+  if(cost.hpSet!==undefined){if(!room.players[cost.player]||![50,100].includes(cost.hpSet))deny('잘못된 체력 설정 비용입니다.');continue;}
   if(cost.hp!==undefined){
    if(!room.players[cost.player]||(!cost.damage&&room.players[cost.player].hp<=cost.hp))deny('필요한 체력을 지불할 수 없습니다.');
    continue;
