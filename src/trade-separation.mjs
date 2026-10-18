@@ -1,5 +1,6 @@
 import {swordActualAttack} from './life-eating-sword.mjs';
 import {damagePlayer} from './weapon-equipment.mjs';
+import {sharedRecipient,feasibleTransfers} from './shared-state.mjs';
 export function prepareTrade(r,who,body,H){
  const id=body.target?.id,u=id&&r.units[id],z=u&&H.zone(r,id);
  if(z?.zone!=='field'||z.player!==who)H.fail(409,'상대에게 넘길 자신의 필드 몬스터를 선택하세요.');
@@ -26,8 +27,14 @@ export function chooseTrade(r,who,id,H){
  const u=r.units[p.sourceId];
  if(!r.players[p.giver].field.includes(p.sourceId)||(u?.fieldRevision||0)!==p.sourceRevision||!tradeChoices(r,p).length){r.pendingDeckSearch=null;return;}
  if(!tradeChoices(r,p).includes(id))H.fail(409,'교환 전에 자신의 필드에 있던 몬스터를 선택하세요.');
- H.transferField(r,[{id:p.sourceId,from:p.giver,to:who},{id,from:who,to:p.giver}],{sourcePlayer:p.giver});
- const units=[{id:p.sourceId,from:who,to:p.giver},{id,from:p.giver,to:who}].filter(c=>r.units[c.id]&&r.players[c.from].field.includes(c.id)).map(c=>({...c,revision:r.units[c.id].fieldRevision||0}));
+ const originals=[{id:p.sourceId,from:p.giver,to:who},{id,from:who,to:p.giver}];
+ const shared=originals.flatMap(t=>{
+  const id=sharedRecipient(r,t.id),z=id&&H.zone(r,id);
+  return z?.zone==='field'&&z.player!==t.to?[{id,from:z.player,to:t.to}]:[];
+ });
+ const transfers=feasibleTransfers(r,originals,shared);
+ H.transferField(r,transfers,{sourcePlayer:p.giver});
+ const units=transfers.map(c=>({id:c.id,from:c.to,to:c.from})).filter(c=>r.units[c.id]&&r.players[c.from].field.includes(c.id)).map(c=>({...c,revision:r.units[c.id].fieldRevision||0}));
  (r.tradeReturns??=[]).push({player:p.giver,turn:r.turnNumber,units});
  r.pendingDeckSearch=null;H.log(r,'effect','트레이드: 선택한 두 몬스터의 조종권 맞교환');
 }
@@ -36,7 +43,7 @@ export function returnTrades(r,who,H){
   if(e.player!==who||e.turn>=r.turnNumber)continue;
   r.tradeReturns.splice(r.tradeReturns.indexOf(e),1);
   const valid=e.units.filter(c=>r.players[c.from].field.includes(c.id)&&(r.units[c.id]?.fieldRevision||0)===c.revision);
-  const allowed=valid.filter(c=>r.players[c.to].field.includes(null)||valid.some(other=>other.from===c.to));
+  const allowed=feasibleTransfers(r,[],valid);
   if(allowed.length)H.transferField(r,allowed);
   H.log(r,'effect',`트레이드: 필드에 남은 교환 몬스터 ${allowed.length}장 반환`);
  }

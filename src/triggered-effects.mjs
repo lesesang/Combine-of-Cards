@@ -1,5 +1,6 @@
 import {recordCartoonKill,resolveCartoonTrigger,cartoonSummonBeforeParent} from './cartoon-land.mjs';
 import {resolveProphet} from './deck-control.mjs';
+import {resolveBorrowedEvent,recordBorrowedEvent} from './borrowed-effects.mjs';
 import {gainUnitStats} from './stat-gains.mjs';
 import {dragonAttackTriggers,resolveDragonTrigger} from './dragon-gold.mjs';
 import {linkStraw,applySharedUnitEffect,destroySharedUnits,hurtSharedUnits,moveSharedUnits,captureSharedUnits} from './shared-unit-effects.mjs';
@@ -16,6 +17,7 @@ import {queueDeathRevival} from './death-revival.mjs';
 // Draft automation: the user requested implementation batches before testing.
 // Automatic monster/integration triggers, not selectable MAIN abilities.
 export const TRIGGER_RULES=Object.freeze({
+ 'COC-21-001':{effectNumber:1,event:'borrowed',sourceZone:'integration',sourceType:'integration',repeatPerEvent:true},
  'COC-07-005':{effectNumber:1,event:'effect-draw',repeatPerEvent:true},
  'COC-27-007':{effectNumber:1,event:'natural-draw-replacement'},
  'COC-22-011':{effectNumber:2,event:'end-phase'},
@@ -202,6 +204,7 @@ export function recordElementalBattle(r,sourceId,{sourceAttack,targetAttack},H){
   deferAttackBonus(r,sourceId,H,{event:'battle-completed',sourceAttack,targetAttack});
 }
 export function recordMonsterDestruction(r,{sourceId,victimId,victimController,victimType,cause,victimAttack,victimRevision},H){
+ if(victimType?.includes('몬스터'))recordBorrowedEvent(r,'enemy-destroyed',{sourceId,victimId,victimController,cause,victimAttack,victimRevision});
  recordCartoonKill(r,{sourceId,victimId,victimController,victimType,cause,victimAttack,victimRevision},H);
  const z=sourceId&&H.zone(r,sourceId);
  if(r.units[sourceId]?.cardId!=='COC-32-011'||cause==='cost'||sourceId===victimId||z?.player===victimController||!victimType?.includes('몬스터'))return;
@@ -219,6 +222,10 @@ export function drainDeferredMonsterTriggers(r,H){
 export function attackDeclarationTriggers(r,attackerId,target,H,{retarget=false}={}){
  const source=r.units[attackerId],who=r.turn,group=[];
  if(!source)return group;
+ if(!retarget){
+  recordBorrowedEvent(r,'attack-declared',{sourceId:attackerId});
+  if(target.type==='player'&&H.zone(r,attackerId)?.zone==='field')recordBorrowedEvent(r,'targeted',{who:1-who,attackerId,attackerRevision:source.fieldRevision||0});
+ }
  if(!retarget&&r.players[who].integration===attackerId&&target.type==='unit')for(const id of r.players[who].field.filter(Boolean)){
   const tool=r.units[id];if(tool.cardId==='COC-01-005'&&tool.gToolBody&&!tool.effectsNegated&&!effectUsedThisTurn(r,who,id,2))group.push(trigger(r,who,id,{targetId:target.id,targetRevision:r.units[target.id].fieldRevision||0,targetController:1-who}));
  }
@@ -331,6 +338,7 @@ export function resolveMonsterTrigger(r,e,H){
  }
  const sourceZone=TRIGGER_RULES[p.cardId].sourceZone||'field';
  if(!u||u.cardId!==p.cardId||u.effectsNegated||z?.zone!==sourceZone||z.player!==e.owner||((sourceZone==='integration'?u.integrationRevision:sourceZone==='field'?u.fieldRevision:u.zoneRevision)||0)!==p.sourceRevision){H.log(r,'effect','유발 소스 이탈/재진입·조종권/무효 상태로 불발');return;}
+ if(p.borrowedKey){resolveBorrowedEvent(r,e,H);return;}
  if(p.cardId==='COC-27-007'){resolveProphet(r,e,H);return;}
  if(p.cardId==='COC-07-005'){
   H.mill(r,p.drawPlayer,p.count);H.log(r,'effect',`포식의 전투마차: 상대의 효과 드로우 성공 ${p.count}장만큼 덱 위 묘지 이동`);return;

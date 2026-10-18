@@ -1,5 +1,7 @@
 import {legalClayCopies,chooseClayCopies} from './clay-copies.mjs';
 import {deckControlView,chooseDeckControl} from './deck-control.mjs';
+import {borrowedChoiceView,chooseBorrowed} from './borrowed-effects.mjs';
+import {copiedHandView,chooseCopiedHand} from './copied-spell-clauses.mjs';
 import {cartoonChoices,chooseCartoonSchedule} from './history-spells.mjs';
 import {tradeChoices,chooseTrade} from './trade-separation.mjs';
 import {blackMetalChoices,chooseBlackMetal} from './black-metal-change.mjs';
@@ -40,6 +42,8 @@ export function beginDeckSearch(room,who,cardId,cards,H,source={}){
 }
 export function deckSearchView(room,viewer,cards){
  const p=room.pendingDeckSearch;if(!p)return null;
+ if(p.copyHandDiscard)return copiedHandView(room,viewer,cards);
+ if(p.borrowedChoice)return borrowedChoiceView(room,viewer,cards);
  if(p.deckControl)return deckControlView(room,viewer,cards);
  if(p.cartoonSchedule||p.trade||p.blackMetal){
   const choices=p.cartoonSchedule?cartoonChoices(room,p,cards):p.trade?tradeChoices(room,p):blackMetalChoices(room,p,cards);
@@ -53,6 +57,8 @@ export function deckSearchView(room,viewer,cards){
 }
 export function finishDeckSearch(room,who,id,cards,H){
  const p=room.pendingDeckSearch;
+ if(p?.copyHandDiscard)return chooseCopiedHand(room,who,id,H);
+ if(p?.borrowedChoice)return chooseBorrowed(room,who,id,H);
  if(p?.deckControl)return chooseDeckControl(room,who,id,H);
  if(p?.cartoonSchedule)return chooseCartoonSchedule(room,who,id,H);
  if(p?.trade)return chooseTrade(room,who,id,H);
@@ -62,7 +68,7 @@ export function finishDeckSearch(room,who,id,cards,H){
  if(room.status!=='active'||!p||p.who!==who)H.fail(403,'카드 검색 효과의 선택권자가 아닙니다.');
  if(p.sourceId){
   const u=room.units[p.sourceId],z=H.zone(room,p.sourceId),revision=p.sourceZone==='integration'?u?.integrationRevision:u?.fieldRevision;
-  if(!u||u.cardId!==p.cardId||u.effectsNegated||z?.zone!==p.sourceZone||z.player!==who||(revision||0)!==p.sourceRevision){
+  if(!u||u.cardId!==(p.sourceCardId||p.cardId)||u.effectsNegated||z?.zone!==p.sourceZone||z.player!==who||(revision||0)!==p.sourceRevision){
    room.pendingDeckSearch=null;H.log(room,'search','검색 소스 이탈/무효 상태로 불발');return;
   }
  }

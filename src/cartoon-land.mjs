@@ -1,5 +1,7 @@
+import {recordCopyHistory} from './copy-history.mjs';
 import {effectUsedThisTurn,markEffectUsed} from './effect-usage.mjs';
 import {damagePlayer} from './weapon-equipment.mjs';
+import {continuousApplies} from './shared-state.mjs';
 
 export const CARTOON_IDS=Object.freeze({demonDragon:'COC-05-001',land:'COC-05-002',guide:'COC-05-008'});
 export const hasCartoonLand=(r,who)=>r.players[who].field.some(id=>id&&r.units[id]?.cardId===CARTOON_IDS.land);
@@ -8,7 +10,7 @@ export function clearCartoonWork(r){r.cartoonDeathEvents=[];r.cartoonSummonQueue
 export function isCartoonField(r,id,H){
  const u=r.units[id],z=u&&H.zone(r,id);
  return z?.zone==='field'&&!!(u.treatedAsToon||H.name(r,id).includes('카툰')||
-  r.players[z.player].field.some(uid=>uid&&r.units[uid]?.cardId===CARTOON_IDS.land&&!r.units[uid].effectsNegated));
+  r.players.some(p=>p.field.some(uid=>uid&&r.units[uid]?.cardId===CARTOON_IDS.land&&!r.units[uid].effectsNegated)&&continuousApplies(r,id,p.field.filter(Boolean))));
 }
 // Called only after an actual field destruction. No stack execution, summons,
 // or recursive restoration is allowed in this hook (including paid costs).
@@ -50,7 +52,7 @@ export function resumeCartoonDeaths(r,H){
   // One physical Guide per Land death. Stable UID order does not reveal or
   // reshuffle deck positions; the cost and once-per-card use are paid now.
   const id=candidate.id;markEffectUsed(r,who,id,1);H.move(r,id,'grave',r.units[id].owner);H.recordUse?.(r,who,id);
-  p.roundPlays=(p.roundPlays||0)+1;p.spellsThisTurn=(p.spellsThisTurn||0)+1;
+  recordCopyHistory(r,'play',{who});p.roundPlays=(p.roundPlays||0)+1;p.spellsThisTurn=(p.spellsThisTurn||0)+1;
   (r.deferredMonsterTriggers??=[]).push({key:event.key,effectId:'monster-trigger-resolution',owner:who,sourceId:id,sourceZone:'grave',
    exception:'destroy-trigger',priority:0,title:'카툰 월드 가이드 · 랜드 복구',
    payload:{cardId:CARTOON_IDS.guide,eventTurn:r.turnNumber,sourceRevision:r.units[id].zoneRevision||0,cartoonEvent:event.key,

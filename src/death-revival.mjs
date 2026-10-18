@@ -36,6 +36,7 @@ export function finishDeathRevival(r,p,H){
  H.move(r,u.id,'field',p.who);
  H.prepareMonsterizedUnit?.(r,p,H);
  if(kind==='wilhelm')u.revivedOnce=true;
+ if(kind==='borrowed-donkey')u.effectsNegated=true;
  if(p.cannotAttackUntil!==null&&p.cannotAttackUntil!==undefined)u.cannotAttackUntil=p.cannotAttackUntil;
  H.onSummon(r,p.who,u.id);
  H.log(r,'revive',`${H.name(r,u.id)}: 효과 소환 완료`);

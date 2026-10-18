@@ -1,5 +1,7 @@
 // Positive additive gains are different from printed bases, set/copy/swap,
 // costs, damage and the confirmed independent Sword x2 multipliers.
+import {borrowedTraits} from './borrowed-state.mjs';
+import {continuousApplies} from './shared-state.mjs';
 export function refreshStatAttributes(r,cards){
  for(const u of Object.values(r.units)){
   u.statAttribute=(cards.get(u.cardId)||u.tokenCard)?.attribute||'';
@@ -27,7 +29,11 @@ export function statGainFactor(r,target){
  const kings=dragon?r.players.filter(p=>{
   const u=p.integration&&r.units[p.integration];return u?.cardId==='COC-11-003'&&!u.effectsNegated;
  }).length:0;
- const suppressors=(r.players[1-who]?.field||[]).filter(id=>id&&r.units[id]?.cardId==='COC-11-005'&&!r.units[id].effectsNegated).length;
+ const suppressors=r.players.reduce((n,p,owner)=>{
+  const enemy=r.players[1-owner];
+  const applies=target.player!==undefined?who!==owner:continuousApplies(r,target.id,[...enemy.field,enemy.integration,...enemy.hand,...enemy.deck,...enemy.grave,...enemy.extra,...(enemy.banished||[])].filter(Boolean));
+  return n+(applies?p.field.filter(id=>id&&r.units[id]?.cardId==='COC-11-005'&&!r.units[id].effectsNegated).length+borrowedTraits(r,owner,'gain-suppressor').length:0);
+ },0);
  return 1.5**kings*0.5**suppressors;
 }
 export function scaledStatGain(r,target,amount){

@@ -13,14 +13,14 @@ export const choiceResponseSpellIds=Object.freeze(Object.keys(choiceResponseTarg
 export function isNonToonField(room,id,H){
  return H.zone(room,id)?.zone==='field'&&!isCartoonField(room,id,H);
 }
-export function prepareChoiceDeclaration(room,who,cardId,body,H){
+export function prepareChoiceDeclaration(room,who,cardId,body,H,{copiedEffectNumber=null}={}){
  if(cardId==='COC-24-006'){
   const id=room.players[who].integration,u=id&&room.units[id];
   if(!u)H.fail(409,'마인드 체인지를 사용할 일체화가 필요합니다.');
   return {...body,mindChangeHost:id,mindChangeRevision:u.integrationRevision||0};
  }
  if(cardId==='COC-06-004'){
-  const mode=(room.players[who].roundElementUses||0)+1>=3?2:1;
+  const mode=copiedEffectNumber??((room.players[who].roundElementUses||0)+1>=3?2:1);
   const ids=mode===2?body.targets:[body.target?.type==='unit'?body.target.id:null];
   if(!Array.isArray(ids)||ids.length!==mode||new Set(ids).size!==mode||ids.some(id=>!id||H.zone(room,id)?.zone!=='field'))
    H.fail(409,mode===2?'파괴할 서로 다른 필드 몬스터 두 장을 선택하세요.':'피해를 줄 필드 몬스터 한 장을 선택하세요.');
