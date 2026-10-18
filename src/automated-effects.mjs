@@ -35,10 +35,15 @@ register('COC-19-007',ctx=>beginClayCopies(ctx.r,ctx.who,ctx.H));
 register('COC-19-002',ctx=>{
  const {r,who,body,H}=ctx,id=body.target.id,u=r.units[id],z=H.zone(r,id);
  if(!u||z?.zone!=='field'||z.player!==who||(u.fieldRevision||0)!==body.copyTargetRevision)return;
- const copy=H.instantiate(r,u.cardId,who);
- // Printed state only: no damage, enchantments, counters or borrowed effects.
- H.move(r,copy,body.option===1?'hand':'deck',who);
- H.log(r,'effect',`형틀: ${H.name(r,id)} 기본 상태 복사본을 ${body.option===1?'패':'덱'}에 생성`);
+ applySharedUnitEffect(r,[id],H,(uid,target)=>{
+  const card=H.cards.get(target.cardId);
+  if(target.created||card?.type!=='몬스터'||card.zone!=='main'||card.deckId!==r.players[who].deckId)return;
+  const copy=H.instantiate(r,target.cardId,who);
+  // Each actual recipient supplies its printed identity, never its private
+  // mutable state, attachments, borrowed programs or usage counters.
+  H.move(r,copy,body.option===1?'hand':'deck',who);
+  H.log(r,'effect',`형틀: ${H.name(r,uid)} 기본 상태 복사본을 ${body.option===1?'패':'덱'}에 생성`);
+ });
 });
 register('COC-09-005 COC-09-006',ctx=>beginWeaponSelection(ctx.r,ctx.who,ctx.c.id,ctx.H));
 register('COC-20-010 COC-23-010 COC-24-007',ctx=>{beginSummonBatch(ctx.r,ctx.who,ctx.c.id,ctx.H);});
@@ -116,7 +121,7 @@ register('COC-21-002',ctx=>{
 register('COC-03-007',ctx=>{const n=ctx.r.players[1-ctx.who].grave.length;hit(ctx,getTarget(ctx,'any'),Array.from({length:n},()=>ctx.rollValue(100)).reduce((a,b)=>a+b,0));});
 register('COC-03-008',ctx=>{const n=ctx.r.players[ctx.who].grave.length;heal(ctx,getTarget(ctx,'any'),Array.from({length:n},()=>ctx.rollValue(100)).reduce((a,b)=>a+b,0));});
 register('COC-05-002',ctx=>{if(!ctx.activationValidated)charge(ctx,100);if(!ctx.r.players[ctx.who].field.includes(null))ctx.H.fail(409,'몬스터 슬롯이 없습니다.');return {retain:'field',monsterized:true,hp:1,atk:0}});
-register('COC-06-003',ctx=>{const n=Math.max(0,ctx.r.players[ctx.who].roundElementUses||0)+( ['금속','원소'].includes(ctx.c.attribute)?1:0);for(let i=0;i<n;i++){const choices=[...ctx.r.players.flatMap((p,j)=>[{player:j},...p.field.filter(Boolean).map(id=>({player:j,id}))])];hit(ctx,choices[ctx.H.randomInt(choices.length)],50)}});
+register('COC-06-003',ctx=>{const n=ctx.copyHistory?Math.max(0,ctx.copyHistory.elements):Math.max(0,ctx.r.players[ctx.who].roundElementUses||0)+( ['금속','원소'].includes(ctx.c.attribute)?1:0);for(let i=0;i<n;i++){const choices=[...ctx.r.players.flatMap((p,j)=>[{player:j},...p.field.filter(Boolean).map(id=>({player:j,id}))])];hit(ctx,choices[ctx.H.randomInt(choices.length)],50)}});
 register('COC-06-004',ctx=>{
  if(ctx.activationValidated){
   const ids=mercuryTargetsStillPresent(ctx.r,ctx.body,ctx.H);
@@ -166,7 +171,7 @@ register('COC-32-005',ctx=>{requireField(ctx,'플레임',true);hit(ctx,{player:1
 register('COC-32-006',ctx=>{requireField(ctx,'워터',true);heal(ctx,{player:ctx.who},100)});
 register('COC-32-008',ctx=>{requireField(ctx,'랜드',true);destroyTogether(ctx,ctx.r.players[1-ctx.who].field.filter(Boolean))});
 // More precisely scoped automatic spells with explicit prerequisites.
-register('COC-06-002',ctx=>{const count=ctx.r.players[ctx.who].roundElementUses||0;const atk=count*50,hp=50+count*50;ctx.H.summonToken(ctx.r,ctx.who,'인조 생물',atk,hp)});
+register('COC-06-002',ctx=>{const count=ctx.copyHistory?.elements??(ctx.r.players[ctx.who].roundElementUses||0);const atk=count*50,hp=50+count*50;ctx.H.summonToken(ctx.r,ctx.who,'인조 생물',atk,hp)});
 register('COC-07-004',ctx=>{if(!ctx.activationValidated)ctx.H.draw(ctx.r,1-ctx.who);return {deckSearch:true};});
 register('COC-07-011',ctx=>{ctx.H.draw(ctx.r,1-ctx.who);if(ctx.r.status==='finished')return;ctx.H.mill(ctx.r,1-ctx.who,3);if(ctx.r.status==='finished')return;gainPlayerStats(ctx.r,ctx.who,{hp:B.selfDevourHeal});const id=ctx.r.players[ctx.who].integration;if(id){const gained=gainUnitStats(ctx.r,id,{atk:B.selfDevourAttack}).atk;const token=ctx.r.units[id].selfDevourBuffToken||`${id}:${ctx.r.selfDevourSequence=(ctx.r.selfDevourSequence||0)+1}`;ctx.r.units[id].selfDevourBuffToken=token;const prior=ctx.r.effects.find(e=>e.type==='selfDevourBuff'&&e.token===token);if(prior)prior.amount+=gained;else ctx.r.effects.push({type:'selfDevourBuff',unitId:id,player:ctx.who,turn:ctx.r.turnNumber,token,amount:gained})}});
 register('COC-14-002',ctx=>{if(!ctx.activationValidated)ctx.H.mill(ctx.r,ctx.who,1);for(let i=0;i<2;i++)ctx.H.summonToken(ctx.r,ctx.who,'스톰 토큰',0,50)});
@@ -344,7 +349,7 @@ register('COC-11-011',ctx=>{
 
 export function hasAutoSpell(cardId){return Object.hasOwn(aliases,cardId)}
 export const spellHandlerIds=Object.keys(aliases);
-export function castAutomatedSpell(r,who,c,body,H,{activationValidated=false,baseDiceMax=null}={}){
+export function castAutomatedSpell(r,who,c,body,H,{activationValidated=false,baseDiceMax=null,copyHistory=null}={}){
  const f=aliases[c.id];if(!f)return {supported:false};
  // A player applying a spell is its action source. In particular, an
  // independently enchanted integrated player can earn the next-turn sword
@@ -361,7 +366,7 @@ export function castAutomatedSpell(r,who,c,body,H,{activationValidated=false,bas
  if(typeof H.destroyBatch==='function')
   attributedH.destroyBatch=(room,ids,meta={})=>H.destroyBatch(room,ids,{...meta,sourcePlayer:who,sourceCardId:c.id});
  const rollValue=(maximum,min=1)=>H.roll(Math.max(1,(baseDiceMax??maximum)+(r.players[who].spellDiceBonus||0)+horusSpellDiceBonus(r,c.id)),min);
- const ctx={r,who,c,body,H:attributedH,activationValidated,rollValue};
+ const ctx={r,who,c,body,H:attributedH,activationValidated,copyHistory,rollValue};
  const result=f(ctx)||{};
  return {supported:true,...result};
 }

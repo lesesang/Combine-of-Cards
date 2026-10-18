@@ -1,6 +1,7 @@
 // Physical equipment from the smith deck. Sword21-002 is NOT equipment.
 import {damageProtected} from './protection-auras.mjs';
 import {scaledStatGain} from './stat-gains.mjs';
+import {borrowedTraits} from './borrowed-state.mjs';
 export const WEAPON_MONSTERS=Object.freeze(['COC-09-002','COC-09-003','COC-09-004']);
 export const WEAPON_SPELLS=Object.freeze(['COC-09-005','COC-09-006']);
 export function activeWeapons(r,host){
@@ -11,12 +12,13 @@ export function weaponAttackBonus(r,host){return activeWeapons(r,host).reduce((n
 export function hasWeaponAbility(r,host,cardId){return activeWeapons(r,host).some(u=>u.cardId===cardId);}
 // HP payment, HP setting, absorption and reload are separate from incoming
 // attack/effect damage. Callers settle outcome after simultaneous damage.
-export function damagePlayer(r,who,amount){
+export function damagePlayer(r,who,amount,{battle=false}={}){
  if(!Number.isFinite(amount))throw new Error('invalid player damage');
  amount=Math.max(0,Math.floor(amount));
  if(damageProtected(r,{type:'player',player:who}))return 0;
  const p=r.players[who],host=p.integration&&r.units[p.integration];
- const dealt=amount>0&&hasWeaponAbility(r,host,'COC-09-002')?1:amount;
+ let dealt=amount>0&&(hasWeaponAbility(r,host,'COC-09-002')||borrowedTraits(r,who,'damage-one').length)?1:amount;
+ if(battle&&borrowedTraits(r,who,'battle-survival').length)dealt=Math.min(dealt,Math.max(0,p.hp-1));
  p.hp-=dealt;return dealt;
 }
 export function weaponCandidates(r,who,cardId,cards){

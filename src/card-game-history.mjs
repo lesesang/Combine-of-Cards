@@ -45,11 +45,6 @@ export function refreshHistoryAttack(r,cards){
  for(const p of r.players){
   const host=p.integration&&r.units[p.integration];
   if(host){host.weaponAttackBonus=weaponAttackBonus(r,host);host.weaponDoubleAttack=hasWeaponAbility(r,host,'COC-09-003');}
-  const source=p.integration&&r.units[p.integration];
-  if(source?.cardId==='COC-08-004'&&!source.effectsNegated){
-   for(const id of p.field.filter(Boolean))if(cards.get(r.units[id].cardId)?.attribute==='요괴')
-    r.units[id].fieldAura={sourceId:p.integration,sourceRevision:source.integrationRevision||0,amount:scaledStatGain(r,{id},100)};
-  }
   const u=p.integration&&r.units[p.integration],rule=u&&EVOLVED_HISTORY[u.cardId];if(!rule)continue;
   const count=Object.values(p.usedCardsGame||{}).filter(e=>{
    const c=cards.get(e.cardId);

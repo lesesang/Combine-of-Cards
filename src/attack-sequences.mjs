@@ -15,7 +15,7 @@ export function beginTempering(r,who,body,H){
 export function sequenceSourceValid(r,p,H){
  const u=r.units[p.sourceId],z=u&&H.zone(r,p.sourceId),player=r.players[p.who];
  return r.status==='active'&&r.turn===p.who&&r.turnNumber===p.turnNumber&&z?.zone==='integration'&&z.player===p.who&&
-  (u.integrationRevision||0)===p.sourceRevision&&!u.frozen&&!u.cannotAttack&&u.cannotAttackUntil!==r.turnNumber&&
+  (u.integrationRevision||0)===p.sourceRevision&&!u.frozen&&!u.cannotAttack&&!u.borrowedNoAttack&&u.cannotAttackUntil!==r.turnNumber&&
   !((player.noAttackUntil||0)>0&&player.noAttackUntil>=player.turnsTaken);
 }
 export function sequenceChoices(r,H){

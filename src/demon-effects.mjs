@@ -1,5 +1,6 @@
 import {applySharedUnitEffect} from './shared-unit-effects.mjs';
 import {gainUnitStats,gainPlayerStats,scaledStatGain} from './stat-gains.mjs';
+import {continuousApplies} from './shared-state.mjs';
 // Draft demon effects. Grants are JSON data, independent of the granting card.
 export function actionLocked(r,id){
  const u=r.units[id];
@@ -51,10 +52,12 @@ export function restoreNobleStats(u){
  u.atk+=atk;if(Number.isFinite(u.hp))u.hp+=hp;
 }
 export function demonAura(r,u){
- if(!u?.demonAttribute)return 0;
+ if(!u)return 0;
  const onBoard=r.players.some(p=>p.integration===u.id||p.field.includes(u.id));
  if(!onBoard)return 0;
  // The printed text has no allied restriction: both sides' demons benefit.
+ const direct=r.players.flatMap(p=>[...p.field,p.integration].filter(id=>id&&r.units[id]?.demonAttribute));
+ if(!continuousApplies(r,u.id,direct))return 0;
  return r.players.reduce((n,p)=>n+p.field.filter(id=>id&&r.units[id]?.cardId==='COC-21-012'&&!r.units[id].effectsNegated).length*scaledStatGain(r,{id:u.id},30),0);
 }
 export function refreshDemonAttributes(r,cards){

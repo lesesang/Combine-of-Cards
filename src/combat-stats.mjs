@@ -18,11 +18,9 @@ export function actualAttack(unit,{room,getZone}={}) {
   const zone=getZone||((r,id)=>{const player=r.players.findIndex(p=>p.field.includes(id)||p.integration===id);return player<0?null:{player,zone:r.players[player].integration===id?'integration':'field'};});
   return Math.floor(swordActualAttack(room,linked,{getZone:zone})/2);
  }
- let aura=Number(unit?.fieldAura?.amount||0);
- if(aura&&room){
-  const source=room.units[unit.fieldAura.sourceId],z=getZone?.(room,unit.id);
-  if(!source||source.effectsNegated||source.cardId!=='COC-08-004'||(source.integrationRevision||0)!==unit.fieldAura.sourceRevision||z?.zone!=='field'||room.players[z.player].integration!==source.id)aura=0;
- }
+ // Live yokai contributions now share the source-keyed continuous path;
+ // legacy cached fieldAura is only meaningful without a room context.
+ const aura=room?0:Number(unit?.fieldAura?.amount||0);
  const equipment=room?weaponAttackBonus(room,unit):Number(unit?.weaponAttackBonus||0);
  const tempering=(unit?.temperingBonuses||[]).filter(b=>!room||b.turn===room.turnNumber).reduce((n,b)=>n+b.amount,0);
  const continuous=room?continuousAttackBonus(room,unit):Number(unit?.continuousAttackBonus||0);
@@ -33,6 +31,6 @@ export function actualAttack(unit,{room,getZone}={}) {
 /** Used ONLY when a card condition explicitly allows "treated as" ATK. */
 export function treatedAttackForCondition(unit) {
  const actual=actualAttack(unit);
- if(unit?.cardId===BLACK_METAL_MAGICIAN_ID&&!unit.effectsNegated)return Math.max(actual,250);
+ if((unit?.cardId===BLACK_METAL_MAGICIAN_ID||unit?.borrowedTreated250)&&!unit.effectsNegated)return Math.max(actual,250);
  return actual;
 }

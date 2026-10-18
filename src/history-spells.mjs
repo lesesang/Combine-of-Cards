@@ -1,8 +1,10 @@
+import {recordCopyHistory} from './copy-history.mjs';
 import {hurtSharedUnits} from './shared-unit-effects.mjs';
 import {swordActualAttack} from './life-eating-sword.mjs';
 import {damagePlayer} from './weapon-equipment.mjs';
 // Keep rule history in state, never infer it from the capped public log.
 export function recordTopToGrave(r,who){
+ recordCopyHistory(r,'mill',{who});
  const key=String(r.turnNumber);r.topToGraveCounts??={};
  r.topToGraveCounts[key]=(r.topToGraveCounts[key]||0)+1;
  for(const turn of Object.keys(r.topToGraveCounts))if(Number(turn)<r.turnNumber-1)delete r.topToGraveCounts[turn];
@@ -18,6 +20,7 @@ export function recordMonsterLoss(r,id,{sourceId=null,sourcePlayer=null,kind='de
  const killer=sourceId?H.zone(r,sourceId):null;
  const entry={id,cardId:u.cardId,turn:r.turnNumber,kind,peakAttack:Math.max(u.peakAttack||0,swordActualAttack(r,id,{getZone:H.zone})),
   sourceId,sourcePlayer:sourcePlayer??(killer?.zone==='integration'?killer.player:null),sourceRevision:sourceId?(r.units[sourceId]?.fieldRevision||0):null};
+ recordCopyHistory(r,'loss',{who:z.player,entry});
  const p=r.players[z.player];p.recentMonsterLosses??=[];p.recentMonsterLosses.push(entry);p.recentMonsterLosses=p.recentMonsterLosses.slice(-3);
  // Eligibility is historical, unlike the damage's most-recent-three window.
  p.monsterLossCount=(p.monsterLossCount||0)+1;

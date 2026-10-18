@@ -2,7 +2,7 @@ import {choiceResponseTargets,prepareChoiceDeclaration,isNonToonField,mercuryTar
 import {prepareTrade} from './trade-separation.mjs';
 import {prepareBlackMetal} from './black-metal-change.mjs';
 import {validWrathTarget} from './history-spells.mjs';
-const extendedTargets=Object.freeze({'COC-06-008':'board','COC-07-008':'any','COC-14-007':'own-field','COC-21-006':'any','COC-22-007':'own-field'});
+const extendedTargets=Object.freeze({'COC-01-008':'enemy','COC-06-008':'board','COC-07-008':'any','COC-14-007':'own-field','COC-21-006':'any','COC-22-007':'own-field'});
 // Audited normal spell clauses. Other clauses of these cards remain partial.
 export const batchResponseTargets=Object.freeze({
  'COC-01-004':'field','COC-01-005':'field','COC-01-009':null,
@@ -20,10 +20,10 @@ export const batchResponseSpellIds=Object.freeze(Object.keys(batchResponseTarget
 
 // Pure preflight: freeze the existing default target at declaration so a
 // later missing target can never silently redirect the spell to another unit.
-export function prepareResponseTargets(room,who,cardId,body,H){
+export function prepareResponseTargets(room,who,cardId,body,H,{ignoreConditions=false,copiedEffectNumber=null}={}){
  if(cardId==='COC-14-007')body=prepareTrade(room,who,body,H);
  if(cardId==='COC-22-007')body=prepareBlackMetal(room,who,body,H);
- if(cardId==='COC-21-006'&&!validWrathTarget(room,who,body.target,H))H.fail(409,'자신의 몬스터 3장 파괴/삭제 이력과 그 몬스터를 파괴/삭제한 적 있는 대상이 필요합니다.');
+ if(!ignoreConditions&&cardId==='COC-21-006'&&!validWrathTarget(room,who,body.target,H))H.fail(409,'자신의 몬스터 3장 파괴/삭제 이력과 그 몬스터를 파괴/삭제한 적 있는 대상이 필요합니다.');
  if(extendedTargets[cardId]&&body.target?.type==='unit'){
   const id=body.target.id,u=room.units[id],z=u&&H.zone(room,id);
   if(!u||!['field','integration'].includes(z?.zone))H.fail(409,'필드의 카드가 필요합니다.');
@@ -37,7 +37,7 @@ export function prepareResponseTargets(room,who,cardId,body,H){
   if(body.temperingSourceId!==undefined&&(id!==body.temperingSourceId||(u.integrationRevision||0)!==body.temperingRevision))H.fail(409,'뜨임질의 일체화가 이탈하거나 재진입했습니다.');
   body={...body,temperingSourceId:id,temperingRevision:u.integrationRevision||0};
  }
- body=prepareChoiceDeclaration(room,who,cardId,body,H);
+ body=prepareChoiceDeclaration(room,who,cardId,body,H,{copiedEffectNumber:ignoreConditions?copiedEffectNumber:null});
  let kind=extendedTargets[cardId]??batchResponseTargets[cardId]??choiceResponseTargets[cardId]??balanceResponseTargets[cardId];
  if(kind==='two-non-toon'||kind==='mercury')return body;
  if(kind==='option')kind=body.option===1?'enemy-field':'any';
@@ -79,7 +79,7 @@ export function prepareResponseTargets(room,who,cardId,body,H){
  return {...body,target:{type:'unit',id}};
 }
 
-export function responseTargetStillValid(room,who,cardId,body,H){
+export function responseTargetStillValid(room,who,cardId,body,H,options={}){
  if(cardId==='COC-06-004'&&body.mercuryTargets)return mercuryTargetsStillPresent(room,body,H).length>0;
  if(cardId==='COC-24-006'&&body.mindChangeHost){
   const id=room.players[who].integration;
@@ -87,7 +87,7 @@ export function responseTargetStillValid(room,who,cardId,body,H){
  }
  if(cardId==='COC-05-006')return body.targets.some(id=>isNonToonField(room,id,H));
  if(['COC-05-002','COC-05-007','COC-31-007'].includes(cardId)&&!room.players[who].field.includes(null))return false;
- try{prepareResponseTargets(room,who,cardId,body,H);return true;}
+ try{prepareResponseTargets(room,who,cardId,body,H,options);return true;}
  catch(error){if(error.status===409)return false;throw error;}
 }
 

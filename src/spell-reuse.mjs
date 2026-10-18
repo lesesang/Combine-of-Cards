@@ -1,3 +1,4 @@
+import {recordCopyHistory} from './copy-history.mjs';
 import {declareEffect} from './effect-runtime.mjs';
 import {effectUsedThisTurn,markEffectUsed} from './effect-usage.mjs';
 import {castAutomatedSpell,validateLifeEatingSwordTarget} from './automated-effects.mjs';
@@ -82,7 +83,7 @@ export function queueSpellReuse(r,who,body,H){
  try{
  if(rule.onceGame){
   u.spellReuseGameUsed=true;H.move(r,plan.sourceId,'grave',u.owner);H.recordUse(r,who,plan.sourceId);
-  r.players[who].roundPlays=(r.players[who].roundPlays||0)+1;
+  recordCopyHistory(r,'play',{who});r.players[who].roundPlays=(r.players[who].roundPlays||0)+1;
   r.players[who].spellsThisTurn=(r.players[who].spellsThisTurn||0)+1;
  }else markEffectUsed(r,who,plan.sourceId,rule.effectNumber);
  commitActivationCosts(r,plan.activation,{

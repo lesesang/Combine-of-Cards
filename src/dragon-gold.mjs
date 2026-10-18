@@ -1,3 +1,4 @@
+import {recordCopyHistory} from './copy-history.mjs';
 import {recordFafnirTreasure,fafnirResidence} from './dragon-growth.mjs';
 import {effectUsedThisTurn,markEffectUsed} from './effect-usage.mjs';
 import {declareEffect} from './effect-runtime.mjs';
@@ -51,7 +52,7 @@ export function declareGoldCast(room,job,H){
   H.log(room,'effect','라인의 황금: 주문 금지/실물별 이번 턴 사용 제한으로 자동 사용 불가');return false;
  }
  markEffectUsed(room,job.who,u.id,1);H.move(room,u.id,'grave',u.owner);H.recordUse?.(room,job.who,u.id);
- p.roundPlays=(p.roundPlays||0)+1;p.spellsThisTurn=(p.spellsThisTurn||0)+1;
+ recordCopyHistory(room,'play',{who:job.who});p.roundPlays=(p.roundPlays||0)+1;p.spellsThisTurn=(p.spellsThisTurn||0)+1;
  const e=declareEffect(room,{effectId:'dragon-gold-cast-resolution',owner:job.who,sourceId:u.id,sourceZone:'grave',exception:'independent',
   payload:{cardId:DRAGON_CARDS.gold,sourceRevision:u.zoneRevision||0,binding:job.binding}});
  room.pendingAbility={who:job.who,sourceId:u.id,cardId:u.cardId,kind:'gold-cast',effectNumber:1,sequence:e.sequence,stage:'response'};
@@ -140,7 +141,7 @@ export function onFafnirDestroyed(room,fafnirId,controller,H){
   // Ordinary automatic spell use: reveal/move before responding. A negated
   // Ring remains in the grave; only successful resolution banishes the Ring.
   markEffectUsed(room,gold.owner,ringId,1);
-  owner.roundPlays=(owner.roundPlays||0)+1;owner.spellsThisTurn=(owner.spellsThisTurn||0)+1;
+  recordCopyHistory(room,'play',{who:gold.owner});owner.roundPlays=(owner.roundPlays||0)+1;owner.spellsThisTurn=(owner.spellsThisTurn||0)+1;
   H.move(room,ringId,'grave',ring.owner);
   H.recordUse?.(room,gold.owner,ringId);
   (room.deferredMonsterTriggers??=[]).push({

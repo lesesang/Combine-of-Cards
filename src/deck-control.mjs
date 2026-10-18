@@ -1,15 +1,26 @@
 import {effectUsedThisTurn} from './effect-usage.mjs';
 import {actionLocked} from './demon-effects.mjs';
+import {activeBorrowed,borrowedProfile} from './borrowed-state.mjs';
 const PROPHET='COC-27-007',ORACLE='COC-27-012';
 const snapshot=(r,ids)=>ids.map(id=>({id,revision:r.units[id].zoneRevision||0}));
 const legal=(r,who,items)=>items.filter(t=>r.players[who].deck.includes(t.id)&&(r.units[t.id]?.zoneRevision||0)===t.revision).map(t=>t.id);
 function sourceValid(r,p,H){
  const u=r.units[p.sourceId],z=u&&H.zone(r,u.id);
- return u?.cardId===p.cardId&&!u.effectsNegated&&z?.zone==='field'&&z.player===p.sourceOwner&&(u.fieldRevision||0)===p.sourceRevision;
+ const area=p.sourceZone||'field';
+ return u?.cardId===(p.sourceCardId||p.cardId)&&!u.effectsNegated&&z?.zone===area&&z.player===p.sourceOwner&&((area==='integration'?u.integrationRevision:u.fieldRevision)||0)===p.sourceRevision;
 }
 export function beginNaturalDraw(r,who,H){
  const sourceId=r.players[who].field.find(id=>id&&r.units[id].cardId===PROPHET&&!r.units[id].effectsNegated&&!actionLocked(r,id)&&!effectUsedThisTurn(r,who,id,1));
- if(!sourceId){H.draw(r,who,{kind:'natural'});if(r.status==='active')r.phase='MAIN';return;}
+ if(!sourceId){
+  const g=activeBorrowed(r,who).find(g=>borrowedProfile(g.cardId,g.number).action==='prophet'&&g.history.usedTurns['natural-draw']!==r.turnNumber);
+  if(g&&!actionLocked(r,r.players[who].integration)){
+   const id=r.players[who].integration;g.history.usedTurns['natural-draw']=r.turnNumber;
+   r.pendingNaturalDraw={who,turn:r.turnNumber,sourceId:id,stage:'response'};
+   H.queueTriggers(r,[{key:`copied-prophet-${r.turnNumber}-${id}`,effectId:'monster-trigger-resolution',owner:who,sourceId:id,sourceZone:'integration',priority:0,
+    payload:{cardId:'COC-21-001',eventTurn:r.turnNumber,sourceRevision:r.units[id].integrationRevision||0,borrowedKey:g.key,borrowedCardId:g.cardId,borrowedNumber:g.number,eventData:{}}}]);return;
+  }
+  H.draw(r,who,{kind:'natural'});if(r.status==='active')r.phase='MAIN';return;
+ }
  r.pendingNaturalDraw={who,turn:r.turnNumber,sourceId,stage:'response'};
  H.queueTriggers(r,[{key:`prophet-${r.turnNumber}-${sourceId}`,effectId:'monster-trigger-resolution',owner:who,sourceId,sourceZone:'field',priority:0,
   payload:{cardId:PROPHET,eventTurn:r.turnNumber,sourceRevision:r.units[sourceId].fieldRevision||0}}]);
@@ -22,12 +33,12 @@ export function resolveProphet(r,e,H){
  if(r.status!=='active')return;
  if(!p.deck.length){H.drawFailure(r,e.owner);r.pendingNaturalDraw=null;if(r.status==='active')r.phase='MAIN';return;}
  pending.stage='choice';
- r.pendingDeckSearch={deckControl:'crystal',cardId:PROPHET,who:e.owner,sourceOwner:e.owner,sourceId:e.sourceId,sourceRevision:e.payload.sourceRevision,choices:snapshot(r,p.deck.slice(0,3))};
+ r.pendingDeckSearch={deckControl:'crystal',cardId:PROPHET,who:e.owner,sourceOwner:e.owner,sourceId:e.sourceId,sourceRevision:e.payload.sourceRevision,choices:snapshot(r,p.deck.slice(0,3)),sourceCardId:r.units[e.sourceId].cardId,sourceZone:H.zone(r,e.sourceId).zone};
  H.log(r,'search','수정 예언자: 덱 위 최대 3장 중 일반 드로우할 1장 선택');
 }
 export function settleProphet(r,e,H){
  const p=r.pendingNaturalDraw;
- if(e.payload?.cardId!==PROPHET||!p||p.sourceId!==e.sourceId||p.stage!=='response')return;
+ if(e.payload?.cardId!==PROPHET&&e.payload?.borrowedCardId!==PROPHET||!p||p.sourceId!==e.sourceId||p.stage!=='response')return;
  r.pendingNaturalDraw=null;
  if(r.status==='active'&&r.turn===p.who&&r.turnNumber===p.turn){
   H.draw(r,p.who,{kind:'natural'});if(r.status==='active')r.phase='MAIN';
@@ -38,7 +49,8 @@ export function beginOracle(r,e,H){
  const order=[e.owner,1-e.owner],choicesByPlayer=Object.fromEntries(order.map(who=>[who,snapshot(r,r.players[who].deck)]));
  const awaiting=order.filter(who=>choicesByPlayer[who].length);
  if(!awaiting.length)return;
- r.pendingDeckSearch={deckControl:'oracle',cardId:ORACLE,who:awaiting[0],awaiting,choicesByPlayer,sourceOwner:e.owner,sourceId:e.sourceId,sourceRevision:e.payload.sourceRevision};
+ r.pendingDeckSearch={deckControl:'oracle',cardId:ORACLE,who:awaiting[0],awaiting,choicesByPlayer,sourceOwner:e.owner,sourceId:e.sourceId,sourceRevision:e.payload.sourceRevision,
+  sourceCardId:r.units[e.sourceId].cardId,sourceZone:H.zone(r,e.sourceId).zone};
  H.log(r,'search','오라클: 각 플레이어가 자기 덱에서 맨 위로 올릴 카드 비공개 선택');
 }
 export function deckControlView(r,viewer,cards){
